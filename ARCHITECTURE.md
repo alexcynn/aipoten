@@ -295,16 +295,26 @@ videos
   - id (PK)
   - title
   - description
-  - thumbnail_url
-  - video_url
+  - video_url (외부 링크: YouTube, 네이버TV 등)
+  - video_platform (enum: youtube, naver_tv, kakao_tv, vimeo, other)
+  - embed_code (TEXT: 임베디드 코드)
+  - thumbnail_url (썸네일 이미지 URL)
   - duration (seconds)
-  - target_age_min
-  - target_age_max
+  - target_age_min (대상 연령 최소, 개월)
+  - target_age_max (대상 연령 최대, 개월)
   - difficulty (enum: easy, medium, hard)
-  - is_premium (BOOLEAN)
+  - play_method (TEXT: 놀이 방법 상세)
+  - expected_effects (TEXT: 기대 효과)
+  - materials_needed (TEXT: 준비물)
+  - precautions (TEXT: 주의사항)
+  - is_published (BOOLEAN)
+  - priority (INT: 추천 우선순위 1-10)
   - view_count (INT)
+  - bookmark_count (INT)
+  - completion_count (INT)
   - created_at
   - published_at
+  - url_last_checked_at (링크 유효성 마지막 체크 시간)
 
 video_categories
   - id (PK)
@@ -314,6 +324,11 @@ video_categories
 video_category_mapping
   - video_id (FK -> videos)
   - category_id (FK -> video_categories)
+
+video_development_areas
+  - id (PK)
+  - video_id (FK -> videos)
+  - area (enum: gross_motor, fine_motor, cognitive, language, social, emotional)
 
 video_tags
   - id (PK)
@@ -328,6 +343,18 @@ user_video_interactions
   - is_completed (BOOLEAN)
   - watch_time (seconds)
   - last_watched_at
+
+recommended_videos
+  - id (PK)
+  - assessment_id (FK -> development_assessments)
+  - child_id (FK -> children)
+  - video_id (FK -> videos)
+  - development_area (enum: gross_motor, fine_motor, cognitive, language, social, emotional)
+  - area_level (enum: excellent, good, caution, needs_observation)
+  - recommendation_reason (TEXT: 추천 이유)
+  - priority_score (INT: 추천 우선순위 점수)
+  - is_viewed (BOOLEAN: 시청 여부)
+  - created_at (추천 생성 시간)
 
 -- 치료사 관리
 therapist_profiles
