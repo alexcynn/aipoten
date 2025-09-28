@@ -238,7 +238,14 @@ children
   - name
   - birth_date
   - gender
-  - notes (TEXT)
+  - gestational_weeks (출산 주수, INT)
+  - birth_weight (출생 시 몸무게, DECIMAL)
+  - current_height (현재 키, DECIMAL)
+  - current_weight (현재 몸무게, DECIMAL)
+  - medical_history (병력/수술력, TEXT)
+  - family_history (가족력, TEXT)
+  - treatment_history (치료력, TEXT)
+  - notes (특이사항, TEXT)
   - created_at
   - updated_at
 
@@ -274,8 +281,13 @@ assessment_results
   - assessment_id (FK -> development_assessments)
   - category
   - score (FLOAT)
-  - percentile (FLOAT)
-  - notes (TEXT)
+  - level (enum: excellent, good, caution, needs_observation)
+    - excellent: 80-100점 (우수)
+    - good: 60-79점 (양호)
+    - caution: 40-59점 (주의)
+    - needs_observation: 0-39점 (관찰 필요)
+  - feedback (TEXT)
+  - recommendations (TEXT)
   - created_at
 
 -- 놀이영상
