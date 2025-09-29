@@ -399,15 +399,61 @@ matching_requests
   - created_at
   - responded_at
 
+consultation_packages
+  - id (PK)
+  - parent_user_id (FK -> users)
+  - child_id (FK -> children)
+  - therapist_id (FK -> therapist_profiles)
+  - total_sessions (총 세션 회수: 1, 4, 8, 12)
+  - completed_sessions (완료된 세션 수)
+  - remaining_sessions (남은 세션 수)
+  - package_discount_rate (할인율: 0%, 10%, 15%, 20%)
+  - original_price (할인 전 금액)
+  - discounted_price (할인 후 금액)
+  - status (enum: active, completed, cancelled)
+  - created_at
+  - updated_at
+
 consultations
   - id (PK)
-  - matching_request_id (FK -> matching_requests)
+  - package_id (FK -> consultation_packages)
+  - session_number (회차: 1, 2, 3...)
   - scheduled_at
-  - duration (minutes)
-  - consultation_type (enum: online, in_person, home_visit)
-  - status (enum: scheduled, completed, cancelled)
-  - meeting_url (for online)
+  - visit_address (TEXT: 방문 주소)
+  - session_fee (세션 비용, 할인 적용된 금액)
+  - platform_fee (플랫폼 수수료, 예: 15%)
+  - status (enum: pending_payment, scheduled, completed, cancelled)
+  - cancellation_reason (TEXT)
+  - cancelled_at
   - notes (TEXT)
+  - session_report_submitted (BOOLEAN: 상담일지 작성 여부)
+  - session_report_submitted_at
+  - created_at
+
+consultation_reports
+  - id (PK)
+  - consultation_id (FK -> consultations)
+  - therapist_id (FK -> therapist_profiles)
+  - child_assessment (TEXT: 아이 상태 평가, 필수)
+  - session_content (TEXT: 세션 내용, 필수)
+  - home_activities (TEXT: 가정 과제, 필수)
+  - next_session_goal (TEXT: 다음 세션 목표, 선택)
+  - recommended_videos (JSONB: 추천 놀이영상 ID 배열)
+  - next_session_suggestions (JSONB: 다음 세션 일정 제안)
+  - created_at
+  - updated_at
+
+schedule_change_requests
+  - id (PK)
+  - consultation_id (FK -> consultations)
+  - requester_user_id (FK -> users)
+  - original_scheduled_at
+  - change_reason (TEXT)
+  - preferred_dates (JSONB: 희망 일정 배열, 1-3순위)
+  - status (enum: pending, approved, rejected)
+  - therapist_response (TEXT: 승인/거절 사유)
+  - new_scheduled_at (승인된 새 일정)
+  - responded_at
   - created_at
 
 consultation_feedbacks
@@ -426,26 +472,69 @@ consultation_reviews
   - review_text (TEXT)
   - created_at
 
--- 구독 관리
-subscriptions
-  - id (PK)
-  - user_id (FK -> users)
-  - plan_type (enum: free, monthly, annual)
-  - start_date
-  - end_date
-  - status (enum: active, cancelled, expired)
-  - auto_renew (BOOLEAN)
-  - created_at
-
+-- 결제 관리 (세션 결제)
 payments
   - id (PK)
   - user_id (FK -> users)
-  - subscription_id (FK -> subscriptions)
-  - amount
-  - currency
-  - payment_method
-  - payment_status (enum: pending, completed, failed, refunded)
-  - transaction_id
+  - package_id (FK -> consultation_packages)
+  - payment_type (enum: package, single_session)
+  - total_sessions (결제한 총 세션 수)
+  - total_amount (총 결제 금액: 세션비 + 수수료)
+  - session_fee_total (세션 비용 합계, 할인 적용)
+  - original_session_fee_total (할인 전 세션 비용 합계)
+  - discount_amount (할인 금액)
+  - platform_fee (플랫폼 수수료)
+  - currency (default: KRW)
+  - payment_method (enum: card, bank_transfer, simple_pay, mobile)
+  - payment_status (enum: pending, completed, failed, refunded, partially_refunded)
+  - pg_provider (PG사: tosspayments, iamport 등)
+  - transaction_id (PG사 거래 ID)
+  - paid_at
+  - created_at
+
+refunds
+  - id (PK)
+  - payment_id (FK -> payments)
+  - consultation_id (FK -> consultations)
+  - refund_amount
+  - refund_reason (enum: customer_request, therapist_cancel, no_show, dispute)
+  - refund_policy (enum: full, partial_50, none)
+  - refund_status (enum: pending, completed, failed)
+  - requested_at
+  - processed_at
+  - created_at
+
+-- 정산 관리 (치료사 정산)
+settlements
+  - id (PK)
+  - therapist_id (FK -> therapist_profiles)
+  - settlement_period_start (정산 기간 시작)
+  - settlement_period_end (정산 기간 종료)
+  - total_sessions (총 세션 수)
+  - settled_sessions (정산된 세션 수: 상담일지 작성 완료)
+  - pending_sessions (보류된 세션 수: 상담일지 미작성)
+  - total_session_fee (총 세션 비용)
+  - total_platform_fee (총 플랫폼 수수료)
+  - settlement_amount (정산 금액)
+  - withholding_tax (원천징수 3.3%)
+  - final_amount (실지급액)
+  - bank_account (지급 계좌)
+  - status (enum: pending, confirmed, paid)
+  - confirmed_at (정산 확정일)
+  - paid_at (지급 완료일)
+  - created_at
+
+settlement_details
+  - id (PK)
+  - settlement_id (FK -> settlements)
+  - consultation_id (FK -> consultations)
+  - session_number (회차)
+  - session_fee (세션 비용)
+  - platform_fee (플랫폼 수수료)
+  - net_amount (정산 금액: session_fee - platform_fee)
+  - report_submitted (상담일지 작성 여부)
+  - report_submitted_at
+  - settlement_status (enum: settled, pending_report)
   - created_at
 
 -- 알림
@@ -473,8 +562,9 @@ CREATE INDEX idx_matching_requests_status ON matching_requests(status, created_a
 CREATE INDEX idx_notifications_user_unread ON notifications(user_id, is_read, created_at DESC);
 
 -- 복합 인덱스
-CREATE INDEX idx_videos_age_premium ON videos(target_age_min, target_age_max, is_premium);
+CREATE INDEX idx_videos_age_published ON videos(target_age_min, target_age_max, is_published);
 CREATE INDEX idx_consultations_therapist_status ON consultations(therapist_id, status, scheduled_at);
+CREATE INDEX idx_recommended_videos_child ON recommended_videos(child_id, assessment_id, created_at DESC);
 ```
 
 ---
@@ -569,13 +659,12 @@ POST   /api/v1/consultations/:id/feedback # 피드백 작성
 POST   /api/v1/consultations/:id/review  # 리뷰 작성
 ```
 
-#### 구독 (Subscriptions)
+#### 결제 (Payments)
 ```
-GET    /api/v1/subscriptions/plans       # 구독 플랜 목록
-GET    /api/v1/subscriptions/me          # 내 구독 정보
-POST   /api/v1/subscriptions             # 구독 시작
-PATCH  /api/v1/subscriptions/:id         # 구독 변경
-DELETE /api/v1/subscriptions/:id         # 구독 취소
+POST   /api/v1/payments                  # 결제 생성 (상담 비용)
+GET    /api/v1/payments                  # 결제 이력 조회
+GET    /api/v1/payments/:id              # 결제 상세 조회
+POST   /api/v1/payments/:id/refund       # 환불 요청
 ```
 
 #### 알림 (Notifications)
