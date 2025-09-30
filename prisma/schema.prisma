@@ -1,0 +1,284 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 사용자 관리
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String?  // NextAuth 사용 시 null 가능
+  role      Role     @default(PARENT)
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 관계
+  posts     Post[]
+  comments  Comment[]
+  children  Child[]
+  accounts  Account[]
+  sessions  Session[]
+
+  @@map("users")
+}
+
+// NextAuth.js를 위한 계정 모델
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+// NextAuth.js를 위한 세션 모델
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// NextAuth.js를 위한 검증 토큰 모델
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+// 사용자 역할
+enum Role {
+  PARENT     // 부모
+  THERAPIST  // 치료사
+  ADMIN      // 관리자
+}
+
+// 아이 정보 (기존 아키텍처에서 가져옴)
+model Child {
+  id               String    @id @default(cuid())
+  userId           String
+  name             String
+  birthDate        DateTime
+  gender           Gender
+  gestationalWeeks Int?      // 출산 주수
+  birthWeight      Float?    // 출생 시 몸무게
+  currentHeight    Float?    // 현재 키
+  currentWeight    Float?    // 현재 몸무게
+  medicalHistory   String?   // 병력/수술력
+  familyHistory    String?   // 가족력
+  treatmentHistory String?   // 치료력
+  notes            String?   // 특이사항
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // 관계
+  user        User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assessments DevelopmentAssessment[]
+
+  @@map("children")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+// 발달 체크 (기본 구조만 설정)
+model DevelopmentAssessment {
+  id           String                @id @default(cuid())
+  childId      String
+  ageInMonths  Int
+  status       AssessmentStatus      @default(IN_PROGRESS)
+  completedAt  DateTime?
+  createdAt    DateTime              @default(now())
+
+  // 관계
+  child    Child                   @relation(fields: [childId], references: [id], onDelete: Cascade)
+  results  AssessmentResult[]
+
+  @@map("development_assessments")
+}
+
+enum AssessmentStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+model AssessmentResult {
+  id           String                @id @default(cuid())
+  assessmentId String
+  category     DevelopmentCategory
+  score        Float
+  level        DevelopmentLevel
+  feedback     String?
+  recommendations String?
+  createdAt    DateTime              @default(now())
+
+  // 관계
+  assessment DevelopmentAssessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@map("assessment_results")
+}
+
+enum DevelopmentCategory {
+  GROSS_MOTOR   // 대근육
+  FINE_MOTOR    // 소근육
+  COGNITIVE     // 인지
+  LANGUAGE      // 언어
+  SOCIAL        // 사회성
+  EMOTIONAL     // 정서
+}
+
+enum DevelopmentLevel {
+  EXCELLENT          // 우수 (80-100점)
+  GOOD              // 양호 (60-79점)
+  CAUTION           // 주의 (40-59점)
+  NEEDS_OBSERVATION // 관찰 필요 (0-39점)
+}
+
+// 게시판 시스템
+model Board {
+  id          String @id
+  name        String
+  description String?
+  order       Int    @default(0)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 관계
+  posts Post[]
+
+  @@map("boards")
+}
+
+// 게시글
+model Post {
+  id        String      @id @default(cuid())
+  title     String
+  content   String
+  views     Int         @default(0)
+  isSticky  Boolean     @default(false) // 공지사항 고정
+  isPublished Boolean   @default(true)
+  boardId   String
+  authorId  String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  // 관계
+  board    Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments Comment[]
+
+  @@map("posts")
+}
+
+// 댓글
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  postId    String
+  authorId  String
+  parentId  String?  // 대댓글을 위한 부모 댓글 ID
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 관계
+  post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent   Comment?  @relation("CommentReply", fields: [parentId], references: [id])
+  replies  Comment[] @relation("CommentReply")
+
+  @@map("comments")
+}
+
+// 뉴스 시스템
+model News {
+  id          String    @id @default(cuid())
+  title       String
+  summary     String
+  content     String
+  imageUrl    String?
+  category    NewsCategory
+  tags        String?   // JSON 배열로 저장
+  views       Int       @default(0)
+  isPublished Boolean   @default(false)
+  isFeatured  Boolean   @default(false) // 메인 페이지 노출 여부
+  publishedAt DateTime?
+  authorId    String?   // 작성자 (관리자)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("news")
+}
+
+enum NewsCategory {
+  PARENTING_INFO     // 육아정보
+  DEVELOPMENT_GUIDE  // 발달가이드
+  ANNOUNCEMENT      // 공지사항
+  RESEARCH          // 연구소식
+  EVENT             // 이벤트
+}
+
+// 놀이영상 (기본 구조만 설정)
+model Video {
+  id             String   @id @default(cuid())
+  title          String
+  description    String
+  videoUrl       String   // 외부 링크
+  videoPlatform  VideoPlatform
+  thumbnailUrl   String?
+  duration       Int?     // seconds
+  targetAgeMin   Int      // 대상 연령 최소 (개월)
+  targetAgeMax   Int      // 대상 연령 최대 (개월)
+  difficulty     Difficulty
+  viewCount      Int      @default(0)
+  bookmarkCount  Int      @default(0)
+  isPublished    Boolean  @default(false)
+  priority       Int      @default(5) // 추천 우선순위 1-10
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("videos")
+}
+
+enum VideoPlatform {
+  YOUTUBE
+  NAVER_TV
+  KAKAO_TV
+  VIMEO
+  OTHER
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
