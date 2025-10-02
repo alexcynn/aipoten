@@ -12,6 +12,17 @@ interface Stats {
   videos: number
   posts: number
   news: number
+  therapists: number
+  consultations: number
+  pendingTherapists: number
+  monthlyRevenue: number
+  recentUsers: number
+  recentActivities: Array<{
+    name: string
+    email: string
+    role: string
+    createdAt: string
+  }>
 }
 
 export default function AdminPage() {
@@ -28,12 +39,8 @@ export default function AdminPage() {
       return
     }
 
-    // 관리자 권한 확인 (실제로는 세션에서 role을 확인해야 함)
-    // 여기서는 간단히 이메일로 확인
-    const isAdmin = session.user?.email === 'admin@aipoten.com' ||
-                   session.user?.name === 'admin'
-
-    if (!isAdmin) {
+    // 관리자 권한 확인
+    if (session.user?.role !== 'ADMIN') {
       router.push('/dashboard')
       return
     }
@@ -104,7 +111,7 @@ export default function AdminPage() {
 
           {/* Statistics Cards */}
           {stats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-white p-6 rounded-lg shadow">
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
@@ -113,6 +120,7 @@ export default function AdminPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-500">총 사용자</p>
                     <p className="text-2xl font-bold text-gray-900">{stats.users}명</p>
+                    <p className="text-xs text-green-600">최근 7일: +{stats.recentUsers}명</p>
                   </div>
                 </div>
               </div>
@@ -120,6 +128,45 @@ export default function AdminPage() {
               <div className="bg-white p-6 rounded-lg shadow">
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                    <span className="text-2xl">👩‍⚕️</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">치료사</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats.therapists}명</p>
+                    {stats.pendingTherapists > 0 && (
+                      <p className="text-xs text-yellow-600">승인 대기: {stats.pendingTherapists}명</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow">
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                    <span className="text-2xl">💬</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">상담</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats.consultations}회</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow">
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                    <span className="text-2xl">💰</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">이번 달 수익</p>
+                    <p className="text-2xl font-bold text-gray-900">₩{stats.monthlyRevenue.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow">
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
                     <span className="text-2xl">👶</span>
                   </div>
                   <div>
@@ -131,7 +178,7 @@ export default function AdminPage() {
 
               <div className="bg-white p-6 rounded-lg shadow">
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                  <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
                     <span className="text-2xl">📊</span>
                   </div>
                   <div>
@@ -143,7 +190,7 @@ export default function AdminPage() {
 
               <div className="bg-white p-6 rounded-lg shadow">
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                  <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mr-4">
                     <span className="text-2xl">📹</span>
                   </div>
                   <div>
@@ -155,24 +202,12 @@ export default function AdminPage() {
 
               <div className="bg-white p-6 rounded-lg shadow">
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
-                    <span className="text-2xl">💬</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">게시글</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.posts}개</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mr-4">
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
                     <span className="text-2xl">📰</span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">뉴스</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.news}개</p>
+                    <p className="text-sm font-medium text-gray-500">게시글/뉴스</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats.posts + stats.news}개</p>
                   </div>
                 </div>
               </div>

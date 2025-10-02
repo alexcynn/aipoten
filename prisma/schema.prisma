@@ -190,6 +190,7 @@ model Post {
   id        String      @id @default(cuid())
   title     String
   content   String
+  category  String?     // 게시글 카테고리 (QUESTION, SHARE, REVIEW 등)
   views     Int         @default(0)
   isSticky  Boolean     @default(false) // 공지사항 고정
   isPublished Boolean   @default(true)

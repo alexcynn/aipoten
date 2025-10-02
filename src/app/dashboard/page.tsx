@@ -36,7 +36,7 @@ export default function DashboardPage() {
     }
 
     if (session.user?.role === 'ADMIN') {
-      router.push('/dashboard/admin')
+      router.push('/admin')
       return
     }
 

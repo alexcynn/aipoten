@@ -93,7 +93,7 @@ export async function PATCH(
     }
 
     const { id } = await params
-    const { title, content } = await request.json()
+    const { title, content, category } = await request.json()
 
     // 작성자 또는 관리자인지 확인
     const existingPost = await prisma.post.findUnique({
@@ -125,7 +125,8 @@ export async function PATCH(
       where: { id },
       data: {
         ...(title && { title }),
-        ...(content && { content })
+        ...(content && { content }),
+        ...(category && { category })
       },
       include: {
         author: {
