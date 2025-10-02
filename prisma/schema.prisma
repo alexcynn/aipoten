@@ -16,6 +16,7 @@ model User {
   email     String   @unique
   name      String?
   password  String?  // NextAuth 사용 시 null 가능
+  phone     String?  // 전화번호 추가
   role      Role     @default(PARENT)
   avatar    String?
   createdAt DateTime @default(now())
@@ -258,6 +259,7 @@ model Video {
   duration       Int?     // seconds
   targetAgeMin   Int      // 대상 연령 최소 (개월)
   targetAgeMax   Int      // 대상 연령 최대 (개월)
+  category       String?  // 카테고리 추가
   difficulty     Difficulty
   viewCount      Int      @default(0)
   bookmarkCount  Int      @default(0)

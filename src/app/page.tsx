@@ -1,4 +1,10 @@
+'use client'
+
+import { useSession } from 'next-auth/react'
+import Link from 'next/link'
+
 export default function Home() {
+  const { data: session, status } = useSession()
   return (
     <div className="min-h-screen bg-neutral-light">
       {/* Navigation Header */}
@@ -10,12 +16,19 @@ export default function Home() {
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
-                <a href="#" className="text-aipoten-navy hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">홈</a>
-                <a href="#" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">발달체크</a>
-                <a href="#" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">놀이영성</a>
-                <a href="#" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">추천영상</a>
-                <a href="#" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">게시판</a>
-                <button className="btn-aipoten-primary">로그인</button>
+                <Link href="/" className="text-aipoten-navy hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">홈</Link>
+                <Link href="/assessments" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">발달체크</Link>
+                <Link href="/spirituality" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">놀이영성</Link>
+                <Link href="/videos" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">추천영상</Link>
+                <Link href="/boards" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">게시판</Link>
+                {session && (
+                  <Link href="/search" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">🔍</Link>
+                )}
+                {session ? (
+                  <Link href="/dashboard" className="btn-aipoten-primary">대시보드</Link>
+                ) : (
+                  <Link href="/login" className="btn-aipoten-primary">로그인</Link>
+                )}
               </div>
             </div>
           </div>
@@ -36,12 +49,25 @@ export default function Home() {
             아이의 잠재력을 키우는 모든 것
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-aipoten-green px-8 py-3 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors">
-              발달체크 시작하기
-            </button>
-            <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-white hover:text-aipoten-green transition-colors">
-              서비스 둘러보기
-            </button>
+            {session ? (
+              <>
+                <Link href="/assessments" className="bg-white text-aipoten-green px-8 py-3 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors text-center">
+                  발달체크 시작하기
+                </Link>
+                <Link href="/dashboard" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-white hover:text-aipoten-green transition-colors text-center">
+                  대시보드로 이동
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/signup" className="bg-white text-aipoten-green px-8 py-3 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors text-center">
+                  회원가입하고 시작하기
+                </Link>
+                <Link href="/login" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-white hover:text-aipoten-green transition-colors text-center">
+                  로그인하기
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -111,9 +137,15 @@ export default function Home() {
           <p className="text-xl text-white/90 mb-8">
             우리 아이만을 위한 맞춤형 발달 지원 서비스
           </p>
-          <button className="bg-white text-aipoten-green px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors">
-            회원가입하고 시작하기
-          </button>
+          {session ? (
+            <Link href="/dashboard" className="bg-white text-aipoten-green px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors">
+              대시보드로 이동하기
+            </Link>
+          ) : (
+            <Link href="/signup" className="bg-white text-aipoten-green px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors">
+              회원가입하고 시작하기
+            </Link>
+          )}
         </div>
       </section>
 
