@@ -1,8 +1,73 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
+  console.log('🌱 시드 데이터 생성 시작...')
+
+  // 테스트 사용자 계정 생성
+  const hashedPassword = await bcrypt.hash('test123!', 10)
+
+  const testUsers = await Promise.all([
+    prisma.user.upsert({
+      where: { email: 'parent@test.com' },
+      update: {},
+      create: {
+        email: 'parent@test.com',
+        name: '김부모',
+        password: hashedPassword,
+        role: 'PARENT',
+        phone: '010-1234-5678'
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: 'therapist@test.com' },
+      update: {},
+      create: {
+        email: 'therapist@test.com',
+        name: '이치료사',
+        password: hashedPassword,
+        role: 'THERAPIST',
+        phone: '010-2345-6789'
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: 'admin@test.com' },
+      update: {},
+      create: {
+        email: 'admin@test.com',
+        name: '관리자',
+        password: hashedPassword,
+        role: 'ADMIN',
+        phone: '010-3456-7890'
+      },
+    })
+  ])
+
+  console.log('✅ 테스트 사용자 계정 생성 완료')
+  console.log('📧 테스트 계정 정보:')
+  console.log('   부모: parent@test.com / test123!')
+  console.log('   치료사: therapist@test.com / test123!')
+  console.log('   관리자: admin@test.com / test123!')
+  console.log('')
+
+  // 테스트 아이 정보 생성 (부모 계정용)
+  const testChild = await prisma.child.create({
+    data: {
+      userId: testUsers[0].id, // 부모 계정
+      name: '김아이',
+      birthDate: new Date('2022-06-15'),
+      gender: 'MALE',
+      gestationalWeeks: 40,
+      birthWeight: 3.2,
+      currentHeight: 85.5,
+      currentWeight: 12.8,
+      notes: '활발하고 호기심이 많은 아이입니다.'
+    }
+  })
+
+  console.log('✅ 테스트 아이 정보 생성 완료')
   // 게시판 생성
   const boards = await Promise.all([
     prisma.board.upsert({

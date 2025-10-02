@@ -68,6 +68,57 @@ export default function LoginPage() {
           </p>
         </div>
 
+        {/* 테스트 계정 정보 */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-blue-800 mb-2">🧪 테스트 계정</h3>
+          <div className="space-y-2 text-xs text-blue-700">
+            <div className="flex justify-between">
+              <span className="font-medium">👨‍👩‍👧 부모:</span>
+              <span>parent@test.com / test123!</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">👩‍⚕️ 치료사:</span>
+              <span>therapist@test.com / test123!</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">👨‍💼 관리자:</span>
+              <span>admin@test.com / test123!</span>
+            </div>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('parent@test.com')
+                setPassword('test123!')
+              }}
+              className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded text-xs font-medium transition-colors"
+            >
+              부모 계정 입력
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('therapist@test.com')
+                setPassword('test123!')
+              }}
+              className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-800 rounded text-xs font-medium transition-colors"
+            >
+              치료사 계정 입력
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('admin@test.com')
+                setPassword('test123!')
+              }}
+              className="px-3 py-1 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded text-xs font-medium transition-colors"
+            >
+              관리자 계정 입력
+            </button>
+          </div>
+        </div>
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>

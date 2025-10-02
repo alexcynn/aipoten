@@ -44,7 +44,9 @@ export default function DashboardPage() {
 
         if (childrenRes.ok) {
           const childrenData = await childrenRes.json()
-          setChildren(childrenData)
+          // API 응답이 객체인 경우 children 배열 추출
+          const childrenArray = Array.isArray(childrenData) ? childrenData : (childrenData.children || [])
+          setChildren(childrenArray)
         }
       } catch (error) {
         console.error('데이터를 가져오는 중 오류 발생:', error)
