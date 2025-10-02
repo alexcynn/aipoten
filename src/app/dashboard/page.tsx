@@ -29,6 +29,17 @@ export default function DashboardPage() {
       return
     }
 
+    // 역할에 따른 리다이렉트
+    if (session.user?.role === 'THERAPIST') {
+      router.push('/dashboard/therapist')
+      return
+    }
+
+    if (session.user?.role === 'ADMIN') {
+      router.push('/dashboard/admin')
+      return
+    }
+
     // 사용자 정보와 아이 목록 가져오기
     const fetchData = async () => {
       try {

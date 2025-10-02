@@ -298,6 +298,43 @@ async function main() {
     }),
   ])
 
+  // 치료사 프로필 생성
+  const therapistProfile = await prisma.therapistProfile.upsert({
+    where: { userId: testUsers[1].id },
+    update: {},
+    create: {
+      userId: testUsers[1].id, // 치료사 계정
+      specialty: 'SPEECH_THERAPY',
+      licenseNumber: 'ST-2024-001',
+      experience: 5,
+      education: '특수교육학 석사',
+      certifications: JSON.stringify(['언어재활사 1급', '특수교육교사 2급']),
+      introduction: '안녕하세요. 5년 경력의 언어치료사 이치료사입니다. 영유아부터 학령기 아동까지 다양한 언어발달 지원 경험이 있습니다.',
+      consultationFee: 120000,
+      status: 'APPROVED',
+      approvedAt: new Date()
+    }
+  })
+
+  // 치료사 스케줄 설정 (월-금, 9시-18시)
+  const scheduleData = []
+  for (let day = 1; day <= 5; day++) { // 월요일(1)부터 금요일(5)까지
+    for (let hour = 9; hour < 18; hour++) {
+      scheduleData.push({
+        therapistId: therapistProfile.id,
+        dayOfWeek: day,
+        startTime: `${hour.toString().padStart(2, '0')}:00`,
+        endTime: `${(hour + 1).toString().padStart(2, '0')}:00`,
+        isActive: true
+      })
+    }
+  }
+
+  await prisma.therapistAvailability.createMany({
+    data: scheduleData
+  })
+
+  console.log('✅ 치료사 프로필과 스케줄이 생성되었습니다')
   console.log('시드 데이터 생성 완료!')
   console.log('게시판:', boards.length)
   console.log('뉴스:', sampleNews.length)

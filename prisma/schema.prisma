@@ -28,6 +28,9 @@ model User {
   children  Child[]
   accounts  Account[]
   sessions  Session[]
+  therapistProfile TherapistProfile?
+  matchingRequests MatchingRequest[]
+  consultations    Consultation[]
 
   @@map("users")
 }
@@ -102,6 +105,8 @@ model Child {
   // 관계
   user        User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   assessments DevelopmentAssessment[]
+  matchingRequests MatchingRequest[]
+  consultations    Consultation[]
 
   @@map("children")
 }
@@ -283,4 +288,140 @@ enum Difficulty {
   EASY
   MEDIUM
   HARD
+}
+
+// 치료사 프로필
+model TherapistProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  specialty       TherapyType
+  licenseNumber   String?  // 자격증 번호
+  experience      Int      // 경력 (년)
+  education       String?  // 학력
+  certifications  String?  // 자격증 (JSON)
+  introduction    String?  // 자기소개
+  consultationFee Int      // 상담료 (원)
+  status          TherapistStatus @default(PENDING)
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // 관계
+  user            User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  availability    TherapistAvailability[]
+  matchingRequests MatchingRequest[]
+  consultations   Consultation[]
+
+  @@map("therapist_profiles")
+}
+
+enum TherapyType {
+  SPEECH_THERAPY     // 언어치료
+  OCCUPATIONAL_THERAPY // 작업치료
+  PHYSICAL_THERAPY   // 물리치료
+  PSYCHOLOGICAL_THERAPY // 심리치료
+  BEHAVIORAL_THERAPY // 행동치료
+  PLAY_THERAPY      // 놀이치료
+}
+
+enum TherapistStatus {
+  PENDING   // 승인 대기
+  APPROVED  // 승인됨
+  REJECTED  // 거절됨
+  SUSPENDED // 정지됨
+}
+
+// 치료사 가능 시간
+model TherapistAvailability {
+  id          String   @id @default(cuid())
+  therapistId String
+  dayOfWeek   Int      // 0=일요일, 1=월요일, ..., 6=토요일
+  startTime   String   // "09:00"
+  endTime     String   // "18:00"
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  // 관계
+  therapist TherapistProfile @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@map("therapist_availability")
+}
+
+// 매칭 요청
+model MatchingRequest {
+  id              String   @id @default(cuid())
+  parentUserId    String
+  childId         String
+  therapistId     String
+  preferredDates  String   // JSON 배열 ["2024-01-15", "2024-01-16"]
+  notes           String?  // 부모 요청사항
+  status          MatchingStatus @default(PENDING)
+  therapistResponse String? // 치료사 응답
+  consultationId  String?  // 승인된 경우 상담 ID
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // 관계
+  parentUser  User              @relation(fields: [parentUserId], references: [id])
+  child       Child             @relation(fields: [childId], references: [id])
+  therapist   TherapistProfile  @relation(fields: [therapistId], references: [id])
+  consultation Consultation?
+
+  @@map("matching_requests")
+}
+
+enum MatchingStatus {
+  PENDING   // 대기중
+  APPROVED  // 승인됨
+  REJECTED  // 거절됨
+  CANCELLED // 취소됨
+}
+
+// 상담 예약
+model Consultation {
+  id              String   @id @default(cuid())
+  matchingRequestId String @unique
+  parentUserId    String
+  childId         String
+  therapistId     String
+  scheduledAt     DateTime // 예약된 시간
+  duration        Int      @default(50) // 상담 시간 (분)
+  type            ConsultationType @default(ONLINE)
+  status          ConsultationStatus @default(SCHEDULED)
+  fee             Int      // 상담료
+  paymentStatus   PaymentStatus @default(PENDING)
+  notes           String?  // 상담 노트
+  feedback        String?  // 피드백
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // 관계
+  matchingRequest MatchingRequest  @relation(fields: [matchingRequestId], references: [id])
+  parentUser      User            @relation(fields: [parentUserId], references: [id])
+  child           Child           @relation(fields: [childId], references: [id])
+  therapist       TherapistProfile @relation(fields: [therapistId], references: [id])
+
+  @@map("consultations")
+}
+
+enum ConsultationType {
+  ONLINE    // 온라인
+  OFFLINE   // 오프라인
+  HOME_VISIT // 방문
+}
+
+enum ConsultationStatus {
+  SCHEDULED // 예약됨
+  COMPLETED // 완료됨
+  CANCELLED // 취소됨
+  NO_SHOW   // 노쇼
+}
+
+enum PaymentStatus {
+  PENDING   // 결제 대기
+  PAID      // 결제 완료
+  REFUNDED  // 환불 완료
+  FAILED    // 결제 실패
 }
