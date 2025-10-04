@@ -122,12 +122,14 @@ model DevelopmentAssessment {
   childId      String
   ageInMonths  Int
   status       AssessmentStatus      @default(IN_PROGRESS)
+  totalScore   Float                 @default(0)
   completedAt  DateTime?
   createdAt    DateTime              @default(now())
 
   // 관계
-  child    Child                   @relation(fields: [childId], references: [id], onDelete: Cascade)
-  results  AssessmentResult[]
+  child     Child                   @relation(fields: [childId], references: [id], onDelete: Cascade)
+  results   AssessmentResult[]
+  responses AssessmentResponse[]
 
   @@map("development_assessments")
 }
@@ -151,6 +153,72 @@ model AssessmentResult {
   assessment DevelopmentAssessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
 
   @@map("assessment_results")
+}
+
+// 발달 체크 질문
+model AssessmentQuestion {
+  id          String              @id @default(cuid())
+  category    DevelopmentCategory
+  ageMin      Int                 // 최소 월령
+  ageMax      Int                 // 최대 월령
+  questionNumber Int              // 문항 번호 (1-35)
+  level       QuestionLevel       // Q1, Q2, Q3
+  questionText String
+  answerType  AnswerType
+  isWarning   Boolean             @default(false) // 경고 질문 여부
+  order       Int                 // 표시 순서
+  createdAt   DateTime            @default(now())
+
+  // 관계
+  responses AssessmentResponse[]
+
+  @@map("assessment_questions")
+}
+
+enum QuestionLevel {
+  Q1
+  Q2
+  Q3
+}
+
+enum AnswerType {
+  FOUR_POINT  // 잘함, 대체로 잘함, 대체로 못함, 전혀 못함
+  TWO_POINT   // 잘함, 못함
+}
+
+// 발달 체크 응답
+model AssessmentResponse {
+  id           String                @id @default(cuid())
+  assessmentId String?               // null이면 비로그인 평가
+  guestAssessmentId String?
+  questionId   String
+  level        QuestionLevel         // 응답한 레벨 (Q1/Q2/Q3)
+  answer       String                // 응답 (잘함, 못함 등)
+  score        Float                 @default(0) // 환산 점수
+  createdAt    DateTime              @default(now())
+
+  // 관계
+  assessment      DevelopmentAssessment? @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  guestAssessment GuestAssessment?       @relation(fields: [guestAssessmentId], references: [id], onDelete: Cascade)
+  question        AssessmentQuestion     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("assessment_responses")
+}
+
+// 비로그인 발달 체크
+model GuestAssessment {
+  id           String   @id @default(cuid())
+  childName    String
+  birthDate    DateTime
+  gender       Gender
+  totalScore   Float    @default(0)
+  completedAt  DateTime?
+  createdAt    DateTime @default(now())
+
+  // 관계
+  responses AssessmentResponse[]
+
+  @@map("guest_assessments")
 }
 
 enum DevelopmentCategory {

@@ -32,27 +32,25 @@ export default function AssessmentsPage() {
   const [selectedChildId, setSelectedChildId] = useState<string>('')
 
   useEffect(() => {
-    if (status === 'loading') return
-    if (!session) {
-      router.push('/login')
-      return
-    }
-
     const fetchData = async () => {
       try {
-        const [assessmentsRes, childrenRes] = await Promise.all([
-          fetch('/api/assessments'),
-          fetch('/api/children')
-        ])
+        if (session) {
+          const [assessmentsRes, childrenRes] = await Promise.all([
+            fetch('/api/assessments'),
+            fetch('/api/children')
+          ])
 
-        if (assessmentsRes.ok) {
-          const assessmentsData = await assessmentsRes.json()
-          setAssessments(assessmentsData)
-        }
+          if (assessmentsRes.ok) {
+            const assessmentsData = await assessmentsRes.json()
+            const assessmentsArray = Array.isArray(assessmentsData) ? assessmentsData : (assessmentsData.assessments || [])
+            setAssessments(assessmentsArray)
+          }
 
-        if (childrenRes.ok) {
-          const childrenData = await childrenRes.json()
-          setChildren(childrenData)
+          if (childrenRes.ok) {
+            const childrenData = await childrenRes.json()
+            const childrenArray = Array.isArray(childrenData) ? childrenData : (childrenData.children || [])
+            setChildren(childrenArray)
+          }
         }
       } catch (error) {
         console.error('데이터를 불러오는 중 오류 발생:', error)
@@ -62,7 +60,7 @@ export default function AssessmentsPage() {
     }
 
     fetchData()
-  }, [session, status, router])
+  }, [session])
 
   const calculateAge = (birthDate: string) => {
     const birth = new Date(birthDate)
@@ -82,7 +80,7 @@ export default function AssessmentsPage() {
     ? assessments.filter(assessment => assessment.childId === selectedChildId)
     : assessments
 
-  if (status === 'loading' || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-light flex items-center justify-center">
         <div className="text-center">
@@ -91,10 +89,6 @@ export default function AssessmentsPage() {
         </div>
       </div>
     )
-  }
-
-  if (!session) {
-    return null
   }
 
   return (
@@ -107,10 +101,14 @@ export default function AssessmentsPage() {
               아이포텐
             </Link>
             <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="text-gray-600 hover:text-aipoten-green">
-                대시보드
-              </Link>
-              <span className="text-gray-700">{session.user?.name}님</span>
+              {session && (
+                <>
+                  <Link href="/dashboard" className="text-gray-600 hover:text-aipoten-green">
+                    대시보드
+                  </Link>
+                  <span className="text-gray-700">{session.user?.name}님</span>
+                </>
+              )}
             </div>
           </div>
         </div>

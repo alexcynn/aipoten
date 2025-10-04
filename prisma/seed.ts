@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { seedAssessmentQuestions } from './assessment-questions-seed'
 
 const prisma = new PrismaClient()
 
@@ -481,10 +482,14 @@ async function main() {
   console.log('✅ 게시판 데이터 생성 완료')
   console.log('   알림장:', notificationPosts.length, '개')
   console.log('   육아소통:', parentingPosts.length, '개')
-  console.log('시드 데이터 생성 완료!')
-  console.log('게시판:', boards.length)
-  console.log('뉴스:', sampleNews.length)
-  console.log('영상:', sampleVideos.length)
+
+  // 발달체크 질문 생성
+  await seedAssessmentQuestions()
+
+  console.log('✅ 시드 데이터 생성 완료!')
+  console.log('   게시판:', boards.length)
+  console.log('   뉴스:', sampleNews.length)
+  console.log('   영상:', sampleVideos.length)
 }
 
 main()

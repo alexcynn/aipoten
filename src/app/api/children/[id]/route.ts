@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth-config'
 
 // 아이 상세 정보 조회
 export async function GET(
@@ -8,7 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(
@@ -51,10 +52,8 @@ export async function GET(
     )
 
     return NextResponse.json({
-      child: {
-        ...child,
-        ageInMonths
-      }
+      ...child,
+      ageInMonths
     })
   } catch (error) {
     console.error('아이 정보 조회 오류:', error)
@@ -71,7 +70,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(
@@ -146,7 +145,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(

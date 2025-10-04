@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth-config'
 
 // 발달 체크 생성
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
 // 사용자별 발달 체크 목록 조회
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(

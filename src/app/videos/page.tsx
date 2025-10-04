@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export const dynamic = 'force-dynamic'
 interface Video {
@@ -53,32 +54,27 @@ export default function VideosPage() {
   ]
 
   useEffect(() => {
-    if (status === 'loading') return
-    if (!session) {
-      router.push('/login')
-      return
-    }
-
     const fetchData = async () => {
       try {
-        const [videosRes, childrenRes] = await Promise.all([
-          fetch('/api/videos'),
-          fetch('/api/children')
-        ])
-
+        const videosRes = await fetch('/api/videos')
         if (videosRes.ok) {
           const videosData = await videosRes.json()
           setVideos(videosData)
         }
 
-        if (childrenRes.ok) {
-          const childrenData = await childrenRes.json()
-          setChildren(childrenData)
+        // 로그인한 경우만 children 정보 가져오기
+        if (session) {
+          const childrenRes = await fetch('/api/children')
+          if (childrenRes.ok) {
+            const childrenData = await childrenRes.json()
+            const childrenArray = Array.isArray(childrenData) ? childrenData : (childrenData.children || [])
+            setChildren(childrenArray)
 
-          // URL 파라미터에서 childId가 있으면 자동 선택
-          const childIdParam = searchParams.get('childId')
-          if (childIdParam && childrenData.find((c: Child) => c.id === childIdParam)) {
-            setSelectedChildId(childIdParam)
+            // URL 파라미터에서 childId가 있으면 자동 선택
+            const childIdParam = searchParams.get('childId')
+            if (childIdParam && childrenArray.find((c: Child) => c.id === childIdParam)) {
+              setSelectedChildId(childIdParam)
+            }
           }
         }
       } catch (error) {
@@ -89,7 +85,7 @@ export default function VideosPage() {
     }
 
     fetchData()
-  }, [session, status, router, searchParams])
+  }, [session, searchParams])
 
   const calculateAge = (birthDate: string) => {
     const birth = new Date(birthDate)
@@ -141,7 +137,7 @@ export default function VideosPage() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
   }
 
-  if (status === 'loading' || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-light flex items-center justify-center">
         <div className="text-center">
@@ -152,24 +148,29 @@ export default function VideosPage() {
     )
   }
 
-  if (!session) {
-    return null
-  }
-
   return (
     <div className="min-h-screen bg-neutral-light">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/dashboard" className="text-xl font-bold text-aipoten-navy">
-              아이포텐
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/images/logo-text.png"
+                alt="AI Poten"
+                width={160}
+                height={40}
+                className="h-10 w-auto"
+                priority
+              />
             </Link>
             <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="text-gray-600 hover:text-aipoten-green">
-                대시보드
+              <Link href="/" className="text-gray-600 hover:text-aipoten-green">
+                홈으로
               </Link>
-              <span className="text-gray-700">{session.user?.name}님</span>
+              {session && (
+                <span className="text-gray-700">{session.user?.name}님</span>
+              )}
             </div>
           </div>
         </div>
