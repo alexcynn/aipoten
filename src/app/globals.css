@@ -54,3 +54,9 @@
 .link-aipoten:hover {
   color: #386646;
 }
+
+/* 푸터 스타일 강제 적용 */
+footer {
+  background-color: #193149 !important;
+  color: white !important;
+}

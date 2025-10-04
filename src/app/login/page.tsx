@@ -4,6 +4,7 @@ import { signIn, getSession } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -51,8 +52,15 @@ export default function LoginPage() {
     <div className="min-h-screen bg-neutral-light flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <Link href="/" className="text-2xl font-bold text-aipoten-navy">
-            아이포텐
+          <Link href="/" className="inline-block mb-4">
+            <Image
+              src="/images/logo-full.png"
+              alt="AI Poten"
+              width={250}
+              height={200}
+              className="mx-auto"
+              priority
+            />
           </Link>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
             로그인
@@ -172,8 +180,8 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-aipoten-green hover:bg-aipoten-navy focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-aipoten-green disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || !email || !password}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-aipoten-green hover:bg-aipoten-navy focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-aipoten-green disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? '로그인 중...' : '로그인'}
             </button>

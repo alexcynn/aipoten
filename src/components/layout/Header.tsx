@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -53,9 +54,14 @@ const Header: React.FC<HeaderProps> = ({
           {/* 로고 섹션 */}
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center">
-              <div className="h-10 w-32 bg-gradient-aipoten rounded-md flex items-center justify-center">
-                <span className="text-white font-bold text-lg">AI POTEN</span>
-              </div>
+              <Image
+                src="/images/logo-text.png"
+                alt="AI Poten"
+                width={160}
+                height={40}
+                className="h-10 w-auto"
+                priority
+              />
             </Link>
           </div>
 

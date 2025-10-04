@@ -25,7 +25,13 @@
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
-  "keywords": ["nextjs", "prisma", "infant-development", "education", "korea"],
+  "keywords": [
+    "nextjs",
+    "prisma",
+    "infant-development",
+    "education",
+    "korea"
+  ],
   "author": "Aipoten Team",
   "license": "MIT",
   "description": "아이포텐 - 영유아 발달 지원 플랫폼",
@@ -37,6 +43,7 @@
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "critters": "^0.0.23",
     "lucide-react": "^0.544.0",
     "next": "^15.5.4",
     "next-auth": "^4.24.11",
