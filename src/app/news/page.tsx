@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface News {
   id: string
@@ -11,28 +11,18 @@ interface News {
   summary: string
   imageUrl: string | null
   views: number
-  author: {
-    name: string
-  }
+  category: string
   createdAt: string
 }
 
 export default function NewsPage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
+  const { data: session } = useSession()
   const [news, setNews] = useState<News[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (status === 'loading') return
-
-    if (!session) {
-      router.push('/login')
-      return
-    }
-
     fetchNews()
-  }, [session, status, router])
+  }, [])
 
   const fetchNews = async () => {
     try {
@@ -48,7 +38,18 @@ export default function NewsPage() {
     }
   }
 
-  if (status === 'loading' || isLoading) {
+  const getCategoryLabel = (category: string) => {
+    const labels: { [key: string]: string } = {
+      ANNOUNCEMENT: '공지사항',
+      DEVELOPMENT_GUIDE: '발달가이드',
+      PARENTING_TIP: '육아팁',
+      EVENT: '이벤트',
+      UPDATE: '업데이트'
+    }
+    return labels[category] || '기타'
+  }
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-light flex items-center justify-center">
         <div className="text-center">
@@ -59,25 +60,30 @@ export default function NewsPage() {
     )
   }
 
-  if (!session) {
-    return null
-  }
-
   return (
     <div className="min-h-screen bg-neutral-light">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/dashboard" className="text-xl font-bold text-aipoten-navy">
-              아이포텐
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/images/logo-text.png"
+                alt="AI Poten"
+                width={160}
+                height={40}
+                className="h-10 w-auto"
+                priority
+              />
             </Link>
 
             <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="text-gray-600 hover:text-aipoten-green">
-                대시보드
+              <Link href="/" className="text-gray-600 hover:text-aipoten-green">
+                홈으로
               </Link>
-              <span className="text-gray-700">{session.user?.name}님</span>
+              {session && (
+                <span className="text-gray-700">{session.user?.name}님</span>
+              )}
             </div>
           </div>
         </div>
@@ -88,9 +94,9 @@ export default function NewsPage() {
         <div className="px-4 py-6 sm:px-0">
           {/* Header Section */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">뉴스 및 공지사항</h1>
+            <h1 className="text-3xl font-bold text-gray-900">육아정보</h1>
             <p className="mt-2 text-gray-600">
-              아이포텐의 최신 소식과 중요한 공지사항을 확인하세요.
+              전문가가 제공하는 다양한 육아 정보와 발달 가이드를 확인하세요
             </p>
           </div>
 
@@ -98,8 +104,8 @@ export default function NewsPage() {
           {news.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-400 text-6xl mb-4">📰</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">등록된 뉴스가 없습니다</h3>
-              <p className="text-gray-500">새로운 소식을 준비 중입니다.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">등록된 육아정보가 없습니다</h3>
+              <p className="text-gray-500">새로운 정보를 준비 중입니다.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -117,6 +123,12 @@ export default function NewsPage() {
                     )}
 
                     <div className="p-6">
+                      <div className="flex items-center mb-2">
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                          {getCategoryLabel(item.category)}
+                        </span>
+                      </div>
+
                       <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
                         {item.title}
                       </h3>
@@ -126,12 +138,8 @@ export default function NewsPage() {
                       </p>
 
                       <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span>{item.author.name}</span>
-                        <div className="flex items-center space-x-2">
-                          <span>조회 {item.views}</span>
-                          <span>•</span>
-                          <span>{new Date(item.createdAt).toLocaleDateString('ko-KR')}</span>
-                        </div>
+                        <span>조회 {item.views}</span>
+                        <span>{new Date(item.createdAt).toLocaleDateString('ko-KR')}</span>
                       </div>
                     </div>
                   </div>
