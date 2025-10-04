@@ -31,6 +31,7 @@ export default function AdminPage() {
   const router = useRouter()
   const [stats, setStats] = useState<Stats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -96,14 +97,54 @@ export default function AdminPage() {
                 />
               </Link>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="text-gray-600 hover:text-aipoten-green">
-                대시보드
-              </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-4">
+              <Link href="/admin" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">대시보드</Link>
+              <Link href="/admin/users" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">사용자관리</Link>
+              <Link href="/admin/boards" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">게시판관리</Link>
+              <Link href="/admin/news" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">뉴스관리</Link>
+              <Link href="/admin/videos" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">영상관리</Link>
+              <Link href="/admin/therapists" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">치료사관리</Link>
               <span className="text-gray-700">{session.user?.name}님</span>
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-aipoten-green hover:bg-gray-100 focus:outline-none"
+              >
+                {isMobileMenuOpen ? (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              <Link href="/admin" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">대시보드</Link>
+              <Link href="/admin/users" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">사용자관리</Link>
+              <Link href="/admin/boards" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">게시판관리</Link>
+              <Link href="/admin/news" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">뉴스관리</Link>
+              <Link href="/admin/videos" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">영상관리</Link>
+              <Link href="/admin/therapists" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">치료사관리</Link>
+              <div className="border-t border-gray-200 pt-2 mt-2">
+                <div className="px-3 py-2 text-sm text-gray-700">{session.user?.name}님</div>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Main Content */}

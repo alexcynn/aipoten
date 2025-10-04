@@ -71,43 +71,23 @@ async function main() {
   // 게시판 생성
   const boards = await Promise.all([
     prisma.board.upsert({
-      where: { id: 'general' },
+      where: { id: 'notification' },
       update: {},
       create: {
-        id: 'general',
-        name: '자유게시판',
-        description: '자유롭게 소통할 수 있는 공간입니다',
-        order: 1,
-      },
-    }),
-    prisma.board.upsert({
-      where: { id: 'qna' },
-      update: {},
-      create: {
-        id: 'qna',
-        name: '질문답변',
-        description: '육아와 발달에 관한 궁금한 점을 물어보세요',
-        order: 2,
-      },
-    }),
-    prisma.board.upsert({
-      where: { id: 'review' },
-      update: {},
-      create: {
-        id: 'review',
-        name: '후기게시판',
-        description: '아이포텐 서비스 이용 후기를 공유해주세요',
-        order: 3,
-      },
-    }),
-    prisma.board.upsert({
-      where: { id: 'notice' },
-      update: {},
-      create: {
-        id: 'notice',
-        name: '공지사항',
-        description: '아이포텐 서비스 공지사항',
+        id: 'notification',
+        name: '알림장',
+        description: '아이포텐의 주요 소식과 알림을 확인하세요',
         order: 0,
+      },
+    }),
+    prisma.board.upsert({
+      where: { id: 'parenting' },
+      update: {},
+      create: {
+        id: 'parenting',
+        name: '육아소통',
+        description: '육아 경험과 팁을 나누며 소통하는 공간입니다',
+        order: 1,
       },
     }),
   ])

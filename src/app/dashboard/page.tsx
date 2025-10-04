@@ -21,6 +21,7 @@ export default function DashboardPage() {
   const [children, setChildren] = useState<Child[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -124,8 +125,14 @@ export default function DashboardPage() {
               />
             </Link>
 
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">안녕하세요, {session.user?.name}님</span>
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-4">
+              <Link href="/assessments" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">발달체크</Link>
+              <Link href="/boards/notification" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">알림장</Link>
+              <Link href="/news" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">육아정보</Link>
+              <Link href="/boards/parenting" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">육아소통</Link>
+              <Link href="/videos" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">놀이영상</Link>
+              <span className="text-gray-700">{session.user?.name}님</span>
               <button
                 onClick={handleSignOut}
                 className="text-gray-600 hover:text-aipoten-green"
@@ -133,8 +140,48 @@ export default function DashboardPage() {
                 로그아웃
               </button>
             </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-aipoten-green hover:bg-gray-100 focus:outline-none"
+              >
+                {isMobileMenuOpen ? (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              <Link href="/assessments" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">발달체크</Link>
+              <Link href="/boards/notification" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">알림장</Link>
+              <Link href="/news" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">육아정보</Link>
+              <Link href="/boards/parenting" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">육아소통</Link>
+              <Link href="/videos" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">놀이영상</Link>
+              <div className="border-t border-gray-200 pt-2 mt-2">
+                <div className="px-3 py-2 text-sm text-gray-700">{session.user?.name}님</div>
+                <button
+                  onClick={handleSignOut}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100"
+                >
+                  로그아웃
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Main Content */}
