@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Stats {
   users: number
@@ -84,8 +85,15 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Link href="/dashboard" className="text-xl font-bold text-aipoten-navy">
-                아이포텐 관리자
+              <Link href="/dashboard" className="flex items-center">
+                <Image
+                  src="/images/logo-text.png"
+                  alt="AI Poten"
+                  width={160}
+                  height={40}
+                  className="h-10 w-auto"
+                  priority
+                />
               </Link>
             </div>
             <div className="flex items-center space-x-4">
