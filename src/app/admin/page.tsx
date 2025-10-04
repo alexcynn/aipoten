@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -100,13 +100,17 @@ export default function AdminPage() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4">
-              <Link href="/admin" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">대시보드</Link>
-              <Link href="/admin/users" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">사용자관리</Link>
-              <Link href="/admin/boards" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">게시판관리</Link>
-              <Link href="/admin/news" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">뉴스관리</Link>
-              <Link href="/admin/videos" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">영상관리</Link>
-              <Link href="/admin/therapists" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">치료사관리</Link>
+              <Link href="/boards/notification" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">알림장</Link>
+              <Link href="/news" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">육아정보</Link>
+              <Link href="/boards/parenting" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">육아소통</Link>
+              <Link href="/videos" className="text-gray-600 hover:text-aipoten-green px-3 py-2 rounded-md text-sm font-medium">놀이영상</Link>
               <span className="text-gray-700">{session.user?.name}님</span>
+              <button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="text-gray-600 hover:text-aipoten-green"
+              >
+                로그아웃
+              </button>
             </div>
 
             {/* Mobile menu button */}
@@ -133,14 +137,18 @@ export default function AdminPage() {
         {isMobileMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <Link href="/admin" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">대시보드</Link>
-              <Link href="/admin/users" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">사용자관리</Link>
-              <Link href="/admin/boards" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">게시판관리</Link>
-              <Link href="/admin/news" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">뉴스관리</Link>
-              <Link href="/admin/videos" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">영상관리</Link>
-              <Link href="/admin/therapists" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">치료사관리</Link>
+              <Link href="/boards/notification" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">알림장</Link>
+              <Link href="/news" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">육아정보</Link>
+              <Link href="/boards/parenting" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">육아소통</Link>
+              <Link href="/videos" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100">놀이영상</Link>
               <div className="border-t border-gray-200 pt-2 mt-2">
                 <div className="px-3 py-2 text-sm text-gray-700">{session.user?.name}님</div>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-aipoten-green hover:bg-gray-100"
+                >
+                  로그아웃
+                </button>
               </div>
             </div>
           </div>
@@ -270,27 +278,40 @@ export default function AdminPage() {
               <h3 className="text-lg font-medium text-gray-900 mb-4">콘텐츠 관리</h3>
               <div className="space-y-3">
                 <Link
-                  href="/admin/videos"
-                  className="block p-3 rounded-md hover:bg-gray-50 transition-colors"
+                  href="/boards/notification/new"
+                  className="block p-3 rounded-md hover:bg-gray-50 transition-colors border-2 border-aipoten-green"
                 >
                   <div className="flex items-center">
-                    <span className="text-lg mr-3">📹</span>
+                    <span className="text-lg mr-3">📝</span>
                     <div>
-                      <div className="font-medium">영상 관리</div>
-                      <div className="text-sm text-gray-500">추천 영상 추가/수정/삭제</div>
+                      <div className="font-medium text-aipoten-green">알림장 새글 작성</div>
+                      <div className="text-sm text-gray-500">새로운 알림장 게시글 추가</div>
                     </div>
                   </div>
                 </Link>
 
                 <Link
-                  href="/admin/news"
-                  className="block p-3 rounded-md hover:bg-gray-50 transition-colors"
+                  href="/news/new"
+                  className="block p-3 rounded-md hover:bg-gray-50 transition-colors border-2 border-aipoten-blue"
                 >
                   <div className="flex items-center">
                     <span className="text-lg mr-3">📰</span>
                     <div>
-                      <div className="font-medium">뉴스 관리</div>
-                      <div className="text-sm text-gray-500">뉴스 및 공지사항 관리</div>
+                      <div className="font-medium text-aipoten-blue">육아정보 새글 작성</div>
+                      <div className="text-sm text-gray-500">새로운 육아정보 추가</div>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/videos/new"
+                  className="block p-3 rounded-md hover:bg-gray-50 transition-colors border-2 border-aipoten-orange"
+                >
+                  <div className="flex items-center">
+                    <span className="text-lg mr-3">📹</span>
+                    <div>
+                      <div className="font-medium text-aipoten-orange">놀이영상 추가</div>
+                      <div className="text-sm text-gray-500">새로운 놀이영상 등록</div>
                     </div>
                   </div>
                 </Link>
@@ -303,7 +324,7 @@ export default function AdminPage() {
                     <span className="text-lg mr-3">💬</span>
                     <div>
                       <div className="font-medium">게시판 관리</div>
-                      <div className="text-sm text-gray-500">게시판 및 게시글 관리</div>
+                      <div className="text-sm text-gray-500">전체 게시글 관리</div>
                     </div>
                   </div>
                 </Link>
@@ -323,6 +344,19 @@ export default function AdminPage() {
                     <div>
                       <div className="font-medium">사용자 목록</div>
                       <div className="text-sm text-gray-500">전체 사용자 관리</div>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/admin/therapists"
+                  className="block p-3 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <span className="text-lg mr-3">👩‍⚕️</span>
+                    <div>
+                      <div className="font-medium">치료사 관리</div>
+                      <div className="text-sm text-gray-500">치료사 승인 및 관리</div>
                     </div>
                   </div>
                 </Link>

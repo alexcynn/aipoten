@@ -170,6 +170,16 @@ export default function Home() {
                 다른 부모님들과 육아 경험과 팁을 나누며 소통하는 공간입니다
               </p>
             </div>
+
+            <div className="card-aipoten p-6 text-center hover:shadow-lg transition-shadow">
+              <div className="w-16 h-16 bg-aipoten-red rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl text-white">📰</span>
+              </div>
+              <h3 className="text-xl font-semibold text-aipoten-navy mb-3">육아정보</h3>
+              <p className="text-gray-600">
+                전문가가 제공하는 다양한 육아 정보와 발달 가이드를 확인하세요
+              </p>
+            </div>
           </div>
         </div>
       </section>

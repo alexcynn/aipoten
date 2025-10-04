@@ -265,7 +265,7 @@ export default function DashboardPage() {
             </Link>
 
             <Link
-              href="/boards"
+              href="/boards/parenting"
               className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
             >
               <div className="flex items-center">
@@ -275,7 +275,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">커뮤니티</h3>
+                  <h3 className="text-lg font-medium text-gray-900">육아소통</h3>
                   <p className="text-sm text-gray-500">다른 부모님과 소통하세요</p>
                 </div>
               </div>
