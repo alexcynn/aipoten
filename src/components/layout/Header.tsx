@@ -5,6 +5,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useSession, signOut } from 'next-auth/react'
+import { usePathname } from 'next/navigation'
 
 interface HeaderProps {
   variant?: 'default' | 'brand'
@@ -15,6 +17,8 @@ const Header: React.FC<HeaderProps> = ({
   variant = 'default',
   className = ''
 }) => {
+  const { data: session, status } = useSession()
+  const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const headerStyles = {
@@ -32,14 +36,85 @@ const Header: React.FC<HeaderProps> = ({
     brand: 'text-white hover:bg-brand-green/80',
   }
 
-  const navItems = [
+  // 로그인하지 않은 경우의 메뉴
+  const guestNavItems = [
     { href: '/', label: '홈' },
-    { href: '/board', label: '게시판' },
-    { href: '/news', label: '뉴스' },
-    { href: '/assessment', label: '발달체크' },
+    { href: '/assessments', label: '발달체크' },
     { href: '/videos', label: '놀이영상' },
-    { href: '/therapists', label: '치료사' },
+    { href: '/boards/parenting', label: '육아소통' },
+    { href: '/news', label: '소식' },
   ]
+
+  // 부모 메뉴
+  const parentNavItems = [
+    { href: '/parent/dashboard', label: '대시보드' },
+    { href: '/parent/assessments', label: '발달체크' },
+    { href: '/parent/children/new', label: '아이 관리' },
+    { href: '/videos', label: '놀이영상' },
+    { href: '/boards/parenting', label: '육아소통' },
+    { href: '/news', label: '소식' },
+  ]
+
+  // 치료사 메뉴
+  const therapistNavItems = [
+    { href: '/therapist/dashboard', label: '대시보드' },
+    { href: '/therapist/profile', label: '프로필' },
+    { href: '/therapist/matching', label: '매칭 요청' },
+    { href: '/therapist/consultations', label: '상담 관리' },
+    { href: '/therapist/schedule', label: '일정' },
+  ]
+
+  // 관리자 메뉴
+  const adminNavItems = [
+    { href: '/admin/dashboard', label: '대시보드' },
+    { href: '/admin/users', label: '사용자' },
+    { href: '/admin/therapists', label: '치료사' },
+    { href: '/admin/boards', label: '게시판' },
+    { href: '/admin/news', label: '소식' },
+    { href: '/admin/videos', label: '영상' },
+  ]
+
+  // 역할에 따른 메뉴 선택
+  const getNavItems = () => {
+    if (!session?.user) return guestNavItems
+
+    switch (session.user.role) {
+      case 'PARENT':
+        return parentNavItems
+      case 'THERAPIST':
+        return therapistNavItems
+      case 'ADMIN':
+        return adminNavItems
+      default:
+        return guestNavItems
+    }
+  }
+
+  const navItems = getNavItems()
+
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/'
+    return pathname.startsWith(href)
+  }
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: '/' })
+  }
+
+  // 로고 링크 URL
+  const getLogoHref = () => {
+    if (!session?.user) return '/'
+    switch (session.user.role) {
+      case 'PARENT':
+        return '/parent/dashboard'
+      case 'THERAPIST':
+        return '/therapist/dashboard'
+      case 'ADMIN':
+        return '/admin/dashboard'
+      default:
+        return '/'
+    }
+  }
 
   return (
     <header
@@ -53,7 +128,7 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center justify-between h-16">
           {/* 로고 섹션 */}
           <div className="flex items-center space-x-4">
-            <Link href="/" className="flex items-center">
+            <Link href={getLogoHref()} className="flex items-center">
               <Image
                 src="/images/logo-text.png"
                 alt="AI Poten"
@@ -66,14 +141,17 @@ const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* 데스크탑 네비게이션 */}
-          <nav className="hidden lg:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-6">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={`
-                  font-medium transition-colors duration-200
-                  ${linkStyles[variant]}
+                  font-medium transition-colors duration-200 px-3 py-2 rounded-md
+                  ${isActive(item.href)
+                    ? 'text-aipoten-green bg-aipoten-accent bg-opacity-10'
+                    : linkStyles[variant]
+                  }
                 `}
               >
                 {item.label}
@@ -83,12 +161,35 @@ const Header: React.FC<HeaderProps> = ({
 
           {/* 사용자 액션 버튼 (데스크탑) */}
           <div className="hidden lg:flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
-              로그인
-            </Button>
-            <Button variant="default" size="sm">
-              회원가입
-            </Button>
+            {status === 'loading' ? (
+              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
+            ) : session?.user ? (
+              <>
+                <span className="text-sm text-gray-700">
+                  {session.user.name}님
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                >
+                  로그아웃
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" size="sm">
+                    로그인
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button variant="default" size="sm">
+                    회원가입
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* 모바일 메뉴 버튼 */}
@@ -119,7 +220,10 @@ const Header: React.FC<HeaderProps> = ({
                 href={item.href}
                 className={`
                   block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200
-                  ${linkStyles[variant]}
+                  ${isActive(item.href)
+                    ? 'text-aipoten-green bg-aipoten-accent bg-opacity-10'
+                    : linkStyles[variant]
+                  }
                   ${variant === 'default' ? 'hover:bg-neutral-light' : 'hover:bg-brand-green/80'}
                 `}
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -128,12 +232,34 @@ const Header: React.FC<HeaderProps> = ({
               </Link>
             ))}
             <div className="border-t border-neutral-light pt-3 mt-3 space-y-2">
-              <Button variant="ghost" size="sm" className="w-full justify-start">
-                로그인
-              </Button>
-              <Button variant="default" size="sm" className="w-full">
-                회원가입
-              </Button>
+              {session?.user ? (
+                <>
+                  <div className="px-3 py-2 text-sm text-gray-700">
+                    {session.user.name}님
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={handleSignOut}
+                  >
+                    로그아웃
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="ghost" size="sm" className="w-full justify-start">
+                      로그인
+                    </Button>
+                  </Link>
+                  <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="default" size="sm" className="w-full">
+                      회원가입
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

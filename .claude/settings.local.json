@@ -8,7 +8,8 @@
       "Bash(set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=C:workaipotenprismadev.db 이 DB 파일을 써줘)",
       "Bash(dir:*)",
       "Bash(copy srcappchildrennewpage.tsx srcappparentchildrennewpage.tsx)",
-      "Bash(copy srcappchildren[id]page.tsx srcappparentchildren[id]page.tsx)"
+      "Bash(copy srcappchildren[id]page.tsx srcappparentchildren[id]page.tsx)",
+      "Bash(npx tsx:*)"
     ],
     "deny": [],
     "ask": []
