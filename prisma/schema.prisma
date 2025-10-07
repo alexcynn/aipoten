@@ -255,17 +255,21 @@ model Board {
 
 // 게시글
 model Post {
-  id        String      @id @default(cuid())
-  title     String
-  content   String
-  category  String?     // 게시글 카테고리 (QUESTION, SHARE, REVIEW 등)
-  views     Int         @default(0)
-  isSticky  Boolean     @default(false) // 공지사항 고정
-  isPublished Boolean   @default(true)
-  boardId   String
-  authorId  String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id          String      @id @default(cuid())
+  title       String
+  content     String
+  summary     String?     // 요약 (뉴스에서 사용)
+  imageUrl    String?     // 썸네일 이미지 (뉴스에서 사용)
+  category    String?     // 게시글 카테고리 (QUESTION, SHARE, REVIEW, ANNOUNCEMENT, EVENT 등)
+  tags        String?     // JSON 배열로 저장 (뉴스 태그)
+  views       Int         @default(0)
+  isSticky    Boolean     @default(false) // 상단 고정
+  isPublished Boolean     @default(true)
+  publishedAt DateTime?   // 발행일 (뉴스에서 사용)
+  boardId     String
+  authorId    String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   // 관계
   board    Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
@@ -294,33 +298,8 @@ model Comment {
   @@map("comments")
 }
 
-// 뉴스 시스템
-model News {
-  id          String    @id @default(cuid())
-  title       String
-  summary     String
-  content     String
-  imageUrl    String?
-  category    NewsCategory
-  tags        String?   // JSON 배열로 저장
-  views       Int       @default(0)
-  isPublished Boolean   @default(false)
-  isFeatured  Boolean   @default(false) // 메인 페이지 노출 여부
-  publishedAt DateTime?
-  authorId    String?   // 작성자 (관리자)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@map("news")
-}
-
-enum NewsCategory {
-  PARENTING_INFO     // 육아정보
-  DEVELOPMENT_GUIDE  // 발달가이드
-  ANNOUNCEMENT      // 공지사항
-  RESEARCH          // 연구소식
-  EVENT             // 이벤트
-}
+// News 모델은 Post 모델로 통합되었습니다.
+// 모든 뉴스는 boardId='news'인 Post로 저장됩니다.
 
 // 놀이영상 (기본 구조만 설정)
 model Video {

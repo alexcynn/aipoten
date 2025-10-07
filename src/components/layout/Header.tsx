@@ -41,8 +41,9 @@ const Header: React.FC<HeaderProps> = ({
     { href: '/', label: '홈' },
     { href: '/assessments', label: '발달체크' },
     { href: '/videos', label: '놀이영상' },
-    { href: '/boards/parenting', label: '육아소통' },
-    { href: '/news', label: '소식' },
+    { href: '/boards/notification', label: '알림장' },
+    { href: '/boards/news', label: '육아정보' },
+    { href: '/boards/community', label: '육아소통' },
   ]
 
   // 부모 메뉴
@@ -51,8 +52,9 @@ const Header: React.FC<HeaderProps> = ({
     { href: '/parent/assessments', label: '발달체크' },
     { href: '/parent/children/new', label: '아이 관리' },
     { href: '/videos', label: '놀이영상' },
-    { href: '/boards/parenting', label: '육아소통' },
-    { href: '/news', label: '소식' },
+    { href: '/boards/notification', label: '알림장' },
+    { href: '/boards/news', label: '육아정보' },
+    { href: '/boards/community', label: '육아소통' },
   ]
 
   // 치료사 메뉴
@@ -62,15 +64,20 @@ const Header: React.FC<HeaderProps> = ({
     { href: '/therapist/matching', label: '매칭 요청' },
     { href: '/therapist/consultations', label: '상담 관리' },
     { href: '/therapist/schedule', label: '일정' },
+    { href: '/boards/notification', label: '알림장' },
+    { href: '/boards/news', label: '육아정보' },
+    { href: '/boards/community', label: '육아소통' },
   ]
 
   // 관리자 메뉴
   const adminNavItems = [
     { href: '/admin/dashboard', label: '대시보드' },
+    { href: '/boards/notification', label: '알림장' },
+    { href: '/boards/news', label: '육아정보' },
+    { href: '/boards/community', label: '육아소통' },
     { href: '/admin/users', label: '사용자' },
     { href: '/admin/therapists', label: '치료사' },
-    { href: '/admin/boards', label: '게시판' },
-    { href: '/admin/news', label: '소식' },
+    { href: '/admin/boards', label: '게시판 관리' },
     { href: '/admin/videos', label: '영상' },
   ]
 

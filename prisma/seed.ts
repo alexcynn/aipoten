@@ -235,7 +235,7 @@ async function main() {
 
 감사합니다.
         `,
-        category: 'ANNOUNCEMENT',
+        category: 'NOTIFICATION',
         isPublished: true,
         isFeatured: true,
         publishedAt: new Date(),
