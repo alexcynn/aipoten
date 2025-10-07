@@ -122,137 +122,166 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {/* Header Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">{config.title}</h1>
-            <p className="mt-2 text-gray-600">{config.description}</p>
-          </div>
+      <main className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Board Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">{config.title}</h1>
+          <p className="mt-1 text-sm text-gray-600">{config.description}</p>
+        </div>
 
-          {/* Action Bar */}
-          <div className="bg-white shadow rounded-lg p-6 mb-8">
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-600">
-                총 {posts.length}개의 게시글
-              </div>
+        {/* Board Controls */}
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-sm text-gray-600">
+            전체 글 <span className="font-semibold">{posts.length}</span>개
+          </div>
+          <button
+            onClick={handleWriteClick}
+            className="px-4 py-2 bg-aipoten-green text-white text-sm font-medium rounded hover:bg-aipoten-navy transition-colors"
+          >
+            글쓰기
+          </button>
+        </div>
+
+        {/* BBS Table */}
+        <div className="bg-white border border-gray-300 rounded">
+          {posts.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-500 mb-4">등록된 게시글이 없습니다.</p>
               <button
                 onClick={handleWriteClick}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy"
+                className="px-4 py-2 bg-aipoten-green text-white text-sm font-medium rounded hover:bg-aipoten-navy transition-colors"
               >
-                글쓰기
+                첫 게시글 작성하기
               </button>
             </div>
-          </div>
-
-          {/* Posts List */}
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            {posts.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-4xl">📝</span>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  아직 게시글이 없습니다
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  첫 번째 게시글을 작성해보세요.
-                </p>
-                <button
-                  onClick={handleWriteClick}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy"
-                >
-                  글쓰기
-                </button>
+          ) : (
+            <>
+              {/* Table Header */}
+              <div className="hidden md:grid md:grid-cols-12 border-b border-gray-300 bg-gray-50 text-sm font-medium text-gray-700">
+                <div className="col-span-1 py-3 px-4 text-center">번호</div>
+                <div className="col-span-6 py-3 px-4">제목</div>
+                <div className="col-span-2 py-3 px-4 text-center">작성자</div>
+                <div className="col-span-2 py-3 px-4 text-center">작성일</div>
+                <div className="col-span-1 py-3 px-4 text-center">조회</div>
               </div>
-            ) : (
-              <ul className="divide-y divide-gray-200">
-                {posts.map((post) => (
-                  <li key={post.id}>
-                    <Link
-                      href={`/boards/${boardId}/${post.id}`}
-                      className="block hover:bg-gray-50 px-4 py-4 sm:px-6"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2">
-                            {post.isSticky && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                                공지
-                              </span>
-                            )}
-                            {post.category && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                {post.category}
-                              </span>
-                            )}
-                            <h3 className="text-sm font-medium text-gray-900 truncate">
-                              {post.title}
-                            </h3>
-                            {post._count.comments > 0 && (
-                              <span className="text-xs text-aipoten-green">
-                                [{post._count.comments}]
-                              </span>
-                            )}
-                          </div>
-                          {post.summary && (
-                            <p className="mt-1 text-sm text-gray-500 line-clamp-1">
-                              {post.summary}
-                            </p>
-                          )}
-                          <div className="mt-2 flex items-center text-xs text-gray-500 space-x-4">
-                            <span>{post.author.name}</span>
-                            <span>조회 {post.views}</span>
-                            <span>
-                              {new Date(post.createdAt).toLocaleDateString('ko-KR')}
+
+              {/* Table Body */}
+              <div className="divide-y divide-gray-200">
+                {posts.map((post, index) => (
+                  <Link
+                    key={post.id}
+                    href={`/boards/${boardId}/${post.id}`}
+                    className="grid grid-cols-1 md:grid-cols-12 py-3 px-4 hover:bg-gray-50 transition-colors"
+                  >
+                    {/* 모바일: 전체 레이아웃 */}
+                    <div className="md:hidden space-y-2">
+                      <div className="flex items-center space-x-2">
+                        {post.isSticky && (
+                          <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded">
+                            공지
+                          </span>
+                        )}
+                        {post.category && (
+                          <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">
+                            {post.category}
+                          </span>
+                        )}
+                        <h3 className="text-sm font-medium text-gray-900 flex-1">
+                          {post.title}
+                          {post._count.comments > 0 && (
+                            <span className="ml-1 text-aipoten-green">
+                              [{post._count.comments}]
                             </span>
-                          </div>
+                          )}
+                        </h3>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{post.author.name}</span>
+                        <div className="flex items-center space-x-3">
+                          <span>{new Date(post.createdAt).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
+                          <span>조회 {post.views}</span>
                         </div>
-                        {post.imageUrl && (
-                          <div className="ml-4 flex-shrink-0">
-                            <img
-                              src={post.imageUrl}
-                              alt={post.title}
-                              className="h-16 w-16 rounded object-cover"
-                            />
-                          </div>
+                      </div>
+                    </div>
+
+                    {/* 데스크탑: 테이블 레이아웃 */}
+                    <div className="hidden md:block md:col-span-1 text-center text-sm text-gray-600">
+                      {post.isSticky ? (
+                        <span className="font-medium text-red-600">공지</span>
+                      ) : (
+                        posts.length - index
+                      )}
+                    </div>
+                    <div className="hidden md:block md:col-span-6">
+                      <div className="flex items-center space-x-2">
+                        {post.category && (
+                          <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">
+                            {post.category}
+                          </span>
+                        )}
+                        <span className="text-sm text-gray-900 font-medium">
+                          {post.title}
+                        </span>
+                        {post._count.comments > 0 && (
+                          <span className="text-sm text-aipoten-green">
+                            [{post._count.comments}]
+                          </span>
                         )}
                       </div>
-                    </Link>
-                  </li>
+                    </div>
+                    <div className="hidden md:block md:col-span-2 text-center text-sm text-gray-600">
+                      {post.author.name}
+                    </div>
+                    <div className="hidden md:block md:col-span-2 text-center text-sm text-gray-500">
+                      {new Date(post.createdAt).toLocaleDateString('ko-KR')}
+                    </div>
+                    <div className="hidden md:block md:col-span-1 text-center text-sm text-gray-500">
+                      {post.views}
+                    </div>
+                  </Link>
                 ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-8 flex justify-center">
-              <nav className="flex items-center space-x-2">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  이전
-                </button>
-                <span className="px-4 py-2 text-sm text-gray-700">
-                  {currentPage} / {totalPages}
-                </span>
-                <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  다음
-                </button>
-              </nav>
-            </div>
+              </div>
+            </>
           )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-6 flex justify-center">
+            <nav className="flex items-center space-x-1">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ‹
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1 border text-sm rounded ${
+                    currentPage === page
+                      ? 'bg-aipoten-green text-white border-aipoten-green'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ›
+              </button>
+            </nav>
+          </div>
+        )}
       </main>
     </div>
   )

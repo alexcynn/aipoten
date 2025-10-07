@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { use, useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -41,9 +41,9 @@ interface Post {
 export default function PostDetailPage({
   params,
 }: {
-  params: { boardId: string; postId: string }
+  params: Promise<{ boardId: string; postId: string }>
 }) {
-  const { boardId, postId } = params
+  const { boardId, postId } = use(params)
   const { data: session } = useSession()
   const router = useRouter()
   const [post, setPost] = useState<Post | null>(null)
