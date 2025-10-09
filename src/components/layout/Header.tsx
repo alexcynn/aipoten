@@ -50,7 +50,6 @@ const Header: React.FC<HeaderProps> = ({
   const parentNavItems = [
     { href: '/parent/dashboard', label: '대시보드' },
     { href: '/parent/assessments', label: '발달체크' },
-    { href: '/parent/children/new', label: '아이 관리' },
     { href: '/videos', label: '놀이영상' },
     { href: '/boards/notification', label: '알림장' },
     { href: '/boards/news', label: '육아정보' },
