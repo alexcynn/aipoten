@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
+import Header from '@/components/layout/Header'
 
 export default function AssessmentsLandingPage() {
   const { data: session, status } = useSession()
@@ -12,42 +12,7 @@ export default function AssessmentsLandingPage() {
 
   return (
     <div className="min-h-screen bg-neutral-light">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/images/logo-text.png"
-                alt="AI Poten"
-                width={160}
-                height={40}
-                className="h-10 w-auto"
-                priority
-              />
-            </Link>
-            <div className="flex items-center space-x-4">
-              {session ? (
-                <>
-                  <Link href="/parent/dashboard" className="text-gray-600 hover:text-aipoten-green">
-                    대시보드
-                  </Link>
-                  <span className="text-gray-700">{session.user?.name}님</span>
-                </>
-              ) : (
-                <>
-                  <Link href="/login" className="text-gray-600 hover:text-aipoten-green">
-                    로그인
-                  </Link>
-                  <Link href="/signup" className="btn-aipoten-primary text-sm">
-                    회원가입
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-12 sm:px-6 lg:px-8">
@@ -82,7 +47,7 @@ export default function AssessmentsLandingPage() {
                   </li>
                   <li className="flex items-start">
                     <span className="text-aipoten-green mr-2">✓</span>
-                    <span className="text-gray-700">대근육 발달 8문항 체크</span>
+                    <span className="text-gray-700">언어 발달 10문항 체크</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-aipoten-green mr-2">✓</span>
@@ -94,7 +59,7 @@ export default function AssessmentsLandingPage() {
                   </li>
                 </ul>
                 <Link
-                  href="/assessments/guest"
+                  href="/assessments/trial"
                   className="block w-full text-center px-6 py-3 bg-aipoten-blue text-white rounded-md hover:bg-aipoten-navy transition-colors font-medium"
                 >
                   체험하기
@@ -121,7 +86,7 @@ export default function AssessmentsLandingPage() {
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-start">
                     <span className="text-aipoten-green mr-2">✓</span>
-                    <span className="text-gray-700">5개 영역 전체 평가 (35문항)</span>
+                    <span className="text-gray-700">6개 영역 전체 평가 (60문항)</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-aipoten-green mr-2">✓</span>
@@ -165,9 +130,9 @@ export default function AssessmentsLandingPage() {
                 <div className="w-16 h-16 bg-aipoten-blue rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">📊</span>
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">5개 발달 영역</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">6개 발달 영역</h4>
                 <p className="text-sm text-gray-600">
-                  대근육, 소근육, 언어, 인지, 사회성 영역을 체계적으로 평가합니다.
+                  대근육, 소근육, 언어, 인지, 사회성, 정서 영역을 체계적으로 평가합니다.
                 </p>
               </div>
               <div className="text-center">

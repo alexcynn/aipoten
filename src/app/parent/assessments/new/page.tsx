@@ -39,6 +39,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   LANGUAGE: '언어',
   COGNITIVE: '인지',
   SOCIAL: '사회성',
+  EMOTIONAL: '정서',
 }
 
 const FOUR_POINT_OPTIONS = [

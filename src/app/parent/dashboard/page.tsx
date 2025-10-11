@@ -219,7 +219,7 @@ export default function ParentDashboardPage() {
                       </div>
                       <Link
                         href="/parent/children/new"
-                        className="px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors whitespace-nowrap"
+                        className="px-4 py-2 bg-brand-accent text-brand-navy font-semibold rounded-md hover:bg-brand-green hover:text-white transition-colors whitespace-nowrap shadow-md"
                       >
                         + 아이 등록
                       </Link>
@@ -377,17 +377,34 @@ export default function ParentDashboardPage() {
                 {/* 발달체크 탭 */}
                 {activeTab === 'assessments' && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">발달체크 이력</h3>
-                    <div className="space-y-4">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900">발달체크</h3>
                       <Link
-                        href="/parent/assessments/new"
-                        className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                        href={`/parent/assessments/new?childId=${selectedChildId}`}
+                        className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors font-medium"
                       >
-                        + 새 발달체크 시작하기
+                        + 새 발달체크 시작
                       </Link>
-                      <div className="text-sm text-gray-500">
-                        발달체크 이력을 확인하고 새로운 평가를 시작할 수 있습니다.
-                      </div>
+                    </div>
+                    <div className="bg-blue-50 rounded-lg p-6 mb-6">
+                      <h4 className="font-semibold text-blue-900 mb-2">
+                        전체 6개 영역 발달 평가
+                      </h4>
+                      <ul className="text-sm text-blue-800 space-y-1 mb-4">
+                        <li>• 대근육, 소근육, 언어, 인지, 사회성, 정서 영역</li>
+                        <li>• 60문항 체계적 평가 (영역당 10문항)</li>
+                        <li>• 상세한 발달 리포트 제공</li>
+                        <li>• AI 기반 맞춤 놀이영상 추천</li>
+                      </ul>
+                      <Link
+                        href="/parent/assessments"
+                        className="text-blue-900 hover:underline font-medium text-sm"
+                      >
+                        이전 발달체크 기록 보기 →
+                      </Link>
+                    </div>
+                    <div className="text-center py-8 text-gray-500">
+                      선택된 아이의 최근 발달체크 결과가 여기에 표시됩니다.
                     </div>
                   </div>
                 )}
