@@ -9,7 +9,8 @@
       "Bash(dir:*)",
       "Bash(copy srcappchildrennewpage.tsx srcappparentchildrennewpage.tsx)",
       "Bash(copy srcappchildren[id]page.tsx srcappparentchildren[id]page.tsx)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

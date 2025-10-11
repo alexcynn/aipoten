@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth-config'
 
 // 개인화된 영상 추천
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(
@@ -74,54 +75,56 @@ export async function GET(request: NextRequest) {
     // 최근 발달 체크 결과가 있는 경우 맞춤 추천
     if (child.assessments.length > 0) {
       const latestAssessment = child.assessments[0]
-      const weakAreas: string[] = []
+      const weakCategories: string[] = []
+      const weakLevels: string[] = []
 
-      // 점수가 낮은 영역 찾기 (60점 미만)
+      // 점수가 낮은 영역과 레벨 찾기
       latestAssessment.results.forEach(result => {
+        weakCategories.push(result.category)
         if (result.score < 60) {
-          switch (result.category) {
-            case 'GROSS_MOTOR':
-              weakAreas.push('대근육')
-              break
-            case 'FINE_MOTOR':
-              weakAreas.push('소근육')
-              break
-            case 'COGNITIVE':
-              weakAreas.push('인지')
-              break
-            case 'LANGUAGE':
-              weakAreas.push('언어')
-              break
-            case 'SOCIAL':
-              weakAreas.push('사회성')
-              break
-            case 'EMOTIONAL':
-              weakAreas.push('정서')
-              break
+          // NEEDS_ATTENTION, CAUTION 레벨
+          if (result.level === 'NEEDS_ATTENTION' || result.level === 'CAUTION') {
+            weakLevels.push(result.level)
           }
         }
       })
 
-      // 약한 영역에 맞는 영상 우선 추천
-      if (weakAreas.length > 0) {
-        const targetedVideos = await prisma.video.findMany({
+      // 약한 영역에 맞는 영상 우선 추천 (developmentCategories 필드 활용)
+      if (weakCategories.length > 0) {
+        const allVideos = await prisma.video.findMany({
           where: {
             isPublished: true,
             targetAgeMin: { lte: ageInMonths },
-            targetAgeMax: { gte: ageInMonths },
-            OR: weakAreas.map(area => ({
-              OR: [
-                { title: { contains: area } },
-                { description: { contains: area } }
-              ]
-            }))
-          },
-          orderBy: [
-            { priority: 'desc' },
-            { viewCount: 'desc' }
-          ],
-          take: Math.ceil(limit * 0.7) // 70%는 맞춤 추천
+            targetAgeMax: { gte: ageInMonths }
+          }
         })
+
+        // developmentCategories와 recommendedForLevels를 파싱하여 매칭
+        const targetedVideos = allVideos
+          .filter(video => {
+            const categories = video.developmentCategories
+              ? JSON.parse(video.developmentCategories)
+              : []
+            const levels = video.recommendedForLevels
+              ? JSON.parse(video.recommendedForLevels)
+              : []
+
+            // 약한 영역과 매칭되거나, 추천 레벨과 매칭되는 영상
+            const hasMatchingCategory = categories.some((cat: string) =>
+              weakCategories.includes(cat)
+            )
+            const hasMatchingLevel = levels.length === 0 || levels.some((level: string) =>
+              weakLevels.includes(level)
+            )
+
+            return hasMatchingCategory || hasMatchingLevel
+          })
+          .sort((a, b) => {
+            // priority 높은 순, viewCount 높은 순
+            if (a.priority !== b.priority) return b.priority - a.priority
+            return b.viewCount - a.viewCount
+          })
+          .slice(0, Math.ceil(limit * 0.7))
 
         // 나머지는 일반 추천으로 채우기
         const remainingCount = limit - targetedVideos.length
@@ -145,9 +148,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 추천 이유 추가
+    // 추천 이유 추가 및 JSON 파싱
     const videosWithReasons = recommendedVideos.map(video => {
       let reason = `${child.name}의 연령(${ageInMonths}개월)에 적합한 영상입니다.`
+
+      // JSON 필드 파싱
+      const developmentCategories = video.developmentCategories
+        ? JSON.parse(video.developmentCategories)
+        : []
+      const recommendedForLevels = video.recommendedForLevels
+        ? JSON.parse(video.recommendedForLevels)
+        : []
 
       if (child.assessments.length > 0) {
         const latestAssessment = child.assessments[0]
@@ -156,7 +167,7 @@ export async function GET(request: NextRequest) {
           .map(r => r.category)
 
         if (weakAreas.length > 0) {
-          const categories = {
+          const categories: Record<string, string> = {
             'GROSS_MOTOR': '대근육',
             'FINE_MOTOR': '소근육',
             'COGNITIVE': '인지',
@@ -165,18 +176,22 @@ export async function GET(request: NextRequest) {
             'EMOTIONAL': '정서'
           }
 
-          const weakAreaNames = weakAreas.map(area => categories[area as keyof typeof categories])
+          // developmentCategories에서 약한 영역과 매칭되는 것 찾기
+          const matchingCategories = developmentCategories.filter((cat: string) =>
+            weakAreas.includes(cat)
+          )
 
-          if (weakAreaNames.some(area =>
-            video.title.includes(area) || video.description.includes(area)
-          )) {
-            reason = `${weakAreaNames.join(', ')} 발달을 위해 추천하는 영상입니다.`
+          if (matchingCategories.length > 0) {
+            const categoryNames = matchingCategories.map((cat: string) => categories[cat])
+            reason = `${categoryNames.join(', ')} 발달을 위해 추천하는 영상입니다.`
           }
         }
       }
 
       return {
         ...video,
+        developmentCategories,
+        recommendedForLevels,
         recommendationReason: reason
       }
     })

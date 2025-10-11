@@ -130,6 +130,8 @@ export async function POST(request: NextRequest) {
       targetAgeMin,
       targetAgeMax,
       difficulty,
+      developmentCategories,
+      recommendedForLevels,
       priority = 5,
       isPublished = false
     } = await request.json()
@@ -152,6 +154,8 @@ export async function POST(request: NextRequest) {
         targetAgeMin,
         targetAgeMax,
         difficulty,
+        developmentCategories: developmentCategories ? JSON.stringify(developmentCategories) : null,
+        recommendedForLevels: recommendedForLevels ? JSON.stringify(recommendedForLevels) : null,
         priority,
         isPublished
       }

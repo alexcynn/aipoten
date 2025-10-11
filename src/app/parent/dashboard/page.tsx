@@ -47,6 +47,7 @@ export default function ParentDashboardPage() {
   const [selectedChildId, setSelectedChildId] = useState<string>('')
   const [latestAssessment, setLatestAssessment] = useState<Assessment | null>(null)
   const [assessments, setAssessments] = useState<Assessment[]>([])
+  const [recommendedVideos, setRecommendedVideos] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -132,7 +133,20 @@ export default function ParentDashboardPage() {
       }
     }
 
+    const fetchRecommendedVideos = async () => {
+      try {
+        const response = await fetch(`/api/videos/recommendations?childId=${selectedChildId}&limit=5`)
+        if (response.ok) {
+          const data = await response.json()
+          setRecommendedVideos(data.videos || [])
+        }
+      } catch (error) {
+        console.error('추천 영상 조회 오류:', error)
+      }
+    }
+
     fetchAssessments()
+    fetchRecommendedVideos()
   }, [selectedChildId])
 
   // 아이 선택 변경 핸들러
@@ -481,18 +495,99 @@ export default function ParentDashboardPage() {
                 {/* 추천영상 탭 */}
                 {activeTab === 'videos' && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">추천 놀이영상</h3>
-                    <div className="space-y-4">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {children.find(c => c.id === selectedChildId)?.name}님을 위한 추천 영상
+                      </h3>
                       <Link
-                        href="/videos"
-                        className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                        href={`/videos?childId=${selectedChildId}`}
+                        className="text-sm text-aipoten-green hover:text-aipoten-navy"
                       >
-                        추천영상 보러가기
+                        전체 보기 →
                       </Link>
-                      <div className="text-sm text-gray-500">
-                        아이의 발달 단계에 맞는 놀이영상을 확인해보세요.
-                      </div>
                     </div>
+
+                    {recommendedVideos.length === 0 ? (
+                      <div className="text-center py-12 bg-gray-50 rounded-lg">
+                        <div className="text-4xl mb-4">📹</div>
+                        <p className="text-gray-600 mb-4">아직 추천 영상이 없습니다.</p>
+                        <Link
+                          href="/videos"
+                          className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                        >
+                          전체 영상 보러가기
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {recommendedVideos.map((video) => (
+                          <div key={video.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                            {/* Thumbnail - 클릭하면 상세 페이지로 */}
+                            <Link href={`/videos/${video.id}`}>
+                              <div className="aspect-video bg-gray-200 relative cursor-pointer group">
+                                {video.thumbnailUrl ? (
+                                  <img
+                                    src={video.thumbnailUrl}
+                                    alt={video.title}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <span className="text-4xl">📹</span>
+                                  </div>
+                                )}
+                                {/* 재생 아이콘 오버레이 */}
+                                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all">
+                                  <div className="w-12 h-12 bg-white bg-opacity-90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span className="text-xl ml-1">▶️</span>
+                                  </div>
+                                </div>
+                                {video.duration && (
+                                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                                    {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}
+                                  </div>
+                                )}
+                              </div>
+                            </Link>
+
+                            {/* Content */}
+                            <div className="p-4">
+                              <Link href={`/videos/${video.id}`}>
+                                <h4 className="font-medium text-gray-900 mb-2 line-clamp-2 hover:text-aipoten-green cursor-pointer">
+                                  {video.title}
+                                </h4>
+                              </Link>
+                              {video.recommendationReason && (
+                                <p className="text-xs text-blue-600 mb-2">
+                                  💡 {video.recommendationReason}
+                                </p>
+                              )}
+                              <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                                {video.description}
+                              </p>
+                              <div className="flex gap-2 mb-3">
+                                {video.developmentCategories && video.developmentCategories.slice(0, 2).map((cat: string) => (
+                                  <span
+                                    key={cat}
+                                    className="text-xs px-2 py-1 rounded-full"
+                                    style={{ backgroundColor: '#E8F5E9', color: '#386646' }}
+                                  >
+                                    {CATEGORY_LABELS[cat] || cat}
+                                  </span>
+                                ))}
+                              </div>
+                              <Link
+                                href={`/videos/${video.id}`}
+                                className="inline-block w-full text-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white hover:opacity-90"
+                                style={{ backgroundColor: '#F78C6B' }}
+                              >
+                                시청하기
+                              </Link>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 

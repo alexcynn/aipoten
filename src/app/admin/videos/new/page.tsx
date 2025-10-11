@@ -23,6 +23,8 @@ export default function NewVideoPage() {
     priority: '5',
     isPublished: false
   })
+  const [developmentCategories, setDevelopmentCategories] = useState<string[]>([])
+  const [recommendedForLevels, setRecommendedForLevels] = useState<string[]>([])
 
   const difficulties = [
     { value: 'EASY', label: '쉬움' },
@@ -34,6 +36,22 @@ export default function NewVideoPage() {
     { value: 'YOUTUBE', label: 'YouTube' },
     { value: 'VIMEO', label: 'Vimeo' },
     { value: 'OTHER', label: '기타' }
+  ]
+
+  const developmentCategoryOptions = [
+    { value: 'GROSS_MOTOR', label: '대근육' },
+    { value: 'FINE_MOTOR', label: '소근육' },
+    { value: 'COGNITIVE', label: '인지' },
+    { value: 'LANGUAGE', label: '언어' },
+    { value: 'SOCIAL', label: '사회성' },
+    { value: 'EMOTIONAL', label: '정서' }
+  ]
+
+  const developmentLevelOptions = [
+    { value: 'EXCELLENT', label: '우수' },
+    { value: 'GOOD', label: '양호' },
+    { value: 'CAUTION', label: '주의' },
+    { value: 'NEEDS_ATTENTION', label: '관심' }
   ]
 
   if (status === 'loading') {
@@ -78,7 +96,9 @@ export default function NewVideoPage() {
           targetAgeMin: parseInt(formData.targetAgeMin),
           targetAgeMax: parseInt(formData.targetAgeMax),
           priority: parseInt(formData.priority),
-          duration: formData.duration ? parseInt(formData.duration) : null
+          duration: formData.duration ? parseInt(formData.duration) : null,
+          developmentCategories,
+          recommendedForLevels
         }),
       })
 
@@ -309,6 +329,68 @@ export default function NewVideoPage() {
                     max="10"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-aipoten-green focus:border-aipoten-green"
                   />
+                </div>
+              </div>
+
+              {/* Development Categories */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">발달 영역</h3>
+                <p className="text-sm text-gray-500 mb-3">
+                  이 영상이 도움이 되는 발달 영역을 선택하세요 (다중 선택 가능)
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {developmentCategoryOptions.map((option) => (
+                    <div key={option.value} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`category-${option.value}`}
+                        value={option.value}
+                        checked={developmentCategories.includes(option.value)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setDevelopmentCategories([...developmentCategories, option.value])
+                          } else {
+                            setDevelopmentCategories(developmentCategories.filter(c => c !== option.value))
+                          }
+                        }}
+                        className="h-4 w-4 text-aipoten-green focus:ring-aipoten-green border-gray-300 rounded"
+                      />
+                      <label htmlFor={`category-${option.value}`} className="ml-2 block text-sm text-gray-900">
+                        {option.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Recommended For Levels */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">추천 대상 레벨</h3>
+                <p className="text-sm text-gray-500 mb-3">
+                  이 영상을 추천할 발달 레벨을 선택하세요 (선택 안 하면 모든 레벨에 추천)
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {developmentLevelOptions.map((option) => (
+                    <div key={option.value} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`level-${option.value}`}
+                        value={option.value}
+                        checked={recommendedForLevels.includes(option.value)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setRecommendedForLevels([...recommendedForLevels, option.value])
+                          } else {
+                            setRecommendedForLevels(recommendedForLevels.filter(l => l !== option.value))
+                          }
+                        }}
+                        className="h-4 w-4 text-aipoten-green focus:ring-aipoten-green border-gray-300 rounded"
+                      />
+                      <label htmlFor={`level-${option.value}`} className="ml-2 block text-sm text-gray-900">
+                        {option.label}
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </div>
 

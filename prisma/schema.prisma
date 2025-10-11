@@ -23,11 +23,12 @@ model User {
   updatedAt DateTime @updatedAt
 
   // 관계
-  posts     Post[]
-  comments  Comment[]
-  children  Child[]
-  accounts  Account[]
-  sessions  Session[]
+  posts            Post[]
+  comments         Comment[]
+  videoComments    VideoComment[]
+  children         Child[]
+  accounts         Account[]
+  sessions         Session[]
   therapistProfile TherapistProfile?
   matchingRequests MatchingRequest[]
   consultations    Consultation[]
@@ -303,25 +304,45 @@ model Comment {
 
 // 놀이영상 (기본 구조만 설정)
 model Video {
-  id             String   @id @default(cuid())
-  title          String
-  description    String
-  videoUrl       String   // 외부 링크
-  videoPlatform  VideoPlatform
-  thumbnailUrl   String?
-  duration       Int?     // seconds
-  targetAgeMin   Int      // 대상 연령 최소 (개월)
-  targetAgeMax   Int      // 대상 연령 최대 (개월)
-  category       String?  // 카테고리 추가
-  difficulty     Difficulty
-  viewCount      Int      @default(0)
-  bookmarkCount  Int      @default(0)
-  isPublished    Boolean  @default(false)
-  priority       Int      @default(5) // 추천 우선순위 1-10
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                    String         @id @default(cuid())
+  title                 String
+  description           String
+  videoUrl              String         // 외부 링크
+  videoPlatform         VideoPlatform
+  thumbnailUrl          String?
+  duration              Int?           // seconds
+  targetAgeMin          Int            // 대상 연령 최소 (개월)
+  targetAgeMax          Int            // 대상 연령 최대 (개월)
+  category              String?        // 카테고리 (레거시)
+  difficulty            Difficulty
+  developmentCategories String?        // JSON 배열: ["GROSS_MOTOR", "FINE_MOTOR", ...]
+  recommendedForLevels  String?        // JSON 배열: ["NEEDS_ATTENTION", "CAUTION", ...]
+  viewCount             Int            @default(0)
+  bookmarkCount         Int            @default(0)
+  isPublished           Boolean        @default(false)
+  priority              Int            @default(5) // 추천 우선순위 1-10
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  // 관계
+  comments VideoComment[]
 
   @@map("videos")
+}
+
+model VideoComment {
+  id        String   @id @default(cuid())
+  videoId   String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 관계
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("video_comments")
 }
 
 enum VideoPlatform {

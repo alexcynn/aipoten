@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth-config'
 
 // 영상 상세 조회
 export async function GET(
@@ -27,7 +28,18 @@ export async function GET(
       )
     }
 
-    return NextResponse.json({ video })
+    // JSON 문자열을 배열로 파싱
+    const parsedVideo = {
+      ...video,
+      developmentCategories: video.developmentCategories
+        ? JSON.parse(video.developmentCategories)
+        : [],
+      recommendedForLevels: video.recommendedForLevels
+        ? JSON.parse(video.recommendedForLevels)
+        : []
+    }
+
+    return NextResponse.json({ video: parsedVideo })
   } catch (error) {
     console.error('영상 조회 오류:', error)
     return NextResponse.json(
@@ -43,7 +55,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(
@@ -74,7 +86,10 @@ export async function PATCH(
       duration,
       targetAgeMin,
       targetAgeMax,
+      category,
       difficulty,
+      developmentCategories,
+      recommendedForLevels,
       priority,
       isPublished
     } = await request.json()
@@ -89,9 +104,16 @@ export async function PATCH(
     if (duration !== undefined) updateData.duration = duration
     if (targetAgeMin !== undefined) updateData.targetAgeMin = targetAgeMin
     if (targetAgeMax !== undefined) updateData.targetAgeMax = targetAgeMax
+    if (category !== undefined) updateData.category = category
     if (difficulty) updateData.difficulty = difficulty
     if (priority !== undefined) updateData.priority = priority
     if (isPublished !== undefined) updateData.isPublished = isPublished
+    if (developmentCategories !== undefined) {
+      updateData.developmentCategories = JSON.stringify(developmentCategories)
+    }
+    if (recommendedForLevels !== undefined) {
+      updateData.recommendedForLevels = JSON.stringify(recommendedForLevels)
+    }
 
     const video = await prisma.video.update({
       where: { id },
@@ -117,7 +139,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(

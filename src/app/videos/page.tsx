@@ -60,7 +60,8 @@ export default function VideosPage() {
         const videosRes = await fetch('/api/videos')
         if (videosRes.ok) {
           const videosData = await videosRes.json()
-          setVideos(videosData)
+          const videosArray = Array.isArray(videosData) ? videosData : (videosData.videos || [])
+          setVideos(videosArray)
         }
 
         // 로그인한 경우만 children 정보 가져오기
@@ -158,11 +159,21 @@ export default function VideosPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           {/* Header Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">추천 영상</h1>
-            <p className="mt-2 text-gray-600">
-              우리 아이의 발달 단계에 맞는 교육 영상을 찾아보세요.
-            </p>
+          <div className="mb-8 flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">추천 영상</h1>
+              <p className="mt-2 text-gray-600">
+                우리 아이의 발달 단계에 맞는 교육 영상을 찾아보세요.
+              </p>
+            </div>
+            {session?.user?.role === 'ADMIN' && (
+              <Link
+                href="/admin/videos/new"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy"
+              >
+                영상 추가
+              </Link>
+            )}
           </div>
 
           {/* Filters */}
@@ -253,23 +264,31 @@ export default function VideosPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredVideos.map((video) => (
                 <div key={video.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-                  {/* Thumbnail */}
-                  <div className="aspect-video bg-gray-200 rounded-t-lg relative overflow-hidden">
-                    {video.thumbnailUrl ? (
-                      <img
-                        src={video.thumbnailUrl}
-                        alt={video.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-4xl text-gray-400">📹</span>
+                  {/* Thumbnail - 클릭하면 상세 페이지로 */}
+                  <Link href={`/videos/${video.id}`}>
+                    <div className="aspect-video bg-gray-200 rounded-t-lg relative overflow-hidden cursor-pointer group">
+                      {video.thumbnailUrl ? (
+                        <img
+                          src={video.thumbnailUrl}
+                          alt={video.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-4xl text-gray-400">📹</span>
+                        </div>
+                      )}
+                      {/* 재생 아이콘 오버레이 */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all">
+                        <div className="w-16 h-16 bg-white bg-opacity-90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-2xl ml-1">▶️</span>
+                        </div>
                       </div>
-                    )}
-                    <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
-                      {formatDuration(video.duration)}
+                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                        {formatDuration(video.duration)}
+                      </div>
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Content */}
                   <div className="p-4">
@@ -282,26 +301,61 @@ export default function VideosPage() {
                       </span>
                     </div>
 
-                    <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">
-                      {video.title}
-                    </h3>
+                    <Link href={`/videos/${video.id}`}>
+                      <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 hover:text-aipoten-green cursor-pointer">
+                        {video.title}
+                      </h3>
+                    </Link>
 
                     <p className="text-sm text-gray-600 mb-4 line-clamp-3">
                       {video.description}
                     </p>
 
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center gap-2">
                       <span className="text-xs text-gray-500">
                         {new Date(video.createdAt).toLocaleDateString('ko-KR')}
                       </span>
-                      <a
-                        href={video.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-aipoten-green hover:bg-aipoten-navy"
-                      >
-                        시청하기
-                      </a>
+                      <div className="flex gap-2">
+                        {session?.user?.role === 'ADMIN' && (
+                          <>
+                            <Link
+                              href={`/admin/videos/${video.id}`}
+                              className="inline-flex items-center px-2 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                            >
+                              수정
+                            </Link>
+                            <button
+                              onClick={async () => {
+                                if (confirm('정말 삭제하시겠습니까?')) {
+                                  try {
+                                    const response = await fetch(`/api/videos/${video.id}`, {
+                                      method: 'DELETE'
+                                    })
+                                    if (response.ok) {
+                                      setVideos(videos.filter(v => v.id !== video.id))
+                                    } else {
+                                      alert('삭제 중 오류가 발생했습니다.')
+                                    }
+                                  } catch (error) {
+                                    alert('삭제 중 오류가 발생했습니다.')
+                                  }
+                                }
+                              }}
+                              className="inline-flex items-center px-2 py-1 border border-red-300 text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50"
+                            >
+                              삭제
+                            </button>
+                          </>
+                        )}
+                        <a
+                          href={video.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-aipoten-green hover:bg-aipoten-navy"
+                        >
+                          시청
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
