@@ -7,6 +7,7 @@ import Link from 'next/link'
 import ProfilePictureUpload from '@/components/ProfilePictureUpload'
 import Header from '@/components/layout/Header'
 import ChildSelector from '@/components/ChildSelector'
+import ChildEditModal from '@/components/ChildEditModal'
 
 interface Child {
   id: string
@@ -32,6 +33,8 @@ export default function ParentDashboardPage() {
   const [latestAssessment, setLatestAssessment] = useState<Assessment | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<'assessments' | 'videos' | 'therapists' | 'sessions'>('assessments')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -121,6 +124,13 @@ export default function ParentDashboardPage() {
     localStorage.setItem('aipoten_selected_child_id', childId)
   }
 
+  // 아이 정보 업데이트 핸들러
+  const handleChildUpdate = (updatedChild: Child) => {
+    setChildren(children.map(child =>
+      child.id === updatedChild.id ? updatedChild : child
+    ))
+  }
+
   // 나이 계산
   const calculateAge = (birthDate: string) => {
     const birth = new Date(birthDate)
@@ -197,14 +207,22 @@ export default function ParentDashboardPage() {
                     아이포텐에서 우리 아이의 발달을 체크하고 관리해보세요.
                   </p>
 
-                  {/* ChildSelector - 다자녀인 경우만 표시 */}
-                  {children.length > 1 && (
-                    <div className="mt-4">
-                      <ChildSelector
-                        children={children}
-                        selectedChildId={selectedChildId}
-                        onSelectChild={handleSelectChild}
-                      />
+                  {/* ChildSelector와 등록 버튼 */}
+                  {children.length > 0 && (
+                    <div className="mt-4 flex items-center gap-3">
+                      <div className="flex-1">
+                        <ChildSelector
+                          children={children}
+                          selectedChildId={selectedChildId}
+                          onSelectChild={handleSelectChild}
+                        />
+                      </div>
+                      <Link
+                        href="/parent/children/new"
+                        className="px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors whitespace-nowrap"
+                      >
+                        + 아이 등록
+                      </Link>
                     </div>
                   )}
                 </div>
@@ -224,9 +242,17 @@ export default function ParentDashboardPage() {
           {selectedChildId && children.length > 0 && (
             <div className="bg-white overflow-hidden shadow rounded-lg mb-6">
               <div className="px-4 py-5 sm:p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  {children.find(c => c.id === selectedChildId)?.name}의 정보
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    {children.find(c => c.id === selectedChildId)?.name}의 정보
+                  </h2>
+                  <button
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="px-3 py-1 text-sm text-aipoten-green border border-aipoten-green rounded-md hover:bg-aipoten-green hover:text-white transition-colors"
+                  >
+                    편집
+                  </button>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* 기본 정보 */}
@@ -297,171 +323,144 @@ export default function ParentDashboardPage() {
             </div>
           )}
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <Link
-              href="/parent/children/new"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-aipoten-blue rounded flex items-center justify-center">
-                    <span className="text-white font-bold">+</span>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">아이 등록</h3>
-                  <p className="text-sm text-gray-500">새로운 아이를 등록하세요</p>
-                </div>
+          {/* Tabs Navigation */}
+          {selectedChildId && children.length > 0 && (
+            <div className="bg-white shadow rounded-lg mb-6">
+              {/* Tab Headers */}
+              <div className="border-b border-gray-200">
+                <nav className="flex -mb-px">
+                  <button
+                    onClick={() => setActiveTab('assessments')}
+                    className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === 'assessments'
+                        ? 'border-aipoten-green text-aipoten-green'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    발달체크
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('videos')}
+                    className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === 'videos'
+                        ? 'border-aipoten-green text-aipoten-green'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    추천영상
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('therapists')}
+                    className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === 'therapists'
+                        ? 'border-aipoten-green text-aipoten-green'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    치료사 찾기
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('sessions')}
+                    className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === 'sessions'
+                        ? 'border-aipoten-green text-aipoten-green'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    세션 일정
+                  </button>
+                </nav>
               </div>
-            </Link>
 
-            <Link
-              href="/parent/assessments"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-aipoten-green rounded flex items-center justify-center">
-                    <span className="text-white">📊</span>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">발달체크</h3>
-                  <p className="text-sm text-gray-500">발달 상태를 확인하세요</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              href="/videos"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-aipoten-red rounded flex items-center justify-center">
-                    <span className="text-white">📹</span>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">추천영상</h3>
-                  <p className="text-sm text-gray-500">맞춤 콘텐츠를 확인하세요</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              href="/parent/therapists"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-purple-500 rounded flex items-center justify-center">
-                    <span className="text-white">👨‍⚕️</span>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">치료사 찾기</h3>
-                  <p className="text-sm text-gray-500">전문 치료사를 찾아보세요</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              href="/parent/sessions/schedule"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-blue-500 rounded flex items-center justify-center">
-                    <span className="text-white">📅</span>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">세션 일정</h3>
-                  <p className="text-sm text-gray-500">치료 일정을 확인하세요</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              href="/boards/parenting"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-aipoten-orange rounded flex items-center justify-center">
-                    <span className="text-white">💬</span>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">육아소통</h3>
-                  <p className="text-sm text-gray-500">다른 부모님과 소통하세요</p>
-                </div>
-              </div>
-            </Link>
-          </div>
-
-          {/* Children List */}
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <div className="px-4 py-5 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
-                등록된 아이들
-              </h3>
-              <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                현재 등록된 아이들의 목록입니다.
-              </p>
-            </div>
-
-            {children.length === 0 ? (
-              <div className="px-4 py-8 text-center">
-                <p className="text-gray-500 mb-4">아직 등록된 아이가 없습니다.</p>
-                <Link
-                  href="/parent/children/new"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy"
-                >
-                  첫 번째 아이 등록하기
-                </Link>
-              </div>
-            ) : (
-              <ul className="divide-y divide-gray-200">
-                {children.map((child) => (
-                  <li key={child.id}>
-                    <Link
-                      href={`/parent/children/${child.id}`}
-                      className="block hover:bg-gray-50 px-4 py-4 sm:px-6"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0">
-                            <div className="w-10 h-10 bg-aipoten-accent rounded-full flex items-center justify-center">
-                              <span className="text-white font-semibold">
-                                {child.name.charAt(0)}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {child.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {child.gender === 'MALE' ? '남아' : '여아'} •
-                              생년월일: {new Date(child.birthDate).toLocaleDateString('ko-KR')}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-400">
-                          등록일: {new Date(child.createdAt).toLocaleDateString('ko-KR')}
-                        </div>
+              {/* Tab Content */}
+              <div className="p-6">
+                {/* 발달체크 탭 */}
+                {activeTab === 'assessments' && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">발달체크 이력</h3>
+                    <div className="space-y-4">
+                      <Link
+                        href="/parent/assessments/new"
+                        className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                      >
+                        + 새 발달체크 시작하기
+                      </Link>
+                      <div className="text-sm text-gray-500">
+                        발달체크 이력을 확인하고 새로운 평가를 시작할 수 있습니다.
                       </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 추천영상 탭 */}
+                {activeTab === 'videos' && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">추천 놀이영상</h3>
+                    <div className="space-y-4">
+                      <Link
+                        href="/videos"
+                        className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                      >
+                        추천영상 보러가기
+                      </Link>
+                      <div className="text-sm text-gray-500">
+                        아이의 발달 단계에 맞는 놀이영상을 확인해보세요.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 치료사 찾기 탭 */}
+                {activeTab === 'therapists' && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">전문 치료사 찾기</h3>
+                    <div className="space-y-4">
+                      <Link
+                        href="/parent/therapists"
+                        className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                      >
+                        치료사 검색하기
+                      </Link>
+                      <div className="text-sm text-gray-500">
+                        우리 아이에게 맞는 전문 치료사를 찾아보세요.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 세션 일정 탭 */}
+                {activeTab === 'sessions' && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">치료 세션 일정</h3>
+                    <div className="space-y-4">
+                      <Link
+                        href="/parent/sessions/schedule"
+                        className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                      >
+                        일정 확인하기
+                      </Link>
+                      <div className="text-sm text-gray-500">
+                        예약된 치료 세션 일정을 확인하고 관리할 수 있습니다.
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
         </div>
       </main>
+
+      {/* Child Edit Modal */}
+      {selectedChildId && children.find(c => c.id === selectedChildId) && (
+        <ChildEditModal
+          child={children.find(c => c.id === selectedChildId)!}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleChildUpdate}
+        />
+      )}
     </div>
   )
 }
