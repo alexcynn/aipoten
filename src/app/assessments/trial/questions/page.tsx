@@ -139,7 +139,7 @@ export default function TrialQuestionsPage() {
             {/* Progress */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-brand-navy">
                   언어 발달 체크
                 </span>
                 <span className="text-sm text-gray-600">
@@ -148,7 +148,7 @@ export default function TrialQuestionsPage() {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2.5">
                 <div
-                  className="bg-aipoten-green h-2.5 rounded-full transition-all duration-300"
+                  className="bg-brand-accent h-2.5 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
@@ -156,8 +156,8 @@ export default function TrialQuestionsPage() {
 
             {/* Question */}
             <div className="mb-8">
-              <div className="bg-gray-50 rounded-lg p-6 mb-6">
-                <h2 className="text-xl font-medium text-gray-900 mb-2">
+              <div className="bg-neutral-light rounded-lg p-6 mb-6 border-l-4 border-brand-accent">
+                <h2 className="text-xl font-medium text-brand-navy mb-2">
                   질문 {currentQuestionIndex + 1}
                 </h2>
                 <p className="text-lg text-gray-800">
@@ -171,12 +171,12 @@ export default function TrialQuestionsPage() {
                   <button
                     key={option.value}
                     onClick={() => handleAnswer(option.value, option.score)}
-                    className="w-full p-4 border-2 border-gray-300 rounded-lg hover:border-aipoten-green hover:bg-aipoten-green hover:bg-opacity-5 transition-colors text-left group"
+                    className="w-full p-4 border-2 border-gray-300 rounded-lg hover:border-brand-accent hover:bg-brand-accent hover:bg-opacity-10 transition-colors text-left group"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <span className="text-2xl mr-3">{option.emoji}</span>
-                        <span className="text-gray-900 font-medium group-hover:text-aipoten-green">
+                        <span className="text-gray-900 font-medium group-hover:text-brand-green">
                           {option.value}
                         </span>
                       </div>

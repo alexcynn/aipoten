@@ -89,8 +89,16 @@ export default function TrialResultPage() {
         {/* Result Card */}
         <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
           {/* Header Banner */}
-          <div className="bg-gradient-to-r from-aipoten-green to-aipoten-accent p-8 text-center">
-            <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-white text-aipoten-green mb-4">
+          <div
+            style={{
+              background: 'linear-gradient(to right, #386646, #98C15E)'
+            }}
+            className="p-8 text-center"
+          >
+            <span
+              style={{ color: '#386646' }}
+              className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-white mb-4"
+            >
               체험판 결과
             </span>
             <h1 className="text-3xl font-bold text-white mb-2">
@@ -154,28 +162,37 @@ export default function TrialResultPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-aipoten-green rounded-full flex items-center justify-center mx-auto mb-3">
+              <div
+                style={{ backgroundColor: '#98C15E' }}
+                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
+              >
                 <span className="text-2xl">📊</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-1">6개 영역 진단</h3>
+              <h3 style={{ color: '#193149' }} className="font-semibold mb-1">6개 영역 진단</h3>
               <p className="text-sm text-gray-600">
                 대근육, 소근육, 언어, 인지, 사회성, 정서
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-aipoten-blue rounded-full flex items-center justify-center mx-auto mb-3">
+              <div
+                style={{ backgroundColor: '#5D93B3' }}
+                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
+              >
                 <span className="text-2xl">📈</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-1">발달 추이</h3>
+              <h3 style={{ color: '#193149' }} className="font-semibold mb-1">발달 추이</h3>
               <p className="text-sm text-gray-600">
                 시간에 따른 성장 기록
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-aipoten-orange rounded-full flex items-center justify-center mx-auto mb-3">
+              <div
+                style={{ backgroundColor: '#F78C6B' }}
+                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
+              >
                 <span className="text-2xl">🎯</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-1">맞춤 추천</h3>
+              <h3 style={{ color: '#193149' }} className="font-semibold mb-1">맞춤 추천</h3>
               <p className="text-sm text-gray-600">
                 AI 기반 놀이영상 추천
               </p>
@@ -185,13 +202,15 @@ export default function TrialResultPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/signup"
-              className="px-8 py-3 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors font-medium text-lg"
+              style={{ backgroundColor: '#F78C6B' }}
+              className="px-8 py-3 text-white rounded-md hover:opacity-90 transition-all font-medium text-lg shadow-md"
             >
               회원가입하고 전체 진단받기
             </Link>
             <Link
               href="/login?redirect=/parent/assessments"
-              className="px-8 py-3 bg-white text-aipoten-green border-2 border-aipoten-green rounded-md hover:bg-gray-50 transition-colors font-medium text-lg"
+              style={{ borderColor: '#193149', borderWidth: '2px', color: '#193149' }}
+              className="px-8 py-3 bg-white rounded-md hover:bg-gray-50 transition-colors font-medium text-lg"
             >
               로그인
             </Link>
@@ -199,8 +218,9 @@ export default function TrialResultPage() {
 
           <div className="mt-6">
             <Link
-              href="/assessments/trial"
-              className="text-sm text-gray-600 hover:text-gray-900 underline"
+              href="/assessments/trial/start"
+              style={{ color: '#386646' }}
+              className="text-sm hover:opacity-70 underline font-medium"
             >
               다시 체험하기
             </Link>
