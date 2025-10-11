@@ -4,6 +4,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Header from '@/components/layout/Header'
 
 interface MatchingRequest {
   id: string
@@ -128,29 +129,7 @@ export default function MatchingRequestDetailPage({ params }: { params: { id: st
 
   return (
     <div className="min-h-screen bg-neutral-light">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/therapist/matching" className="text-aipoten-green hover:text-aipoten-navy">
-                ← 매칭 요청 목록
-              </Link>
-              <h1 className="text-xl font-bold text-aipoten-navy">매칭 요청 상세</h1>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">안녕하세요, {session.user?.name}님</span>
-              <button
-                onClick={() => signOut({ callbackUrl: '/' })}
-                className="text-gray-600 hover:text-aipoten-green"
-              >
-                로그아웃
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">

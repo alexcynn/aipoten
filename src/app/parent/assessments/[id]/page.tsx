@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Header from '@/components/layout/Header'
 
 interface AssessmentAnswer {
   id: string
@@ -31,6 +32,15 @@ interface Assessment {
 
 interface PageParams {
   id: string
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  GROSS_MOTOR: '대근육',
+  FINE_MOTOR: '소근육',
+  COGNITIVE: '인지',
+  LANGUAGE: '언어',
+  SOCIAL: '사회성',
+  EMOTIONAL: '정서'
 }
 
 export default function AssessmentDetailPage({ params }: { params: Promise<PageParams> }) {
@@ -202,25 +212,7 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
 
   return (
     <div className="min-h-screen bg-neutral-light">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/dashboard" className="text-xl font-bold text-aipoten-navy">
-              아이포텐
-            </Link>
-            <div className="flex items-center space-x-4">
-              <Link href="/assessments" className="text-gray-600 hover:text-aipoten-green">
-                평가 목록
-              </Link>
-              <Link href={`/children/${assessment.child.id}`} className="text-gray-600 hover:text-aipoten-green">
-                아이 프로필
-              </Link>
-              <span className="text-gray-700">{session.user?.name}님</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -283,7 +275,7 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {Object.entries(categoryStats).map(([category, stats]) => (
                   <div key={category} className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 mb-2">{category}</h4>
+                    <h4 className="font-medium text-gray-900 mb-2">{CATEGORY_LABELS[category] || category}</h4>
                     <div className="text-2xl font-bold text-gray-900 mb-1">
                       {stats.total}/{stats.maxScore}
                     </div>
@@ -311,7 +303,7 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
                 {Object.entries(groupedAnswers).map(([category, answers]) => (
                   <div key={category}>
                     <h4 className="text-md font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                      {category}
+                      {CATEGORY_LABELS[category] || category}
                     </h4>
                     <div className="space-y-3">
                       {answers.map((answer) => (

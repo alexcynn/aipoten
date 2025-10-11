@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Header from '@/components/layout/Header'
 
 interface User {
   id: string
@@ -113,26 +114,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="min-h-screen bg-neutral-light">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Link href="/admin" className="text-xl font-bold text-aipoten-navy">
-                아이포텐 관리자
-              </Link>
-              <span className="ml-2 text-gray-400">/</span>
-              <span className="ml-2 text-gray-600">사용자 관리</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/admin" className="text-gray-600 hover:text-aipoten-green">
-                관리자 패널
-              </Link>
-              <span className="text-gray-700">{session.user?.name}님</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">

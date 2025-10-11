@@ -31,6 +31,15 @@ interface Assessment {
   }[]
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  GROSS_MOTOR: '대근육',
+  FINE_MOTOR: '소근육',
+  COGNITIVE: '인지',
+  LANGUAGE: '언어',
+  SOCIAL: '사회성',
+  EMOTIONAL: '정서'
+}
+
 export default function ParentDashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -439,7 +448,7 @@ export default function ParentDashboardPage() {
                                             className="text-xs px-2 py-1 rounded"
                                             style={{ backgroundColor: '#F5F5F5', color: '#386646' }}
                                           >
-                                            {result.category}: {result.score}점
+                                            {CATEGORY_LABELS[result.category] || result.category}: {result.score}점
                                           </div>
                                         ))}
                                       </div>

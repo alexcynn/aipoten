@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import Header from '@/components/layout/Header'
 
 export const dynamic = 'force-dynamic'
 interface Video {
@@ -151,30 +152,7 @@ export default function VideosPage() {
   return (
     <div className="min-h-screen bg-neutral-light">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/images/logo-text.png"
-                alt="AI Poten"
-                width={160}
-                height={40}
-                className="h-10 w-auto"
-                priority
-              />
-            </Link>
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="text-gray-600 hover:text-aipoten-green">
-                홈으로
-              </Link>
-              {session && (
-                <span className="text-gray-700">{session.user?.name}님</span>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
