@@ -64,7 +64,6 @@ export default function NewAssessmentPage() {
   const [allQuestions, setAllQuestions] = useState<AssessmentQuestion[]>([])
   const [responses, setResponses] = useState<QuestionResponse[]>([])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [currentStep, setCurrentStep] = useState<'select' | 'assess'>('select')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -85,24 +84,34 @@ export default function NewAssessmentPage() {
           const childrenArray = Array.isArray(childrenData) ? childrenData : (childrenData.children || [])
           setChildren(childrenArray)
 
+          // childId가 URL 파라미터로 전달되면 해당 아이 선택
           const childIdParam = searchParams.get('childId')
-          if (childIdParam && childrenArray.find((c: Child) => c.id === childIdParam)) {
-            const child = childrenArray.find((c: Child) => c.id === childIdParam)
-            if (child) {
-              handleChildSelect(child)
-            }
+          let targetChild: Child | null = null
+
+          if (childIdParam) {
+            targetChild = childrenArray.find((c: Child) => c.id === childIdParam) || null
+          }
+
+          // childId가 없거나 찾을 수 없으면 첫 번째 아이 선택
+          if (!targetChild && childrenArray.length > 0) {
+            targetChild = childrenArray[0]
+          }
+
+          if (targetChild) {
+            handleChildSelect(targetChild)
+          } else {
+            setIsLoading(false)
           }
         }
       } catch (error) {
         console.error('아이 목록을 가져오는 중 오류 발생:', error)
         setError('아이 목록을 불러올 수 없습니다.')
-      } finally {
         setIsLoading(false)
       }
     }
 
     fetchChildren()
-  }, [session, status, router])
+  }, [session, status, router, searchParams])
 
   const calculateAge = (birthDate: string) => {
     const birth = new Date(birthDate)
@@ -124,15 +133,17 @@ export default function NewAssessmentPage() {
           q.level === 'Q1' && !q.isWarning
         )
         setAllQuestions(questionsData)
-        setCurrentStep('assess')
         setResponses([])
         setCurrentQuestionIndex(0)
+        setIsLoading(false)
       } else {
         setError('평가 질문을 불러올 수 없습니다.')
+        setIsLoading(false)
       }
     } catch (error) {
       console.error('질문을 가져오는 중 오류 발생:', error)
       setError('평가 질문을 불러올 수 없습니다.')
+      setIsLoading(false)
     }
   }
 
@@ -397,57 +408,7 @@ export default function NewAssessmentPage() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          {currentStep === 'select' ? (
-            /* Child Selection */
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <h1 className="text-2xl font-bold text-gray-900 mb-6">발달체크 시작</h1>
-                <p className="text-gray-600 mb-8">
-                  발달체크를 진행할 아이를 선택해주세요. 각 아이의 월령에 맞는 평가 항목이 제공됩니다.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {children.map((child) => {
-                    const ageInMonths = calculateAge(child.birthDate)
-                    const ageText = ageInMonths < 12
-                      ? `${ageInMonths}개월`
-                      : `${Math.floor(ageInMonths / 12)}세 ${ageInMonths % 12}개월`
-
-                    return (
-                      <button
-                        key={child.id}
-                        onClick={() => handleChildSelect(child)}
-                        className="p-6 border-2 border-gray-200 rounded-lg hover:border-aipoten-green hover:bg-gray-50 transition-colors text-left"
-                      >
-                        <div className="flex items-center">
-                          <div className="w-12 h-12 bg-aipoten-accent rounded-full flex items-center justify-center mr-4">
-                            <span className="text-xl text-white font-bold">
-                              {child.name.charAt(0)}
-                            </span>
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-medium text-gray-900">{child.name}</h3>
-                            <p className="text-sm text-gray-500">
-                              {child.gender === 'MALE' ? '남아' : '여아'} • {ageText}
-                            </p>
-                            <p className="text-xs text-gray-400">
-                              생일: {new Date(child.birthDate).toLocaleDateString('ko-KR')}
-                            </p>
-                          </div>
-                        </div>
-                      </button>
-                    )
-                  })}
-                </div>
-
-                {error && (
-                  <div className="mt-4 rounded-md bg-red-50 p-4">
-                    <div className="text-sm text-red-800">{error}</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
+          {selectedChild ? (
             /* Assessment Form with Q1→Q2→Q3 Flow */
             <div className="bg-white shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
@@ -563,6 +524,23 @@ export default function NewAssessmentPage() {
                     <div className="text-sm text-red-800">{error}</div>
                   </div>
                 )}
+              </div>
+            </div>
+          ) : (
+            /* No children available */
+            <div className="bg-white shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6 text-center">
+                <h1 className="text-2xl font-bold text-gray-900 mb-4">등록된 아이가 없습니다</h1>
+                <p className="text-gray-600 mb-6">
+                  발달체크를 진행하려면 먼저 아이를 등록해주세요.
+                </p>
+                <Link
+                  href="/parent/children/new"
+                  style={{ backgroundColor: '#F78C6B' }}
+                  className="inline-flex items-center px-6 py-3 text-white rounded-md hover:opacity-90 transition-all font-medium shadow-md"
+                >
+                  아이 등록하기
+                </Link>
               </div>
             </div>
           )}

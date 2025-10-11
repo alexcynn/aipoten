@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth-config'
 import { DevelopmentCategory, DevelopmentLevel } from '@prisma/client'
 
 // 발달 체크 상세 조회
@@ -9,7 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(
@@ -28,6 +29,7 @@ export async function GET(
             id: true,
             name: true,
             birthDate: true,
+            gender: true,
             user: {
               select: {
                 id: true
@@ -35,7 +37,17 @@ export async function GET(
             }
           }
         },
-        results: true
+        results: true,
+        responses: {
+          include: {
+            question: {
+              select: {
+                category: true,
+                questionText: true
+              }
+            }
+          }
+        }
       }
     })
 
@@ -54,6 +66,7 @@ export async function GET(
       )
     }
 
+    console.log('Assessment data:', JSON.stringify(assessment, null, 2))
     return NextResponse.json({ assessment })
   } catch (error) {
     console.error('발달 체크 조회 오류:', error)
@@ -70,7 +83,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(
@@ -169,7 +182,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(

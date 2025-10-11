@@ -23,6 +23,12 @@ interface Assessment {
   ageInMonths: number
   totalScore: number
   createdAt: string
+  completedAt?: string
+  results?: {
+    category: string
+    score: number
+    level: string
+  }[]
 }
 
 export default function ParentDashboardPage() {
@@ -31,6 +37,7 @@ export default function ParentDashboardPage() {
   const [children, setChildren] = useState<Child[]>([])
   const [selectedChildId, setSelectedChildId] = useState<string>('')
   const [latestAssessment, setLatestAssessment] = useState<Assessment | null>(null)
+  const [assessments, setAssessments] = useState<Assessment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -102,20 +109,21 @@ export default function ParentDashboardPage() {
   useEffect(() => {
     if (!selectedChildId) return
 
-    const fetchLatestAssessment = async () => {
+    const fetchAssessments = async () => {
       try {
-        const response = await fetch(`/api/assessments?childId=${selectedChildId}&limit=1`)
+        const response = await fetch(`/api/assessments?childId=${selectedChildId}`)
         if (response.ok) {
           const data = await response.json()
           const assessmentsArray = Array.isArray(data) ? data : (data.assessments || [])
           setLatestAssessment(assessmentsArray.length > 0 ? assessmentsArray[0] : null)
+          setAssessments(assessmentsArray.slice(0, 5)) // 최근 5개
         }
       } catch (error) {
-        console.error('최근 발달체크 조회 오류:', error)
+        console.error('발달체크 조회 오류:', error)
       }
     }
 
-    fetchLatestAssessment()
+    fetchAssessments()
   }, [selectedChildId])
 
   // 아이 선택 변경 핸들러
@@ -377,34 +385,86 @@ export default function ParentDashboardPage() {
                 {/* 발달체크 탭 */}
                 {activeTab === 'assessments' && (
                   <div>
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900">발달체크</h3>
+                    {/* 발달체크 시작하기 버튼 */}
+                    <div className="mb-6">
                       <Link
                         href={`/parent/assessments/new?childId=${selectedChildId}`}
-                        className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors font-medium"
+                        style={{ backgroundColor: '#F78C6B' }}
+                        className="inline-flex items-center px-6 py-3 text-white rounded-md hover:opacity-90 transition-all font-medium text-lg shadow-md"
                       >
-                        + 새 발달체크 시작
+                        발달체크 시작하기
                       </Link>
                     </div>
-                    <div className="bg-blue-50 rounded-lg p-6 mb-6">
-                      <h4 className="font-semibold text-blue-900 mb-2">
-                        전체 6개 영역 발달 평가
-                      </h4>
-                      <ul className="text-sm text-blue-800 space-y-1 mb-4">
-                        <li>• 대근육, 소근육, 언어, 인지, 사회성, 정서 영역</li>
-                        <li>• 60문항 체계적 평가 (영역당 10문항)</li>
-                        <li>• 상세한 발달 리포트 제공</li>
-                        <li>• AI 기반 맞춤 놀이영상 추천</li>
-                      </ul>
-                      <Link
-                        href="/parent/assessments"
-                        className="text-blue-900 hover:underline font-medium text-sm"
-                      >
-                        이전 발달체크 기록 보기 →
-                      </Link>
-                    </div>
-                    <div className="text-center py-8 text-gray-500">
-                      선택된 아이의 최근 발달체크 결과가 여기에 표시됩니다.
+
+                    {/* 이전 발달체크 기록 */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">이전 발달체크 기록</h3>
+                      {assessments.length > 0 ? (
+                        <div className="space-y-4">
+                          {assessments.map((assessment) => {
+                            const date = new Date(assessment.createdAt)
+                            const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
+                            const percentage = Math.round((assessment.totalScore / 300) * 100)
+
+                            return (
+                              <div
+                                key={assessment.id}
+                                className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <span className="text-sm font-medium text-gray-600">{formattedDate}</span>
+                                      <span className="text-sm text-gray-500">
+                                        {assessment.ageInMonths}개월
+                                      </span>
+                                      <span
+                                        className="px-3 py-1 rounded-full text-xs font-medium"
+                                        style={{
+                                          backgroundColor: assessment.completedAt ? '#98C15E' : '#E5E7EB',
+                                          color: assessment.completedAt ? 'white' : '#6B7280'
+                                        }}
+                                      >
+                                        {assessment.completedAt ? '완료' : '진행 중'}
+                                      </span>
+                                    </div>
+                                    <div className="text-2xl font-bold" style={{ color: '#193149' }}>
+                                      {percentage}점
+                                    </div>
+                                    {assessment.results && assessment.results.length > 0 && (
+                                      <div className="flex flex-wrap gap-2 mt-3">
+                                        {assessment.results.map((result, idx) => (
+                                          <div
+                                            key={idx}
+                                            className="text-xs px-2 py-1 rounded"
+                                            style={{ backgroundColor: '#F5F5F5', color: '#386646' }}
+                                          >
+                                            {result.category}: {result.score}점
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <Link
+                                    href={`/parent/assessments/${assessment.id}`}
+                                    style={{ color: '#386646' }}
+                                    className="ml-4 text-sm font-medium hover:opacity-70 underline"
+                                  >
+                                    자세히 보기 →
+                                  </Link>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        <div className="bg-blue-50 rounded-lg p-6 text-center">
+                          <p className="text-blue-900 mb-2">아직 발달체크 기록이 없습니다.</p>
+                          <p className="text-sm text-blue-800">
+                            위의 "발달체크 시작하기" 버튼을 눌러 첫 발달체크를 진행해보세요.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

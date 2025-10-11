@@ -54,14 +54,41 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
         if (!response.ok) {
           if (response.status === 404) {
             setError('평가 결과를 찾을 수 없습니다.')
+          } else if (response.status === 403) {
+            setError('이 평가 결과를 볼 권한이 없습니다.')
           } else {
             setError('평가 결과를 불러오는 중 오류가 발생했습니다.')
           }
+          setIsLoading(false)
           return
         }
-        const assessmentData = await response.json()
+        const data = await response.json()
+        console.log('API 응답 데이터:', data)
+
+        // API는 { assessment } 형태로 반환
+        const assessmentData = data.assessment
+        console.log('Assessment 데이터:', assessmentData)
+
+        // responses를 answers로 변환
+        if (assessmentData?.responses) {
+          assessmentData.answers = assessmentData.responses.map((response: any) => ({
+            id: response.id,
+            questionId: response.questionId,
+            score: response.score,
+            question: {
+              category: response.question.category,
+              question: response.question.questionText
+            }
+          }))
+          console.log('변환된 answers:', assessmentData.answers)
+        } else {
+          console.log('responses가 없습니다')
+          assessmentData.answers = []
+        }
+
         setAssessment(assessmentData)
       } catch (error) {
+        console.error('평가 결과 조회 오류:', error)
         setError('평가 결과를 불러오는 중 오류가 발생했습니다.')
       } finally {
         setIsLoading(false)
@@ -92,7 +119,7 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
   }
 
   const getCategoryStats = () => {
-    if (!assessment) return {}
+    if (!assessment || !assessment.answers || assessment.answers.length === 0) return {}
 
     const stats: { [key: string]: { total: number; maxScore: number; average: number } } = {}
 
@@ -113,7 +140,7 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
   }
 
   const getOverallPercentage = () => {
-    if (!assessment) return 0
+    if (!assessment || !assessment.answers || assessment.answers.length === 0) return 0
     const maxPossibleScore = assessment.answers.length * 3
     return Math.round((assessment.totalScore / maxPossibleScore) * 100)
   }
@@ -147,10 +174,11 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <Link
-            href="/assessments"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy"
+            href="/parent/dashboard"
+            style={{ backgroundColor: '#F78C6B' }}
+            className="inline-flex items-center px-6 py-3 text-white rounded-md hover:opacity-90 transition-all font-medium shadow-md"
           >
-            평가 목록으로 돌아가기
+            대시보드로 돌아가기
           </Link>
         </div>
       </div>
@@ -163,7 +191,7 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
 
   const categoryStats = getCategoryStats()
   const interpretation = getInterpretation()
-  const groupedAnswers = assessment.answers.reduce((groups, answer) => {
+  const groupedAnswers = (assessment.answers || []).reduce((groups, answer) => {
     const category = answer.question.category
     if (!groups[category]) {
       groups[category] = []
