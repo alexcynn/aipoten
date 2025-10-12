@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 
-export default function TrialResultPage() {
+function TrialResultContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -228,5 +228,20 @@ export default function TrialResultPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function TrialResultPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
+          <p className="mt-4 text-gray-600">결과 분석 중...</p>
+        </div>
+      </div>
+    }>
+      <TrialResultContent />
+    </Suspense>
   )
 }

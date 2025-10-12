@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -54,7 +54,7 @@ const TWO_POINT_OPTIONS = [
   { value: '못함', score: 0 },
 ]
 
-export default function NewAssessmentPage() {
+function AssessmentContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -414,21 +414,13 @@ export default function NewAssessmentPage() {
               <div className="px-4 py-5 sm:p-6">
                 {/* Header */}
                 <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h1 className="text-2xl font-bold text-gray-900">
-                        {selectedChild?.name}의 발달체크
-                      </h1>
-                      <p className="text-gray-600 mt-1">
-                        현재 월령: {calculateAge(selectedChild?.birthDate || '')}개월
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setCurrentStep('select')}
-                      className="text-sm text-gray-600 hover:text-gray-900"
-                    >
-                      아이 다시 선택
-                    </button>
+                  <div className="mb-4">
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      {selectedChild?.name}의 발달체크
+                    </h1>
+                    <p className="text-gray-600 mt-1">
+                      현재 월령: {calculateAge(selectedChild?.birthDate || '')}개월
+                    </p>
                   </div>
 
                   {/* Progress Bar */}
@@ -547,5 +539,20 @@ export default function NewAssessmentPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function NewAssessmentPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
+          <p className="mt-4 text-gray-600">로딩 중...</p>
+        </div>
+      </div>
+    }>
+      <AssessmentContent />
+    </Suspense>
   )
 }
