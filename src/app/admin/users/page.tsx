@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
+import AdminLayout from '@/components/layout/AdminLayout'
 
 interface User {
   id: string
@@ -113,15 +113,10 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
-      <Header />
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {/* Header Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">사용자 관리</h1>
+    <AdminLayout title="사용자 관리">
+      <div className="space-y-6">
+        <div>
+          <div className="mb-6">
             <p className="mt-2 text-gray-600">
               플랫폼에 가입한 모든 사용자를 관리할 수 있습니다.
             </p>
@@ -299,7 +294,7 @@ export default function AdminUsersPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   )
 }

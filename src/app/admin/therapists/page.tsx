@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/layout/Header'
+import AdminLayout from '@/components/layout/AdminLayout'
 
 interface TherapistProfile {
   id: string
@@ -144,19 +144,13 @@ export default function AdminTherapistsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
-      <Header />
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {/* Header Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">치료사 관리</h1>
-            <p className="mt-2 text-gray-600">
-              치료사 가입 승인 및 프로필 관리를 할 수 있습니다.
-            </p>
-          </div>
+    <AdminLayout title="치료사 관리">
+      <div className="space-y-6">
+        <div>
+          <p className="text-gray-600">
+            치료사 가입 승인 및 프로필 관리를 할 수 있습니다.
+          </p>
+        </div>
 
           {/* Filter Tabs */}
           <div className="mb-6">
@@ -288,7 +282,7 @@ export default function AdminTherapistsPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   )
 }
