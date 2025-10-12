@@ -388,7 +388,7 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
                 {session?.user?.role === 'ADMIN' && (
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <Link
-                      href={`/admin/videos/${video.id}`}
+                      href={`/videos/edit/${video.id}`}
                       className="block w-full text-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
                     >
                       영상 수정

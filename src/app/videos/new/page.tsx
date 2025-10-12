@@ -103,7 +103,7 @@ export default function NewVideoPage() {
       })
 
       if (response.ok) {
-        router.push('/admin/videos')
+        router.push('/videos')
       } else {
         const error = await response.json()
         alert(error.error || '영상 추가 중 오류가 발생했습니다.')
@@ -417,7 +417,7 @@ export default function NewVideoPage() {
               {/* Buttons */}
               <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
                 <Link
-                  href="/admin/videos"
+                  href="/videos"
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-aipoten-green"
                 >
                   취소

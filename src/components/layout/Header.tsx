@@ -58,25 +58,28 @@ const Header: React.FC<HeaderProps> = ({
   // 치료사 메뉴
   const therapistNavItems = [
     { href: '/therapist/dashboard', label: '대시보드' },
+    { href: '/videos', label: '놀이영상' },
+    { href: '/boards/notification', label: '알림장' },
+    { href: '/boards/news', label: '육아정보' },
+    { href: '/boards/community', label: '육아소통' },
     { href: '/therapist/profile', label: '프로필' },
     { href: '/therapist/matching', label: '매칭 요청' },
     { href: '/therapist/consultations', label: '상담 관리' },
     { href: '/therapist/schedule', label: '일정' },
-    { href: '/boards/notification', label: '알림장' },
-    { href: '/boards/news', label: '육아정보' },
-    { href: '/boards/community', label: '육아소통' },
+
   ]
 
   // 관리자 메뉴
   const adminNavItems = [
     { href: '/admin/dashboard', label: '대시보드' },
+    { href: '/videos', label: '놀이영상' },
     { href: '/boards/notification', label: '알림장' },
     { href: '/boards/news', label: '육아정보' },
     { href: '/boards/community', label: '육아소통' },
     { href: '/admin/users', label: '사용자' },
     { href: '/admin/therapists', label: '치료사' },
     { href: '/admin/boards', label: '게시판 관리' },
-    { href: '/admin/videos', label: '영상' },
+
   ]
 
   // 역할에 따른 메뉴 선택

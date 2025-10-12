@@ -199,65 +199,7 @@ export default function AdminPage() {
           )}
 
           {/* Management Sections */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Content Management */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">콘텐츠 관리</h3>
-              <div className="space-y-3">
-                <Link
-                  href="/boards/notification/new"
-                  className="block p-3 rounded-md hover:bg-gray-50 transition-colors border-2 border-aipoten-green"
-                >
-                  <div className="flex items-center">
-                    <span className="text-lg mr-3">📝</span>
-                    <div>
-                      <div className="font-medium text-aipoten-green">알림장 새글 작성</div>
-                      <div className="text-sm text-gray-500">새로운 알림장 게시글 추가</div>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link
-                  href="/news/new"
-                  className="block p-3 rounded-md hover:bg-gray-50 transition-colors border-2 border-aipoten-blue"
-                >
-                  <div className="flex items-center">
-                    <span className="text-lg mr-3">📰</span>
-                    <div>
-                      <div className="font-medium text-aipoten-blue">육아정보 새글 작성</div>
-                      <div className="text-sm text-gray-500">새로운 육아정보 추가</div>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link
-                  href="/videos/new"
-                  className="block p-3 rounded-md hover:bg-gray-50 transition-colors border-2 border-aipoten-orange"
-                >
-                  <div className="flex items-center">
-                    <span className="text-lg mr-3">📹</span>
-                    <div>
-                      <div className="font-medium text-aipoten-orange">놀이영상 추가</div>
-                      <div className="text-sm text-gray-500">새로운 놀이영상 등록</div>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link
-                  href="/admin/boards"
-                  className="block p-3 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center">
-                    <span className="text-lg mr-3">💬</span>
-                    <div>
-                      <div className="font-medium">게시판 관리</div>
-                      <div className="text-sm text-gray-500">전체 게시글 관리</div>
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* User Management */}
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">사용자 관리</h3>

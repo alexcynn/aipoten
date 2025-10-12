@@ -168,7 +168,7 @@ export default function VideosPage() {
             </div>
             {session?.user?.role === 'ADMIN' && (
               <Link
-                href="/admin/videos/new"
+                href="/videos/new"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy"
               >
                 영상 추가
@@ -319,7 +319,7 @@ export default function VideosPage() {
                         {session?.user?.role === 'ADMIN' && (
                           <>
                             <Link
-                              href={`/admin/videos/${video.id}`}
+                              href={`/videos/edit/${video.id}`}
                               className="inline-flex items-center px-2 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
                             >
                               수정
