@@ -145,7 +145,7 @@ export default function NewVideoPage() {
             <div className="px-6 py-4 border-b border-gray-200">
               <h1 className="text-2xl font-bold text-gray-900">새 영상 추가</h1>
               <p className="mt-1 text-sm text-gray-600">
-                새로운 추천 영상을 추가합니다.
+                새로운 놀이 영상을 추가합니다.
               </p>
             </div>
 

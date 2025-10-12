@@ -418,8 +418,7 @@ export default function SearchPage() {
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">🔍 검색 가능한 콘텐츠</h4>
                   <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• 추천 영상 제목과 설명</li>
-                    <li>• 놀이영성 활동</li>
+                    <li>• 놀이영상 제목과 설명</li>                    
                     <li>• 커뮤니티 게시글</li>
                     <li>• 아이 프로필</li>
                     <li>• 뉴스 및 공지사항</li>

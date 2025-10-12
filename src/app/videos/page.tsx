@@ -37,6 +37,8 @@ export default function VideosPage() {
   const [selectedChildId, setSelectedChildId] = useState<string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const videosPerPage = 12
 
   const categories = [
     '전체',
@@ -139,6 +141,23 @@ export default function VideosPage() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
   }
 
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(filteredVideos.length / videosPerPage)
+  const indexOfLastVideo = currentPage * videosPerPage
+  const indexOfFirstVideo = indexOfLastVideo - videosPerPage
+  const currentVideos = filteredVideos.slice(indexOfFirstVideo, indexOfLastVideo)
+
+  // 페이지 변경 시 맨 위로 스크롤
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // 필터 변경 시 첫 페이지로 리셋
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [selectedChildId, selectedCategory, searchQuery])
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-light flex items-center justify-center">
@@ -161,7 +180,7 @@ export default function VideosPage() {
           {/* Header Section */}
           <div className="mb-8 flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">추천 영상</h1>
+              <h1 className="text-3xl font-bold text-gray-900">놀이 영상</h1>
               <p className="mt-2 text-gray-600">
                 우리 아이의 발달 단계에 맞는 교육 영상을 찾아보세요.
               </p>
@@ -169,7 +188,8 @@ export default function VideosPage() {
             {session?.user?.role === 'ADMIN' && (
               <Link
                 href="/videos/new"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm"
+                style={{ backgroundColor: '#386646', color: 'white' }}
               >
                 영상 추가
               </Link>
@@ -261,8 +281,9 @@ export default function VideosPage() {
               </div>
             </div>
           ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredVideos.map((video) => (
+              {currentVideos.map((video) => (
                 <div key={video.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
                   {/* Thumbnail - 클릭하면 상세 페이지로 */}
                   <Link href={`/videos/${video.id}`}>
@@ -361,6 +382,65 @@ export default function VideosPage() {
                 </div>
               ))}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <nav className="flex items-center gap-2">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    이전
+                  </button>
+
+                  {[...Array(totalPages)].map((_, index) => {
+                    const pageNumber = index + 1
+                    // 첫 페이지, 마지막 페이지, 현재 페이지 주변만 표시
+                    if (
+                      pageNumber === 1 ||
+                      pageNumber === totalPages ||
+                      (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => handlePageChange(pageNumber)}
+                          className={`px-4 py-2 rounded-md text-sm font-medium ${
+                            currentPage === pageNumber
+                              ? 'text-white'
+                              : 'text-gray-700 bg-white hover:bg-gray-50 border border-gray-300'
+                          }`}
+                          style={
+                            currentPage === pageNumber
+                              ? { backgroundColor: '#386646' }
+                              : {}
+                          }
+                        >
+                          {pageNumber}
+                        </button>
+                      )
+                    } else if (
+                      pageNumber === currentPage - 2 ||
+                      pageNumber === currentPage + 2
+                    ) {
+                      return <span key={pageNumber} className="px-2 text-gray-500">...</span>
+                    }
+                    return null
+                  })}
+
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    다음
+                  </button>
+                </nav>
+              </div>
+            )}
+            </>
           )}
 
           {/* Stats */}
