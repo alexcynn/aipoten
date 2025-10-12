@@ -75,10 +75,7 @@ const Header: React.FC<HeaderProps> = ({
     { href: '/videos', label: '놀이영상' },
     { href: '/boards/notification', label: '알림장' },
     { href: '/boards/news', label: '육아정보' },
-    { href: '/boards/community', label: '육아소통' },
-    { href: '/admin/users', label: '사용자' },
-    { href: '/admin/therapists', label: '치료사' },
-    { href: '/admin/boards', label: '게시판 관리' },
+    { href: '/boards/community', label: '육아소통' },    
 
   ]
 
