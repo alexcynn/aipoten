@@ -405,6 +405,7 @@ model TherapistProfile {
   consultations   Consultation[]
   certifications  Certification[]
   experiences     Experience[]
+  timeSlots       TimeSlot[]              // Phase 3: 스케줄 슬롯
 
   @@map("therapist_profiles")
 }
@@ -568,4 +569,50 @@ enum PaymentStatus {
   PAID      // 결제 완료
   REFUNDED  // 환불 완료
   FAILED    // 결제 실패
+}
+
+// ===== Phase 3: 스케줄 관리 시스템 =====
+
+// 예약 가능 시간 슬롯
+model TimeSlot {
+  id               String   @id @default(cuid())
+  therapistId      String
+  date             DateTime // 날짜 (YYYY-MM-DD)
+  startTime        String   // "09:00"
+  endTime          String   // "09:50"
+
+  // 상태
+  isAvailable      Boolean  @default(true)
+  isHoliday        Boolean  @default(false)
+  isBufferBlocked  Boolean  @default(false) // 버퍼 타임으로 차단됨
+  blockedBy        String?  // 버퍼로 막은 예약 ID
+
+  // 예약 관리
+  maxCapacity      Int      @default(1)     // 동시 예약 가능 인원
+  currentBookings  Int      @default(0)     // 현재 예약 수
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // 관계
+  therapist TherapistProfile @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@unique([therapistId, date, startTime])
+  @@index([therapistId, date, isAvailable])
+  @@map("time_slots")
+}
+
+// 휴일 관리
+model HolidayDate {
+  id          String   @id @default(cuid())
+  therapistId String?  // null이면 공휴일
+  date        DateTime // 휴일 날짜
+  reason      String?  // 휴일 사유
+  isRecurring Boolean  @default(false) // 매년 반복 여부
+
+  createdAt   DateTime @default(now())
+
+  @@unique([therapistId, date])
+  @@index([date])
+  @@map("holiday_dates")
 }

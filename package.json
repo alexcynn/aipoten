@@ -11,6 +11,8 @@
     "type-check": "tsc --noEmit",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:therapists": "tsx scripts/seed-therapists.ts",
+    "db:seed:schedules": "tsx scripts/seed-schedules.ts",
+    "db:create-admin": "tsx scripts/create-admin.ts",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
