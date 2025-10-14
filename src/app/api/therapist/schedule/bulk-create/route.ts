@@ -19,14 +19,19 @@ export async function POST(request: NextRequest) {
     const {
       startDate,        // "2025-10-15"
       endDate,          // "2025-12-31"
-      weeklyPattern,    // { monday: ["09:00-12:00", "14:00-18:00"], tuesday: [...], ... }
-      sessionDuration,  // 50 (분)
-      maxCapacity,      // 1 (명)
+      weeklyPattern,    // { monday: ["09:00-10:00", "10:00-11:00"], tuesday: [...], ... }
       excludeHolidays,  // true
     } = body
 
+    console.log('📥 일괄 생성 요청:', {
+      startDate,
+      endDate,
+      weeklyPattern,
+      excludeHolidays
+    })
+
     // Validation
-    if (!startDate || !endDate || !weeklyPattern || !sessionDuration) {
+    if (!startDate || !endDate || !weeklyPattern) {
       return NextResponse.json(
         { error: '필수 정보가 누락되었습니다.' },
         { status: 400 }
@@ -45,8 +50,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const start = new Date(startDate)
-    const end = new Date(endDate)
+    // 한국 시간 기준으로 날짜 처리 (UTC+9)
+    const [startYear, startMonth, startDay] = startDate.split('-').map(Number)
+    const [endYear, endMonth, endDay] = endDate.split('-').map(Number)
+
+    // UTC 기준으로 정오 12시 = KST 21시 = 한국 날짜 유지
+    const start = new Date(Date.UTC(startYear, startMonth - 1, startDay, 12, 0, 0, 0))
+    const end = new Date(Date.UTC(endYear, endMonth - 1, endDay, 12, 0, 0, 0))
+
+    console.log('📅 날짜 파싱 (한국 시간 기준):', {
+      startDateStr: startDate,
+      endDateStr: endDate,
+      startUTC: start.toISOString(),
+      endUTC: end.toISOString()
+    })
 
     // 3개월 제한 검증
     const maxEndDate = new Date(start)
@@ -80,62 +97,59 @@ export async function POST(request: NextRequest) {
     // 슬롯 생성
     const slots = []
     let currentDate = new Date(start)
+    let debugCount = 0
+
+    console.log('📅 슬롯 생성 시작:', {
+      start: start.toISOString(),
+      end: end.toISOString()
+    })
 
     while (currentDate <= end) {
-      // 공휴일 체크
-      const isHoliday = holidays.some(h =>
-        h.getFullYear() === currentDate.getFullYear() &&
-        h.getMonth() === currentDate.getMonth() &&
-        h.getDate() === currentDate.getDate()
-      )
+      // 한국 날짜 문자열 추출 (UTC+9 고려)
+      const dateStr = currentDate.toISOString().split('T')[0]
+
+      // 공휴일 체크 (날짜 문자열로 비교)
+      const isHoliday = holidays.some(h => {
+        const holidayStr = h.toISOString().split('T')[0]
+        return holidayStr === dateStr
+      })
 
       if (!isHoliday) {
-        // 요일 확인 (0=일, 1=월, ..., 6=토)
-        const dayOfWeek = currentDate.getDay()
+        // 요일 확인 (UTC 기준으로 계산)
+        const dayOfWeek = currentDate.getUTCDay()
         const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
         const dayName = dayNames[dayOfWeek]
 
         const timeRanges = weeklyPattern[dayName]
 
+        // 첫 5일만 상세 로그
+        if (debugCount < 5) {
+          console.log(`  📆 ${dateStr} UTC요일:(${currentDate.getUTCDay()}) → ${dayName}:`, timeRanges?.length || 0, '개 시간대')
+          debugCount++
+        }
+
         if (timeRanges && timeRanges.length > 0) {
           for (const timeRange of timeRanges) {
-            // "09:00-12:00" → 09:00, 09:50, 10:00, 10:50, 11:00, 11:50
-            const [start, end] = timeRange.split('-')
-            const startHour = parseInt(start.split(':')[0])
-            const startMinute = parseInt(start.split(':')[1])
-            const endHour = parseInt(end.split(':')[0])
-            const endMinute = parseInt(end.split(':')[1])
+            // "09:00-10:00" 형태의 시간 범위를 직접 사용
+            const [startTime, endTime] = timeRange.split('-')
 
-            const startMinutes = startHour * 60 + startMinute
-            const endMinutes = endHour * 60 + endMinute
-
-            for (let minutes = startMinutes; minutes < endMinutes; minutes += sessionDuration) {
-              const slotStartHour = Math.floor(minutes / 60)
-              const slotStartMinute = minutes % 60
-              const slotEndHour = Math.floor((minutes + sessionDuration) / 60)
-              const slotEndMinute = (minutes + sessionDuration) % 60
-
-              const slotStartTime = `${String(slotStartHour).padStart(2, '0')}:${String(slotStartMinute).padStart(2, '0')}`
-              const slotEndTime = `${String(slotEndHour).padStart(2, '0')}:${String(slotEndMinute).padStart(2, '0')}`
-
-              slots.push({
-                therapistId: therapistProfile.id,
-                date: new Date(currentDate),
-                startTime: slotStartTime,
-                endTime: slotEndTime,
-                isAvailable: true,
-                isHoliday: false,
-                isBufferBlocked: false,
-                maxCapacity: maxCapacity || 1,
-                currentBookings: 0,
-              })
-            }
+            // 현재 날짜를 그대로 사용 (이미 UTC 기준으로 생성됨)
+            slots.push({
+              therapistId: therapistProfile.id,
+              date: new Date(currentDate),
+              startTime,
+              endTime,
+              isAvailable: true,
+              isHoliday: false,
+              isBufferBlocked: false,
+              currentBookings: 0,
+            })
           }
         }
       }
 
-      // 다음 날
-      currentDate.setDate(currentDate.getDate() + 1)
+      // 다음 날 (UTC 기준으로 하루 추가)
+      currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000)
     }
 
     // 중복 체크 및 일괄 생성

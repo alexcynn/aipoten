@@ -22,6 +22,12 @@ export async function DELETE(request: NextRequest) {
       onlyEmpty,     // true: 예약 없는 슬롯만 삭제
     } = body
 
+    console.log('📥 일괄 삭제 요청:', {
+      startDate,
+      endDate,
+      onlyEmpty
+    })
+
     // Validation
     if (!startDate || !endDate) {
       return NextResponse.json(
@@ -42,26 +48,73 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const start = new Date(startDate)
-    const end = new Date(endDate)
+    // 한국 시간 기준으로 날짜 처리 (UTC+9)
+    const [startYear, startMonth, startDay] = startDate.split('-').map(Number)
+    const [endYear, endMonth, endDay] = endDate.split('-').map(Number)
 
-    // 삭제 조건
-    const deleteWhere: any = {
+    // 조회 범위를 넓게 잡음 (하루 전 ~ 하루 후) - UTC 기준
+    const queryStart = new Date(Date.UTC(startYear, startMonth - 1, startDay - 1, 0, 0, 0, 0))
+    const queryEnd = new Date(Date.UTC(endYear, endMonth - 1, endDay + 1, 23, 59, 59, 999))
+
+    console.log('📅 날짜 파싱 (한국 시간 기준):', {
+      startDateStr: startDate,
+      endDateStr: endDate,
+      queryStart: queryStart.toISOString(),
+      queryEnd: queryEnd.toISOString()
+    })
+
+    // 먼저 슬롯 조회
+    const queryWhere: any = {
       therapistId: therapistProfile.id,
       date: {
-        gte: start,
-        lte: end
+        gte: queryStart,
+        lte: queryEnd
       }
     }
 
-    // 예약 없는 슬롯만 삭제
     if (onlyEmpty) {
-      deleteWhere.currentBookings = 0
+      queryWhere.currentBookings = 0
     }
 
-    // 삭제
+    const slotsToCheck = await prisma.timeSlot.findMany({
+      where: queryWhere,
+      select: {
+        id: true,
+        date: true,
+        startTime: true,
+        currentBookings: true
+      }
+    })
+
+    console.log(`🔍 조회된 슬롯: ${slotsToCheck.length}개`)
+
+    // 날짜 문자열로 필터링
+    const slotsToDelete = slotsToCheck.filter(slot => {
+      const slotDateStr = new Date(slot.date).toISOString().split('T')[0]
+      const inRange = slotDateStr >= startDate && slotDateStr <= endDate
+      if (slotsToCheck.length <= 10) {
+        console.log(`  📌 슬롯 ${slot.id}: ${slotDateStr} (${slot.startTime}) → ${inRange ? '삭제 대상' : '범위 밖'}`)
+      }
+      return inRange
+    })
+
+    console.log(`✅ 삭제 대상 슬롯: ${slotsToDelete.length}개`)
+
+    // ID 기반 삭제
+    if (slotsToDelete.length === 0) {
+      console.log('⚠️ 삭제할 슬롯이 없습니다.')
+      return NextResponse.json({
+        message: '삭제할 슬롯이 없습니다.',
+        deleted: 0
+      })
+    }
+
     const result = await prisma.timeSlot.deleteMany({
-      where: deleteWhere
+      where: {
+        id: {
+          in: slotsToDelete.map(s => s.id)
+        }
+      }
     })
 
     console.log(`✅ 치료사 ${therapistProfile.id}: ${result.count}개 슬롯 삭제 완료`)

@@ -579,7 +579,7 @@ model TimeSlot {
   therapistId      String
   date             DateTime // 날짜 (YYYY-MM-DD)
   startTime        String   // "09:00"
-  endTime          String   // "09:50"
+  endTime          String   // "10:00"
 
   // 상태
   isAvailable      Boolean  @default(true)
@@ -588,7 +588,6 @@ model TimeSlot {
   blockedBy        String?  // 버퍼로 막은 예약 ID
 
   // 예약 관리
-  maxCapacity      Int      @default(1)     // 동시 예약 가능 인원
   currentBookings  Int      @default(0)     // 현재 예약 수
 
   createdAt        DateTime @default(now())

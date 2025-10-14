@@ -13,7 +13,8 @@
       "WebSearch",
       "Bash(npm run build:*)",
       "Bash(copy src/app/signup/page.tsx src/app/signup/parent/page.tsx)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=다시 해줘)"
     ],
     "deny": [],
     "ask": []

@@ -31,10 +31,10 @@ async function main() {
   for (const therapist of therapists) {
     console.log(`\n🔧 치료사: ${therapist.name} (${therapist.id})`)
 
-    // 3-1. 개인 휴일 추가
+    // 3-1. 개인 휴일 추가 (UTC 기준으로 정오 생성)
     const holidays = [
-      { date: new Date(2025, 11, 25), reason: '크리스마스' }, // 12월 25일
-      { date: new Date(2026, 0, 1), reason: '신정' },          // 1월 1일
+      { date: new Date(Date.UTC(2025, 11, 25, 12, 0, 0, 0)), reason: '크리스마스' }, // 12월 25일
+      { date: new Date(Date.UTC(2026, 0, 1, 12, 0, 0, 0)), reason: '신정' },          // 1월 1일
     ]
 
     let holidayCount = 0
@@ -60,27 +60,37 @@ async function main() {
     console.log(`  ✅ 휴일 ${holidayCount}개 추가`)
 
     // 3-2. TimeSlot 생성
-    // 주중 패턴: 월-금 09:00-18:00 (50분 세션)
+    // 주중 패턴: 월-금 09:00-18:00 (1시간 단위 예약)
     const slots = []
-    let currentDate = new Date(today)
 
-    while (currentDate <= endDate) {
-      const dayOfWeek = currentDate.getDay() // 0=일, 1=월, ..., 6=토
+    // UTC 기준으로 날짜 생성 (한국 시간 기준 유지)
+    const startYear = today.getFullYear()
+    const startMonth = today.getMonth()
+    const startDay = today.getDate()
+    let currentDate = new Date(Date.UTC(startYear, startMonth, startDay, 12, 0, 0, 0))
+
+    const endYear = endDate.getFullYear()
+    const endMonth = endDate.getMonth()
+    const endDay = endDate.getDate()
+    const endDateUTC = new Date(Date.UTC(endYear, endMonth, endDay, 12, 0, 0, 0))
+
+    while (currentDate <= endDateUTC) {
+      const dayOfWeek = currentDate.getUTCDay() // UTC 기준 요일 (0=일, 1=월, ..., 6=토)
 
       // 주중만 (월-금)
       if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-        // 점심시간 제외: 09:00-12:00, 14:00-18:00
+        // 점심시간 제외: 09:00-12:00, 14:00-18:00 (1시간 단위)
         const morningSlots = [
-          { start: '09:00', end: '09:50' },
-          { start: '10:00', end: '10:50' },
-          { start: '11:00', end: '11:50' },
+          { start: '09:00', end: '10:00' },
+          { start: '10:00', end: '11:00' },
+          { start: '11:00', end: '12:00' },
         ]
 
         const afternoonSlots = [
-          { start: '14:00', end: '14:50' },
-          { start: '15:00', end: '15:50' },
-          { start: '16:00', end: '16:50' },
-          { start: '17:00', end: '17:50' },
+          { start: '14:00', end: '15:00' },
+          { start: '15:00', end: '16:00' },
+          { start: '16:00', end: '17:00' },
+          { start: '17:00', end: '18:00' },
         ]
 
         const allSlots = [...morningSlots, ...afternoonSlots]
@@ -88,19 +98,19 @@ async function main() {
         for (const slot of allSlots) {
           slots.push({
             therapistId: therapist.id,
-            date: new Date(currentDate),
+            date: new Date(currentDate), // 이미 UTC 기준으로 생성된 날짜
             startTime: slot.start,
             endTime: slot.end,
             isAvailable: true,
             isHoliday: false,
             isBufferBlocked: false,
-            maxCapacity: 1,
             currentBookings: 0,
           })
         }
       }
 
-      currentDate.setDate(currentDate.getDate() + 1)
+      // 다음 날 (UTC 기준으로 하루 추가)
+      currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000)
     }
 
     // 일괄 생성
@@ -124,18 +134,18 @@ async function main() {
     console.log(`  📊 총 ${slots.length}개 슬롯 처리`)
   }
 
-  // 4. 공휴일 추가
+  // 4. 공휴일 추가 (UTC 기준으로 정오 생성)
   console.log('\n\n📆 공휴일 추가 중...')
 
   const publicHolidays = [
-    { date: new Date(2025, 0, 1), reason: '신정' },
-    { date: new Date(2025, 2, 1), reason: '삼일절' },
-    { date: new Date(2025, 4, 5), reason: '어린이날' },
-    { date: new Date(2025, 5, 6), reason: '현충일' },
-    { date: new Date(2025, 7, 15), reason: '광복절' },
-    { date: new Date(2025, 9, 3), reason: '개천절' },
-    { date: new Date(2025, 9, 9), reason: '한글날' },
-    { date: new Date(2025, 11, 25), reason: '크리스마스' },
+    { date: new Date(Date.UTC(2025, 0, 1, 12, 0, 0, 0)), reason: '신정' },
+    { date: new Date(Date.UTC(2025, 2, 1, 12, 0, 0, 0)), reason: '삼일절' },
+    { date: new Date(Date.UTC(2025, 4, 5, 12, 0, 0, 0)), reason: '어린이날' },
+    { date: new Date(Date.UTC(2025, 5, 6, 12, 0, 0, 0)), reason: '현충일' },
+    { date: new Date(Date.UTC(2025, 7, 15, 12, 0, 0, 0)), reason: '광복절' },
+    { date: new Date(Date.UTC(2025, 9, 3, 12, 0, 0, 0)), reason: '개천절' },
+    { date: new Date(Date.UTC(2025, 9, 9, 12, 0, 0, 0)), reason: '한글날' },
+    { date: new Date(Date.UTC(2025, 11, 25, 12, 0, 0, 0)), reason: '크리스마스' },
   ]
 
   let publicHolidayCount = 0
