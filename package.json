@@ -10,6 +10,7 @@
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:therapists": "tsx scripts/seed-therapists.ts",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",

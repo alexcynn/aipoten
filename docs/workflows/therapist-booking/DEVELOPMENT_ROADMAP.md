@@ -8,41 +8,42 @@
 
 ---
 
-## Phase 1: 기초 인프라 및 인증 (1-2주)
+## Phase 1: 기초 인프라 및 인증 (1-2주) ✅ **완료**
 
-### 1.1 프로젝트 초기 설정
-- [ ] Next.js 15 프로젝트 구조 확인
-- [ ] TypeScript 설정 검증
-- [ ] ESLint, Prettier 설정
-- [ ] Git 브랜치 전략 수립
+### 1.1 프로젝트 초기 설정 ✅
+- [x] Next.js 15 프로젝트 구조 확인
+- [x] TypeScript 설정 검증
+- [x] ESLint, Prettier 설정
+- [x] Git 브랜치 전략 수립
 
-### 1.2 데이터베이스 설계
-- [ ] Prisma Schema 기본 구조 작성
+### 1.2 데이터베이스 설계 ✅
+- [x] Prisma Schema 기본 구조 작성
   - User 모델 (기존 확장)
   - Role enum (PARENT, THERAPIST, ADMIN)
-- [ ] 개발 환경: SQLite 설정
-- [ ] 운영 환경: PostgreSQL 준비
-- [ ] Migration 전략 수립
+- [x] 개발 환경: SQLite 설정
+- [x] 운영 환경: PostgreSQL 준비
+- [x] Migration 전략 수립
 
-### 1.3 인증 시스템
-- [ ] 기존 인증 시스템 확인 (NextAuth.js 등)
-- [ ] 역할 기반 접근 제어 (RBAC) 구현
+### 1.3 인증 시스템 ✅
+- [x] 기존 인증 시스템 확인 (NextAuth.js)
+- [x] NextAuth.js 설정 완료 (Account, Session, VerificationToken 모델)
+- [ ] 역할 기반 접근 제어 (RBAC) 미들웨어 구현 ⚠️ **추가 개발 필요**
   - `/api/therapist/*` → THERAPIST, ADMIN만
   - `/api/admin/*` → ADMIN만
   - `/api/my/*` → 인증된 모든 사용자
-- [ ] 미들웨어 구현 (role 체크)
 
 **산출물**:
 - ✅ Prisma schema 기본 구조
-- ✅ 인증 미들웨어
-- ✅ 역할별 라우팅 가드
+- ✅ User 모델 및 Role enum
+- ✅ NextAuth.js 인증 시스템
+- ⚠️ 역할별 라우팅 가드 (추가 개발 필요)
 
 ---
 
-## Phase 2: 치료사 온보딩 및 프로필 (2-3주)
+## Phase 2: 치료사 온보딩 및 프로필 (2-3주) ✅ **백엔드 완료** / ⚠️ **프론트엔드 추가 개발 필요**
 
-### 2.1 데이터 모델 구현
-- [ ] **TherapistProfile 모델**
+### 2.1 데이터 모델 구현 ✅
+- [x] **TherapistProfile 모델**
   ```prisma
   - userId (User 1:1 관계)
   - specialties (JSON: 치료 분야)
@@ -51,36 +52,59 @@
   - sessionFee (세션 비용)
   - approvalStatus (승인 상태)
   ```
-- [ ] **Certification 모델** (자격증)
-- [ ] **Experience 모델** (경력)
-- [ ] ApprovalStatus enum (PENDING, APPROVED, REJECTED, PENDING_ADDITIONAL_INFO)
+- [x] **Certification 모델** (자격증)
+- [x] **Experience 모델** (경력)
+- [x] ApprovalStatus enum (PENDING, APPROVED, REJECTED, PENDING_ADDITIONAL_INFO)
+- [x] TherapyType enum (SPEECH_THERAPY, SENSORY_INTEGRATION, 등)
+- [x] EmploymentType enum (INSTITUTION, FREELANCER)
 
-### 2.2 치료사 회원가입 API
-- [ ] `POST /api/auth/register/therapist`
-  - 기본 정보 (이름, 연락처, 주소)
-  - 전문 정보 (분야, 대상 연령, 지역, 비용)
-  - 자격증 및 경력 정보
-- [ ] 파일 업로드 (자격증 사본)
-- [ ] 유효성 검증
+### 2.2 치료사 회원가입 API ✅
+- [x] `POST /api/auth/register/therapist` - **완료**
+  - ✅ 기본 정보 (이름, 연락처, 주소)
+  - ✅ 전문 정보 (분야, 대상 연령, 지역, 비용)
+  - ✅ 자격증 및 경력 정보
+  - ✅ 트랜잭션으로 User + TherapistProfile + Certifications + Experiences 생성
+  - ✅ 비밀번호 해싱 (bcrypt)
+  - ✅ 이메일 중복 체크
+- [ ] 파일 업로드 (자격증 사본) ⚠️ **추가 개발 필요** (AWS S3 또는 Cloudinary 연동)
+- [x] 유효성 검증
 
-### 2.3 관리자 승인 시스템
-- [ ] `GET /api/admin/therapists/pending` (승인 대기 목록)
-- [ ] `POST /api/admin/therapists/[id]/approve` (승인)
-- [ ] `POST /api/admin/therapists/[id]/reject` (반려)
-- [ ] `POST /api/admin/therapists/[id]/request-info` (추가 자료 요청)
+### 2.3 관리자 승인 시스템 ✅
+- [x] `GET /api/admin/therapists` (목록 조회, 필터링 가능)
+- [x] `GET /api/admin/therapists/[id]` (상세 조회)
+- [x] `POST /api/admin/therapists/[id]/approve` (승인)
+- [x] `POST /api/admin/therapists/[id]/reject` (반려)
+- [x] `POST /api/admin/therapists/[id]/request-info` (추가 자료 요청)
 
-### 2.4 치료사 프로필 UI
+### 2.4 치료사 프로필 UI ⚠️ **추가 개발 필요**
 - [ ] 회원가입 3단계 폼
-  - Step 1: 기본 정보
-  - Step 2: 전문 정보
-  - Step 3: 자격증/경력
+  - [ ] Step 1: 기본 정보
+  - [ ] Step 2: 전문 정보
+  - [ ] Step 3: 자격증/경력
 - [ ] 관리자 승인 대시보드
 - [ ] 치료사 프로필 조회 페이지
 
+### 2.5 알림 시스템 ⚠️ **추가 개발 필요**
+- [ ] 치료사 가입 시 관리자에게 알림
+- [ ] 승인/반려 시 치료사에게 이메일 발송
+
+### 2.6 샘플 데이터 ✅
+- [x] 샘플 치료사 6명 생성 (5명 승인됨, 1명 대기중)
+- [x] 각 치료사마다 자격증 및 경력 정보
+- [x] Seed 스크립트: `npm run db:seed:therapists`
+
 **산출물**:
-- ✅ 치료사 온보딩 완전 플로우
-- ✅ 관리자 승인 시스템
-- ✅ 치료사 프로필 페이지
+- ✅ 치료사 온보딩 백엔드 API 완료
+- ✅ 관리자 승인 시스템 API 완료
+- ✅ 샘플 데이터 6명
+- ⚠️ UI 컴포넌트 (추후 구현)
+- ⚠️ 파일 업로드 시스템 (추후 구현)
+- ⚠️ 알림 시스템 (추후 구현)
+
+**파일 위치**:
+- API: `src/app/api/auth/register/therapist/route.ts`
+- API: `src/app/api/admin/therapists/*`
+- Seed: `scripts/seed-therapists.ts`
 
 ---
 
@@ -554,6 +578,54 @@
 3. **정산 시스템**은 금전이 관련되므로 정확성 최우선
 4. **클레임 시스템**은 분쟁 해결의 핵심 - 증거 자동 수집 필수
 5. **알림 발송 실패**는 대체 경로 반드시 구현
+
+---
+
+## 📊 Phase 1-2 완료 상태 (2025-01-14 업데이트)
+
+### ✅ 완료된 기능
+
+**Phase 1: 기초 인프라**
+- ✅ Next.js 15 + TypeScript + Prisma 설정
+- ✅ User 모델 및 Role enum (PARENT, THERAPIST, ADMIN)
+- ✅ NextAuth.js 인증 시스템 (Account, Session, VerificationToken)
+
+**Phase 2: 치료사 온보딩**
+- ✅ TherapistProfile, Certification, Experience 모델
+- ✅ `POST /api/auth/register/therapist` - 회원가입 API
+- ✅ 관리자 승인 시스템 API (approve, reject, request-info)
+- ✅ 샘플 치료사 데이터 6명 (`npm run db:seed:therapists`)
+
+**샘플 데이터**:
+| 이름 | 이메일 | 전문분야 | 지역 | 상태 |
+|------|--------|----------|------|------|
+| 김지은 | jieun.kim@therapist.com | 언어치료 | 강남구, 서초구 | ✅ 승인됨 |
+| 박민수 | minsu.park@therapist.com | 감각통합 | 서초구, 강남구 | ✅ 승인됨 |
+| 이수진 | sujin.lee@therapist.com | 놀이치료 | 송파구, 강동구 | ⏳ 승인 대기 |
+| 최영희 | younghee.choi@therapist.com | 미술치료 | 광진구, 성동구 | ✅ 승인됨 |
+| 정민호 | minho.jung@therapist.com | 언어+감각통합 | 강남구, 서초구 | ✅ 승인됨 |
+| 한소희 | sohee.han@therapist.com | 음악치료 | 마포구, 서대문구 | ✅ 승인됨 |
+
+**비밀번호**: `password123`
+
+### ⚠️ 추가 개발 필요 항목
+
+**Phase 1:**
+- [ ] 역할 기반 접근 제어 (RBAC) 미들웨어
+  - `/api/therapist/*` → THERAPIST, ADMIN만 접근 가능
+  - `/api/admin/*` → ADMIN만 접근 가능
+  - `/api/my/*` → 인증된 모든 사용자
+
+**Phase 2:**
+- [ ] **파일 업로드 시스템** (자격증 사본)
+  - AWS S3, Cloudinary 등 연동 필요
+- [ ] **UI 컴포넌트**
+  - 치료사 회원가입 3단계 폼
+  - 관리자 승인 대시보드
+  - 치료사 프로필 조회 페이지
+- [ ] **알림 시스템**
+  - 치료사 가입 시 관리자 알림
+  - 승인/반려 시 치료사 이메일 발송
 
 ---
 
