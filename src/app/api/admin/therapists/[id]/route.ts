@@ -35,6 +35,8 @@ export async function GET(
             createdAt: true
           }
         },
+        certifications: true,
+        experiences: true,
         consultations: {
           select: {
             id: true,
@@ -56,13 +58,25 @@ export async function GET(
     const formattedTherapist = {
       id: therapist.id,
       user: therapist.user,
-      specialty: therapist.specialty,
-      experience: therapist.experience,
+      gender: therapist.gender,
+      birthYear: therapist.birthYear,
+      address: therapist.address,
+      addressDetail: therapist.addressDetail,
+      specialties: therapist.specialties ? JSON.parse(therapist.specialties) : [],
+      childAgeRanges: therapist.childAgeRanges ? JSON.parse(therapist.childAgeRanges) : [],
+      serviceAreas: therapist.serviceAreas ? JSON.parse(therapist.serviceAreas) : [],
+      sessionFee: therapist.sessionFee,
       education: therapist.education,
-      certifications: JSON.parse(therapist.certifications || '[]'),
-      consultationFee: therapist.consultationFee,
-      description: therapist.description,
+      introduction: therapist.introduction,
+      certifications: therapist.certifications,
+      experiences: therapist.experiences,
+      approvalStatus: therapist.approvalStatus,
       status: therapist.status,
+      approvedAt: therapist.approvedAt?.toISOString(),
+      approvedBy: therapist.approvedBy,
+      rejectedAt: therapist.rejectedAt?.toISOString(),
+      rejectionReason: therapist.rejectionReason,
+      additionalInfoRequested: therapist.additionalInfoRequested,
       createdAt: therapist.createdAt.toISOString(),
       consultations: therapist.consultations
     }

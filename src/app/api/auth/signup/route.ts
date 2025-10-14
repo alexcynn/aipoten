@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
+import { handleDatabaseError } from '@/lib/db-error-handler'
 
 export async function POST(request: NextRequest) {
   try {
@@ -63,6 +64,8 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    console.log(`✅ User created successfully: ${email} (ID: ${user.id})`)
+
     return NextResponse.json(
       {
         message: '회원가입이 완료되었습니다.',
@@ -72,10 +75,10 @@ export async function POST(request: NextRequest) {
     )
 
   } catch (error) {
-    console.error('회원가입 오류:', error)
+    const dbError = handleDatabaseError(error, 'POST /api/auth/signup')
     return NextResponse.json(
-      { error: '서버 오류가 발생했습니다.' },
-      { status: 500 }
+      { error: dbError.message, errorCode: dbError.errorCode },
+      { status: dbError.statusCode }
     )
   }
 }

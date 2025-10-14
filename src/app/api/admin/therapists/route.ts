@@ -21,7 +21,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    const { status } = Object.fromEntries(request.nextUrl.searchParams)
+
     const therapists = await prisma.therapistProfile.findMany({
+      where: status ? { approvalStatus: status as any } : undefined,
       include: {
         user: {
           select: {
@@ -29,7 +32,9 @@ export async function GET(request: NextRequest) {
             email: true,
             phone: true
           }
-        }
+        },
+        certifications: true,
+        experiences: true,
       },
       orderBy: {
         createdAt: 'desc'
@@ -39,13 +44,22 @@ export async function GET(request: NextRequest) {
     const formattedTherapists = therapists.map(therapist => ({
       id: therapist.id,
       user: therapist.user,
-      specialty: therapist.specialty,
-      experience: therapist.experience,
+      gender: therapist.gender,
+      birthYear: therapist.birthYear,
+      address: therapist.address,
+      specialties: therapist.specialties ? JSON.parse(therapist.specialties) : [],
+      childAgeRanges: therapist.childAgeRanges ? JSON.parse(therapist.childAgeRanges) : [],
+      serviceAreas: therapist.serviceAreas ? JSON.parse(therapist.serviceAreas) : [],
+      sessionFee: therapist.sessionFee,
       education: therapist.education,
-      certifications: JSON.parse(therapist.certifications || '[]'),
-      consultationFee: therapist.consultationFee,
-      description: therapist.description,
+      certifications: therapist.certifications,
+      experiences: therapist.experiences,
+      approvalStatus: therapist.approvalStatus,
       status: therapist.status,
+      approvedAt: therapist.approvedAt?.toISOString(),
+      rejectedAt: therapist.rejectedAt?.toISOString(),
+      rejectionReason: therapist.rejectionReason,
+      additionalInfoRequested: therapist.additionalInfoRequested,
       createdAt: therapist.createdAt.toISOString()
     }))
 

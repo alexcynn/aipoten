@@ -363,17 +363,38 @@ enum Difficulty {
 model TherapistProfile {
   id              String   @id @default(cuid())
   userId          String   @unique
-  specialty       TherapyType
-  licenseNumber   String?  // 자격증 번호
-  experience      Int      // 경력 (년)
+
+  // 기본 정보
+  gender          Gender?
+  birthYear       Int?
+  address         String?
+  addressDetail   String?
+
+  // 전문 정보
+  specialties     String?  // JSON 배열: ["SPEECH_THERAPY", "SENSORY_INTEGRATION"]
+  childAgeRanges  String?  // JSON 배열: ["AGE_0_12", "AGE_13_24"]
+  serviceAreas    String?  // JSON 배열: ["GANGNAM", "SEOCHO"]
+  sessionFee      Int?     // 50분 기준 상담료 (원)
+
+  // 기존 필드 (호환성 유지)
+  specialty       TherapyType? // 레거시
+  licenseNumber   String?  // 자격증 번호 (레거시)
+  experience      Int?     // 경력 (년) (레거시)
   education       String?  // 학력
-  certifications  String?  // 자격증 (JSON)
   introduction    String?  // 자기소개
-  consultationFee Int      // 상담료 (원)
-  status          TherapistStatus @default(PENDING)
+  consultationFee Int?     // 상담료 (원) (레거시)
+
+  // 승인 관련
+  approvalStatus  ApprovalStatus @default(PENDING)
   approvedAt      DateTime?
+  approvedBy      String?  // 승인한 관리자 ID
   rejectedAt      DateTime?
   rejectionReason String?
+  additionalInfoRequested String? // 추가 자료 요청 내용
+
+  // 기존 상태 (레거시)
+  status          TherapistStatus @default(PENDING)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -382,17 +403,23 @@ model TherapistProfile {
   availability    TherapistAvailability[]
   matchingRequests MatchingRequest[]
   consultations   Consultation[]
+  certifications  Certification[]
+  experiences     Experience[]
 
   @@map("therapist_profiles")
 }
 
 enum TherapyType {
-  SPEECH_THERAPY     // 언어치료
-  OCCUPATIONAL_THERAPY // 작업치료
-  PHYSICAL_THERAPY   // 물리치료
-  PSYCHOLOGICAL_THERAPY // 심리치료
-  BEHAVIORAL_THERAPY // 행동치료
-  PLAY_THERAPY      // 놀이치료
+  SPEECH_THERAPY        // 언어치료
+  SENSORY_INTEGRATION   // 감각통합
+  PLAY_THERAPY          // 놀이치료
+  ART_THERAPY           // 미술치료
+  MUSIC_THERAPY         // 음악치료
+  OCCUPATIONAL_THERAPY  // 작업치료
+  COGNITIVE_THERAPY     // 인지치료
+  BEHAVIORAL_THERAPY    // 행동치료
+  PHYSICAL_THERAPY      // 물리치료 (레거시)
+  PSYCHOLOGICAL_THERAPY // 심리치료 (레거시)
 }
 
 enum TherapistStatus {
@@ -400,6 +427,13 @@ enum TherapistStatus {
   APPROVED  // 승인됨
   REJECTED  // 거절됨
   SUSPENDED // 정지됨
+}
+
+enum ApprovalStatus {
+  PENDING                    // 승인 대기
+  PENDING_ADDITIONAL_INFO    // 추가 자료 요청됨
+  APPROVED                   // 승인됨
+  REJECTED                   // 거절됨
 }
 
 // 치료사 가능 시간
@@ -416,6 +450,47 @@ model TherapistAvailability {
   therapist TherapistProfile @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 
   @@map("therapist_availability")
+}
+
+// 치료사 자격증
+model Certification {
+  id                String   @id @default(cuid())
+  therapistProfileId String
+  name              String   // 자격증명
+  issuingOrganization String // 발급기관
+  issueDate         DateTime // 취득일
+  filePath          String?  // 자격증 사본 파일 경로
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // 관계
+  therapistProfile TherapistProfile @relation(fields: [therapistProfileId], references: [id], onDelete: Cascade)
+
+  @@map("certifications")
+}
+
+// 치료사 경력
+model Experience {
+  id                String         @id @default(cuid())
+  therapistProfileId String
+  employmentType    EmploymentType // 기관 또는 프리랜서
+  institutionName   String?        // 기관명 (기관인 경우)
+  specialty         TherapyType    // 치료분야
+  startDate         DateTime       // 시작일
+  endDate           DateTime?      // 종료일 (현재 재직 중이면 null)
+  description       String?        // 설명
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  // 관계
+  therapistProfile TherapistProfile @relation(fields: [therapistProfileId], references: [id], onDelete: Cascade)
+
+  @@map("experiences")
+}
+
+enum EmploymentType {
+  INSTITUTION  // 기관
+  FREELANCER   // 프리랜서
 }
 
 // 매칭 요청

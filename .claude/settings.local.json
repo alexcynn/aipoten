@@ -11,7 +11,8 @@
       "Bash(copy srcappchildren[id]page.tsx srcappparentchildren[id]page.tsx)",
       "Bash(npx tsx:*)",
       "WebSearch",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(copy src/app/signup/page.tsx src/app/signup/parent/page.tsx)"
     ],
     "deny": [],
     "ask": []

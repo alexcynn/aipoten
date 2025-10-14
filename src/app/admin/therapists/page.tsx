@@ -6,6 +6,24 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AdminLayout from '@/components/layout/AdminLayout'
 
+interface Certification {
+  id: string
+  name: string
+  issuingOrganization: string
+  issueDate: string
+  filePath?: string
+}
+
+interface Experience {
+  id: string
+  employmentType: string
+  institutionName?: string
+  specialty: string
+  startDate: string
+  endDate?: string
+  description?: string
+}
+
 interface TherapistProfile {
   id: string
   user: {
@@ -13,13 +31,22 @@ interface TherapistProfile {
     email: string
     phone: string
   }
-  specialty: string
-  experience: number
-  education: string
-  certifications: string[]
-  consultationFee: number
-  description: string
+  gender?: string
+  birthYear?: number
+  address?: string
+  specialties: string[]
+  childAgeRanges: string[]
+  serviceAreas: string[]
+  sessionFee?: number
+  education?: string
+  certifications: Certification[]
+  experiences: Experience[]
+  approvalStatus: string
   status: string
+  approvedAt?: string
+  rejectedAt?: string
+  rejectionReason?: string
+  additionalInfoRequested?: string
   createdAt: string
 }
 
@@ -28,7 +55,7 @@ export default function AdminTherapistsPage() {
   const router = useRouter()
   const [therapists, setTherapists] = useState<TherapistProfile[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('ALL')
+  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'PENDING_ADDITIONAL_INFO'>('PENDING')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -44,11 +71,12 @@ export default function AdminTherapistsPage() {
     }
 
     fetchTherapists()
-  }, [session, status, router])
+  }, [session, status, router, filter])
 
   const fetchTherapists = async () => {
     try {
-      const response = await fetch('/api/admin/therapists')
+      const queryParam = filter !== 'ALL' ? `?status=${filter}` : ''
+      const response = await fetch(`/api/admin/therapists${queryParam}`)
       if (response.ok) {
         const data = await response.json()
         setTherapists(data)
@@ -61,55 +89,96 @@ export default function AdminTherapistsPage() {
   }
 
   const handleApprove = async (therapistId: string) => {
+    if (!confirm('이 치료사를 승인하시겠습니까?')) return
+
     try {
-      const response = await fetch(`/api/admin/therapists/${therapistId}`, {
-        method: 'PUT',
+      const response = await fetch(`/api/admin/therapists/${therapistId}/approve`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: 'APPROVED' }),
       })
 
       if (response.ok) {
+        alert('치료사가 승인되었습니다.')
         await fetchTherapists()
+      } else {
+        const data = await response.json()
+        alert(data.error || '승인에 실패했습니다.')
       }
     } catch (error) {
       console.error('치료사 승인 중 오류 발생:', error)
+      alert('승인 중 오류가 발생했습니다.')
     }
   }
 
   const handleReject = async (therapistId: string) => {
+    const reason = prompt('반려 사유를 입력해주세요:')
+    if (!reason) return
+
     try {
-      const response = await fetch(`/api/admin/therapists/${therapistId}`, {
-        method: 'PUT',
+      const response = await fetch(`/api/admin/therapists/${therapistId}/reject`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: 'REJECTED' }),
+        body: JSON.stringify({ reason }),
       })
 
       if (response.ok) {
+        alert('치료사 신청이 반려되었습니다.')
         await fetchTherapists()
+      } else {
+        const data = await response.json()
+        alert(data.error || '반려에 실패했습니다.')
       }
     } catch (error) {
-      console.error('치료사 거부 중 오류 발생:', error)
+      console.error('치료사 반려 중 오류 발생:', error)
+      alert('반려 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleRequestInfo = async (therapistId: string) => {
+    const requestMessage = prompt('요청할 추가 정보를 입력해주세요:')
+    if (!requestMessage) return
+
+    try {
+      const response = await fetch(`/api/admin/therapists/${therapistId}/request-info`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ requestMessage }),
+      })
+
+      if (response.ok) {
+        alert('추가 자료 요청이 전송되었습니다.')
+        await fetchTherapists()
+      } else {
+        const data = await response.json()
+        alert(data.error || '요청에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('추가 자료 요청 중 오류 발생:', error)
+      alert('요청 중 오류가 발생했습니다.')
     }
   }
 
   const filteredTherapists = therapists.filter(therapist => {
     if (filter === 'ALL') return true
-    return therapist.status === filter
+    return therapist.approvalStatus === filter
   })
 
   const getSpecialtyLabel = (specialty: string) => {
     const labels: { [key: string]: string } = {
-      SPEECH: '언어치료',
-      OCCUPATIONAL: '작업치료',
-      PHYSICAL: '물리치료',
-      BEHAVIORAL: '행동치료',
-      ART: '미술치료',
-      MUSIC: '음악치료',
-      PLAY: '놀이치료'
+      SPEECH_THERAPY: '언어치료',
+      SENSORY_INTEGRATION: '감각통합',
+      PLAY_THERAPY: '놀이치료',
+      ART_THERAPY: '미술치료',
+      MUSIC_THERAPY: '음악치료',
+      OCCUPATIONAL_THERAPY: '작업치료',
+      COGNITIVE_THERAPY: '인지치료',
+      BEHAVIORAL_THERAPY: '행동치료',
     }
     return labels[specialty] || specialty
   }
@@ -117,6 +186,7 @@ export default function AdminTherapistsPage() {
   const getStatusBadge = (status: string) => {
     const badges: { [key: string]: { bg: string; text: string; label: string } } = {
       PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: '승인 대기' },
+      PENDING_ADDITIONAL_INFO: { bg: 'bg-orange-100', text: 'text-orange-800', label: '추가 자료 요청' },
       APPROVED: { bg: 'bg-green-100', text: 'text-green-800', label: '승인됨' },
       REJECTED: { bg: 'bg-red-100', text: 'text-red-800', label: '거부됨' }
     }
@@ -156,24 +226,25 @@ export default function AdminTherapistsPage() {
         <div className="mb-6">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
-              {['ALL', 'PENDING', 'APPROVED', 'REJECTED'].map((status) => (
+              {['ALL', 'PENDING', 'PENDING_ADDITIONAL_INFO', 'APPROVED', 'REJECTED'].map((statusFilter) => (
                 <button
-                  key={status}
-                  onClick={() => setFilter(status as any)}
+                  key={statusFilter}
+                  onClick={() => setFilter(statusFilter as any)}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    filter === status
+                    filter === statusFilter
                       ? 'border-aipoten-green text-aipoten-green'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  {status === 'ALL' && '전체'}
-                  {status === 'PENDING' && '승인 대기'}
-                  {status === 'APPROVED' && '승인됨'}
-                  {status === 'REJECTED' && '거부됨'}
+                  {statusFilter === 'ALL' && '전체'}
+                  {statusFilter === 'PENDING' && '승인 대기'}
+                  {statusFilter === 'PENDING_ADDITIONAL_INFO' && '추가 자료 요청'}
+                  {statusFilter === 'APPROVED' && '승인됨'}
+                  {statusFilter === 'REJECTED' && '거부됨'}
                   <span className="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs">
-                    {status === 'ALL'
+                    {statusFilter === 'ALL'
                       ? therapists.length
-                      : therapists.filter(t => t.status === status).length
+                      : therapists.filter(t => t.approvalStatus === statusFilter).length
                     }
                   </span>
                 </button>
@@ -214,17 +285,23 @@ export default function AdminTherapistsPage() {
                               {therapist.user.name}
                             </div>
                             <div className="ml-2">
-                              {getStatusBadge(therapist.status)}
+                              {getStatusBadge(therapist.approvalStatus)}
                             </div>
                           </div>
                           <div className="text-sm text-gray-500">
                             {therapist.user.email} • {therapist.user.phone}
                           </div>
                           <div className="text-sm text-gray-600 mt-1">
-                            {getSpecialtyLabel(therapist.specialty)} •
-                            경력 {therapist.experience}년 •
-                            상담료 ₩{therapist.consultationFee.toLocaleString()}
+                            {therapist.specialties.map(s => getSpecialtyLabel(s)).join(', ')} •
+                            경력 {therapist.experiences.length}건 •
+                            {therapist.sessionFee && `상담료 ₩${therapist.sessionFee.toLocaleString()}`}
                           </div>
+                          {therapist.serviceAreas.length > 0 && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              서비스 지역: {therapist.serviceAreas.slice(0, 3).join(', ')}
+                              {therapist.serviceAreas.length > 3 && ` 외 ${therapist.serviceAreas.length - 3}곳`}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -234,7 +311,29 @@ export default function AdminTherapistsPage() {
                         >
                           상세보기
                         </Link>
-                        {therapist.status === 'PENDING' && (
+                        {therapist.approvalStatus === 'PENDING' && (
+                          <>
+                            <button
+                              onClick={() => handleApprove(therapist.id)}
+                              className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                            >
+                              승인
+                            </button>
+                            <button
+                              onClick={() => handleRequestInfo(therapist.id)}
+                              className="bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700"
+                            >
+                              추가 자료 요청
+                            </button>
+                            <button
+                              onClick={() => handleReject(therapist.id)}
+                              className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                            >
+                              거부
+                            </button>
+                          </>
+                        )}
+                        {therapist.approvalStatus === 'PENDING_ADDITIONAL_INFO' && (
                           <>
                             <button
                               onClick={() => handleApprove(therapist.id)}
@@ -253,21 +352,29 @@ export default function AdminTherapistsPage() {
                       </div>
                     </div>
 
-                    {therapist.description && (
-                      <div className="mt-3">
-                        <p className="text-sm text-gray-600 line-clamp-2">
-                          {therapist.description}
+                    {therapist.additionalInfoRequested && (
+                      <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-md">
+                        <p className="text-sm text-orange-800">
+                          <span className="font-medium">추가 자료 요청:</span> {therapist.additionalInfoRequested}
+                        </p>
+                      </div>
+                    )}
+
+                    {therapist.rejectionReason && (
+                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-sm text-red-800">
+                          <span className="font-medium">반려 사유:</span> {therapist.rejectionReason}
                         </p>
                       </div>
                     )}
 
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {therapist.certifications.map((cert, index) => (
+                      {therapist.certifications.map((cert) => (
                         <span
-                          key={index}
+                          key={cert.id}
                           className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded"
                         >
-                          {cert}
+                          {cert.name}
                         </span>
                       ))}
                     </div>
