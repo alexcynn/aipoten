@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Header from '@/components/layout/Header'
 
 interface Therapist {
   id: string
@@ -30,6 +31,8 @@ export default function TherapistsSearchPage() {
   const [specialty, setSpecialty] = useState('')
   const [serviceArea, setServiceArea] = useState('')
   const [maxFee, setMaxFee] = useState('')
+  const [dayOfWeek, setDayOfWeek] = useState('')
+  const [timeRange, setTimeRange] = useState('')
 
   const router = useRouter()
 
@@ -42,6 +45,8 @@ export default function TherapistsSearchPage() {
       if (specialty) params.append('specialty', specialty)
       if (serviceArea) params.append('serviceArea', serviceArea)
       if (maxFee) params.append('maxFee', maxFee)
+      if (dayOfWeek) params.append('dayOfWeek', dayOfWeek)
+      if (timeRange) params.append('timeRange', timeRange)
 
       const response = await fetch(`/api/therapists/search?${params}`)
       const data = await response.json()
@@ -79,14 +84,33 @@ export default function TherapistsSearchPage() {
     { value: 'GANGDONG', label: '강동구' },
   ]
 
+  const dayOfWeekOptions = [
+    { value: '', label: '전체' },
+    { value: '0', label: '일요일' },
+    { value: '1', label: '월요일' },
+    { value: '2', label: '화요일' },
+    { value: '3', label: '수요일' },
+    { value: '4', label: '목요일' },
+    { value: '5', label: '금요일' },
+    { value: '6', label: '토요일' },
+  ]
+
+  const timeRangeOptions = [
+    { value: '', label: '전체' },
+    { value: 'MORNING', label: '오전 (06:00-12:00)' },
+    { value: 'AFTERNOON', label: '오후 (12:00-18:00)' },
+    { value: 'EVENING', label: '저녁 (18:00-22:00)' },
+  ]
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">치료사 찾기</h1>
 
         {/* 검색 필터 */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 전문 분야
@@ -114,6 +138,40 @@ export default function TherapistsSearchPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               >
                 {areaOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                요일
+              </label>
+              <select
+                value={dayOfWeek}
+                onChange={(e) => setDayOfWeek(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              >
+                {dayOfWeekOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                시간대
+              </label>
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              >
+                {timeRangeOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>

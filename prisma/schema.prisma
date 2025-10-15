@@ -12,15 +12,17 @@ datasource db {
 
 // 사용자 관리
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  password  String?  // NextAuth 사용 시 null 가능
-  phone     String?  // 전화번호 추가
-  role      Role     @default(PARENT)
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  password      String?  // NextAuth 사용 시 null 가능
+  phone         String?  // 전화번호 추가
+  address       String?  // 방문 주소
+  addressDetail String?  // 상세 주소
+  role          Role     @default(PARENT)
+  avatar        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // 관계
   posts                Post[]
@@ -663,6 +665,7 @@ model Booking {
   sessionType           SessionType         // 상담 or 치료
   sessionCount          Int                 // 회차 (1, 4, 8, 12)
   completedSessions     Int                 @default(0) // 완료된 세션 수
+  bookingGroupId        String?             // 여러 예약을 하나의 그룹으로 묶기 (치료 시 사용)
 
   status                BookingStatus       @default(PENDING_CONFIRMATION)
 

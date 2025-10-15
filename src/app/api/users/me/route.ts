@@ -16,6 +16,9 @@ export async function GET() {
         id: true,
         name: true,
         email: true,
+        phone: true,
+        address: true,
+        addressDetail: true,
         avatar: true,
         role: true,
         createdAt: true,
@@ -44,11 +47,14 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 })
     }
 
-    const { name, avatar } = await request.json()
+    const { name, avatar, phone, address, addressDetail } = await request.json()
 
     const updateData: Record<string, unknown> = {}
     if (name !== undefined) updateData.name = name
     if (avatar !== undefined) updateData.avatar = avatar
+    if (phone !== undefined) updateData.phone = phone
+    if (address !== undefined) updateData.address = address
+    if (addressDetail !== undefined) updateData.addressDetail = addressDetail
 
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
@@ -57,6 +63,9 @@ export async function PUT(request: NextRequest) {
         id: true,
         name: true,
         email: true,
+        phone: true,
+        address: true,
+        addressDetail: true,
         avatar: true,
         role: true,
         createdAt: true,

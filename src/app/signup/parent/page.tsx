@@ -12,6 +12,8 @@ export default function SignupPage() {
     password: '',
     confirmPassword: '',
     phone: '',
+    address: '',
+    addressDetail: '',
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -66,6 +68,8 @@ export default function SignupPage() {
           email: formData.email,
           password: formData.password,
           phone: formData.phone,
+          address: formData.address,
+          addressDetail: formData.addressDetail,
         }),
       })
 
@@ -167,6 +171,36 @@ export default function SignupPage() {
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green focus:z-10 sm:text-sm"
                 placeholder="전화번호 (선택사항)"
                 value={formData.phone}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                주소
+              </label>
+              <input
+                id="address"
+                name="address"
+                type="text"
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green focus:z-10 sm:text-sm"
+                placeholder="예: 서울시 강남구 테헤란로 123 (선택사항)"
+                value={formData.address}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="addressDetail" className="block text-sm font-medium text-gray-700">
+                상세 주소
+              </label>
+              <input
+                id="addressDetail"
+                name="addressDetail"
+                type="text"
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green focus:z-10 sm:text-sm"
+                placeholder="예: 101동 1234호 (선택사항)"
+                value={formData.addressDetail}
                 onChange={handleChange}
               />
             </div>

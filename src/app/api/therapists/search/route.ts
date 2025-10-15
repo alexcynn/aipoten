@@ -11,6 +11,8 @@ import { prisma } from '@/lib/prisma'
  * - childAgeRange: 아이 연령 범위 (예: "AGE_0_12", "AGE_13_24")
  * - startDate: 가용성 검색 시작 날짜 (예: "2025-11-01")
  * - endDate: 가용성 검색 종료 날짜 (예: "2025-11-30")
+ * - dayOfWeek: 요일 (0-6: 0=일요일, 1=월요일, ..., 6=토요일)
+ * - timeRange: 시간대 ("MORNING", "AFTERNOON", "EVENING")
  * - minFee: 최소 상담료
  * - maxFee: 최대 상담료
  * - gender: 성별 (MALE, FEMALE)
@@ -27,6 +29,8 @@ export async function GET(request: NextRequest) {
     const childAgeRange = searchParams.get('childAgeRange')
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
+    const dayOfWeek = searchParams.get('dayOfWeek')
+    const timeRange = searchParams.get('timeRange')
     const minFee = searchParams.get('minFee')
     const maxFee = searchParams.get('maxFee')
     const gender = searchParams.get('gender')
@@ -39,6 +43,8 @@ export async function GET(request: NextRequest) {
       childAgeRange,
       startDate,
       endDate,
+      dayOfWeek,
+      timeRange,
       minFee,
       maxFee,
       gender,
@@ -93,39 +99,76 @@ export async function GET(request: NextRequest) {
     // 가용성 필터 (날짜 범위가 지정된 경우)
     let therapistIdsWithAvailability: string[] | undefined
 
-    if (startDate && endDate) {
-      const [startYear, startMonth, startDay] = startDate.split('-').map(Number)
-      const [endYear, endMonth, endDay] = endDate.split('-').map(Number)
+    // 요일 또는 시간대 필터가 있는 경우 가용성 필터 활성화
+    if ((startDate && endDate) || dayOfWeek || timeRange) {
+      const timeSlotWhere: any = {
+        isAvailable: true,
+        isHoliday: false,
+        isBufferBlocked: false,
+        currentBookings: 0
+      }
 
-      const start = new Date(Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0))
-      const end = new Date(Date.UTC(endYear, endMonth - 1, endDay, 23, 59, 59, 999))
+      // 날짜 범위 필터
+      if (startDate && endDate) {
+        const [startYear, startMonth, startDay] = startDate.split('-').map(Number)
+        const [endYear, endMonth, endDay] = endDate.split('-').map(Number)
 
-      console.log('📅 가용성 검색 날짜 범위:', {
-        start: start.toISOString(),
-        end: end.toISOString()
-      })
+        const start = new Date(Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0))
+        const end = new Date(Date.UTC(endYear, endMonth - 1, endDay, 23, 59, 59, 999))
 
-      // 해당 기간에 가용한 슬롯이 있는 치료사 찾기
+        console.log('📅 가용성 검색 날짜 범위:', {
+          start: start.toISOString(),
+          end: end.toISOString()
+        })
+
+        timeSlotWhere.date = {
+          gte: start,
+          lte: end
+        }
+      }
+
+      // 해당 조건에 맞는 슬롯 조회
       const availableSlots = await prisma.timeSlot.findMany({
-        where: {
-          date: {
-            gte: start,
-            lte: end
-          },
-          isAvailable: true,
-          isHoliday: false,
-          isBufferBlocked: false,
-          currentBookings: 0
-        },
+        where: timeSlotWhere,
         select: {
-          therapistId: true
-        },
-        distinct: ['therapistId']
+          therapistId: true,
+          date: true,
+          startTime: true
+        }
       })
 
-      therapistIdsWithAvailability = availableSlots.map(slot => slot.therapistId)
+      // 요일 필터링 (JavaScript에서 처리)
+      let filteredSlots = availableSlots
 
-      console.log(`✅ ${therapistIdsWithAvailability.length}명의 치료사가 해당 기간에 가용`)
+      if (dayOfWeek !== null && dayOfWeek !== undefined) {
+        const targetDayOfWeek = parseInt(dayOfWeek)
+        filteredSlots = filteredSlots.filter(slot => {
+          const slotDay = new Date(slot.date).getUTCDay()
+          return slotDay === targetDayOfWeek
+        })
+        console.log(`📆 요일 필터 (${targetDayOfWeek}): ${filteredSlots.length}개 슬롯`)
+      }
+
+      // 시간대 필터링
+      if (timeRange) {
+        const timeRangeMap: { [key: string]: [string, string] } = {
+          'MORNING': ['06:00', '12:00'],
+          'AFTERNOON': ['12:00', '18:00'],
+          'EVENING': ['18:00', '22:00']
+        }
+
+        const [rangeStart, rangeEnd] = timeRangeMap[timeRange] || ['00:00', '23:59']
+
+        filteredSlots = filteredSlots.filter(slot => {
+          return slot.startTime >= rangeStart && slot.startTime < rangeEnd
+        })
+        console.log(`⏰ 시간대 필터 (${timeRange}): ${filteredSlots.length}개 슬롯`)
+      }
+
+      // 중복 제거하여 치료사 ID 목록 생성
+      therapistIdsWithAvailability = [...new Set(filteredSlots.map(slot => slot.therapistId))]
+
+      console.log(`✅ ${therapistIdsWithAvailability.length}명의 치료사가 가용 조건 충족`)
 
       // 가용한 치료사가 없으면 빈 결과 반환
       if (therapistIdsWithAvailability.length === 0) {

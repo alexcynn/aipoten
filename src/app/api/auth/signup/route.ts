@@ -5,7 +5,7 @@ import { handleDatabaseError } from '@/lib/db-error-handler'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password, phone } = await request.json()
+    const { name, email, password, phone, address, addressDetail } = await request.json()
 
     // 입력 데이터 검증
     if (!name || !email || !password) {
@@ -54,12 +54,16 @@ export async function POST(request: NextRequest) {
         email,
         password: hashedPassword,
         phone: phone || null,
+        address: address || null,
+        addressDetail: addressDetail || null,
       },
       select: {
         id: true,
         name: true,
         email: true,
         phone: true,
+        address: true,
+        addressDetail: true,
         createdAt: true,
       }
     })

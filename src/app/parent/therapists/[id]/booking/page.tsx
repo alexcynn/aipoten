@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
+import Header from '@/components/layout/Header'
 
 interface TimeSlot {
   id: string
@@ -32,14 +33,36 @@ export default function BookingPage() {
   const [error, setError] = useState('')
 
   // 폼 데이터
-  const [selectedDate, setSelectedDate] = useState('')
-  const [selectedTimeSlotId, setSelectedTimeSlotId] = useState('')
+  const [selectedTimeSlotIds, setSelectedTimeSlotIds] = useState<string[]>([])
   const [selectedChildId, setSelectedChildId] = useState('')
   const [sessionType, setSessionType] = useState<'CONSULTATION' | 'THERAPY'>('CONSULTATION')
   const [sessionCount, setSessionCount] = useState(1)
   const [visitAddress, setVisitAddress] = useState('')
   const [visitAddressDetail, setVisitAddressDetail] = useState('')
   const [parentNote, setParentNote] = useState('')
+  const [userInfo, setUserInfo] = useState<any>(null)
+
+  // 사용자 정보 가져오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await fetch('/api/users/me')
+        if (response.ok) {
+          const data = await response.json()
+          setUserInfo(data)
+          if (data.address) {
+            setVisitAddress(data.address)
+          }
+          if (data.addressDetail) {
+            setVisitAddressDetail(data.addressDetail)
+          }
+        }
+      } catch (err) {
+        console.error('사용자 정보 조회 실패:', err)
+      }
+    }
+    fetchUserInfo()
+  }, [])
 
   // 자녀 목록 가져오기
   useEffect(() => {
@@ -93,16 +116,37 @@ export default function BookingPage() {
     }
   }, [therapistId])
 
+  // 슬롯 선택/해제 처리
+  const handleSlotToggle = (slotId: string) => {
+    if (sessionType === 'CONSULTATION') {
+      // 컨설팅은 1개만 선택
+      setSelectedTimeSlotIds([slotId])
+    } else {
+      // 치료는 여러 개 선택 가능
+      if (selectedTimeSlotIds.includes(slotId)) {
+        setSelectedTimeSlotIds(selectedTimeSlotIds.filter(id => id !== slotId))
+      } else {
+        if (selectedTimeSlotIds.length < sessionCount) {
+          setSelectedTimeSlotIds([...selectedTimeSlotIds, slotId])
+        } else {
+          setError(`최대 ${sessionCount}개의 슬롯만 선택할 수 있습니다.`)
+        }
+      }
+    }
+  }
+
   // 요금 계산
   const calculateFee = () => {
-    const baseFeee = 80000 // 기본 세션 비용
+    const baseFee = 80000 // 기본 세션 비용
     let discountRate = 0
 
-    if (sessionCount >= 12) discountRate = 20
-    else if (sessionCount >= 8) discountRate = 15
-    else if (sessionCount >= 4) discountRate = 10
+    const count = sessionType === 'CONSULTATION' ? 1 : sessionCount
 
-    const originalFee = baseFeee * sessionCount
+    if (count >= 12) discountRate = 20
+    else if (count >= 8) discountRate = 15
+    else if (count >= 4) discountRate = 10
+
+    const originalFee = baseFee * count
     const finalFee = Math.round(originalFee * (1 - discountRate / 100))
 
     return { originalFee, discountRate, finalFee }
@@ -110,8 +154,19 @@ export default function BookingPage() {
 
   // 예약 생성
   const handleSubmit = async () => {
-    if (!selectedTimeSlotId || !selectedChildId) {
+    if (selectedTimeSlotIds.length === 0 || !selectedChildId) {
       setError('필수 정보를 모두 입력해주세요.')
+      return
+    }
+
+    // 치료 타입인 경우 선택한 슬롯 수가 sessionCount와 일치하는지 확인
+    if (sessionType === 'THERAPY' && selectedTimeSlotIds.length !== sessionCount) {
+      setError(`${sessionCount}개의 슬롯을 모두 선택해주세요.`)
+      return
+    }
+
+    if (!visitAddress) {
+      setError('방문 주소를 입력해주세요.')
       return
     }
 
@@ -123,11 +178,11 @@ export default function BookingPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          timeSlotId: selectedTimeSlotId,
+          timeSlotIds: selectedTimeSlotIds,
           childId: selectedChildId,
           sessionType,
           sessionCount,
-          visitAddress: visitAddress || undefined,
+          visitAddress,
           visitAddressDetail: visitAddressDetail || undefined,
           parentNote: parentNote || undefined,
         }),
@@ -136,7 +191,9 @@ export default function BookingPage() {
       const data = await response.json()
 
       if (response.ok) {
-        router.push(`/parent/bookings/${data.booking.id}`)
+        // 첫 번째 예약 ID로 이동
+        const firstBookingId = data.bookings?.[0]?.id || data.booking?.id
+        router.push(`/parent/bookings/${firstBookingId}`)
       } else {
         setError(data.error || '예약 생성에 실패했습니다.')
       }
@@ -150,16 +207,18 @@ export default function BookingPage() {
   const { originalFee, discountRate, finalFee } = calculateFee()
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-3xl mx-auto px-4">
-        <Link
-          href={`/parent/therapists/${therapistId}`}
-          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
-        >
-          ← 치료사 정보로 돌아가기
-        </Link>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="py-8">
+        <div className="max-w-3xl mx-auto px-4">
+          <Link
+            href={`/parent/therapists/${therapistId}`}
+            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
+          >
+            ← 치료사 정보로 돌아가기
+          </Link>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">예약하기</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">예약하기</h1>
 
         {/* 진행 단계 표시 */}
         <div className="mb-8">
@@ -212,6 +271,15 @@ export default function BookingPage() {
                 예약 날짜와 시간을 선택하세요
               </h2>
 
+              {sessionType === 'THERAPY' && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-blue-800">
+                    치료 세션 {sessionCount}회를 예약합니다. {sessionCount}개의 시간 슬롯을 선택해주세요.
+                    (현재 {selectedTimeSlotIds.length}/{sessionCount}개 선택됨)
+                  </p>
+                </div>
+              )}
+
               {isLoading ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
@@ -237,12 +305,9 @@ export default function BookingPage() {
                         {slots.map((slot) => (
                           <button
                             key={slot.id}
-                            onClick={() => {
-                              setSelectedTimeSlotId(slot.id)
-                              setSelectedDate(date)
-                            }}
+                            onClick={() => handleSlotToggle(slot.id)}
                             className={`px-4 py-2 rounded-md text-sm ${
-                              selectedTimeSlotId === slot.id
+                              selectedTimeSlotIds.includes(slot.id)
                                 ? 'bg-green-600 text-white'
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
@@ -259,7 +324,7 @@ export default function BookingPage() {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setStep(2)}
-                  disabled={!selectedTimeSlotId}
+                  disabled={selectedTimeSlotIds.length === 0}
                   className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   다음
@@ -308,6 +373,8 @@ export default function BookingPage() {
                         onChange={(e) => {
                           setSessionType(e.target.value as 'CONSULTATION')
                           setSessionCount(1)
+                          setSelectedTimeSlotIds([])
+                          setStep(1)
                         }}
                         className="mr-2"
                       />
@@ -318,7 +385,11 @@ export default function BookingPage() {
                         type="radio"
                         value="THERAPY"
                         checked={sessionType === 'THERAPY'}
-                        onChange={(e) => setSessionType(e.target.value as 'THERAPY')}
+                        onChange={(e) => {
+                          setSessionType(e.target.value as 'THERAPY')
+                          setSelectedTimeSlotIds([])
+                          setStep(1)
+                        }}
                         className="mr-2"
                       />
                       치료 (정기 세션)
@@ -338,7 +409,11 @@ export default function BookingPage() {
                         return (
                           <button
                             key={count}
-                            onClick={() => setSessionCount(count)}
+                            onClick={() => {
+                              setSessionCount(count)
+                              setSelectedTimeSlotIds([])
+                              setStep(1)
+                            }}
                             className={`px-4 py-3 rounded-md text-sm border ${
                               sessionCount === count
                                 ? 'border-green-600 bg-green-50 text-green-700'
@@ -361,14 +436,20 @@ export default function BookingPage() {
                 {/* 방문 주소 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    방문 주소
+                    방문 주소 *
                   </label>
+                  {!userInfo?.address && (
+                    <p className="text-sm text-amber-600 mb-2">
+                      ℹ️ 회원 정보에 주소가 등록되지 않았습니다. 주소를 입력해주세요.
+                    </p>
+                  )}
                   <input
                     type="text"
                     value={visitAddress}
                     onChange={(e) => setVisitAddress(e.target.value)}
                     placeholder="예: 서울시 강남구 테헤란로 123"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
                   />
                 </div>
 
@@ -427,11 +508,17 @@ export default function BookingPage() {
               <div className="space-y-4 mb-6">
                 <div className="border-b pb-3">
                   <h3 className="text-sm font-medium text-gray-500">예약 날짜/시간</h3>
-                  <p className="text-gray-900">
-                    {new Date(selectedDate).toLocaleDateString('ko-KR')}{' '}
-                    {availableSlots.find(s => s.id === selectedTimeSlotId)?.startTime} -{' '}
-                    {availableSlots.find(s => s.id === selectedTimeSlotId)?.endTime}
-                  </p>
+                  <div className="space-y-1">
+                    {selectedTimeSlotIds.map((slotId) => {
+                      const slot = availableSlots.find(s => s.id === slotId)
+                      if (!slot) return null
+                      return (
+                        <p key={slotId} className="text-gray-900">
+                          {new Date(slot.date).toLocaleDateString('ko-KR')} {slot.startTime} - {slot.endTime}
+                        </p>
+                      )
+                    })}
+                  </div>
                 </div>
 
                 <div className="border-b pb-3">
@@ -501,6 +588,7 @@ export default function BookingPage() {
               </div>
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>
