@@ -628,15 +628,35 @@ export default function ParentDashboardPage() {
                 {/* 치료사 찾기 탭 */}
                 {activeTab === 'therapists' && (
                   <div className="space-y-6">
-                    {/* 헤더와 검색 버튼 */}
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-gray-900">전문 치료사 찾기</h3>
-                      <Link
-                        href="/parent/therapists"
-                        className="inline-flex items-center px-6 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors font-medium"
-                      >
-                        전체 치료사 검색 →
-                      </Link>
+                    {/* 두 가지 검색 옵션 */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* 방문 컨설팅 찾기 */}
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 border-2 border-blue-200 hover:border-blue-400 transition-all">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">방문 컨설팅 찾기</h3>
+                        <p className="text-sm text-gray-600 mb-4">
+                          언어 발달 전문 치료사의 1회 컨설팅
+                        </p>
+                        <Link
+                          href="/parent/therapists?type=consultation"
+                          className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium w-full justify-center"
+                        >
+                          언어치료 컨설팅 예약하기 →
+                        </Link>
+                      </div>
+
+                      {/* 치료사 찾기 */}
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-6 border-2 border-green-200 hover:border-green-400 transition-all">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">치료사 찾기</h3>
+                        <p className="text-sm text-gray-600 mb-4">
+                          정기 치료를 위한 전문 치료사 검색
+                        </p>
+                        <Link
+                          href="/parent/therapists?type=therapy"
+                          className="inline-flex items-center px-6 py-3 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors font-medium w-full justify-center"
+                        >
+                          전문 치료사 검색하기 →
+                        </Link>
+                      </div>
                     </div>
 
                     {/* 다가오는 예약 */}
@@ -800,22 +820,6 @@ export default function ParentDashboardPage() {
                           ))}
                         </div>
                       )}
-                    </div>
-
-                    {/* 전체 검색 CTA */}
-                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 text-center">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                        우리 아이에게 딱 맞는 치료사를 찾아보세요
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-4">
-                        전문 분야, 지역, 비용 등 다양한 조건으로 검색할 수 있습니다
-                      </p>
-                      <Link
-                        href="/parent/therapists"
-                        className="inline-flex items-center px-6 py-3 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors font-medium shadow-md"
-                      >
-                        치료사 전체 검색하기 →
-                      </Link>
                     </div>
                   </div>
                 )}

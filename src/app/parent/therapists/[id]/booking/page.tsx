@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
+import Calendar from '@/components/booking/Calendar'
 
 interface TimeSlot {
   id: string
@@ -23,7 +24,12 @@ interface Child {
 export default function BookingPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const therapistId = params?.id as string
+
+  // URL에서 type 파라미터 읽기 ('consultation' | 'therapy')
+  const bookingType = searchParams.get('type') || 'therapy'
+  const isConsultation = bookingType === 'consultation'
 
   const [step, setStep] = useState(1)
   const [children, setChildren] = useState<Child[]>([])
@@ -32,11 +38,12 @@ export default function BookingPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // 폼 데이터
+  // 폼 데이터 - type에 따라 자동 설정
   const [selectedTimeSlotIds, setSelectedTimeSlotIds] = useState<string[]>([])
   const [selectedChildId, setSelectedChildId] = useState('')
-  const [sessionType, setSessionType] = useState<'CONSULTATION' | 'THERAPY'>('CONSULTATION')
+  const sessionType: 'CONSULTATION' | 'THERAPY' = isConsultation ? 'CONSULTATION' : 'THERAPY'
   const [sessionCount, setSessionCount] = useState(1)
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [visitAddress, setVisitAddress] = useState('')
   const [visitAddressDetail, setVisitAddressDetail] = useState('')
   const [parentNote, setParentNote] = useState('')
@@ -118,21 +125,23 @@ export default function BookingPage() {
 
   // 슬롯 선택/해제 처리
   const handleSlotToggle = (slotId: string) => {
-    if (sessionType === 'CONSULTATION') {
+    if (isConsultation) {
       // 컨설팅은 1개만 선택
       setSelectedTimeSlotIds([slotId])
     } else {
-      // 치료는 여러 개 선택 가능
+      // 치료는 제한 없이 선택 가능
       if (selectedTimeSlotIds.includes(slotId)) {
         setSelectedTimeSlotIds(selectedTimeSlotIds.filter(id => id !== slotId))
       } else {
-        if (selectedTimeSlotIds.length < sessionCount) {
-          setSelectedTimeSlotIds([...selectedTimeSlotIds, slotId])
-        } else {
-          setError(`최대 ${sessionCount}개의 슬롯만 선택할 수 있습니다.`)
-        }
+        setSelectedTimeSlotIds([...selectedTimeSlotIds, slotId])
       }
     }
+    setError('') // 에러 메시지 초기화
+  }
+
+  // 선택한 슬롯 제거
+  const handleRemoveSlot = (slotId: string) => {
+    setSelectedTimeSlotIds(selectedTimeSlotIds.filter(id => id !== slotId))
   }
 
   // 요금 계산
@@ -140,7 +149,8 @@ export default function BookingPage() {
     const baseFee = 80000 // 기본 세션 비용
     let discountRate = 0
 
-    const count = sessionType === 'CONSULTATION' ? 1 : sessionCount
+    // 실제 선택한 슬롯 개수 사용
+    const count = isConsultation ? 1 : selectedTimeSlotIds.length
 
     if (count >= 12) discountRate = 20
     else if (count >= 8) discountRate = 15
@@ -149,19 +159,13 @@ export default function BookingPage() {
     const originalFee = baseFee * count
     const finalFee = Math.round(originalFee * (1 - discountRate / 100))
 
-    return { originalFee, discountRate, finalFee }
+    return { originalFee, discountRate, finalFee, count }
   }
 
   // 예약 생성
   const handleSubmit = async () => {
     if (selectedTimeSlotIds.length === 0 || !selectedChildId) {
       setError('필수 정보를 모두 입력해주세요.')
-      return
-    }
-
-    // 치료 타입인 경우 선택한 슬롯 수가 sessionCount와 일치하는지 확인
-    if (sessionType === 'THERAPY' && selectedTimeSlotIds.length !== sessionCount) {
-      setError(`${sessionCount}개의 슬롯을 모두 선택해주세요.`)
       return
     }
 
@@ -173,6 +177,9 @@ export default function BookingPage() {
     setIsLoading(true)
     setError('')
 
+    // 실제 선택한 슬롯 개수를 sessionCount로 사용
+    const actualSessionCount = selectedTimeSlotIds.length
+
     try {
       const response = await fetch('/api/bookings', {
         method: 'POST',
@@ -181,7 +188,7 @@ export default function BookingPage() {
           timeSlotIds: selectedTimeSlotIds,
           childId: selectedChildId,
           sessionType,
-          sessionCount,
+          sessionCount: actualSessionCount,
           visitAddress,
           visitAddressDetail: visitAddressDetail || undefined,
           parentNote: parentNote || undefined,
@@ -204,7 +211,24 @@ export default function BookingPage() {
     }
   }
 
-  const { originalFee, discountRate, finalFee } = calculateFee()
+  const { originalFee, discountRate, finalFee, count: calculatedCount } = calculateFee()
+
+  // 예약 가능한 날짜 목록
+  const availableDates = Object.keys(groupedSlots)
+
+  // 날짜 선택 핸들러
+  const handleDateSelect = (date: string) => {
+    setSelectedDate(date)
+    // 방문 컨설팅인 경우에만 슬롯 초기화 (1개만 선택 가능)
+    // 정기 치료는 여러 날짜의 슬롯을 계속 추가할 수 있으므로 유지
+    if (isConsultation) {
+      setSelectedTimeSlotIds([])
+    }
+    setError('')
+  }
+
+  // 선택한 날짜의 슬롯
+  const selectedDateSlots = selectedDate ? groupedSlots[selectedDate] || [] : []
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -267,16 +291,61 @@ export default function BookingPage() {
           {/* Step 1: 날짜/시간 선택 */}
           {step === 1 && (
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                예약 날짜와 시간을 선택하세요
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                {isConsultation ? '방문 컨설팅 예약' : '정기 치료 예약'}
               </h2>
 
-              {sessionType === 'THERAPY' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <p className="text-sm text-blue-800">
-                    치료 세션 {sessionCount}회를 예약합니다. {sessionCount}개의 시간 슬롯을 선택해주세요.
-                    (현재 {selectedTimeSlotIds.length}/{sessionCount}개 선택됨)
-                  </p>
+              {/* 안내 메시지 */}
+              <div className={`border rounded-lg p-4 mb-6 ${isConsultation ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}>
+                <p className={`text-sm ${isConsultation ? 'text-blue-800' : 'text-green-800'}`}>
+                  {isConsultation
+                    ? '💡 언어치료 전문가의 1회 방문 컨설팅을 예약합니다. 아래에서 원하는 날짜와 시간을 선택해주세요.'
+                    : '💡 원하는 만큼 치료 세션을 추가해주세요. 여러 날짜의 슬롯을 자유롭게 선택할 수 있습니다.'}
+                </p>
+              </div>
+
+              {/* 정기 치료 모드: 선택한 슬롯 목록 */}
+              {!isConsultation && selectedTimeSlotIds.length > 0 && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-300">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-gray-900">
+                      선택한 슬롯 ({selectedTimeSlotIds.length}개)
+                    </h3>
+                    {calculatedCount >= 4 && (
+                      <span className="text-sm text-green-600 font-medium">
+                        {discountRate}% 할인 적용
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {selectedTimeSlotIds.map((slotId) => {
+                      const slot = availableSlots.find(s => s.id === slotId)
+                      if (!slot) return null
+                      return (
+                        <div key={slotId} className="flex items-center justify-between bg-white p-3 rounded-md border border-gray-200">
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900">
+                              {new Date(slot.date).toLocaleDateString('ko-KR', {
+                                month: 'long',
+                                day: 'numeric',
+                                weekday: 'short'
+                              })}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {slot.startTime} - {slot.endTime}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSlot(slotId)}
+                            className="ml-3 px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                          >
+                            제거
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               )}
 
@@ -285,47 +354,68 @@ export default function BookingPage() {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
                   <p className="mt-4 text-gray-600">가용 시간 조회 중...</p>
                 </div>
-              ) : Object.keys(groupedSlots).length === 0 ? (
+              ) : availableDates.length === 0 ? (
                 <p className="text-gray-500 text-center py-12">
                   현재 예약 가능한 시간이 없습니다.
                 </p>
               ) : (
                 <div className="space-y-6">
-                  {Object.entries(groupedSlots).map(([date, slots]) => (
-                    <div key={date} className="border rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-900 mb-3">
-                        {new Date(date).toLocaleDateString('ko-KR', {
+                  {/* 달력 */}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-700 mb-3">
+                      날짜 선택
+                    </h3>
+                    <Calendar
+                      availableDates={availableDates}
+                      selectedDate={selectedDate}
+                      onDateSelect={handleDateSelect}
+                    />
+                  </div>
+
+                  {/* 선택한 날짜의 슬롯 */}
+                  {selectedDate && (
+                    <div className="border-t pt-6">
+                      <h3 className="text-sm font-medium text-gray-700 mb-3">
+                        {new Date(selectedDate).toLocaleDateString('ko-KR', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
                           weekday: 'short',
-                        })}
+                        })} - 시간 선택
                       </h3>
-                      <div className="grid grid-cols-3 gap-2">
-                        {slots.map((slot) => (
-                          <button
-                            key={slot.id}
-                            onClick={() => handleSlotToggle(slot.id)}
-                            className={`px-4 py-2 rounded-md text-sm ${
-                              selectedTimeSlotIds.includes(slot.id)
-                                ? 'bg-green-600 text-white'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            {slot.startTime} - {slot.endTime}
-                          </button>
-                        ))}
-                      </div>
+                      {selectedDateSlots.length === 0 ? (
+                        <p className="text-gray-500 text-center py-8">
+                          이 날짜에 예약 가능한 시간이 없습니다.
+                        </p>
+                      ) : (
+                        <div className="grid grid-cols-3 gap-2">
+                          {selectedDateSlots.map((slot) => (
+                            <button
+                              key={slot.id}
+                              type="button"
+                              onClick={() => handleSlotToggle(slot.id)}
+                              className={`px-4 py-3 rounded-md text-sm font-medium transition-all ${
+                                selectedTimeSlotIds.includes(slot.id)
+                                  ? 'bg-green-600 text-white'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              {slot.startTime} - {slot.endTime}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
 
               <div className="mt-6 flex justify-end">
                 <button
+                  type="button"
                   onClick={() => setStep(2)}
                   disabled={selectedTimeSlotIds.length === 0}
-                  className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   다음
                 </button>
@@ -341,6 +431,26 @@ export default function BookingPage() {
               </h2>
 
               <div className="space-y-4">
+                {/* 선택한 예약 정보 요약 */}
+                <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">선택한 예약 정보</h3>
+                  <div className="space-y-1 text-sm">
+                    <p className="text-gray-900">
+                      <span className="text-gray-600">세션 타입:</span>{' '}
+                      {isConsultation ? '방문 컨설팅 (1회)' : `정기 치료 (${calculatedCount}회)`}
+                    </p>
+                    <p className="text-gray-900">
+                      <span className="text-gray-600">선택한 슬롯:</span>{' '}
+                      {selectedTimeSlotIds.length}개
+                    </p>
+                    {calculatedCount >= 4 && (
+                      <p className="text-green-600 font-medium">
+                        <span className="text-gray-600">할인:</span> {discountRate}% 적용
+                      </p>
+                    )}
+                  </div>
+                </div>
+
                 {/* 자녀 선택 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -358,80 +468,6 @@ export default function BookingPage() {
                     ))}
                   </select>
                 </div>
-
-                {/* 세션 타입 */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    세션 타입 *
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        value="CONSULTATION"
-                        checked={sessionType === 'CONSULTATION'}
-                        onChange={(e) => {
-                          setSessionType(e.target.value as 'CONSULTATION')
-                          setSessionCount(1)
-                          setSelectedTimeSlotIds([])
-                          setStep(1)
-                        }}
-                        className="mr-2"
-                      />
-                      방문 컨설팅 (1회만 가능)
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        value="THERAPY"
-                        checked={sessionType === 'THERAPY'}
-                        onChange={(e) => {
-                          setSessionType(e.target.value as 'THERAPY')
-                          setSelectedTimeSlotIds([])
-                          setStep(1)
-                        }}
-                        className="mr-2"
-                      />
-                      치료 (정기 세션)
-                    </label>
-                  </div>
-                </div>
-
-                {/* 세션 회수 */}
-                {sessionType === 'THERAPY' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      세션 회수 *
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[1, 4, 8, 12].map((count) => {
-                        const rate = count >= 12 ? 20 : count >= 8 ? 15 : count >= 4 ? 10 : 0
-                        return (
-                          <button
-                            key={count}
-                            onClick={() => {
-                              setSessionCount(count)
-                              setSelectedTimeSlotIds([])
-                              setStep(1)
-                            }}
-                            className={`px-4 py-3 rounded-md text-sm border ${
-                              sessionCount === count
-                                ? 'border-green-600 bg-green-50 text-green-700'
-                                : 'border-gray-300 hover:bg-gray-50'
-                            }`}
-                          >
-                            <div className="font-semibold">{count}회</div>
-                            {rate > 0 && (
-                              <div className="text-xs text-green-600">
-                                {rate}% 할인
-                              </div>
-                            )}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
 
                 {/* 방문 주소 */}
                 <div>
@@ -531,7 +567,7 @@ export default function BookingPage() {
                 <div className="border-b pb-3">
                   <h3 className="text-sm font-medium text-gray-500">세션 정보</h3>
                   <p className="text-gray-900">
-                    {sessionType === 'CONSULTATION' ? '방문 컨설팅' : '치료'} - {sessionCount}회
+                    {isConsultation ? '방문 컨설팅' : '정기 치료'} - {calculatedCount}회
                   </p>
                 </div>
 

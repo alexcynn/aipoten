@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 
@@ -23,12 +23,16 @@ interface Therapist {
 }
 
 export default function TherapistsSearchPage() {
+  const searchParams = useSearchParams()
+  const bookingType = searchParams.get('type') || 'therapy' // 'consultation' | 'therapy'
+  const isConsultation = bookingType === 'consultation'
+
   const [therapists, setTherapists] = useState<Therapist[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
   // 필터 상태
-  const [specialty, setSpecialty] = useState('')
+  const [specialty, setSpecialty] = useState(isConsultation ? 'SPEECH_THERAPY' : '')
   const [serviceArea, setServiceArea] = useState('')
   const [maxFee, setMaxFee] = useState('')
   const [dayOfWeek, setDayOfWeek] = useState('')
@@ -106,19 +110,29 @@ export default function TherapistsSearchPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">치료사 찾기</h1>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {isConsultation ? '방문 컨설팅 치료사 찾기' : '치료사 찾기'}
+          </h1>
+          {isConsultation && (
+            <p className="text-gray-600">
+              언어치료 전문가의 1회 방문 컨설팅을 예약하세요
+            </p>
+          )}
+        </div>
 
         {/* 검색 필터 */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                전문 분야
+                전문 분야 {isConsultation && <span className="text-xs text-gray-500">(언어치료 고정)</span>}
               </label>
               <select
                 value={specialty}
                 onChange={(e) => setSpecialty(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                disabled={isConsultation}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
                 {specialtyOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -262,12 +276,20 @@ export default function TherapistsSearchPage() {
                   </p>
                 )}
 
-                <Link
-                  href={`/parent/therapists/${therapist.id}`}
-                  className="block w-full text-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                >
-                  상세보기
-                </Link>
+                <div className="flex gap-2">
+                  <Link
+                    href={`/parent/therapists/${therapist.id}`}
+                    className="flex-1 text-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                  >
+                    상세보기
+                  </Link>
+                  <Link
+                    href={`/parent/therapists/${therapist.id}/booking?type=${bookingType}`}
+                    className="flex-1 text-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+                  >
+                    예약하기
+                  </Link>
+                </div>
               </div>
             ))
           )}

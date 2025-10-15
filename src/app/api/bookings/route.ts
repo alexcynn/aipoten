@@ -84,9 +84,9 @@ export async function POST(request: NextRequest) {
     }
 
     if (sessionType === 'THERAPY') {
-      if (![1, 4, 8, 12].includes(sessionCount)) {
+      if (sessionCount < 1) {
         return NextResponse.json(
-          { error: '치료는 1회, 4회, 8회, 12회만 가능합니다.' },
+          { error: '최소 1회 이상의 치료 세션을 선택해야 합니다.' },
           { status: 400 }
         )
       }
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     const child = await prisma.child.findFirst({
       where: {
         id: childId,
-        parentUserId: userId
+        userId: userId
       }
     })
 
