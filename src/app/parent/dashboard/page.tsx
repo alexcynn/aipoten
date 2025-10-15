@@ -48,6 +48,8 @@ export default function ParentDashboardPage() {
   const [latestAssessment, setLatestAssessment] = useState<Assessment | null>(null)
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [recommendedVideos, setRecommendedVideos] = useState<any[]>([])
+  const [recommendedTherapists, setRecommendedTherapists] = useState<any[]>([])
+  const [myBookings, setMyBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -145,8 +147,40 @@ export default function ParentDashboardPage() {
       }
     }
 
+    const fetchTherapistsAndBookings = async () => {
+      try {
+        // 추천 치료사 가져오기
+        const therapistsRes = await fetch('/api/therapists/search?limit=3')
+        if (therapistsRes.ok) {
+          const therapistsData = await therapistsRes.json()
+          setRecommendedTherapists(therapistsData.therapists || [])
+        }
+
+        // 예약 목록 가져오기
+        const bookingsRes = await fetch('/api/bookings')
+        if (bookingsRes.ok) {
+          const bookingsData = await bookingsRes.json()
+          const bookingsArray = bookingsData.bookings || []
+          // 확정된 예약 중 앞으로 있을 예약만 필터링
+          const upcomingBookings = bookingsArray
+            .filter((b: any) =>
+              (b.status === 'CONFIRMED' || b.status === 'PENDING_CONFIRMATION') &&
+              new Date(b.scheduledAt) > new Date()
+            )
+            .sort((a: any, b: any) =>
+              new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+            )
+            .slice(0, 3)
+          setMyBookings(upcomingBookings)
+        }
+      } catch (error) {
+        console.error('치료사 및 예약 조회 오류:', error)
+      }
+    }
+
     fetchAssessments()
     fetchRecommendedVideos()
+    fetchTherapistsAndBookings()
   }, [selectedChildId])
 
   // 아이 선택 변경 핸들러
@@ -593,18 +627,195 @@ export default function ParentDashboardPage() {
 
                 {/* 치료사 찾기 탭 */}
                 {activeTab === 'therapists' && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">전문 치료사 찾기</h3>
-                    <div className="space-y-4">
+                  <div className="space-y-6">
+                    {/* 헤더와 검색 버튼 */}
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">전문 치료사 찾기</h3>
                       <Link
                         href="/parent/therapists"
-                        className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                        className="inline-flex items-center px-6 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors font-medium"
                       >
-                        치료사 검색하기
+                        전체 치료사 검색 →
                       </Link>
-                      <div className="text-sm text-gray-500">
-                        우리 아이에게 맞는 전문 치료사를 찾아보세요.
+                    </div>
+
+                    {/* 다가오는 예약 */}
+                    {myBookings.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-md font-semibold text-gray-700">다가오는 예약</h4>
+                          <Link
+                            href="/parent/bookings"
+                            className="text-sm text-aipoten-green hover:text-aipoten-navy"
+                          >
+                            전체 보기 →
+                          </Link>
+                        </div>
+                        <div className="space-y-3">
+                          {myBookings.map((booking: any) => (
+                            <div
+                              key={booking.id}
+                              className="bg-blue-50 border border-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-semibold text-gray-900">
+                                      {booking.therapist.user.name} 치료사
+                                    </span>
+                                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                      booking.status === 'CONFIRMED'
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-yellow-100 text-yellow-800'
+                                    }`}>
+                                      {booking.status === 'CONFIRMED' ? '확정됨' : '확인 대기'}
+                                    </span>
+                                  </div>
+                                  <div className="text-sm text-gray-600">
+                                    📅 {new Date(booking.scheduledAt).toLocaleDateString('ko-KR', {
+                                      month: 'long',
+                                      day: 'numeric',
+                                      weekday: 'short'
+                                    })}{' '}
+                                    {booking.timeSlot.startTime}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {booking.sessionType === 'CONSULTATION' ? '방문 컨설팅' : '치료'} • {booking.child.name}
+                                  </div>
+                                </div>
+                                <Link
+                                  href={`/parent/bookings/${booking.id}`}
+                                  className="ml-3 px-3 py-1 bg-white text-aipoten-green border border-aipoten-green rounded-md hover:bg-aipoten-green hover:text-white transition-colors text-sm"
+                                >
+                                  상세
+                                </Link>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
+                    )}
+
+                    {/* 추천 치료사 */}
+                    <div>
+                      <h4 className="text-md font-semibold text-gray-700 mb-3">추천 치료사</h4>
+                      {recommendedTherapists.length === 0 ? (
+                        <div className="text-center py-12 bg-gray-50 rounded-lg">
+                          <div className="text-4xl mb-4">👨‍⚕️</div>
+                          <p className="text-gray-600 mb-4">추천 치료사 정보를 불러오는 중입니다...</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {recommendedTherapists.map((therapist: any) => (
+                            <div
+                              key={therapist.id}
+                              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
+                            >
+                              <div className="mb-3">
+                                <h5 className="font-semibold text-gray-900 mb-1">
+                                  {therapist.user.name} 치료사
+                                </h5>
+                                {therapist.education && (
+                                  <p className="text-xs text-gray-600">{therapist.education}</p>
+                                )}
+                              </div>
+
+                              {/* 전문 분야 */}
+                              {therapist.specialties && therapist.specialties.length > 0 && (
+                                <div className="mb-3">
+                                  <div className="flex flex-wrap gap-1">
+                                    {therapist.specialties.slice(0, 2).map((spec: string, idx: number) => {
+                                      const specLabels: Record<string, string> = {
+                                        SPEECH_THERAPY: '언어치료',
+                                        SENSORY_INTEGRATION: '감각통합',
+                                        PLAY_THERAPY: '놀이치료',
+                                        ART_THERAPY: '미술치료',
+                                        MUSIC_THERAPY: '음악치료',
+                                        OCCUPATIONAL_THERAPY: '작업치료',
+                                        COGNITIVE_THERAPY: '인지치료',
+                                        BEHAVIORAL_THERAPY: '행동치료',
+                                      }
+                                      return (
+                                        <span
+                                          key={idx}
+                                          className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
+                                        >
+                                          {specLabels[spec] || spec}
+                                        </span>
+                                      )
+                                    })}
+                                    {therapist.specialties.length > 2 && (
+                                      <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
+                                        +{therapist.specialties.length - 2}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 서비스 지역 */}
+                              {therapist.serviceAreas && therapist.serviceAreas.length > 0 && (
+                                <div className="mb-3">
+                                  <div className="text-xs text-gray-600">
+                                    📍 {therapist.serviceAreas.slice(0, 2).map((area: string) => {
+                                      const areaLabels: Record<string, string> = {
+                                        GANGNAM: '강남구',
+                                        SEOCHO: '서초구',
+                                        SONGPA: '송파구',
+                                        GANGDONG: '강동구',
+                                      }
+                                      return areaLabels[area] || area
+                                    }).join(', ')}
+                                    {therapist.serviceAreas.length > 2 && ' 외'}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 세션 비용 */}
+                              {therapist.sessionFee && (
+                                <div className="mb-3 pb-3 border-b border-gray-200">
+                                  <span className="text-sm font-bold text-gray-900">
+                                    ₩{therapist.sessionFee.toLocaleString()}
+                                  </span>
+                                  <span className="text-xs text-gray-500 ml-1">/ 50분</span>
+                                </div>
+                              )}
+
+                              {/* 버튼 */}
+                              <div className="flex gap-2">
+                                <Link
+                                  href={`/parent/therapists/${therapist.id}`}
+                                  className="flex-1 text-center px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
+                                >
+                                  프로필
+                                </Link>
+                                <Link
+                                  href={`/parent/therapists/${therapist.id}/booking`}
+                                  className="flex-1 text-center px-3 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors text-sm font-medium"
+                                >
+                                  예약
+                                </Link>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 전체 검색 CTA */}
+                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 text-center">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                        우리 아이에게 딱 맞는 치료사를 찾아보세요
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-4">
+                        전문 분야, 지역, 비용 등 다양한 조건으로 검색할 수 있습니다
+                      </p>
+                      <Link
+                        href="/parent/therapists"
+                        className="inline-flex items-center px-6 py-3 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors font-medium shadow-md"
+                      >
+                        치료사 전체 검색하기 →
+                      </Link>
                     </div>
                   </div>
                 )}

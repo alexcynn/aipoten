@@ -86,7 +86,7 @@ export default function LoginPage() {
             </div>
             <div className="flex justify-between">
               <span className="font-medium">👩‍⚕️ 치료사:</span>
-              <span>therapist@test.com / test123!</span>
+              <span>jieun.kim@therapist.com / password123</span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium">👨‍💼 관리자:</span>
@@ -107,8 +107,8 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => {
-                setEmail('therapist@test.com')
-                setPassword('test123!')
+                setEmail('jieun.kim@therapist.com')
+                setPassword('password123')
               }}
               className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-800 rounded text-xs font-medium transition-colors"
             >

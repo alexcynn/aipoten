@@ -91,15 +91,30 @@ async function main() {
         order: 1,
       },
     }),
+    prisma.board.upsert({
+      where: { id: 'news' },
+      update: {},
+      create: {
+        id: 'news',
+        name: '소식',
+        description: '아이포텐의 새로운 소식과 발달 가이드를 확인하세요',
+        order: 2,
+      },
+    }),
   ])
 
-  // 샘플 뉴스 생성
+  // 샘플 뉴스 생성 (Post 모델 사용, boardId='news')
   const sampleNews = await Promise.all([
-    prisma.news.upsert({
+    prisma.post.upsert({
       where: { id: 'news-1' },
       update: {},
       create: {
         id: 'news-1',
+        boardId: 'news',
+        authorId: testUsers[2].id, // 관리자
+        category: 'DEVELOPMENT_GUIDE',
+        isPublished: true,
+        publishedAt: new Date(),
         title: '0-6개월 아기의 발달 단계별 놀이 가이드',
         summary: '신생아부터 6개월까지, 월령별 추천 놀이 활동을 소개합니다.',
         content: `
@@ -176,17 +191,18 @@ async function main() {
 
 각 월령에 맞는 적절한 놀이를 통해 아기의 건강한 발달을 도와주세요!
         `,
-        category: 'DEVELOPMENT_GUIDE',
-        isPublished: true,
-        isFeatured: true,
-        publishedAt: new Date(),
       },
     }),
-    prisma.news.upsert({
+    prisma.post.upsert({
       where: { id: 'news-2' },
       update: {},
       create: {
         id: 'news-2',
+        boardId: 'news',
+        authorId: testUsers[2].id, // 관리자
+        category: 'NOTIFICATION',
+        isPublished: true,
+        publishedAt: new Date(),
         title: '아이포텐 서비스 정식 오픈 안내',
         summary: '영유아 발달 지원 플랫폼 아이포텐이 정식으로 서비스를 시작합니다.',
         content: `
@@ -235,10 +251,6 @@ async function main() {
 
 감사합니다.
         `,
-        category: 'NOTIFICATION',
-        isPublished: true,
-        isFeatured: true,
-        publishedAt: new Date(),
       },
     }),
   ])
@@ -289,11 +301,15 @@ async function main() {
       licenseNumber: 'ST-2024-001',
       experience: 5,
       education: '특수교육학 석사',
-      certifications: JSON.stringify(['언어재활사 1급', '특수교육교사 2급']),
       introduction: '안녕하세요. 5년 경력의 언어치료사 이치료사입니다. 영유아부터 학령기 아동까지 다양한 언어발달 지원 경험이 있습니다.',
       consultationFee: 120000,
       status: 'APPROVED',
-      approvedAt: new Date()
+      approvedAt: new Date(),
+      approvalStatus: 'APPROVED',
+      sessionFee: 120000,
+      specialties: JSON.stringify(['SPEECH_THERAPY']),
+      childAgeRanges: JSON.stringify(['AGE_0_12', 'AGE_13_24']),
+      serviceAreas: JSON.stringify(['GANGNAM', 'SEOCHO'])
     }
   })
 

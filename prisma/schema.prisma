@@ -23,15 +23,16 @@ model User {
   updatedAt DateTime @updatedAt
 
   // 관계
-  posts            Post[]
-  comments         Comment[]
-  videoComments    VideoComment[]
-  children         Child[]
-  accounts         Account[]
-  sessions         Session[]
-  therapistProfile TherapistProfile?
-  matchingRequests MatchingRequest[]
-  consultations    Consultation[]
+  posts                Post[]
+  comments             Comment[]
+  videoComments        VideoComment[]
+  children             Child[]
+  accounts             Account[]
+  sessions             Session[]
+  therapistProfile     TherapistProfile?
+  matchingRequests     MatchingRequest[]
+  consultations        Consultation[]       // Phase 2 (MatchingRequest 관련)
+  bookings             Booking[]            @relation("ParentBookings") // Phase 4 예약
 
   @@map("users")
 }
@@ -104,10 +105,11 @@ model Child {
   updatedAt        DateTime  @updatedAt
 
   // 관계
-  user        User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assessments DevelopmentAssessment[]
+  user             User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assessments      DevelopmentAssessment[]
   matchingRequests MatchingRequest[]
-  consultations    Consultation[]
+  consultations    Consultation[]            // Phase 2 (MatchingRequest 관련)
+  bookings         Booking[]                 @relation("ChildBookings") // Phase 4 예약
 
   @@map("children")
 }
@@ -399,13 +401,14 @@ model TherapistProfile {
   updatedAt       DateTime @updatedAt
 
   // 관계
-  user            User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  availability    TherapistAvailability[]
+  user             User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  availability     TherapistAvailability[]
   matchingRequests MatchingRequest[]
-  consultations   Consultation[]
-  certifications  Certification[]
-  experiences     Experience[]
-  timeSlots       TimeSlot[]              // Phase 3: 스케줄 슬롯
+  consultations    Consultation[]          // Phase 2 (MatchingRequest 관련)
+  certifications   Certification[]
+  experiences      Experience[]
+  timeSlots        TimeSlot[]              // Phase 3: 스케줄 슬롯
+  bookings         Booking[]               @relation("TherapistBookings") // Phase 4: 예약
 
   @@map("therapist_profiles")
 }
@@ -595,6 +598,7 @@ model TimeSlot {
 
   // 관계
   therapist TherapistProfile @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  bookings  Booking[]
 
   @@unique([therapistId, date, startTime])
   @@index([therapistId, date, isAvailable])
@@ -614,4 +618,92 @@ model HolidayDate {
   @@unique([therapistId, date])
   @@index([date])
   @@map("holiday_dates")
+}
+
+// ===== Phase 4: 예약 시스템 =====
+
+// 세션 타입 (Phase 4)
+enum SessionType {
+  CONSULTATION  // 상담 (1회만 가능)
+  THERAPY       // 치료 (1/4/8/12회 가능)
+}
+
+// 예약 상태 (Phase 4)
+enum BookingStatus {
+  PENDING_CONFIRMATION  // 결제 완료, 치료사 확인 대기
+  CONFIRMED             // 치료사 확인 완료
+  IN_PROGRESS           // 세션 진행 중
+  COMPLETED             // 세션 완료
+  CANCELLED             // 취소됨
+  NO_SHOW               // 노쇼
+  REJECTED              // 치료사가 거절
+}
+
+// 예약 (상담/치료) - Phase 4
+model Booking {
+  id                    String              @id @default(cuid())
+
+  // 관계
+  timeSlotId            String
+  timeSlot              TimeSlot            @relation(fields: [timeSlotId], references: [id], onDelete: Restrict)
+
+  parentUserId          String
+  parentUser            User                @relation("ParentBookings", fields: [parentUserId], references: [id], onDelete: Cascade)
+
+  childId               String
+  child                 Child               @relation("ChildBookings", fields: [childId], references: [id], onDelete: Cascade)
+
+  therapistId           String
+  therapist             TherapistProfile    @relation("TherapistBookings", fields: [therapistId], references: [id], onDelete: Restrict)
+
+  // 예약 정보
+  scheduledAt           DateTime            // 예약 시간
+  duration              Int                 @default(50) // 세션 시간 (분)
+
+  sessionType           SessionType         // 상담 or 치료
+  sessionCount          Int                 // 회차 (1, 4, 8, 12)
+  completedSessions     Int                 @default(0) // 완료된 세션 수
+
+  status                BookingStatus       @default(PENDING_CONFIRMATION)
+
+  // 확인 관리
+  confirmationDeadline  DateTime?           // 확인 마감 시간 (예약 후 24시간)
+  confirmedAt           DateTime?
+  confirmedBy           String?             // THERAPIST or ADMIN
+
+  rejectedAt            DateTime?
+  rejectionReason       String?
+
+  // 취소 관리
+  cancelledAt           DateTime?
+  cancelledBy           String?             // parentUserId or therapistId or adminUserId
+  cancellationReason    String?
+  refundAmount          Int?                // 환불 금액
+
+  // 방문 정보
+  visitAddress          String?             // 방문 주소 (치료사가 방문하는 경우)
+  visitAddressDetail    String?
+
+  // 요금
+  originalFee           Int                 // 원래 총액
+  discountRate          Int                 @default(0) // 할인율 (%)
+  finalFee              Int                 // 최종 결제 금액
+
+  // 결제 정보
+  paymentId             String?             // 결제 ID (토스페이먼츠 등)
+  paidAt                DateTime?
+
+  // 메모
+  parentNote            String?             // 부모 메모 (특이사항 등)
+  therapistNote         String?             // 치료사 메모
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([timeSlotId])
+  @@index([parentUserId])
+  @@index([therapistId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@map("bookings")
 }
