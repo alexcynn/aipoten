@@ -232,14 +232,13 @@ enum DevelopmentCategory {
   COGNITIVE     // 인지
   LANGUAGE      // 언어
   SOCIAL        // 사회성
-  EMOTIONAL     // 정서
 }
 
 enum DevelopmentLevel {
-  EXCELLENT          // 우수 (80-100점)
-  GOOD              // 양호 (60-79점)
-  CAUTION           // 주의 (40-59점)
-  NEEDS_OBSERVATION // 관찰 필요 (0-39점)
+  ADVANCED           // 빠른 수준
+  NORMAL             // 또래 수준
+  NEEDS_TRACKING     // 추적검사 요망
+  NEEDS_ASSESSMENT   // 심화평가 권고
 }
 
 // 게시판 시스템

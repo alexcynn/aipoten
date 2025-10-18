@@ -6,14 +6,11 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 
-interface AssessmentAnswer {
+interface AssessmentResult {
   id: string
-  questionId: string
+  category: string
   score: number
-  question: {
-    category: string
-    question: string
-  }
+  level: 'ADVANCED' | 'NORMAL' | 'NEEDS_TRACKING' | 'NEEDS_ASSESSMENT'
 }
 
 interface Assessment {
@@ -27,7 +24,7 @@ interface Assessment {
     name: string
     gender: string
   }
-  answers: AssessmentAnswer[]
+  results: AssessmentResult[]
 }
 
 interface PageParams {
@@ -35,12 +32,18 @@ interface PageParams {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  GROSS_MOTOR: '대근육',
-  FINE_MOTOR: '소근육',
+  GROSS_MOTOR: '대근육 운동',
+  FINE_MOTOR: '소근육 운동',
   COGNITIVE: '인지',
   LANGUAGE: '언어',
   SOCIAL: '사회성',
-  EMOTIONAL: '정서'
+}
+
+const LEVEL_LABELS: Record<string, { label: string; color: string; bgColor: string; emoji: string }> = {
+  ADVANCED: { label: '빠른 수준', color: 'text-green-600', bgColor: 'bg-green-50', emoji: '🎉' },
+  NORMAL: { label: '또래 수준', color: 'text-blue-600', bgColor: 'bg-blue-50', emoji: '😊' },
+  NEEDS_TRACKING: { label: '추적검사 요망', color: 'text-yellow-600', bgColor: 'bg-yellow-50', emoji: '🤔' },
+  NEEDS_ASSESSMENT: { label: '심화평가 권고', color: 'text-red-600', bgColor: 'bg-red-50', emoji: '😟' },
 }
 
 export default function AssessmentDetailPage({ params }: { params: Promise<PageParams> }) {
@@ -73,28 +76,8 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
           return
         }
         const data = await response.json()
-        console.log('API 응답 데이터:', data)
-
-        // API는 { assessment } 형태로 반환
-        const assessmentData = data.assessment
-        console.log('Assessment 데이터:', assessmentData)
-
-        // responses를 answers로 변환
-        if (assessmentData?.responses) {
-          assessmentData.answers = assessmentData.responses.map((response: any) => ({
-            id: response.id,
-            questionId: response.questionId,
-            score: response.score,
-            question: {
-              category: response.question.category,
-              question: response.question.questionText
-            }
-          }))
-          console.log('변환된 answers:', assessmentData.answers)
-        } else {
-          console.log('responses가 없습니다')
-          assessmentData.answers = []
-        }
+        // API 응답에서 assessment 데이터 추출 (배열 또는 단일 객체)
+        const assessmentData = Array.isArray(data) ? data[0] : data
 
         setAssessment(assessmentData)
       } catch (error) {
@@ -108,59 +91,30 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
     fetchAssessment()
   }, [session, status, router, params])
 
-  const getScoreLabel = (score: number) => {
-    switch (score) {
-      case 0: return '아직 못함'
-      case 1: return '가끔 함'
-      case 2: return '자주 함'
-      case 3: return '항상 함'
-      default: return ''
+  const getOverallInterpretation = () => {
+    if (!assessment || !assessment.results || assessment.results.length === 0) {
+      return { level: '-', color: 'text-gray-600', description: '평가 결과가 없습니다.' }
     }
-  }
 
-  const getScoreColor = (score: number) => {
-    switch (score) {
-      case 0: return 'text-red-600 bg-red-50'
-      case 1: return 'text-orange-600 bg-orange-50'
-      case 2: return 'text-yellow-600 bg-yellow-50'
-      case 3: return 'text-green-600 bg-green-50'
-      default: return 'text-gray-600 bg-gray-50'
+    // 가장 낮은 레벨을 기준으로 종합 평가
+    const hasAssessment = assessment.results.some(r => r.level === 'NEEDS_ASSESSMENT')
+    const hasTracking = assessment.results.some(r => r.level === 'NEEDS_TRACKING')
+    const hasNormal = assessment.results.some(r => r.level === 'NORMAL')
+    const allAdvanced = assessment.results.every(r => r.level === 'ADVANCED')
+
+    if (allAdvanced) {
+      return { level: '빠른 수준', color: 'text-green-600', description: '모든 영역에서 빠른 발달을 보이고 있습니다.' }
     }
-  }
-
-  const getCategoryStats = () => {
-    if (!assessment || !assessment.answers || assessment.answers.length === 0) return {}
-
-    const stats: { [key: string]: { total: number; maxScore: number; average: number } } = {}
-
-    assessment.answers.forEach(answer => {
-      const category = answer.question.category
-      if (!stats[category]) {
-        stats[category] = { total: 0, maxScore: 0, average: 0 }
-      }
-      stats[category].total += answer.score
-      stats[category].maxScore += 3
-    })
-
-    Object.keys(stats).forEach(category => {
-      stats[category].average = stats[category].total / (stats[category].maxScore / 3)
-    })
-
-    return stats
-  }
-
-  const getOverallPercentage = () => {
-    if (!assessment || !assessment.answers || assessment.answers.length === 0) return 0
-    const maxPossibleScore = assessment.answers.length * 3
-    return Math.round((assessment.totalScore / maxPossibleScore) * 100)
-  }
-
-  const getInterpretation = () => {
-    const percentage = getOverallPercentage()
-    if (percentage >= 80) return { level: '우수', color: 'text-green-600', description: '연령에 적합한 발달을 보이고 있습니다.' }
-    if (percentage >= 60) return { level: '양호', color: 'text-blue-600', description: '대체로 연령에 맞는 발달을 보이고 있습니다.' }
-    if (percentage >= 40) return { level: '주의', color: 'text-yellow-600', description: '일부 영역에서 발달 지원이 필요할 수 있습니다.' }
-    return { level: '관심', color: 'text-red-600', description: '전문가 상담을 고려해보시기 바랍니다.' }
+    if (hasAssessment) {
+      return { level: '심화평가 필요', color: 'text-red-600', description: '일부 영역에서 심화평가가 권고됩니다. 전문가 상담을 고려해보세요.' }
+    }
+    if (hasTracking) {
+      return { level: '추적 필요', color: 'text-yellow-600', description: '일부 영역에서 추적검사가 필요할 수 있습니다.' }
+    }
+    if (hasNormal) {
+      return { level: '또래 수준', color: 'text-blue-600', description: '대체로 또래 수준의 발달을 보이고 있습니다.' }
+    }
+    return { level: '빠른 수준', color: 'text-green-600', description: '빠른 발달을 보이고 있습니다.' }
   }
 
   if (status === 'loading' || isLoading) {
@@ -199,16 +153,7 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
     return null
   }
 
-  const categoryStats = getCategoryStats()
-  const interpretation = getInterpretation()
-  const groupedAnswers = (assessment.answers || []).reduce((groups, answer) => {
-    const category = answer.question.category
-    if (!groups[category]) {
-      groups[category] = []
-    }
-    groups[category].push(answer)
-    return groups
-  }, {} as { [key: string]: AssessmentAnswer[] })
+  const interpretation = getOverallInterpretation()
 
   return (
     <div className="min-h-screen bg-neutral-light">
@@ -238,91 +183,38 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
                 </Link>
               </div>
 
-              {/* Overall Score */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-gray-50 rounded-lg p-6 text-center">
-                  <div className="text-3xl font-bold text-gray-900 mb-2">
-                    {assessment.totalScore}점
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    총점 (최대 {assessment.answers.length * 3}점)
-                  </div>
+              {/* Overall Result */}
+              <div className="bg-gray-50 rounded-lg p-8 text-center">
+                <div className={`text-3xl font-bold mb-4 ${interpretation.color}`}>
+                  {interpretation.level}
                 </div>
-                <div className="bg-gray-50 rounded-lg p-6 text-center">
-                  <div className="text-3xl font-bold text-gray-900 mb-2">
-                    {getOverallPercentage()}%
-                  </div>
-                  <div className="text-sm text-gray-500">달성률</div>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-6 text-center">
-                  <div className={`text-2xl font-bold mb-2 ${interpretation.color}`}>
-                    {interpretation.level}
-                  </div>
-                  <div className="text-sm text-gray-500">발달 수준</div>
-                </div>
-              </div>
-
-              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                <p className="text-blue-800">{interpretation.description}</p>
+                <div className="text-sm text-gray-500 mb-4">종합 발달 수준</div>
+                <p className="text-gray-700">{interpretation.description}</p>
               </div>
             </div>
           </div>
 
-          {/* Category Statistics */}
+          {/* Category Results */}
           <div className="bg-white shadow rounded-lg mb-6">
             <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">영역별 발달 현황</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {Object.entries(categoryStats).map(([category, stats]) => (
-                  <div key={category} className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 mb-2">{CATEGORY_LABELS[category] || category}</h4>
-                    <div className="text-2xl font-bold text-gray-900 mb-1">
-                      {stats.total}/{stats.maxScore}
+              <h3 className="text-lg font-medium text-gray-900 mb-4">영역별 발달 수준</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                {(assessment.results || []).map((result) => {
+                  const levelInfo = LEVEL_LABELS[result.level] || LEVEL_LABELS.NORMAL
+                  return (
+                    <div key={result.id} className="border border-gray-200 rounded-lg p-4 text-center">
+                      <h4 className="font-medium text-gray-900 mb-3">
+                        {CATEGORY_LABELS[result.category] || result.category}
+                      </h4>
+                      <div className="text-3xl mb-2">{levelInfo.emoji}</div>
+                      <div className={`inline-flex items-center px-3 py-2 rounded-full ${levelInfo.bgColor}`}>
+                        <span className={`text-sm font-medium ${levelInfo.color}`}>
+                          {levelInfo.label}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500 mb-2">
-                      평균 {stats.average.toFixed(1)}점
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-aipoten-green h-2 rounded-full"
-                        style={{ width: `${(stats.total / stats.maxScore) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Detailed Results */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-6">상세 평가 결과</h3>
-
-              <div className="space-y-8">
-                {Object.entries(groupedAnswers).map(([category, answers]) => (
-                  <div key={category}>
-                    <h4 className="text-md font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                      {CATEGORY_LABELS[category] || category}
-                    </h4>
-                    <div className="space-y-3">
-                      {answers.map((answer) => (
-                        <div key={answer.id} className="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">
-                              {answer.question.question}
-                            </p>
-                          </div>
-                          <div className="ml-4">
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getScoreColor(answer.score)}`}>
-                              {answer.score}점 • {getScoreLabel(answer.score)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </div>

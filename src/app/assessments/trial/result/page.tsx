@@ -46,24 +46,25 @@ function TrialResultContent() {
     setIsLoading(false)
   }, [searchParams, router])
 
-  const getLevel = (percentage: number) => {
-    if (percentage >= 80) return { label: '우수', color: 'text-green-600', bgColor: 'bg-green-50', emoji: '🎉' }
-    if (percentage >= 60) return { label: '양호', color: 'text-blue-600', bgColor: 'bg-blue-50', emoji: '😊' }
-    if (percentage >= 40) return { label: '주의', color: 'text-yellow-600', bgColor: 'bg-yellow-50', emoji: '🤔' }
-    return { label: '관찰 필요', color: 'text-red-600', bgColor: 'bg-red-50', emoji: '😟' }
+  const getLevel = (score: number) => {
+    // 언어 발달 기준: 24+(빠름), 15-23(또래), 8-14(추적), 0-7(심화)
+    if (score >= 24) return { label: '빠른 수준', color: 'text-green-600', bgColor: 'bg-green-50', emoji: '🎉' }
+    if (score >= 15) return { label: '또래 수준', color: 'text-blue-600', bgColor: 'bg-blue-50', emoji: '😊' }
+    if (score >= 8) return { label: '추적검사 요망', color: 'text-yellow-600', bgColor: 'bg-yellow-50', emoji: '🤔' }
+    return { label: '심화평가 권고', color: 'text-red-600', bgColor: 'bg-red-50', emoji: '😟' }
   }
 
-  const getFeedback = (percentage: number) => {
-    if (percentage >= 80) {
-      return '언어 발달이 우수합니다! 계속해서 다양한 대화와 책 읽기를 통해 언어 능력을 발전시켜 주세요.'
+  const getFeedback = (score: number) => {
+    if (score >= 24) {
+      return '언어 발달이 빠른 수준입니다! 계속해서 다양한 대화와 책 읽기를 통해 언어 능력을 발전시켜 주세요.'
     }
-    if (percentage >= 60) {
-      return '언어 발달이 양호합니다. 더 많은 언어 자극과 상호작용을 통해 발달을 촉진할 수 있습니다.'
+    if (score >= 15) {
+      return '언어 발달이 또래 수준입니다. 더 많은 언어 자극과 상호작용을 통해 발달을 촉진할 수 있습니다.'
     }
-    if (percentage >= 40) {
-      return '일부 언어 영역에서 주의가 필요합니다. 전문가 상담을 통해 정확한 평가를 받아보시는 것을 권장합니다.'
+    if (score >= 8) {
+      return '일부 언어 영역에서 추적검사가 필요할 수 있습니다. 전문가 상담을 통해 정확한 평가를 받아보시는 것을 권장합니다.'
     }
-    return '언어 발달에 관심이 필요합니다. 전문가와의 상담을 통해 아이에게 맞는 지원 방법을 찾아보세요.'
+    return '언어 발달에 심화평가가 권고됩니다. 전문가와의 상담을 통해 아이에게 맞는 지원 방법을 찾아보세요.'
   }
 
   if (isLoading) {
@@ -77,8 +78,8 @@ function TrialResultContent() {
     )
   }
 
-  const level = getLevel(resultData.percentage)
-  const feedback = getFeedback(resultData.percentage)
+  const level = getLevel(resultData.totalScore)
+  const feedback = getFeedback(resultData.totalScore)
 
   return (
     <div className="min-h-screen bg-neutral-light">
@@ -113,17 +114,11 @@ function TrialResultContent() {
           <div className="p-8 text-center border-b">
             <div className="inline-flex flex-col items-center">
               <div className="text-6xl mb-4">{level.emoji}</div>
-              <div className={`inline-flex items-center px-6 py-3 rounded-full ${level.bgColor} mb-4`}>
-                <span className={`text-2xl font-bold ${level.color}`}>
+              <div className="text-gray-600 mb-4">언어 발달 수준</div>
+              <div className={`inline-flex items-center px-8 py-4 rounded-full ${level.bgColor}`}>
+                <span className={`text-3xl font-bold ${level.color}`}>
                   {level.label}
                 </span>
-              </div>
-              <div className="text-gray-600 mb-2">언어 발달 점수</div>
-              <div className="text-5xl font-bold text-gray-900 mb-2">
-                {resultData.percentage}점
-              </div>
-              <div className="text-sm text-gray-500">
-                {resultData.totalScore} / {resultData.maxScore}
               </div>
             </div>
           </div>
@@ -142,7 +137,7 @@ function TrialResultContent() {
               </h3>
               <ul className="text-sm text-yellow-800 space-y-1">
                 <li>• 이 결과는 언어 발달 영역만 평가한 것입니다</li>
-                <li>• 대근육, 소근육, 인지, 사회성, 정서 영역은 평가되지 않았습니다</li>
+                <li>• 대근육, 소근육, 인지, 사회성 영역은 평가되지 않았습니다</li>
                 <li>• 결과가 저장되지 않으며, 발달 추이를 확인할 수 없습니다</li>
                 <li>• 정확한 발달 평가를 위해서는 전체 진단을 권장합니다</li>
               </ul>
@@ -156,7 +151,7 @@ function TrialResultContent() {
             전체 발달체크로 더 정확한 평가를!
           </h2>
           <p className="text-gray-600 mb-6">
-            회원가입 후 6개 영역 전체 진단을 받으시면<br />
+            회원가입 후 5개 영역 전체 진단을 받으시면<br />
             상세한 발달 리포트, 맞춤 놀이영상, 발달 추이 그래프를 확인하실 수 있습니다.
           </p>
 
@@ -168,9 +163,9 @@ function TrialResultContent() {
               >
                 <span className="text-2xl">📊</span>
               </div>
-              <h3 style={{ color: '#193149' }} className="font-semibold mb-1">6개 영역 진단</h3>
+              <h3 style={{ color: '#193149' }} className="font-semibold mb-1">5개 영역 진단</h3>
               <p className="text-sm text-gray-600">
-                대근육, 소근육, 언어, 인지, 사회성, 정서
+                대근육, 소근육, 언어, 인지, 사회성
               </p>
             </div>
             <div className="text-center">

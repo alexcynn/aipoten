@@ -14,16 +14,14 @@ interface QuestionResponse {
 
 // 체험판용 언어 발달 질문 (Q1 레벨만, 간소화)
 const TRIAL_QUESTIONS = [
-  { id: 'lang_1', text: '아이가 자신의 이름을 들으면 반응합니까?', category: 'LANGUAGE' },
-  { id: 'lang_2', text: '아이가 간단한 단어(엄마, 아빠 등)를 말합니까?', category: 'LANGUAGE' },
-  { id: 'lang_3', text: '아이가 다른 사람의 말을 따라 합니까?', category: 'LANGUAGE' },
-  { id: 'lang_4', text: '아이가 그림책의 그림을 가리키며 이름을 말합니까?', category: 'LANGUAGE' },
-  { id: 'lang_5', text: '아이가 두 단어를 조합하여 말합니까? (예: "엄마 물")', category: 'LANGUAGE' },
-  { id: 'lang_6', text: '아이가 간단한 질문에 대답합니까? (예: "이게 뭐야?")', category: 'LANGUAGE' },
-  { id: 'lang_7', text: '아이가 자신의 요구사항을 말로 표현합니까?', category: 'LANGUAGE' },
-  { id: 'lang_8', text: '아이가 간단한 이야기를 이해합니까?', category: 'LANGUAGE' },
-  { id: 'lang_9', text: '아이가 색깔이나 모양을 말할 수 있습니까?', category: 'LANGUAGE' },
-  { id: 'lang_10', text: '아이가 짧은 문장으로 말합니까? (3-4단어)', category: 'LANGUAGE' },
+  { id: 'lang_1', text: '두 낱말을 함께 말하나요? (예: \'엄마 신발\', \'아빠 차\')', category: 'LANGUAGE' },
+  { id: 'lang_2', text: '자신의 이름을 알고 있나요?', category: 'LANGUAGE' },
+  { id: 'lang_3', text: '두 가지 이상의 지시사항을 기억하여 실행하나요? (예: \'신발을 벗어서 신발장에 넣어줘\')', category: 'LANGUAGE' },
+  { id: 'lang_4', text: '대화할 때 아이의 말을 이해할 수 있나요?', category: 'LANGUAGE' },
+  { id: 'lang_5', text: '2가지 이상의 물건 이름을 말하나요? (예: 컵, 숟가락 등)', category: 'LANGUAGE' },
+  { id: 'lang_6', text: '간단한 의문사 질문에 대답하나요? (예: \'뭐 하고 있어?\', \'뭐 먹었어?\' 등)', category: 'LANGUAGE' },
+  { id: 'lang_7', text: '"크다", "작다" 등과 같은 형용사를 말하나요?', category: 'LANGUAGE' },
+  { id: 'lang_8', text: '색깔 이름을 말하나요? (예: 빨강, 노랑 등)', category: 'LANGUAGE' },
 ]
 
 const ANSWER_OPTIONS = [
@@ -173,14 +171,11 @@ function TrialQuestionsContent() {
                     onClick={() => handleAnswer(option.value, option.score)}
                     className="w-full p-4 border-2 border-gray-300 rounded-lg hover:border-brand-accent hover:bg-brand-accent hover:bg-opacity-10 transition-colors text-left group"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <span className="text-2xl mr-3">{option.emoji}</span>
-                        <span className="text-gray-900 font-medium group-hover:text-brand-green">
-                          {option.value}
-                        </span>
-                      </div>
-                      <span className="text-sm text-gray-500">{option.score}점</span>
+                    <div className="flex items-center">
+                      <span className="text-2xl mr-3">{option.emoji}</span>
+                      <span className="text-gray-900 font-medium group-hover:text-brand-green">
+                        {option.value}
+                      </span>
                     </div>
                   </button>
                 ))}
@@ -207,7 +202,7 @@ function TrialQuestionsContent() {
         {/* Info Banner */}
         <div className="mt-6 bg-blue-50 rounded-lg p-4 text-center">
           <p className="text-sm text-blue-800">
-            💡 체험판은 언어 발달 영역만 평가합니다. 전체 6개 영역 진단을 원하시면{' '}
+            💡 체험판은 언어 발달 영역만 평가합니다. 전체 5개 영역 진단을 원하시면{' '}
             <Link href="/signup" className="font-semibold underline hover:text-blue-900">
               회원가입
             </Link>

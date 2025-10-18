@@ -39,7 +39,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   LANGUAGE: '언어',
   COGNITIVE: '인지',
   SOCIAL: '사회성',
-  EMOTIONAL: '정서',
 }
 
 const FOUR_POINT_OPTIONS = [
@@ -49,8 +48,13 @@ const FOUR_POINT_OPTIONS = [
   { value: '전혀 못함', score: 0 },
 ]
 
-const TWO_POINT_OPTIONS = [
+const TWO_POINT_Q2_OPTIONS = [
   { value: '잘함', score: 1 },
+  { value: '못함', score: 0 },
+]
+
+const TWO_POINT_Q3_OPTIONS = [
+  { value: '잘함', score: 0.5 },
   { value: '못함', score: 0 },
 ]
 
@@ -458,17 +462,16 @@ function AssessmentContent() {
                       <div className="grid grid-cols-1 gap-3">
                         {(currentQuestion.answerType === 'FOUR_POINT'
                           ? FOUR_POINT_OPTIONS
-                          : TWO_POINT_OPTIONS
+                          : currentQuestion.level === 'Q3'
+                          ? TWO_POINT_Q3_OPTIONS
+                          : TWO_POINT_Q2_OPTIONS
                         ).map((option) => (
                           <button
                             key={option.value}
                             onClick={() => handleAnswer(option.value, option.score)}
                             className="p-4 border-2 border-gray-300 rounded-lg hover:border-aipoten-green hover:bg-aipoten-green hover:bg-opacity-5 transition-colors text-left"
                           >
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-900 font-medium">{option.value}</span>
-                              <span className="text-sm text-gray-500">{option.score}점</span>
-                            </div>
+                            <span className="text-gray-900 font-medium">{option.value}</span>
                           </button>
                         ))}
                       </div>

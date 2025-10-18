@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     // AssessmentResult 저장
     for (const [category, scoreData] of Object.entries(categoryScores)) {
-      const level = determineDevelopmentLevel(scoreData.score, scoreData.maxScore)
+      const level = determineDevelopmentLevel(category, scoreData.score)
 
       await prisma.assessmentResult.create({
         data: {
@@ -182,14 +182,45 @@ async function calculateCategoryScores(assessmentId: string, responses: any[]) {
   return scores
 }
 
-// 발달 수준 판정
-function determineDevelopmentLevel(score: number, maxScore: number): 'EXCELLENT' | 'GOOD' | 'CAUTION' | 'NEEDS_OBSERVATION' {
-  if (maxScore === 0) return 'NEEDS_OBSERVATION'
+// 발달 수준 판정 (새로운 기준 적용)
+function determineDevelopmentLevel(category: string, score: number): 'ADVANCED' | 'NORMAL' | 'NEEDS_TRACKING' | 'NEEDS_ASSESSMENT' {
+  switch (category) {
+    case 'GROSS_MOTOR':
+      // 대근육: 0-9(심화), 10-16(추적), 17-23(또래), 24+(빠름)
+      if (score >= 24) return 'ADVANCED'
+      if (score >= 17) return 'NORMAL'
+      if (score >= 10) return 'NEEDS_TRACKING'
+      return 'NEEDS_ASSESSMENT'
 
-  const percentage = (score / maxScore) * 100
+    case 'FINE_MOTOR':
+      // 소근육: 0-9(심화), 10-12(추적), 13-19(또래), 20+(빠름)
+      if (score >= 20) return 'ADVANCED'
+      if (score >= 13) return 'NORMAL'
+      if (score >= 10) return 'NEEDS_TRACKING'
+      return 'NEEDS_ASSESSMENT'
 
-  if (percentage >= 80) return 'EXCELLENT'
-  if (percentage >= 60) return 'GOOD'
-  if (percentage >= 40) return 'CAUTION'
-  return 'NEEDS_OBSERVATION'
+    case 'LANGUAGE':
+      // 언어: 0-7(심화), 8-14(추적), 15-23(또래), 24+(빠름)
+      if (score >= 24) return 'ADVANCED'
+      if (score >= 15) return 'NORMAL'
+      if (score >= 8) return 'NEEDS_TRACKING'
+      return 'NEEDS_ASSESSMENT'
+
+    case 'COGNITIVE':
+      // 인지: 0-7(심화), 8-13(추적), 14-20(또래), 21+(빠름)
+      if (score >= 21) return 'ADVANCED'
+      if (score >= 14) return 'NORMAL'
+      if (score >= 8) return 'NEEDS_TRACKING'
+      return 'NEEDS_ASSESSMENT'
+
+    case 'SOCIAL':
+      // 사회성: 0-5(심화), 6-14(추적), 15-23(또래), 24+(빠름)
+      if (score >= 24) return 'ADVANCED'
+      if (score >= 15) return 'NORMAL'
+      if (score >= 6) return 'NEEDS_TRACKING'
+      return 'NEEDS_ASSESSMENT'
+
+    default:
+      return 'NEEDS_ASSESSMENT'
+  }
 }
