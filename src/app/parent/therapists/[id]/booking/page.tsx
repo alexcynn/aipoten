@@ -42,7 +42,6 @@ export default function BookingPage() {
   const [selectedTimeSlotIds, setSelectedTimeSlotIds] = useState<string[]>([])
   const [selectedChildId, setSelectedChildId] = useState('')
   const sessionType: 'CONSULTATION' | 'THERAPY' = isConsultation ? 'CONSULTATION' : 'THERAPY'
-  const [sessionCount, setSessionCount] = useState(1)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [visitAddress, setVisitAddress] = useState('')
   const [visitAddressDetail, setVisitAddressDetail] = useState('')

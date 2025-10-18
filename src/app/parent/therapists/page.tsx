@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
@@ -22,7 +22,7 @@ interface Therapist {
   approvedAt: string
 }
 
-export default function TherapistsSearchPage() {
+function TherapistsSearchPageContent() {
   const searchParams = useSearchParams()
   const bookingType = searchParams.get('type') || 'therapy' // 'consultation' | 'therapy'
   const isConsultation = bookingType === 'consultation'
@@ -296,5 +296,23 @@ export default function TherapistsSearchPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function TherapistsSearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">로딩 중...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <TherapistsSearchPageContent />
+    </Suspense>
   )
 }
