@@ -57,16 +57,6 @@ export default function TrialAssessmentIntroPage() {
       bgColor: 'bg-pink-50',
       borderColor: 'border-pink-200',
     },
-    {
-      id: 'EMOTIONAL',
-      name: '정서 발달',
-      icon: '❤️',
-      description: '감정 조절, 정서적 안정성, 자기 인식 능력을 평가합니다.',
-      examples: '• 감정 인식하기\n• 스트레스 대처하기\n• 자신감 갖기',
-      color: 'from-red-500 to-red-600',
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-200',
-    },
   ]
 
   return (
@@ -84,7 +74,7 @@ export default function TrialAssessmentIntroPage() {
             발달체크 소개
           </h1>
           <p className="text-xl text-gray-600 mb-2">
-            우리 아이의 발달 상태를 6가지 영역으로 체계적으로 평가합니다
+            우리 아이의 발달 상태를 5가지 영역으로 체계적으로 평가합니다
           </p>
           <p className="text-gray-500">
             로그인 없이 언어 발달 영역을 무료로 체험해보세요
@@ -94,7 +84,7 @@ export default function TrialAssessmentIntroPage() {
         {/* Development Categories */}
         <div className="mb-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            6가지 발달 영역
+            5가지 발달 영역
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => (
@@ -155,14 +145,14 @@ export default function TrialAssessmentIntroPage() {
                     언어 발달만
                   </td>
                   <td className="px-6 py-4 text-sm text-center text-green-600 font-semibold">
-                    전체 6개 영역
+                    전체 5개 영역
                   </td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-sm text-gray-900">문항 수</td>
-                  <td className="px-6 py-4 text-sm text-center text-gray-600">10문항</td>
+                  <td className="px-6 py-4 text-sm text-center text-gray-600">8문항</td>
                   <td className="px-6 py-4 text-sm text-center text-green-600 font-semibold">
-                    60문항
+                    40문항
                   </td>
                 </tr>
                 <tr>
@@ -209,8 +199,8 @@ export default function TrialAssessmentIntroPage() {
         {/* Info Notice */}
         <div className="mt-8 bg-blue-50 rounded-lg p-6 text-center">
           <p className="text-sm text-blue-900">
-            💡 <strong>체험판</strong>은 언어 발달 영역 10문항만 평가하며, 결과는 저장되지 않습니다.<br />
-            전체 6개 영역 진단과 맞춤 서비스를 이용하시려면 회원가입이 필요합니다.
+            💡 <strong>체험판</strong>은 언어 발달 영역 8문항만 평가하며, 결과는 저장되지 않습니다.<br />
+            전체 5개 영역 진단과 맞춤 서비스를 이용하시려면 회원가입이 필요합니다.
           </p>
         </div>
       </main>

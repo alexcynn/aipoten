@@ -170,9 +170,9 @@ export default function TrialAssessmentStartPage() {
                   체험판 안내
                 </h3>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• 언어 발달 영역 10문항만 평가합니다</li>
+                  <li>• 언어 발달 영역 8문항만 평가합니다</li>
                   <li>• 결과는 저장되지 않습니다</li>
-                  <li>• 전체 6개 영역 진단은 회원가입 후 이용 가능합니다</li>
+                  <li>• 전체 5개 영역 진단은 회원가입 후 이용 가능합니다</li>
                 </ul>
               </div>
 

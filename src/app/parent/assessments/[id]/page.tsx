@@ -76,8 +76,8 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
           return
         }
         const data = await response.json()
-        // API 응답에서 assessment 데이터 추출 (배열 또는 단일 객체)
-        const assessmentData = Array.isArray(data) ? data[0] : data
+        // API는 { assessment } 형태로 반환
+        const assessmentData = data.assessment || data
 
         setAssessment(assessmentData)
       } catch (error) {
