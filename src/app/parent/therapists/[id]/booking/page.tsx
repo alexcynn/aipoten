@@ -31,6 +31,12 @@ export default function BookingPage() {
   const bookingType = searchParams.get('type') || 'therapy'
   const isConsultation = bookingType === 'consultation'
 
+  // 날짜 문자열을 로컬 시간대로 파싱하는 헬퍼 함수
+  const parseLocalDate = (dateString: string) => {
+    const [year, month, day] = dateString.split('-').map(Number)
+    return new Date(year, month - 1, day)
+  }
+
   const [step, setStep] = useState(1)
   const [children, setChildren] = useState<Child[]>([])
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
@@ -324,7 +330,7 @@ export default function BookingPage() {
                         <div key={slotId} className="flex items-center justify-between bg-white p-3 rounded-md border border-gray-200">
                           <div className="flex-1">
                             <div className="font-medium text-gray-900">
-                              {new Date(slot.date).toLocaleDateString('ko-KR', {
+                              {parseLocalDate(slot.date.split('T')[0]).toLocaleDateString('ko-KR', {
                                 month: 'long',
                                 day: 'numeric',
                                 weekday: 'short'
@@ -375,7 +381,7 @@ export default function BookingPage() {
                   {selectedDate && (
                     <div className="border-t pt-6">
                       <h3 className="text-sm font-medium text-gray-700 mb-3">
-                        {new Date(selectedDate).toLocaleDateString('ko-KR', {
+                        {parseLocalDate(selectedDate).toLocaleDateString('ko-KR', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
@@ -549,7 +555,7 @@ export default function BookingPage() {
                       if (!slot) return null
                       return (
                         <p key={slotId} className="text-gray-900">
-                          {new Date(slot.date).toLocaleDateString('ko-KR')} {slot.startTime} - {slot.endTime}
+                          {parseLocalDate(slot.date.split('T')[0]).toLocaleDateString('ko-KR')} {slot.startTime} - {slot.endTime}
                         </p>
                       )
                     })}

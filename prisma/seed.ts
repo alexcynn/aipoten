@@ -9,8 +9,10 @@ async function main() {
 
   // 테스트 사용자 계정 생성
   const hashedPassword = await bcrypt.hash('test123!', 10)
+  const therapistPassword = await bcrypt.hash('password123', 10)
 
   const testUsers = await Promise.all([
+    // 부모 계정
     prisma.user.upsert({
       where: { email: 'parent@test.com' },
       update: {},
@@ -22,17 +24,7 @@ async function main() {
         phone: '010-1234-5678'
       },
     }),
-    prisma.user.upsert({
-      where: { email: 'therapist@test.com' },
-      update: {},
-      create: {
-        email: 'therapist@test.com',
-        name: '이치료사',
-        password: hashedPassword,
-        role: 'THERAPIST',
-        phone: '010-2345-6789'
-      },
-    }),
+    // 관리자 계정
     prisma.user.upsert({
       where: { email: 'admin@test.com' },
       update: {},
@@ -46,11 +38,75 @@ async function main() {
     })
   ])
 
+  // 치료사 계정들 생성
+  const therapists = await Promise.all([
+    prisma.user.upsert({
+      where: { email: 'jieun.kim@therapist.com' },
+      update: {},
+      create: {
+        email: 'jieun.kim@therapist.com',
+        name: '김지은',
+        password: therapistPassword,
+        role: 'THERAPIST',
+        phone: '010-2345-6789'
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: 'minho.park@therapist.com' },
+      update: {},
+      create: {
+        email: 'minho.park@therapist.com',
+        name: '박민호',
+        password: therapistPassword,
+        role: 'THERAPIST',
+        phone: '010-3456-7890'
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: 'soyoung.lee@therapist.com' },
+      update: {},
+      create: {
+        email: 'soyoung.lee@therapist.com',
+        name: '이소영',
+        password: therapistPassword,
+        role: 'THERAPIST',
+        phone: '010-4567-8901'
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: 'jihoon.choi@therapist.com' },
+      update: {},
+      create: {
+        email: 'jihoon.choi@therapist.com',
+        name: '최지훈',
+        password: therapistPassword,
+        role: 'THERAPIST',
+        phone: '010-5678-9012'
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: 'yuna.jung@therapist.com' },
+      update: {},
+      create: {
+        email: 'yuna.jung@therapist.com',
+        name: '정유나',
+        password: therapistPassword,
+        role: 'THERAPIST',
+        phone: '010-6789-0123'
+      },
+    })
+  ])
+
   console.log('✅ 테스트 사용자 계정 생성 완료')
   console.log('📧 테스트 계정 정보:')
   console.log('   부모: parent@test.com / test123!')
-  console.log('   치료사: therapist@test.com / test123!')
   console.log('   관리자: admin@test.com / test123!')
+  console.log('   치료사들: *@therapist.com / password123')
+  console.log('     - 김지은: jieun.kim@therapist.com')
+  console.log('     - 박민호: minho.park@therapist.com')
+  console.log('     - 이소영: soyoung.lee@therapist.com')
+  console.log('     - 최지훈: jihoon.choi@therapist.com')
+  console.log('     - 정유나: yuna.jung@therapist.com')
   console.log('')
 
   // 테스트 아이 정보 생성 (부모 계정용)
@@ -111,7 +167,7 @@ async function main() {
       create: {
         id: 'news-1',
         boardId: 'news',
-        authorId: testUsers[2].id, // 관리자
+        authorId: testUsers[1].id, // 관리자
         category: 'DEVELOPMENT_GUIDE',
         isPublished: true,
         publishedAt: new Date(),
@@ -199,7 +255,7 @@ async function main() {
       create: {
         id: 'news-2',
         boardId: 'news',
-        authorId: testUsers[2].id, // 관리자
+        authorId: testUsers[1].id, // 관리자
         category: 'NOTIFICATION',
         isPublished: true,
         publishedAt: new Date(),
@@ -292,38 +348,136 @@ async function main() {
   ])
 
   // 치료사 프로필 생성
-  const therapistProfile = await prisma.therapistProfile.upsert({
-    where: { userId: testUsers[1].id },
+  const therapistProfiles = []
+
+  // 1. 김지은 - 언어치료사
+  const profile1 = await prisma.therapistProfile.upsert({
+    where: { userId: therapists[0].id },
     update: {},
     create: {
-      userId: testUsers[1].id, // 치료사 계정
+      userId: therapists[0].id,
       specialty: 'SPEECH_THERAPY',
       licenseNumber: 'ST-2024-001',
-      experience: 5,
-      education: '특수교육학 석사',
-      introduction: '안녕하세요. 5년 경력의 언어치료사 이치료사입니다. 영유아부터 학령기 아동까지 다양한 언어발달 지원 경험이 있습니다.',
+      experience: 7,
+      education: '언어병리학 석사',
+      introduction: '안녕하세요. 7년 경력의 언어치료사 김지은입니다. 영유아 언어발달부터 말더듬, 조음장애까지 다양한 경험이 있습니다.',
       consultationFee: 120000,
       status: 'APPROVED',
       approvedAt: new Date(),
       approvalStatus: 'APPROVED',
       sessionFee: 120000,
       specialties: JSON.stringify(['SPEECH_THERAPY']),
-      childAgeRanges: JSON.stringify(['AGE_0_12', 'AGE_13_24']),
+      childAgeRanges: JSON.stringify(['AGE_0_12', 'AGE_13_24', 'AGE_25_36']),
       serviceAreas: JSON.stringify(['GANGNAM', 'SEOCHO'])
     }
   })
+  therapistProfiles.push(profile1)
 
-  // 치료사 스케줄 설정 (월-금, 9시-18시)
+  // 2. 박민호 - 작업치료사
+  const profile2 = await prisma.therapistProfile.upsert({
+    where: { userId: therapists[1].id },
+    update: {},
+    create: {
+      userId: therapists[1].id,
+      specialty: 'OCCUPATIONAL_THERAPY',
+      licenseNumber: 'OT-2024-002',
+      experience: 5,
+      education: '작업치료학 학사',
+      introduction: '안녕하세요. 5년 경력의 작업치료사 박민호입니다. 소근육 발달과 감각통합 치료를 전문으로 합니다.',
+      consultationFee: 110000,
+      status: 'APPROVED',
+      approvedAt: new Date(),
+      approvalStatus: 'APPROVED',
+      sessionFee: 110000,
+      specialties: JSON.stringify(['OCCUPATIONAL_THERAPY']),
+      childAgeRanges: JSON.stringify(['AGE_13_24', 'AGE_25_36']),
+      serviceAreas: JSON.stringify(['GANGNAM', 'SONGPA'])
+    }
+  })
+  therapistProfiles.push(profile2)
+
+  // 3. 이소영 - 물리치료사
+  const profile3 = await prisma.therapistProfile.upsert({
+    where: { userId: therapists[2].id },
+    update: {},
+    create: {
+      userId: therapists[2].id,
+      specialty: 'PHYSICAL_THERAPY',
+      licenseNumber: 'PT-2024-003',
+      experience: 8,
+      education: '물리치료학 석사',
+      introduction: '안녕하세요. 8년 경력의 물리치료사 이소영입니다. 영유아 대근육 발달과 자세 교정을 전문으로 합니다.',
+      consultationFee: 130000,
+      status: 'APPROVED',
+      approvedAt: new Date(),
+      approvalStatus: 'APPROVED',
+      sessionFee: 130000,
+      specialties: JSON.stringify(['PHYSICAL_THERAPY']),
+      childAgeRanges: JSON.stringify(['AGE_0_12', 'AGE_13_24', 'AGE_25_36']),
+      serviceAreas: JSON.stringify(['SEOCHO', 'GANGDONG'])
+    }
+  })
+  therapistProfiles.push(profile3)
+
+  // 4. 최지훈 - 발달심리치료사
+  const profile4 = await prisma.therapistProfile.upsert({
+    where: { userId: therapists[3].id },
+    update: {},
+    create: {
+      userId: therapists[3].id,
+      specialty: 'PSYCHOLOGICAL_THERAPY',
+      licenseNumber: 'PS-2024-004',
+      experience: 6,
+      education: '아동심리학 박사',
+      introduction: '안녕하세요. 6년 경력의 발달심리치료사 최지훈입니다. 정서발달과 사회성 향상을 중점으로 치료합니다.',
+      consultationFee: 150000,
+      status: 'APPROVED',
+      approvedAt: new Date(),
+      approvalStatus: 'APPROVED',
+      sessionFee: 150000,
+      specialties: JSON.stringify(['PSYCHOLOGICAL_THERAPY']),
+      childAgeRanges: JSON.stringify(['AGE_25_36', 'AGE_37_48']),
+      serviceAreas: JSON.stringify(['GANGNAM', 'JONGNO'])
+    }
+  })
+  therapistProfiles.push(profile4)
+
+  // 5. 정유나 - 놀이치료사
+  const profile5 = await prisma.therapistProfile.upsert({
+    where: { userId: therapists[4].id },
+    update: {},
+    create: {
+      userId: therapists[4].id,
+      specialty: 'PLAY_THERAPY',
+      licenseNumber: 'PLY-2024-005',
+      experience: 4,
+      education: '놀이치료학 석사',
+      introduction: '안녕하세요. 4년 경력의 놀이치료사 정유나입니다. 놀이를 통한 인지 및 사회성 발달을 돕습니다.',
+      consultationFee: 100000,
+      status: 'APPROVED',
+      approvedAt: new Date(),
+      approvalStatus: 'APPROVED',
+      sessionFee: 100000,
+      specialties: JSON.stringify(['PLAY_THERAPY']),
+      childAgeRanges: JSON.stringify(['AGE_13_24', 'AGE_25_36', 'AGE_37_48']),
+      serviceAreas: JSON.stringify(['SONGPA', 'GANGDONG'])
+    }
+  })
+  therapistProfiles.push(profile5)
+
+  // 치료사별 스케줄 설정 (월-금, 9시-18시)
   const scheduleData = []
-  for (let day = 1; day <= 5; day++) { // 월요일(1)부터 금요일(5)까지
-    for (let hour = 9; hour < 18; hour++) {
-      scheduleData.push({
-        therapistId: therapistProfile.id,
-        dayOfWeek: day,
-        startTime: `${hour.toString().padStart(2, '0')}:00`,
-        endTime: `${(hour + 1).toString().padStart(2, '0')}:00`,
-        isActive: true
-      })
+  for (const profile of therapistProfiles) {
+    for (let day = 1; day <= 5; day++) { // 월요일(1)부터 금요일(5)까지
+      for (let hour = 9; hour < 18; hour++) {
+        scheduleData.push({
+          therapistId: profile.id,
+          dayOfWeek: day,
+          startTime: `${hour.toString().padStart(2, '0')}:00`,
+          endTime: `${(hour + 1).toString().padStart(2, '0')}:00`,
+          isActive: true
+        })
+      }
     }
   }
 
@@ -331,7 +485,43 @@ async function main() {
     data: scheduleData
   })
 
+  // 향후 4주간의 타임슬롯 생성 (예약 가능한 실제 날짜)
+  const timeSlots = []
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  for (const profile of therapistProfiles) {
+    for (let dayOffset = 0; dayOffset < 28; dayOffset++) { // 4주
+      const targetDate = new Date(today)
+      targetDate.setDate(today.getDate() + dayOffset)
+
+      const dayOfWeek = targetDate.getDay()
+
+      // 주말 제외 (월-금만)
+      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+        for (let hour = 9; hour < 18; hour++) {
+          const startTime = `${hour.toString().padStart(2, '0')}:00`
+          const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`
+
+          timeSlots.push({
+            therapistId: profile.id,
+            date: targetDate,
+            startTime,
+            endTime,
+            isAvailable: true // 기본적으로 모두 예약 가능
+          })
+        }
+      }
+    }
+  }
+
+  await prisma.timeSlot.createMany({
+    data: timeSlots
+  })
+
   console.log('✅ 치료사 프로필과 스케줄이 생성되었습니다')
+  console.log(`   치료사 수: ${therapistProfiles.length}명`)
+  console.log(`   생성된 타임슬롯: ${timeSlots.length}개 (향후 4주간)`)
 
   // 알림장 게시글 생성
   const notificationPosts = await Promise.all([
@@ -369,7 +559,7 @@ async function main() {
 감사합니다.
         `,
         boardId: 'notification',
-        authorId: testUsers[2].id, // 관리자
+        authorId: testUsers[1].id, // 관리자
         isPublished: true
       }
     }),
@@ -398,7 +588,7 @@ async function main() {
 감사합니다.
         `,
         boardId: 'notification',
-        authorId: testUsers[2].id,
+        authorId: testUsers[1].id,
         isPublished: true
       }
     })

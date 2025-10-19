@@ -85,12 +85,18 @@ export default function LoginPage() {
               <span>parent@test.com / test123!</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium">👩‍⚕️ 치료사:</span>
-              <span>jieun.kim@therapist.com / password123</span>
-            </div>
-            <div className="flex justify-between">
               <span className="font-medium">👨‍💼 관리자:</span>
               <span>admin@test.com / test123!</span>
+            </div>
+            <div className="border-t border-blue-300 pt-2 mt-2">
+              <div className="font-medium mb-1">👩‍⚕️ 치료사들 (비밀번호: password123)</div>
+              <div className="space-y-1 ml-2 text-xs">
+                <div>• 김지은(언어): jieun.kim@therapist.com</div>
+                <div>• 박민호(작업): minho.park@therapist.com</div>
+                <div>• 이소영(물리): soyoung.lee@therapist.com</div>
+                <div>• 최지훈(심리): jihoon.choi@therapist.com</div>
+                <div>• 정유나(놀이): yuna.jung@therapist.com</div>
+              </div>
             </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -102,7 +108,7 @@ export default function LoginPage() {
               }}
               className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded text-xs font-medium transition-colors"
             >
-              부모 계정 입력
+              부모 계정
             </button>
             <button
               type="button"
@@ -112,7 +118,7 @@ export default function LoginPage() {
               }}
               className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-800 rounded text-xs font-medium transition-colors"
             >
-              치료사 계정 입력
+              치료사(김지은)
             </button>
             <button
               type="button"
@@ -122,7 +128,7 @@ export default function LoginPage() {
               }}
               className="px-3 py-1 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded text-xs font-medium transition-colors"
             >
-              관리자 계정 입력
+              관리자
             </button>
           </div>
         </div>
