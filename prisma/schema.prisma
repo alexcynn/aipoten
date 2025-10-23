@@ -378,6 +378,7 @@ model TherapistProfile {
   childAgeRanges  String?  // JSON 배열: ["AGE_0_12", "AGE_13_24"]
   serviceAreas    String?  // JSON 배열: ["GANGNAM", "SEOCHO"]
   sessionFee      Int?     // 50분 기준 상담료 (원)
+  isPreTherapist  Boolean  @default(false) // 예비 치료사 여부 (졸업 전)
 
   // 기존 필드 (호환성 유지)
   specialty       TherapyType? // 레거시

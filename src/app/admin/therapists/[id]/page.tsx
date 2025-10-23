@@ -233,15 +233,23 @@ export default function AdminTherapistDetailPage() {
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">전문 분야</dt>
-                  <dd className="text-sm text-gray-900">{getSpecialtyLabel(therapist.specialty)}</dd>
+                  <dd className="text-sm text-gray-900">
+                    {therapist.specialty ? getSpecialtyLabel(therapist.specialty) : '미등록'}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">경력</dt>
-                  <dd className="text-sm text-gray-900">{therapist.experience}년</dd>
+                  <dd className="text-sm text-gray-900">
+                    {therapist.experience ? `${therapist.experience}년` : '미등록'}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">상담료</dt>
-                  <dd className="text-sm text-gray-900">₩{therapist.consultationFee.toLocaleString()}</dd>
+                  <dd className="text-sm text-gray-900">
+                    {therapist.sessionFee || therapist.consultationFee
+                      ? `₩${(therapist.sessionFee || therapist.consultationFee).toLocaleString()}`
+                      : '미등록'}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">가입일</dt>
@@ -256,20 +264,24 @@ export default function AdminTherapistDetailPage() {
               <div className="space-y-3">
                 <div>
                   <dt className="text-sm font-medium text-gray-500">학력</dt>
-                  <dd className="text-sm text-gray-900">{therapist.education}</dd>
+                  <dd className="text-sm text-gray-900">{therapist.education || '미등록'}</dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">자격증</dt>
                   <dd className="text-sm text-gray-900">
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {therapist.certifications.map((cert, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded"
-                        >
-                          {cert}
-                        </span>
-                      ))}
+                      {therapist.certifications && therapist.certifications.length > 0 ? (
+                        therapist.certifications.map((cert, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded"
+                          >
+                            {typeof cert === 'string' ? cert : cert.name}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-500">미등록</span>
+                      )}
                     </div>
                   </dd>
                 </div>

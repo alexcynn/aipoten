@@ -43,6 +43,14 @@ export default function SignupPage() {
     setIsLoading(true)
     setError('')
 
+    // 이메일 형식 검증
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      setError('올바른 이메일 형식을 입력해주세요. (예: example@email.com)')
+      setIsLoading(false)
+      return
+    }
+
     // 비밀번호 확인
     if (formData.password !== formData.confirmPassword) {
       setError('비밀번호가 일치하지 않습니다.')
@@ -145,7 +153,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                이메일
+                이메일 (아이디로 사용됩니다)
               </label>
               <input
                 id="email"
@@ -154,10 +162,13 @@ export default function SignupPage() {
                 autoComplete="email"
                 required
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green focus:z-10 sm:text-sm"
-                placeholder="이메일 주소"
+                placeholder="example@email.com"
                 value={formData.email}
                 onChange={handleChange}
               />
+              <p className="mt-1 text-sm text-gray-500">
+                로그인 시 아이디로 사용됩니다
+              </p>
             </div>
 
             <div>

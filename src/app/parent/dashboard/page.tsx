@@ -40,6 +40,32 @@ const CATEGORY_LABELS: Record<string, string> = {
   EMOTIONAL: '정서'
 }
 
+const LEVEL_LABELS: Record<string, { text: string; color: string; bgColor: string }> = {
+  ADVANCED: { text: '빠른 발달', color: '#1976D2', bgColor: '#E3F2FD' },
+  NORMAL: { text: '또래 수준', color: '#388E3C', bgColor: '#E8F5E9' },
+  NEEDS_TRACKING: { text: '추적 필요', color: '#F57C00', bgColor: '#FFF3E0' },
+  NEEDS_ASSESSMENT: { text: '심화 평가 필요', color: '#D32F2F', bgColor: '#FFEBEE' }
+}
+
+// 전체 발달 수준 판정 (가장 낮은 수준 기준)
+const getOverallLevel = (results?: { level: string }[]) => {
+  if (!results || results.length === 0) return 'NEEDS_ASSESSMENT'
+
+  const levelPriority = ['NEEDS_ASSESSMENT', 'NEEDS_TRACKING', 'NORMAL', 'ADVANCED']
+  let lowestLevel = 'ADVANCED'
+
+  for (const result of results) {
+    const currentPriority = levelPriority.indexOf(result.level)
+    const lowestPriority = levelPriority.indexOf(lowestLevel)
+
+    if (currentPriority < lowestPriority) {
+      lowestLevel = result.level
+    }
+  }
+
+  return lowestLevel
+}
+
 export default function ParentDashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -127,8 +153,14 @@ export default function ParentDashboardPage() {
         if (response.ok) {
           const data = await response.json()
           const assessmentsArray = Array.isArray(data) ? data : (data.assessments || [])
-          setLatestAssessment(assessmentsArray.length > 0 ? assessmentsArray[0] : null)
-          setAssessments(assessmentsArray.slice(0, 5)) // 최근 5개
+
+          // 중복 제거: ID를 기준으로 unique한 검사만 추출
+          const uniqueAssessments = assessmentsArray.filter((assessment: Assessment, index: number, self: Assessment[]) =>
+            index === self.findIndex((a) => a.id === assessment.id)
+          )
+
+          setLatestAssessment(uniqueAssessments.length > 0 ? uniqueAssessments[0] : null)
+          setAssessments(uniqueAssessments.slice(0, 5)) // 최근 5개
         }
       } catch (error) {
         console.error('발달체크 조회 오류:', error)
@@ -352,10 +384,24 @@ export default function ParentDashboardPage() {
                           <span className="font-medium">평가일:</span>{' '}
                           {new Date(latestAssessment.createdAt).toLocaleDateString('ko-KR')}
                         </p>
-                        <p className="text-sm text-gray-900">
-                          <span className="font-medium">총점:</span>{' '}
-                          {latestAssessment.totalScore}점
-                        </p>
+                        <div>
+                          <span className="text-sm font-medium text-gray-900">발달 수준: </span>
+                          {(() => {
+                            const overallLevel = getOverallLevel(latestAssessment.results)
+                            const levelInfo = LEVEL_LABELS[overallLevel] || LEVEL_LABELS['NEEDS_ASSESSMENT']
+                            return (
+                              <span
+                                className="inline-block px-3 py-1 rounded-full text-xs font-bold"
+                                style={{
+                                  backgroundColor: levelInfo.bgColor,
+                                  color: levelInfo.color
+                                }}
+                              >
+                                {levelInfo.text}
+                              </span>
+                            )
+                          })()}
+                        </div>
                         {getNextCheckDate() && (
                           <p className="text-sm text-gray-600">
                             <span className="font-medium">다음 체크 권장:</span>{' '}
@@ -461,7 +507,10 @@ export default function ParentDashboardPage() {
                           {assessments.map((assessment) => {
                             const date = new Date(assessment.createdAt)
                             const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
-                            const percentage = Math.round((assessment.totalScore / 300) * 100)
+
+                            // 전체 발달 수준 판정
+                            const overallLevel = getOverallLevel(assessment.results)
+                            const levelInfo = LEVEL_LABELS[overallLevel] || LEVEL_LABELS['NEEDS_ASSESSMENT']
 
                             return (
                               <div
@@ -485,20 +534,36 @@ export default function ParentDashboardPage() {
                                         {assessment.completedAt ? '완료' : '진행 중'}
                                       </span>
                                     </div>
-                                    <div className="text-2xl font-bold" style={{ color: '#193149' }}>
-                                      {percentage}점
+
+                                    {/* 전체 발달 수준 표시 */}
+                                    <div
+                                      className="inline-block px-4 py-2 rounded-lg text-lg font-bold mb-3"
+                                      style={{
+                                        backgroundColor: levelInfo.bgColor,
+                                        color: levelInfo.color
+                                      }}
+                                    >
+                                      {levelInfo.text}
                                     </div>
+
+                                    {/* 영역별 발달 수준 */}
                                     {assessment.results && assessment.results.length > 0 && (
                                       <div className="flex flex-wrap gap-2 mt-3">
-                                        {assessment.results.map((result, idx) => (
-                                          <div
-                                            key={idx}
-                                            className="text-xs px-2 py-1 rounded"
-                                            style={{ backgroundColor: '#F5F5F5', color: '#386646' }}
-                                          >
-                                            {CATEGORY_LABELS[result.category] || result.category}: {result.score}점
-                                          </div>
-                                        ))}
+                                        {assessment.results.map((result, idx) => {
+                                          const resultLevelInfo = LEVEL_LABELS[result.level] || LEVEL_LABELS['NEEDS_ASSESSMENT']
+                                          return (
+                                            <div
+                                              key={idx}
+                                              className="text-xs px-2 py-1 rounded font-medium"
+                                              style={{
+                                                backgroundColor: resultLevelInfo.bgColor,
+                                                color: resultLevelInfo.color
+                                              }}
+                                            >
+                                              {CATEGORY_LABELS[result.category] || result.category}: {resultLevelInfo.text}
+                                            </div>
+                                          )
+                                        })}
                                       </div>
                                     )}
                                   </div>

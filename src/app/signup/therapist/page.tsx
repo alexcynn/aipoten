@@ -74,6 +74,7 @@ export default function TherapistRegisterPage() {
   const [sessionFee, setSessionFee] = useState('')
 
   // Step 3: Certifications & Experience
+  const [isPreTherapist, setIsPreTherapist] = useState(false)
   const [certifications, setCertifications] = useState<Certification[]>([
     { name: '', issuingOrganization: '', issueDate: '' }
   ])
@@ -132,6 +133,14 @@ export default function TherapistRegisterPage() {
       alert('필수 정보를 모두 입력해주세요.')
       return false
     }
+
+    // 이메일 형식 검증
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      alert('올바른 이메일 형식을 입력해주세요. (예: example@email.com)')
+      return false
+    }
+
     if (password !== passwordConfirm) {
       alert('비밀번호가 일치하지 않습니다.')
       return false
@@ -164,13 +173,16 @@ export default function TherapistRegisterPage() {
   }
 
   const validateStep3 = () => {
-    if (certifications.some(c => !c.name || !c.issuingOrganization || !c.issueDate)) {
-      alert('모든 자격증 정보를 입력해주세요.')
-      return false
-    }
-    if (experiences.some(e => !e.specialty || !e.startDate)) {
-      alert('모든 경력 정보를 입력해주세요.')
-      return false
+    // 예비 치료사가 아닌 경우에만 자격증/경력 검증
+    if (!isPreTherapist) {
+      if (certifications.some(c => !c.name || !c.issuingOrganization || !c.issueDate)) {
+        alert('모든 자격증 정보를 입력해주세요.')
+        return false
+      }
+      if (experiences.some(e => !e.specialty || !e.startDate)) {
+        alert('모든 경력 정보를 입력해주세요.')
+        return false
+      }
     }
     return true
   }
@@ -202,8 +214,9 @@ export default function TherapistRegisterPage() {
           childAgeRanges,
           serviceAreas,
           sessionFee: parseInt(sessionFee),
-          certifications,
-          experiences,
+          isPreTherapist,
+          certifications: isPreTherapist ? [] : certifications,
+          experiences: isPreTherapist ? [] : experiences,
         }),
       })
 
@@ -229,22 +242,24 @@ export default function TherapistRegisterPage() {
       <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           {/* Progress Bar */}
-          <div className="bg-gradient-to-r from-brand-navy to-brand-green p-6">
+          <div className="bg-slate-800 p-6">
             <h1 className="text-2xl font-bold text-white mb-4">치료사 회원가입</h1>
             <div className="flex items-center justify-between">
               {[1, 2, 3].map((step) => (
                 <div key={step} className="flex-1 flex items-center">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                      currentStep >= step ? 'bg-white text-brand-navy' : 'bg-brand-navy/50 text-white'
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-all ${
+                      currentStep >= step
+                        ? 'bg-green-500 text-white border-green-500 shadow-lg'
+                        : 'bg-transparent text-white border-white/40'
                     }`}
                   >
                     {step}
                   </div>
                   {step < 3 && (
                     <div
-                      className={`flex-1 h-1 mx-2 ${
-                        currentStep > step ? 'bg-white' : 'bg-brand-navy/50'
+                      className={`flex-1 h-1 mx-2 transition-all ${
+                        currentStep > step ? 'bg-green-500' : 'bg-white/30'
                       }`}
                     />
                   )}
@@ -252,9 +267,9 @@ export default function TherapistRegisterPage() {
               ))}
             </div>
             <div className="flex justify-between mt-2">
-              <span className="text-sm text-white">기본 정보</span>
-              <span className="text-sm text-white">전문 정보</span>
-              <span className="text-sm text-white">자격증 · 경력</span>
+              <span className={`text-sm ${currentStep >= 1 ? 'text-green-400 font-medium' : 'text-white/70'}`}>기본 정보</span>
+              <span className={`text-sm ${currentStep >= 2 ? 'text-green-400 font-medium' : 'text-white/70'}`}>전문 정보</span>
+              <span className={`text-sm ${currentStep >= 3 ? 'text-green-400 font-medium' : 'text-white/70'}`}>자격증 · 경력</span>
             </div>
           </div>
 
@@ -266,15 +281,19 @@ export default function TherapistRegisterPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    이메일 <span className="text-red-500">*</span>
+                    이메일 (아이디로 사용됩니다) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-accent focus:border-transparent"
+                    placeholder="example@email.com"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     required
                   />
+                  <p className="mt-1 text-sm text-gray-500">
+                    로그인 시 아이디로 사용됩니다
+                  </p>
                 </div>
 
                 <div>
@@ -496,19 +515,42 @@ export default function TherapistRegisterPage() {
               <div className="space-y-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">자격증 및 경력</h2>
 
-                <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">자격증</h3>
-                    <button
-                      type="button"
-                      onClick={addCertification}
-                      className="px-4 py-2 text-sm bg-brand-accent text-white rounded-md hover:opacity-90"
-                    >
-                      + 자격증 추가
-                    </button>
-                  </div>
+                {/* 예비 치료사 체크박스 */}
+                <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isPreTherapist}
+                      onChange={(e) => setIsPreTherapist(e.target.checked)}
+                      className="w-4 h-4 text-brand-accent border-gray-300 rounded focus:ring-brand-accent mr-3"
+                    />
+                    <div>
+                      <span className="font-medium text-gray-900">
+                        저는 예비 치료사입니다 (졸업 전)
+                      </span>
+                      <p className="text-sm text-gray-600 mt-1">
+                        예비 치료사의 경우 자격증 및 경력 입력 없이도 신청이 가능합니다.
+                      </p>
+                    </div>
+                  </label>
+                </div>
 
-                  {certifications.map((cert, index) => (
+                {/* 예비 치료사가 아닌 경우에만 자격증/경력 입력 */}
+                {!isPreTherapist && (
+                  <>
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium text-gray-900">자격증</h3>
+                        <button
+                          type="button"
+                          onClick={addCertification}
+                          className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                        >
+                          + 자격증 추가
+                        </button>
+                      </div>
+
+                    {certifications.map((cert, index) => (
                     <div key={index} className="mb-6 p-4 border border-gray-300 rounded-md bg-gray-50">
                       <div className="flex justify-between items-center mb-3">
                         <h4 className="font-medium text-gray-900">자격증 {index + 1}</h4>
@@ -587,7 +629,7 @@ export default function TherapistRegisterPage() {
                     <button
                       type="button"
                       onClick={addExperience}
-                      className="px-4 py-2 text-sm bg-brand-accent text-white rounded-md hover:opacity-90"
+                      className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                     >
                       + 경력 추가
                     </button>
@@ -714,7 +756,18 @@ export default function TherapistRegisterPage() {
                       </div>
                     </div>
                   ))}
-                </div>
+                    </div>
+                  </>
+                )}
+
+                {/* 예비 치료사인 경우 안내 메시지 */}
+                {isPreTherapist && (
+                  <div className="bg-green-50 p-4 rounded-md border border-green-200">
+                    <p className="text-sm text-gray-700">
+                      예비 치료사로 신청하셨습니다. 졸업 후 자격증 및 경력 정보를 추가하실 수 있습니다.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -724,7 +777,7 @@ export default function TherapistRegisterPage() {
                 type="button"
                 onClick={() => setCurrentStep(currentStep - 1)}
                 disabled={currentStep === 1}
-                className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 이전
               </button>
@@ -733,7 +786,7 @@ export default function TherapistRegisterPage() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="px-6 py-2 bg-brand-accent text-white rounded-md hover:opacity-90"
+                  className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors shadow-md"
                 >
                   다음
                 </button>
@@ -742,7 +795,7 @@ export default function TherapistRegisterPage() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={isSubmitting}
-                  className="px-6 py-2 bg-brand-green text-white rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                 >
                   {isSubmitting ? '등록 중...' : '등록 신청'}
                 </button>

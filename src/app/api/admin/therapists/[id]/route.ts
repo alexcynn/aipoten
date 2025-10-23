@@ -66,8 +66,16 @@ export async function GET(
       childAgeRanges: therapist.childAgeRanges ? JSON.parse(therapist.childAgeRanges) : [],
       serviceAreas: therapist.serviceAreas ? JSON.parse(therapist.serviceAreas) : [],
       sessionFee: therapist.sessionFee,
+
+      // 레거시 필드 (하위 호환성)
+      specialty: therapist.specialty,
+      experience: therapist.experience,
+      consultationFee: therapist.consultationFee,
+      licenseNumber: therapist.licenseNumber,
+
       education: therapist.education,
       introduction: therapist.introduction,
+      description: therapist.introduction, // 별칭
       certifications: therapist.certifications,
       experiences: therapist.experiences,
       approvalStatus: therapist.approvalStatus,

@@ -10,6 +10,7 @@ interface Booking {
   sessionType: string
   sessionCount: number
   status: string
+  paymentStatus: string
   finalFee: number
   child: {
     id: string
@@ -35,6 +36,13 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   CANCELLED: { label: '취소됨', color: 'bg-red-100 text-red-800' },
   REJECTED: { label: '거절됨', color: 'bg-red-100 text-red-800' },
   NO_SHOW: { label: '노쇼', color: 'bg-red-100 text-red-800' },
+}
+
+const paymentStatusLabels: Record<string, { label: string; color: string }> = {
+  PENDING: { label: '결제 대기', color: 'bg-orange-100 text-orange-800' },
+  PAID: { label: '결제 완료', color: 'bg-green-100 text-green-800' },
+  REFUNDED: { label: '환불 완료', color: 'bg-gray-100 text-gray-800' },
+  FAILED: { label: '결제 실패', color: 'bg-red-100 text-red-800' },
 }
 
 export default function MyBookingsPage() {
@@ -238,6 +246,13 @@ export default function MyBookingsPage() {
                         }`}
                       >
                         {statusLabels[booking.status]?.label || booking.status}
+                      </span>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          paymentStatusLabels[booking.paymentStatus]?.color || 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {paymentStatusLabels[booking.paymentStatus]?.label || booking.paymentStatus}
                       </span>
                     </div>
 

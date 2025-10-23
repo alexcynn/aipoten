@@ -6,6 +6,12 @@ import bcrypt from 'bcryptjs'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    console.log('📝 Received registration data:', {
+      email: body.email,
+      isPreTherapist: body.isPreTherapist,
+      hasCertifications: body.certifications?.length || 0,
+      hasExperiences: body.experiences?.length || 0
+    })
 
     const {
       // Step 1: Basic Info
@@ -25,6 +31,7 @@ export async function POST(request: NextRequest) {
       sessionFee,
 
       // Step 3: Certifications & Experience
+      isPreTherapist,   // 예비 치료사 여부
       certifications,   // array of {name, issuingOrganization, issueDate, filePath}
       experiences,      // array of {employmentType, institutionName, specialty, startDate, endDate, description}
     } = body
@@ -77,6 +84,7 @@ export async function POST(request: NextRequest) {
           childAgeRanges: JSON.stringify(childAgeRanges || []),
           serviceAreas: JSON.stringify(serviceAreas || []),
           sessionFee: sessionFee || null,
+          isPreTherapist: isPreTherapist || false,
           approvalStatus: 'PENDING',
           status: 'PENDING',
         }
@@ -126,9 +134,12 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
 
   } catch (error) {
+    console.error('❌ Therapist registration error:', error)
+    console.error('Error details:', JSON.stringify(error, null, 2))
+
     const dbError = handleDatabaseError(error, 'POST /api/auth/register/therapist')
     return NextResponse.json(
-      { error: dbError.message, errorCode: dbError.errorCode },
+      { error: dbError.message, errorCode: dbError.errorCode, details: error instanceof Error ? error.message : 'Unknown error' },
       { status: dbError.statusCode }
     )
   }
