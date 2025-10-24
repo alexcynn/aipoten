@@ -23,6 +23,28 @@ interface Experience {
   description?: string
 }
 
+interface PendingUpdateRequest {
+  id: string
+  requestData: {
+    name: string
+    gender?: string
+    birthYear?: number
+    phone?: string
+    address?: string
+    addressDetail?: string
+    specialties: string[]
+    childAgeRanges: string[]
+    serviceAreas: string[]
+    sessionFee?: number
+    education?: string
+    isPreTherapist: boolean
+    certifications: any[]
+    experiences: any[]
+  }
+  memo?: string
+  requestedAt: string
+}
+
 interface TherapistProfile {
   id: string
   user: {
@@ -50,6 +72,7 @@ interface TherapistProfile {
   profileUpdateRequestedAt?: string
   profileUpdateNote?: string
   profileUpdateApprovedAt?: string
+  pendingUpdateRequest?: PendingUpdateRequest | null
   createdAt: string
 }
 
@@ -779,31 +802,121 @@ export default function AdminTherapistsPage() {
                 )}
 
                 {/* 프로필 수정 요청 정보 */}
-                {selectedTherapist.profileUpdateRequested && (
+                {selectedTherapist.profileUpdateRequested && selectedTherapist.pendingUpdateRequest && (
                   <div className="bg-orange-50 rounded-lg p-4 border-2 border-orange-200">
                     <div className="flex items-center space-x-2 mb-3">
                       <svg className="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
-                      <h3 className="text-lg font-semibold text-orange-900">프로필 수정 요청</h3>
+                      <h3 className="text-lg font-semibold text-orange-900">프로필 수정 요청 비교</h3>
                     </div>
-                    <div className="space-y-2">
-                      {selectedTherapist.profileUpdateRequestedAt && (
-                        <div>
-                          <label className="text-sm font-medium text-orange-700">요청 시각</label>
-                          <p className="mt-1 text-sm text-orange-900">
-                            {new Date(selectedTherapist.profileUpdateRequestedAt).toLocaleString('ko-KR')}
-                          </p>
+
+                    <div className="space-y-4 mt-4">
+                      {/* Request Info */}
+                      <div className="bg-white rounded p-3">
+                        <div className="text-sm text-orange-700">
+                          <strong>요청 시각:</strong> {new Date(selectedTherapist.pendingUpdateRequest.requestedAt).toLocaleString('ko-KR')}
+                        </div>
+                        {selectedTherapist.pendingUpdateRequest.memo && (
+                          <div className="text-sm text-orange-700 mt-1">
+                            <strong>메모:</strong> {selectedTherapist.pendingUpdateRequest.memo}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Comparison Table */}
+                      <div className="bg-white rounded overflow-hidden">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-100">
+                            <tr>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">항목</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">현재</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">변경 요청</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {/* Name */}
+                            {selectedTherapist.user.name !== selectedTherapist.pendingUpdateRequest.requestData.name && (
+                              <tr className="bg-yellow-50">
+                                <td className="px-3 py-2 text-sm font-medium text-gray-900">이름</td>
+                                <td className="px-3 py-2 text-sm text-gray-500">{selectedTherapist.user.name}</td>
+                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">{selectedTherapist.pendingUpdateRequest.requestData.name}</td>
+                              </tr>
+                            )}
+                            {/* Phone */}
+                            {selectedTherapist.user.phone !== selectedTherapist.pendingUpdateRequest.requestData.phone && (
+                              <tr className="bg-yellow-50">
+                                <td className="px-3 py-2 text-sm font-medium text-gray-900">전화번호</td>
+                                <td className="px-3 py-2 text-sm text-gray-500">{selectedTherapist.user.phone}</td>
+                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">{selectedTherapist.pendingUpdateRequest.requestData.phone}</td>
+                              </tr>
+                            )}
+                            {/* Gender */}
+                            {selectedTherapist.gender !== selectedTherapist.pendingUpdateRequest.requestData.gender && (
+                              <tr className="bg-yellow-50">
+                                <td className="px-3 py-2 text-sm font-medium text-gray-900">성별</td>
+                                <td className="px-3 py-2 text-sm text-gray-500">{selectedTherapist.gender === 'MALE' ? '남성' : selectedTherapist.gender === 'FEMALE' ? '여성' : '-'}</td>
+                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">{selectedTherapist.pendingUpdateRequest.requestData.gender === 'MALE' ? '남성' : selectedTherapist.pendingUpdateRequest.requestData.gender === 'FEMALE' ? '여성' : '-'}</td>
+                              </tr>
+                            )}
+                            {/* Birth Year */}
+                            {selectedTherapist.birthYear !== selectedTherapist.pendingUpdateRequest.requestData.birthYear && (
+                              <tr className="bg-yellow-50">
+                                <td className="px-3 py-2 text-sm font-medium text-gray-900">생년</td>
+                                <td className="px-3 py-2 text-sm text-gray-500">{selectedTherapist.birthYear || '-'}</td>
+                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">{selectedTherapist.pendingUpdateRequest.requestData.birthYear || '-'}</td>
+                              </tr>
+                            )}
+                            {/* Address */}
+                            {selectedTherapist.address !== selectedTherapist.pendingUpdateRequest.requestData.address && (
+                              <tr className="bg-yellow-50">
+                                <td className="px-3 py-2 text-sm font-medium text-gray-900">주소</td>
+                                <td className="px-3 py-2 text-sm text-gray-500">{selectedTherapist.address || '-'}</td>
+                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">{selectedTherapist.pendingUpdateRequest.requestData.address || '-'}</td>
+                              </tr>
+                            )}
+                            {/* Specialties */}
+                            {JSON.stringify(selectedTherapist.specialties) !== JSON.stringify(selectedTherapist.pendingUpdateRequest.requestData.specialties) && (
+                              <tr className="bg-yellow-50">
+                                <td className="px-3 py-2 text-sm font-medium text-gray-900">전문 분야</td>
+                                <td className="px-3 py-2 text-sm text-gray-500">
+                                  {selectedTherapist.specialties.map(s => getSpecialtyLabel(s)).join(', ')}
+                                </td>
+                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">
+                                  {selectedTherapist.pendingUpdateRequest.requestData.specialties.map(s => getSpecialtyLabel(s)).join(', ')}
+                                </td>
+                              </tr>
+                            )}
+                            {/* Session Fee */}
+                            {selectedTherapist.sessionFee !== selectedTherapist.pendingUpdateRequest.requestData.sessionFee && (
+                              <tr className="bg-yellow-50">
+                                <td className="px-3 py-2 text-sm font-medium text-gray-900">세션 비용</td>
+                                <td className="px-3 py-2 text-sm text-gray-500">₩{selectedTherapist.sessionFee?.toLocaleString() || '-'}</td>
+                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">₩{selectedTherapist.pendingUpdateRequest.requestData.sessionFee?.toLocaleString() || '-'}</td>
+                              </tr>
+                            )}
+                            {/* Education */}
+                            {selectedTherapist.education !== selectedTherapist.pendingUpdateRequest.requestData.education && (
+                              <tr className="bg-yellow-50">
+                                <td className="px-3 py-2 text-sm font-medium text-gray-900">학력</td>
+                                <td className="px-3 py-2 text-sm text-gray-500">{selectedTherapist.education || '-'}</td>
+                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">{selectedTherapist.pendingUpdateRequest.requestData.education || '-'}</td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Certifications and Experiences changes note */}
+                      {(selectedTherapist.pendingUpdateRequest.requestData.certifications.length > 0 ||
+                        selectedTherapist.pendingUpdateRequest.requestData.experiences.length > 0) && (
+                        <div className="bg-white rounded p-3 text-sm text-orange-700">
+                          <p className="font-medium">📋 자격증 및 경력 정보가 변경됩니다.</p>
+                          <p className="text-xs mt-1">• 자격증: {selectedTherapist.pendingUpdateRequest.requestData.certifications.length}개</p>
+                          <p className="text-xs">• 경력: {selectedTherapist.pendingUpdateRequest.requestData.experiences.length}개</p>
                         </div>
                       )}
-                      {selectedTherapist.profileUpdateNote && (
-                        <div>
-                          <label className="text-sm font-medium text-orange-700">요청 메모</label>
-                          <p className="mt-1 text-sm text-orange-900 bg-white p-2 rounded">
-                            {selectedTherapist.profileUpdateNote}
-                          </p>
-                        </div>
-                      )}
+
                       <div className="pt-2">
                         <button
                           onClick={() => handleApproveProfileUpdate(selectedTherapist.id)}

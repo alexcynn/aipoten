@@ -22,6 +22,15 @@ export async function GET(request: NextRequest) {
         },
         certifications: true,
         experiences: true,
+        profileUpdateRequests: {
+          where: {
+            status: 'PENDING'
+          },
+          orderBy: {
+            requestedAt: 'desc'
+          },
+          take: 1
+        }
       },
       orderBy: {
         createdAt: 'desc'
@@ -51,6 +60,12 @@ export async function GET(request: NextRequest) {
       profileUpdateRequestedAt: therapist.profileUpdateRequestedAt?.toISOString(),
       profileUpdateNote: therapist.profileUpdateNote,
       profileUpdateApprovedAt: therapist.profileUpdateApprovedAt?.toISOString(),
+      pendingUpdateRequest: therapist.profileUpdateRequests[0] ? {
+        id: therapist.profileUpdateRequests[0].id,
+        requestData: JSON.parse(therapist.profileUpdateRequests[0].requestData),
+        memo: therapist.profileUpdateRequests[0].memo,
+        requestedAt: therapist.profileUpdateRequests[0].requestedAt.toISOString()
+      } : null,
       createdAt: therapist.createdAt.toISOString()
     }))
 

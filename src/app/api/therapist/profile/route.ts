@@ -31,7 +31,9 @@ export async function GET(request: NextRequest) {
             email: true,
             phone: true
           }
-        }
+        },
+        certifications: true,
+        experiences: true,
       }
     })
 
@@ -42,7 +44,15 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(profile)
+    // Format response
+    const formattedProfile = {
+      ...profile,
+      specialties: profile.specialties ? JSON.parse(profile.specialties) : [],
+      childAgeRanges: profile.childAgeRanges ? JSON.parse(profile.childAgeRanges) : [],
+      serviceAreas: profile.serviceAreas ? JSON.parse(profile.serviceAreas) : [],
+    }
+
+    return NextResponse.json(formattedProfile)
   } catch (error) {
     console.error('치료사 프로필 조회 오류:', error)
     return NextResponse.json(

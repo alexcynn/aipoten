@@ -1,55 +1,116 @@
 'use client'
 
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import Header from '@/components/layout/Header'
+
+type TherapyType = 'SPEECH_THERAPY' | 'SENSORY_INTEGRATION' | 'PLAY_THERAPY' | 'ART_THERAPY' | 'MUSIC_THERAPY' | 'OCCUPATIONAL_THERAPY' | 'COGNITIVE_THERAPY' | 'BEHAVIORAL_THERAPY'
+type EmploymentType = 'INSTITUTION' | 'FREELANCER'
+
+interface Certification {
+  name: string
+  issuingOrganization: string
+  issueDate: string
+  filePath?: string
+}
+
+interface Experience {
+  employmentType: EmploymentType
+  institutionName?: string
+  specialty: TherapyType
+  startDate: string
+  endDate?: string
+  description?: string
+}
 
 interface TherapistProfile {
   id: string
-  specialty: string
-  licenseNumber?: string
-  experience: number
-  education?: string
-  certifications?: string
-  introduction?: string
-  consultationFee: number
-  status: string
   user: {
     name: string
     email: string
     phone?: string
   }
+  gender?: string
+  birthYear?: number
+  address?: string
+  addressDetail?: string
+  specialties: string[]
+  childAgeRanges: string[]
+  serviceAreas: string[]
+  sessionFee?: number
+  isPreTherapist: boolean
+  education?: string
+  certifications: Certification[]
+  experiences: Experience[]
+  approvalStatus: string
+  profileUpdateRequested: boolean
 }
 
-const specialtyOptions = [
+const THERAPY_TYPES = [
   { value: 'SPEECH_THERAPY', label: '언어치료' },
+  { value: 'SENSORY_INTEGRATION', label: '감각통합' },
+  { value: 'PLAY_THERAPY', label: '놀이치료' },
+  { value: 'ART_THERAPY', label: '미술치료' },
+  { value: 'MUSIC_THERAPY', label: '음악치료' },
   { value: 'OCCUPATIONAL_THERAPY', label: '작업치료' },
-  { value: 'PHYSICAL_THERAPY', label: '물리치료' },
-  { value: 'PSYCHOLOGICAL_THERAPY', label: '심리치료' },
+  { value: 'COGNITIVE_THERAPY', label: '인지치료' },
   { value: 'BEHAVIORAL_THERAPY', label: '행동치료' },
-  { value: 'PLAY_THERAPY', label: '놀이치료' }
+]
+
+const CHILD_AGE_RANGES = [
+  { value: 'AGE_0_12', label: '0-12개월' },
+  { value: 'AGE_13_24', label: '13-24개월' },
+  { value: 'AGE_25_36', label: '25-36개월' },
+  { value: 'AGE_37_48', label: '37-48개월' },
+  { value: 'AGE_49_60', label: '49-60개월' },
+  { value: 'AGE_5_7', label: '5-7세' },
+  { value: 'AGE_8_PLUS', label: '8세 이상' },
+]
+
+const SEOUL_DISTRICTS = [
+  '강남구', '서초구', '송파구', '강동구', '광진구', '성동구',
+  '중구', '용산구', '성북구', '강북구', '도봉구', '노원구',
+  '은평구', '서대문구', '마포구', '양천구', '강서구', '구로구',
+  '금천구', '영등포구', '동작구', '관악구', '동대문구', '중랑구', '종로구'
 ]
 
 export default function TherapistProfilePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [profile, setProfile] = useState<TherapistProfile | null>(null)
+  const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [profile, setProfile] = useState<TherapistProfile | null>(null)
+  const [hasPendingUpdate, setHasPendingUpdate] = useState(false)
 
-  // Form state
-  const [formData, setFormData] = useState({
-    specialty: '',
-    licenseNumber: '',
-    experience: '',
-    education: '',
-    certifications: '',
-    introduction: '',
-    consultationFee: ''
-  })
+  // Step 1: Basic Info
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [gender, setGender] = useState<'MALE' | 'FEMALE' | ''>('')
+  const [birthYear, setBirthYear] = useState('')
+  const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
+  const [addressDetail, setAddressDetail] = useState('')
+
+  // Step 2: Professional Info
+  const [specialties, setSpecialties] = useState<string[]>([])
+  const [childAgeRanges, setChildAgeRanges] = useState<string[]>([])
+  const [serviceAreas, setServiceAreas] = useState<string[]>([])
+  const [sessionFee, setSessionFee] = useState('')
+  const [education, setEducation] = useState('')
+
+  // Step 3: Certifications & Experience
+  const [isPreTherapist, setIsPreTherapist] = useState(false)
+  const [certifications, setCertifications] = useState<Certification[]>([
+    { name: '', issuingOrganization: '', issueDate: '' }
+  ])
+  const [experiences, setExperiences] = useState<Experience[]>([
+    { employmentType: 'INSTITUTION', specialty: 'SPEECH_THERAPY', startDate: '' }
+  ])
+
+  // Memo field
+  const [memo, setMemo] = useState('')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -75,16 +136,42 @@ export default function TherapistProfilePage() {
         const profileData = await response.json()
         setProfile(profileData)
 
-        // Initialize form with existing data
-        setFormData({
-          specialty: profileData.specialty || '',
-          licenseNumber: profileData.licenseNumber || '',
-          experience: profileData.experience?.toString() || '',
-          education: profileData.education || '',
-          certifications: profileData.certifications || '',
-          introduction: profileData.introduction || '',
-          consultationFee: profileData.consultationFee?.toString() || ''
-        })
+        // Load existing data
+        setName(profileData.user.name || '')
+        setEmail(profileData.user.email || '')
+        setGender(profileData.gender || '')
+        setBirthYear(profileData.birthYear?.toString() || '')
+        setPhone(profileData.user.phone || '')
+        setAddress(profileData.address || '')
+        setAddressDetail(profileData.addressDetail || '')
+        setSpecialties(profileData.specialties || [])
+        setChildAgeRanges(profileData.childAgeRanges || [])
+        setServiceAreas(profileData.serviceAreas || [])
+        setSessionFee(profileData.sessionFee?.toString() || '')
+        setEducation(profileData.education || '')
+        setIsPreTherapist(profileData.isPreTherapist || false)
+
+        if (profileData.certifications && profileData.certifications.length > 0) {
+          setCertifications(profileData.certifications.map((cert: any) => ({
+            name: cert.name || '',
+            issuingOrganization: cert.issuingOrganization || '',
+            issueDate: cert.issueDate ? cert.issueDate.split('T')[0] : '',
+            filePath: cert.filePath || ''
+          })))
+        }
+
+        if (profileData.experiences && profileData.experiences.length > 0) {
+          setExperiences(profileData.experiences.map((exp: any) => ({
+            employmentType: exp.employmentType || 'INSTITUTION',
+            institutionName: exp.institutionName || '',
+            specialty: exp.specialty || 'SPEECH_THERAPY',
+            startDate: exp.startDate ? exp.startDate.split('T')[0] : '',
+            endDate: exp.endDate ? exp.endDate.split('T')[0] : '',
+            description: exp.description || ''
+          })))
+        }
+
+        setHasPendingUpdate(profileData.profileUpdateRequested || false)
       }
     } catch (error) {
       console.error('프로필 조회 오류:', error)
@@ -93,62 +180,139 @@ export default function TherapistProfilePage() {
     }
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+  const handleSpecialtyToggle = (value: string) => {
+    setSpecialties(prev =>
+      prev.includes(value) ? prev.filter(s => s !== value) : [...prev, value]
+    )
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSaving(true)
-    setMessage('')
+  const handleAgeRangeToggle = (value: string) => {
+    setChildAgeRanges(prev =>
+      prev.includes(value) ? prev.filter(a => a !== value) : [...prev, value]
+    )
+  }
 
+  const handleServiceAreaToggle = (value: string) => {
+    setServiceAreas(prev =>
+      prev.includes(value) ? prev.filter(a => a !== value) : [...prev, value]
+    )
+  }
+
+  const addCertification = () => {
+    setCertifications([...certifications, { name: '', issuingOrganization: '', issueDate: '' }])
+  }
+
+  const removeCertification = (index: number) => {
+    setCertifications(certifications.filter((_, i) => i !== index))
+  }
+
+  const updateCertification = (index: number, field: keyof Certification, value: string) => {
+    const updated = [...certifications]
+    updated[index] = { ...updated[index], [field]: value }
+    setCertifications(updated)
+  }
+
+  const addExperience = () => {
+    setExperiences([...experiences, { employmentType: 'INSTITUTION', specialty: 'SPEECH_THERAPY', startDate: '' }])
+  }
+
+  const removeExperience = (index: number) => {
+    setExperiences(experiences.filter((_, i) => i !== index))
+  }
+
+  const updateExperience = (index: number, field: keyof Experience, value: any) => {
+    const updated = [...experiences]
+    updated[index] = { ...updated[index], [field]: value }
+    setExperiences(updated)
+  }
+
+  const validateStep1 = () => {
+    if (!name || !phone) {
+      alert('필수 정보를 모두 입력해주세요.')
+      return false
+    }
+    return true
+  }
+
+  const validateStep2 = () => {
+    if (specialties.length === 0) {
+      alert('최소 1개 이상의 치료 분야를 선택해주세요.')
+      return false
+    }
+    if (childAgeRanges.length === 0) {
+      alert('최소 1개 이상의 아이 나이 범위를 선택해주세요.')
+      return false
+    }
+    if (serviceAreas.length === 0) {
+      alert('최소 1개 이상의 서비스 지역을 선택해주세요.')
+      return false
+    }
+    if (!sessionFee || parseInt(sessionFee) <= 0) {
+      alert('세션 비용을 입력해주세요.')
+      return false
+    }
+    return true
+  }
+
+  const validateStep3 = () => {
+    if (!isPreTherapist) {
+      if (certifications.some(c => !c.name || !c.issuingOrganization || !c.issueDate)) {
+        alert('모든 자격증 정보를 입력해주세요.')
+        return false
+      }
+      if (experiences.some(e => !e.specialty || !e.startDate)) {
+        alert('모든 경력 정보를 입력해주세요.')
+        return false
+      }
+    }
+    return true
+  }
+
+  const handleNext = () => {
+    if (currentStep === 1 && !validateStep1()) return
+    if (currentStep === 2 && !validateStep2()) return
+    setCurrentStep(currentStep + 1)
+  }
+
+  const handleSubmit = async () => {
+    if (!validateStep3()) return
+
+    setIsSubmitting(true)
     try {
-      const method = profile ? 'PUT' : 'POST'
-      const response = await fetch('/api/therapist/profile', {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
+      const response = await fetch('/api/therapist/profile/request-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          gender,
+          birthYear: birthYear ? parseInt(birthYear) : null,
+          phone,
+          address,
+          addressDetail,
+          specialties,
+          childAgeRanges,
+          serviceAreas,
+          sessionFee: parseInt(sessionFee),
+          education,
+          isPreTherapist,
+          certifications: isPreTherapist ? [] : certifications,
+          experiences: isPreTherapist ? [] : experiences,
+          memo,
+        }),
       })
 
-      const result = await response.json()
+      const data = await response.json()
 
-      if (response.ok) {
-        setMessage('프로필이 성공적으로 저장되었습니다.')
-        fetchProfile() // Refresh profile data
-      } else {
-        setMessage(result.error || '저장 중 오류가 발생했습니다.')
+      if (!response.ok) {
+        throw new Error(data.error || '저장에 실패했습니다.')
       }
-    } catch (error) {
-      console.error('프로필 저장 오류:', error)
-      setMessage('저장 중 오류가 발생했습니다.')
+
+      alert('프로필 수정 요청이 완료되었습니다. 관리자 승인 후 프로필이 변경됩니다.')
+      router.push('/dashboard/therapist')
+    } catch (error: any) {
+      alert(error.message)
     } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'APPROVED': return 'text-green-600 bg-green-100'
-      case 'PENDING': return 'text-yellow-600 bg-yellow-100'
-      case 'REJECTED': return 'text-red-600 bg-red-100'
-      case 'SUSPENDED': return 'text-gray-600 bg-gray-100'
-      default: return 'text-gray-600 bg-gray-100'
-    }
-  }
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'APPROVED': return '승인됨'
-      case 'PENDING': return '승인 대기'
-      case 'REJECTED': return '거절됨'
-      case 'SUSPENDED': return '정지됨'
-      default: return status
+      setIsSubmitting(false)
     }
   }
 
@@ -156,7 +320,7 @@ export default function TherapistProfilePage() {
     return (
       <div className="min-h-screen bg-neutral-light flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
           <p className="mt-4 text-gray-600">로딩 중...</p>
         </div>
       </div>
@@ -169,213 +333,574 @@ export default function TherapistProfilePage() {
 
   return (
     <div className="min-h-screen bg-neutral-light">
-      {/* Header */}
       <Header />
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {/* Status Card */}
-          {profile && (
-            <div className="bg-white shadow rounded-lg mb-6 p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">현재 상태</h2>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">승인 상태</p>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(profile.status)}`}>
-                    {getStatusText(profile.status)}
-                  </span>
+      <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        {/* Pending Update Warning */}
+        {hasPendingUpdate && (
+          <div className="mb-6 bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <span className="text-orange-400">⚠️</span>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-orange-800">
+                  프로필 수정 요청 승인 대기 중
+                </h3>
+                <div className="mt-2 text-sm text-orange-700">
+                  <p>관리자 승인 후 프로필 변경사항이 반영됩니다.</p>
                 </div>
-                {profile.status === 'PENDING' && (
-                  <div className="text-sm text-gray-600">
-                    <p>프로필이 검토 중입니다.</p>
-                    <p>승인까지 1-2일 소요될 수 있습니다.</p>
-                  </div>
-                )}
-                {profile.status === 'APPROVED' && (
-                  <div className="text-sm text-green-600">
-                    <p>매칭 서비스를 이용할 수 있습니다.</p>
-                  </div>
-                )}
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Profile Form */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">
-                {profile ? '프로필 수정' : '프로필 등록'}
-              </h3>
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          {/* Progress Bar */}
+          <div className="bg-slate-800 p-6">
+            <h1 className="text-2xl font-bold text-white mb-4">프로필 수정</h1>
+            <div className="relative flex justify-between items-center px-8 mb-4">
+              {/* 연결선 */}
+              <div className="absolute left-0 right-0 top-1/2 h-1 bg-white/30 -translate-y-1/2" style={{ left: 'calc(2rem + 28px)', right: 'calc(2rem + 28px)' }}></div>
 
-              {message && (
-                <div className={`mb-4 p-4 rounded-md ${
-                  message.includes('성공') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-                }`}>
-                  {message}
-                </div>
+              {/* 진행된 연결선 */}
+              {currentStep > 1 && (
+                <div className="absolute top-1/2 h-1 bg-green-500 -translate-y-1/2 transition-all" style={{
+                  left: 'calc(2rem + 28px)',
+                  width: currentStep === 2 ? 'calc(50% - 2rem - 28px)' : 'calc(100% - 4rem - 56px)'
+                }}></div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* 기본 정보 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="specialty" className="block text-sm font-medium text-gray-700">
-                      전문 분야 *
-                    </label>
-                    <select
-                      id="specialty"
-                      name="specialty"
-                      required
-                      value={formData.specialty}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green"
-                    >
-                      <option value="">선택해주세요</option>
-                      {specialtyOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="experience" className="block text-sm font-medium text-gray-700">
-                      경력 (년) *
-                    </label>
-                    <input
-                      type="number"
-                      id="experience"
-                      name="experience"
-                      required
-                      min="0"
-                      max="50"
-                      value={formData.experience}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700">
-                      자격증 번호
-                    </label>
-                    <input
-                      type="text"
-                      id="licenseNumber"
-                      name="licenseNumber"
-                      value={formData.licenseNumber}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="consultationFee" className="block text-sm font-medium text-gray-700">
-                      상담료 (원) *
-                    </label>
-                    <input
-                      type="number"
-                      id="consultationFee"
-                      name="consultationFee"
-                      required
-                      min="0"
-                      step="1000"
-                      value={formData.consultationFee}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green"
-                    />
-                  </div>
+              {/* 숫자 원들 */}
+              {[1, 2, 3].map((step) => (
+                <div
+                  key={step}
+                  className={`relative w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all leading-none z-10 ${
+                    currentStep >= step
+                      ? 'bg-green-500 text-white border-green-500 shadow-lg'
+                      : 'bg-slate-800 text-white border-white/40'
+                  }`}
+                >
+                  {step}
                 </div>
-
-                {/* 학력 */}
-                <div>
-                  <label htmlFor="education" className="block text-sm font-medium text-gray-700">
-                    학력
-                  </label>
-                  <input
-                    type="text"
-                    id="education"
-                    name="education"
-                    value={formData.education}
-                    onChange={handleInputChange}
-                    placeholder="예: 특수교육학 석사"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green"
-                  />
-                </div>
-
-                {/* 자격증 */}
-                <div>
-                  <label htmlFor="certifications" className="block text-sm font-medium text-gray-700">
-                    보유 자격증
-                  </label>
-                  <textarea
-                    id="certifications"
-                    name="certifications"
-                    rows={3}
-                    value={formData.certifications}
-                    onChange={handleInputChange}
-                    placeholder="예: 언어재활사 1급, 특수교육교사 2급"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green"
-                  />
-                </div>
-
-                {/* 자기소개 */}
-                <div>
-                  <label htmlFor="introduction" className="block text-sm font-medium text-gray-700">
-                    자기소개
-                  </label>
-                  <textarea
-                    id="introduction"
-                    name="introduction"
-                    rows={5}
-                    value={formData.introduction}
-                    onChange={handleInputChange}
-                    placeholder="치료 경험, 전문 분야, 치료 철학 등을 자유롭게 작성해주세요."
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green"
-                  />
-                </div>
-
-                {/* 제출 버튼 */}
-                <div className="flex justify-end space-x-3">
-                  <Link
-                    href="/dashboard/therapist"
-                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-aipoten-green"
-                  >
-                    취소
-                  </Link>
-                  <button
-                    type="submit"
-                    disabled={isSaving}
-                    className="bg-aipoten-green border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-aipoten-navy focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-aipoten-green disabled:opacity-50"
-                  >
-                    {isSaving ? '저장 중...' : '저장하기'}
-                  </button>
-                </div>
-              </form>
+              ))}
+            </div>
+            <div className="flex justify-between px-4">
+              <span className={`text-sm text-left flex-1 ${currentStep >= 1 ? 'text-green-400 font-medium' : 'text-white/70'}`}>기본 정보</span>
+              <span className={`text-sm text-center flex-1 ${currentStep >= 2 ? 'text-green-400 font-medium' : 'text-white/70'}`}>전문 정보</span>
+              <span className={`text-sm text-right flex-1 ${currentStep >= 3 ? 'text-green-400 font-medium' : 'text-white/70'}`}>자격증 · 경력</span>
             </div>
           </div>
 
-          {/* Info Card */}
-          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <span className="text-blue-400">💡</span>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-blue-800">
-                  프로필 승인 안내
-                </h3>
-                <div className="mt-2 text-sm text-blue-700">
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li>프로필 등록 후 관리자 승인이 필요합니다.</li>
-                    <li>승인까지 1-2일 정도 소요될 수 있습니다.</li>
-                    <li>정확한 정보 입력이 승인에 도움이 됩니다.</li>
-                    <li>승인 후 매칭 서비스를 이용할 수 있습니다.</li>
-                  </ul>
+          <div className="p-8">
+            {/* Step 1: Basic Info */}
+            {currentStep === 1 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">기본 정보</h2>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    이메일 (변경 불가)
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    disabled
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    이름 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">성별</label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="MALE"
+                        checked={gender === 'MALE'}
+                        onChange={(e) => setGender('MALE')}
+                        className="mr-2"
+                      />
+                      남성
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="FEMALE"
+                        checked={gender === 'FEMALE'}
+                        onChange={(e) => setGender('FEMALE')}
+                        className="mr-2"
+                      />
+                      여성
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">생년</label>
+                  <input
+                    type="number"
+                    value={birthYear}
+                    onChange={(e) => setBirthYear(e.target.value)}
+                    placeholder="1990"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    전화번호 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="010-0000-0000"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">주소</label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="서울시 강남구..."
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent mb-2"
+                  />
+                  <input
+                    type="text"
+                    value={addressDetail}
+                    onChange={(e) => setAddressDetail(e.target.value)}
+                    placeholder="상세주소"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
                 </div>
               </div>
+            )}
+
+            {/* Step 2: Professional Info */}
+            {currentStep === 2 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">전문 정보</h2>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    치료 분야 (중복 선택 가능) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {THERAPY_TYPES.map(type => (
+                      <label
+                        key={type.value}
+                        className={`flex items-center p-3 border-2 rounded-md cursor-pointer transition-colors ${
+                          specialties.includes(type.value)
+                            ? 'border-green-500 bg-green-50'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={specialties.includes(type.value)}
+                          onChange={() => handleSpecialtyToggle(type.value)}
+                          className="mr-2"
+                        />
+                        {type.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    치료 가능 아이 나이 (중복 가능) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {CHILD_AGE_RANGES.map(range => (
+                      <label
+                        key={range.value}
+                        className={`flex items-center p-3 border-2 rounded-md cursor-pointer transition-colors ${
+                          childAgeRanges.includes(range.value)
+                            ? 'border-green-500 bg-green-50'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={childAgeRanges.includes(range.value)}
+                          onChange={() => handleAgeRangeToggle(range.value)}
+                          className="mr-2"
+                        />
+                        {range.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    치료 가능 지역 - 서울특별시 (중복 가능) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-3 md:grid-cols-5 gap-2 max-h-64 overflow-y-auto p-4 border border-gray-300 rounded-md">
+                    {SEOUL_DISTRICTS.map(district => (
+                      <label
+                        key={district}
+                        className={`flex items-center p-2 border-2 rounded-md cursor-pointer transition-colors text-sm ${
+                          serviceAreas.includes(district)
+                            ? 'border-green-500 bg-green-50'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={serviceAreas.includes(district)}
+                          onChange={() => handleServiceAreaToggle(district)}
+                          className="mr-2"
+                        />
+                        {district}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    세션 비용 (50분 기준) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex items-center">
+                    <input
+                      type="number"
+                      value={sessionFee}
+                      onChange={(e) => setSessionFee(e.target.value)}
+                      placeholder="80000"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      required
+                    />
+                    <span className="ml-2 text-gray-600">원</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">학력</label>
+                  <input
+                    type="text"
+                    value={education}
+                    onChange={(e) => setEducation(e.target.value)}
+                    placeholder="예: 특수교육학 석사"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Certifications & Experience */}
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">자격증 및 경력</h2>
+
+                {/* 예비 치료사 체크박스 */}
+                <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isPreTherapist}
+                      onChange={(e) => setIsPreTherapist(e.target.checked)}
+                      className="w-4 h-4 text-green-500 border-gray-300 rounded focus:ring-green-500 mr-3"
+                    />
+                    <div>
+                      <span className="font-medium text-gray-900">
+                        저는 예비 치료사입니다 (졸업 전)
+                      </span>
+                      <p className="text-sm text-gray-600 mt-1">
+                        예비 치료사의 경우 자격증 및 경력 입력 없이도 신청이 가능합니다.
+                      </p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* 예비 치료사가 아닌 경우에만 자격증/경력 입력 */}
+                {!isPreTherapist && (
+                  <>
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium text-gray-900">자격증</h3>
+                        <button
+                          type="button"
+                          onClick={addCertification}
+                          className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                        >
+                          + 자격증 추가
+                        </button>
+                      </div>
+
+                      {certifications.map((cert, index) => (
+                        <div key={index} className="mb-6 p-4 border border-gray-300 rounded-md bg-gray-50">
+                          <div className="flex justify-between items-center mb-3">
+                            <h4 className="font-medium text-gray-900">자격증 {index + 1}</h4>
+                            {certifications.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeCertification(index)}
+                                className="text-red-600 text-sm hover:underline"
+                              >
+                                삭제
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                자격증명 <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={cert.name}
+                                onChange={(e) => updateCertification(index, 'name', e.target.value)}
+                                placeholder="언어치료사 1급"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                required
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                발급기관 <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={cert.issuingOrganization}
+                                onChange={(e) => updateCertification(index, 'issuingOrganization', e.target.value)}
+                                placeholder="한국언어치료사협회"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                required
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                취득일 <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="date"
+                                value={cert.issueDate}
+                                onChange={(e) => updateCertification(index, 'issueDate', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                required
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium text-gray-900">경력</h3>
+                        <button
+                          type="button"
+                          onClick={addExperience}
+                          className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                        >
+                          + 경력 추가
+                        </button>
+                      </div>
+
+                      {experiences.map((exp, index) => (
+                        <div key={index} className="mb-6 p-4 border border-gray-300 rounded-md bg-gray-50">
+                          <div className="flex justify-between items-center mb-3">
+                            <h4 className="font-medium text-gray-900">경력 {index + 1}</h4>
+                            {experiences.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeExperience(index)}
+                                className="text-red-600 text-sm hover:underline"
+                              >
+                                삭제
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                근무형태 <span className="text-red-500">*</span>
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`employmentType-${index}`}
+                                    value="INSTITUTION"
+                                    checked={exp.employmentType === 'INSTITUTION'}
+                                    onChange={(e) => updateExperience(index, 'employmentType', 'INSTITUTION')}
+                                    className="mr-2"
+                                  />
+                                  기관
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`employmentType-${index}`}
+                                    value="FREELANCER"
+                                    checked={exp.employmentType === 'FREELANCER'}
+                                    onChange={(e) => updateExperience(index, 'employmentType', 'FREELANCER')}
+                                    className="mr-2"
+                                  />
+                                  프리랜서
+                                </label>
+                              </div>
+                            </div>
+
+                            {exp.employmentType === 'INSTITUTION' && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  기관명
+                                </label>
+                                <input
+                                  type="text"
+                                  value={exp.institutionName || ''}
+                                  onChange={(e) => updateExperience(index, 'institutionName', e.target.value)}
+                                  placeholder="OO발달센터"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                />
+                              </div>
+                            )}
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                치료분야 <span className="text-red-500">*</span>
+                              </label>
+                              <select
+                                value={exp.specialty}
+                                onChange={(e) => updateExperience(index, 'specialty', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                required
+                              >
+                                {THERAPY_TYPES.map(type => (
+                                  <option key={type.value} value={type.value}>
+                                    {type.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  시작일 <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                  type="date"
+                                  value={exp.startDate}
+                                  onChange={(e) => updateExperience(index, 'startDate', e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                  required
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  종료일 (재직 중이면 비워두세요)
+                                </label>
+                                <input
+                                  type="date"
+                                  value={exp.endDate || ''}
+                                  onChange={(e) => updateExperience(index, 'endDate', e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                설명
+                              </label>
+                              <textarea
+                                value={exp.description || ''}
+                                onChange={(e) => updateExperience(index, 'description', e.target.value)}
+                                placeholder="영유아 언어발달 전담..."
+                                rows={3}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* 예비 치료사인 경우 안내 메시지 */}
+                {isPreTherapist && (
+                  <div className="bg-green-50 p-4 rounded-md border border-green-200">
+                    <p className="text-sm text-gray-700">
+                      예비 치료사로 등록되었습니다. 졸업 후 자격증 및 경력 정보를 추가하실 수 있습니다.
+                    </p>
+                  </div>
+                )}
+
+                {/* Memo field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    수정 요청 메모 (선택 사항)
+                  </label>
+                  <textarea
+                    value={memo}
+                    onChange={(e) => setMemo(e.target.value)}
+                    placeholder="프로필 수정 사유나 특이사항을 작성해주세요."
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between mt-8 pt-6 border-t">
+              <button
+                type="button"
+                onClick={() => setCurrentStep(currentStep - 1)}
+                disabled={currentStep === 1}
+                className="px-6 py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                이전
+              </button>
+
+              {currentStep < 3 ? (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors shadow-md"
+                >
+                  다음
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                >
+                  {isSubmitting ? '요청 중...' : '저장 및 승인 요청'}
+                </button>
+              )}
             </div>
           </div>
         </div>

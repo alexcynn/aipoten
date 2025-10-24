@@ -244,32 +244,36 @@ export default function TherapistRegisterPage() {
           {/* Progress Bar */}
           <div className="bg-slate-800 p-6">
             <h1 className="text-2xl font-bold text-white mb-4">치료사 회원가입</h1>
-            <div className="flex items-center justify-between">
+            <div className="relative flex justify-between items-center px-8 mb-4">
+              {/* 연결선 */}
+              <div className="absolute left-0 right-0 top-1/2 h-1 bg-white/30 -translate-y-1/2" style={{ left: 'calc(2rem + 28px)', right: 'calc(2rem + 28px)' }}></div>
+
+              {/* 진행된 연결선 */}
+              {currentStep > 1 && (
+                <div className="absolute top-1/2 h-1 bg-green-500 -translate-y-1/2 transition-all" style={{
+                  left: 'calc(2rem + 28px)',
+                  width: currentStep === 2 ? 'calc(50% - 2rem - 28px)' : 'calc(100% - 4rem - 56px)'
+                }}></div>
+              )}
+
+              {/* 숫자 원들 */}
               {[1, 2, 3].map((step) => (
-                <div key={step} className="flex-1 flex items-center">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-all ${
-                      currentStep >= step
-                        ? 'bg-green-500 text-white border-green-500 shadow-lg'
-                        : 'bg-transparent text-white border-white/40'
-                    }`}
-                  >
-                    {step}
-                  </div>
-                  {step < 3 && (
-                    <div
-                      className={`flex-1 h-1 mx-2 transition-all ${
-                        currentStep > step ? 'bg-green-500' : 'bg-white/30'
-                      }`}
-                    />
-                  )}
+                <div
+                  key={step}
+                  className={`relative w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all leading-none z-10 ${
+                    currentStep >= step
+                      ? 'bg-green-500 text-white border-green-500 shadow-lg'
+                      : 'bg-slate-800 text-white border-white/40'
+                  }`}
+                >
+                  {step}
                 </div>
               ))}
             </div>
-            <div className="flex justify-between mt-2">
-              <span className={`text-sm ${currentStep >= 1 ? 'text-green-400 font-medium' : 'text-white/70'}`}>기본 정보</span>
-              <span className={`text-sm ${currentStep >= 2 ? 'text-green-400 font-medium' : 'text-white/70'}`}>전문 정보</span>
-              <span className={`text-sm ${currentStep >= 3 ? 'text-green-400 font-medium' : 'text-white/70'}`}>자격증 · 경력</span>
+            <div className="flex justify-between px-4">
+              <span className={`text-sm text-left flex-1 ${currentStep >= 1 ? 'text-green-400 font-medium' : 'text-white/70'}`}>기본 정보</span>
+              <span className={`text-sm text-center flex-1 ${currentStep >= 2 ? 'text-green-400 font-medium' : 'text-white/70'}`}>전문 정보</span>
+              <span className={`text-sm text-right flex-1 ${currentStep >= 3 ? 'text-green-400 font-medium' : 'text-white/70'}`}>자격증 · 경력</span>
             </div>
           </div>
 

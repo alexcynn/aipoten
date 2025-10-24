@@ -417,6 +417,7 @@ model TherapistProfile {
   experiences      Experience[]
   timeSlots        TimeSlot[]              // Phase 3: 스케줄 슬롯
   bookings         Booking[]               @relation("TherapistBookings") // Phase 4: 예약
+  profileUpdateRequests ProfileUpdateRequest[] // 프로필 수정 요청
 
   @@map("therapist_profiles")
 }
@@ -503,6 +504,30 @@ model Experience {
 enum EmploymentType {
   INSTITUTION  // 기관
   FREELANCER   // 프리랜서
+}
+
+// 프로필 수정 요청 (임시 저장)
+model ProfileUpdateRequest {
+  id                String   @id @default(cuid())
+  therapistProfileId String
+  requestData       String   // JSON 문자열로 저장
+  memo              String?  // 치료사가 입력한 메모
+  status            ProfileUpdateStatus @default(PENDING)
+  requestedAt       DateTime @default(now())
+  processedAt       DateTime?
+  processedBy       String?  // 처리한 관리자 ID
+  processedNote     String?  // 관리자 처리 메모
+
+  // 관계
+  therapistProfile  TherapistProfile @relation(fields: [therapistProfileId], references: [id], onDelete: Cascade)
+
+  @@map("profile_update_requests")
+}
+
+enum ProfileUpdateStatus {
+  PENDING   // 대기 중
+  APPROVED  // 승인됨
+  REJECTED  // 거절됨
 }
 
 // 매칭 요청
