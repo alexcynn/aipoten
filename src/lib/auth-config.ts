@@ -19,7 +19,10 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
+          where: { email: credentials.email },
+          include: {
+            therapistProfile: true
+          }
         })
 
         if (!user || !user.password) {
@@ -30,6 +33,16 @@ export const authOptions: NextAuthOptions = {
 
         if (!isValid) {
           return null
+        }
+
+        // 치료사인 경우 승인 상태 확인
+        if (user.role === 'THERAPIST' && user.therapistProfile) {
+          const approvalStatus = user.therapistProfile.approvalStatus
+
+          // WAITING 또는 APPROVED 상태만 로그인 허용
+          if (approvalStatus !== 'WAITING' && approvalStatus !== 'APPROVED') {
+            throw new Error('승인 대기 중이거나 거절된 계정입니다.')
+          }
         }
 
         return {

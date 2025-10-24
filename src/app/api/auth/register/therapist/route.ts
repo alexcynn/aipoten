@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
           serviceAreas: JSON.stringify(serviceAreas || []),
           sessionFee: sessionFee || null,
           isPreTherapist: isPreTherapist || false,
-          approvalStatus: 'PENDING',
+          approvalStatus: 'WAITING', // 대기 상태 (로그인 가능)
           status: 'PENDING',
         }
       })

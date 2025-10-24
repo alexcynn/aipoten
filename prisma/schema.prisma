@@ -389,12 +389,18 @@ model TherapistProfile {
   consultationFee Int?     // 상담료 (원) (레거시)
 
   // 승인 관련
-  approvalStatus  ApprovalStatus @default(PENDING)
+  approvalStatus  ApprovalStatus @default(WAITING)
   approvedAt      DateTime?
   approvedBy      String?  // 승인한 관리자 ID
   rejectedAt      DateTime?
   rejectionReason String?
-  additionalInfoRequested String? // 추가 자료 요청 내용
+
+  // 프로필 수정 요청
+  profileUpdateRequested    Boolean   @default(false)  // 프로필 수정 요청 여부
+  profileUpdateRequestedAt  DateTime? // 수정 요청 시각
+  profileUpdateNote         String?   // 수정 요청 메모
+  profileUpdateApprovedAt   DateTime? // 수정 요청 승인 시각
+  profileUpdateApprovedBy   String?   // 승인한 관리자 ID
 
   // 기존 상태 (레거시)
   status          TherapistStatus @default(PENDING)
@@ -436,8 +442,8 @@ enum TherapistStatus {
 }
 
 enum ApprovalStatus {
-  PENDING                    // 승인 대기
-  PENDING_ADDITIONAL_INFO    // 추가 자료 요청됨
+  PENDING                    // 신청 (회원가입 직후)
+  WAITING                    // 대기 (로그인 가능, 프로필 수정 가능)
   APPROVED                   // 승인됨
   REJECTED                   // 거절됨
 }

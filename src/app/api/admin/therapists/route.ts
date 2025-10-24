@@ -47,6 +47,10 @@ export async function GET(request: NextRequest) {
       rejectedAt: therapist.rejectedAt?.toISOString(),
       rejectionReason: therapist.rejectionReason,
       additionalInfoRequested: therapist.additionalInfoRequested,
+      profileUpdateRequested: therapist.profileUpdateRequested,
+      profileUpdateRequestedAt: therapist.profileUpdateRequestedAt?.toISOString(),
+      profileUpdateNote: therapist.profileUpdateNote,
+      profileUpdateApprovedAt: therapist.profileUpdateApprovedAt?.toISOString(),
       createdAt: therapist.createdAt.toISOString()
     }))
 
