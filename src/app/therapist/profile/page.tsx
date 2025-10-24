@@ -7,6 +7,7 @@ import Header from '@/components/layout/Header'
 
 type TherapyType = 'SPEECH_THERAPY' | 'SENSORY_INTEGRATION' | 'PLAY_THERAPY' | 'ART_THERAPY' | 'MUSIC_THERAPY' | 'OCCUPATIONAL_THERAPY' | 'COGNITIVE_THERAPY' | 'BEHAVIORAL_THERAPY'
 type EmploymentType = 'INSTITUTION' | 'FREELANCER'
+type DegreeType = 'HIGH_SCHOOL' | 'ASSOCIATE' | 'BACHELOR' | 'MASTER' | 'DOCTORATE'
 
 interface Certification {
   name: string
@@ -22,6 +23,13 @@ interface Experience {
   startDate: string
   endDate?: string
   description?: string
+}
+
+interface Education {
+  degree: DegreeType
+  school: string
+  major: string
+  graduationYear: string
 }
 
 interface TherapistProfile {
@@ -75,6 +83,14 @@ const SEOUL_DISTRICTS = [
   '금천구', '영등포구', '동작구', '관악구', '동대문구', '중랑구', '종로구'
 ]
 
+const DEGREE_TYPES = [
+  { value: 'HIGH_SCHOOL', label: '고등학교 졸업' },
+  { value: 'ASSOCIATE', label: '전문학사' },
+  { value: 'BACHELOR', label: '학사' },
+  { value: 'MASTER', label: '석사' },
+  { value: 'DOCTORATE', label: '박사' },
+]
+
 export default function TherapistProfilePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -98,7 +114,9 @@ export default function TherapistProfilePage() {
   const [childAgeRanges, setChildAgeRanges] = useState<string[]>([])
   const [serviceAreas, setServiceAreas] = useState<string[]>([])
   const [sessionFee, setSessionFee] = useState('')
-  const [education, setEducation] = useState('')
+  const [educations, setEducations] = useState<Education[]>([
+    { degree: 'BACHELOR', school: '', major: '', graduationYear: '' }
+  ])
 
   // Step 3: Certifications & Experience
   const [isPreTherapist, setIsPreTherapist] = useState(false)
@@ -148,8 +166,16 @@ export default function TherapistProfilePage() {
         setChildAgeRanges(profileData.childAgeRanges || [])
         setServiceAreas(profileData.serviceAreas || [])
         setSessionFee(profileData.sessionFee?.toString() || '')
-        setEducation(profileData.education || '')
         setIsPreTherapist(profileData.isPreTherapist || false)
+
+        if (profileData.educations && profileData.educations.length > 0) {
+          setEducations(profileData.educations.map((edu: any) => ({
+            degree: edu.degree || 'BACHELOR',
+            school: edu.school || '',
+            major: edu.major || '',
+            graduationYear: edu.graduationYear || ''
+          })))
+        }
 
         if (profileData.certifications && profileData.certifications.length > 0) {
           setCertifications(profileData.certifications.map((cert: any) => ({
@@ -196,6 +222,20 @@ export default function TherapistProfilePage() {
     setServiceAreas(prev =>
       prev.includes(value) ? prev.filter(a => a !== value) : [...prev, value]
     )
+  }
+
+  const addEducation = () => {
+    setEducations([...educations, { degree: 'BACHELOR', school: '', major: '', graduationYear: '' }])
+  }
+
+  const removeEducation = (index: number) => {
+    setEducations(educations.filter((_, i) => i !== index))
+  }
+
+  const updateEducation = (index: number, field: keyof Education, value: string) => {
+    const updated = [...educations]
+    updated[index] = { ...updated[index], [field]: value }
+    setEducations(updated)
   }
 
   const addCertification = () => {
@@ -293,7 +333,7 @@ export default function TherapistProfilePage() {
           childAgeRanges,
           serviceAreas,
           sessionFee: parseInt(sessionFee),
-          education,
+          educations,
           isPreTherapist,
           certifications: isPreTherapist ? [] : certifications,
           experiences: isPreTherapist ? [] : experiences,
@@ -597,14 +637,95 @@ export default function TherapistProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">학력</label>
-                  <input
-                    type="text"
-                    value={education}
-                    onChange={(e) => setEducation(e.target.value)}
-                    placeholder="예: 특수교육학 석사"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium text-gray-900">학력</h3>
+                    <button
+                      type="button"
+                      onClick={addEducation}
+                      className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                    >
+                      + 학력 추가
+                    </button>
+                  </div>
+
+                  {educations.map((edu, index) => (
+                    <div key={index} className="mb-6 p-4 border border-gray-300 rounded-md bg-gray-50">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-medium text-gray-900">학력 {index + 1}</h4>
+                        {educations.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeEducation(index)}
+                            className="text-red-600 text-sm hover:underline"
+                          >
+                            삭제
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            학위 <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={edu.degree}
+                            onChange={(e) => updateEducation(index, 'degree', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            required
+                          >
+                            {DEGREE_TYPES.map(type => (
+                              <option key={type.value} value={type.value}>
+                                {type.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            학교명 <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={edu.school}
+                            onChange={(e) => updateEducation(index, 'school', e.target.value)}
+                            placeholder="서울대학교"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            전공 <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={edu.major}
+                            onChange={(e) => updateEducation(index, 'major', e.target.value)}
+                            placeholder="특수교육학"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            졸업년도 <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={edu.graduationYear}
+                            onChange={(e) => updateEducation(index, 'graduationYear', e.target.value)}
+                            placeholder="2020"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
