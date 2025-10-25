@@ -92,6 +92,13 @@ const DEGREE_TYPES = [
   { value: 'DOCTORATE', label: '박사' },
 ]
 
+const BANKS = [
+  'KB국민은행', '신한은행', '우리은행', '하나은행', 'NH농협은행',
+  'IBK기업은행', 'SC제일은행', '씨티은행', '케이뱅크', '카카오뱅크',
+  '토스뱅크', '대구은행', '부산은행', '경남은행', '광주은행',
+  '전북은행', '제주은행', '새마을금고', '신협', '우체국'
+]
+
 // 서비스 가능 지역 코드 변환 함수
 const getServiceAreaLabel = (area: string) => {
   const labels: { [key: string]: string } = {
@@ -152,6 +159,9 @@ export default function TherapistProfilePage() {
   const [educations, setEducations] = useState<Education[]>([
     { degree: 'BACHELOR', school: '', major: '', graduationYear: '' }
   ])
+  const [bank, setBank] = useState('')
+  const [accountNumber, setAccountNumber] = useState('')
+  const [accountHolder, setAccountHolder] = useState('')
 
   // Step 3: Certifications & Experience
   const [isPreTherapist, setIsPreTherapist] = useState(false)
@@ -202,6 +212,9 @@ export default function TherapistProfilePage() {
         setChildAgeRanges(profileData.childAgeRanges || [])
         setServiceAreas(profileData.serviceAreas || [])
         setSessionFee(profileData.sessionFee?.toString() || '')
+        setBank(profileData.bank || '')
+        setAccountNumber(profileData.accountNumber || '')
+        setAccountHolder(profileData.accountHolder || '')
         setIsPreTherapist(profileData.isPreTherapist || false)
 
         if (profileData.educations && profileData.educations.length > 0) {
@@ -370,6 +383,9 @@ export default function TherapistProfilePage() {
           serviceAreas,
           sessionFee: parseInt(sessionFee),
           educations,
+          bank,
+          accountNumber,
+          accountHolder,
           isPreTherapist,
           certifications: isPreTherapist ? [] : certifications,
           experiences: isPreTherapist ? [] : experiences,
@@ -607,6 +623,25 @@ export default function TherapistProfilePage() {
                         <div>
                           <label className="block text-sm font-medium text-gray-500 mb-1">세션 비용 (50분 기준)</label>
                           <p className="text-lg text-gray-900">{profile.sessionFee?.toLocaleString()}원</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 계좌 정보 */}
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">계좌 정보</h2>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500 mb-1">은행</label>
+                          <p className="text-lg text-gray-900">{profile.bank || '미등록'}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500 mb-1">계좌번호</label>
+                          <p className="text-lg text-gray-900">{profile.accountNumber || '미등록'}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500 mb-1">예금주</label>
+                          <p className="text-lg text-gray-900">{profile.accountHolder || '미등록'}</p>
                         </div>
                       </div>
                     </div>
@@ -937,6 +972,60 @@ export default function TherapistProfilePage() {
                       required
                     />
                     <span className="ml-2 text-gray-600">원</span>
+                  </div>
+                </div>
+
+                {/* 은행 정보 */}
+                <div className="pt-4 border-t border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">계좌 정보</h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        은행 <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={bank}
+                        onChange={(e) => setBank(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        required
+                      >
+                        <option value="">은행을 선택하세요</option>
+                        {BANKS.map((bankName) => (
+                          <option key={bankName} value={bankName}>
+                            {bankName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        계좌번호 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={accountNumber}
+                        onChange={(e) => setAccountNumber(e.target.value.replace(/[^0-9-]/g, ''))}
+                        placeholder="123-456-789012"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        예금주 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={accountHolder}
+                        onChange={(e) => setAccountHolder(e.target.value)}
+                        placeholder="홍길동"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
 

@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
       serviceAreas,     // array of district names
       sessionFee,
       educations,       // array of {degree, school, major, graduationYear}
+      bank,             // 은행명
+      accountNumber,    // 계좌번호
+      accountHolder,    // 예금주
 
       // Step 3: Certifications & Experience
       isPreTherapist,   // 예비 치료사 여부
@@ -86,6 +89,9 @@ export async function POST(request: NextRequest) {
           childAgeRanges: JSON.stringify(childAgeRanges || []),
           serviceAreas: JSON.stringify(serviceAreas || []),
           sessionFee: sessionFee || null,
+          bank: bank || null,
+          accountNumber: accountNumber || null,
+          accountHolder: accountHolder || null,
           isPreTherapist: isPreTherapist || false,
           approvalStatus: 'WAITING', // 대기 상태 (로그인 가능)
           status: 'PENDING',

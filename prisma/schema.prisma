@@ -380,6 +380,11 @@ model TherapistProfile {
   sessionFee      Int?     // 50분 기준 상담료 (원)
   isPreTherapist  Boolean  @default(false) // 예비 치료사 여부 (졸업 전)
 
+  // 계좌 정보
+  bank            String?  // 은행명
+  accountNumber   String?  // 계좌번호
+  accountHolder   String?  // 예금주
+
   // 기존 필드 (호환성 유지)
   specialty       TherapyType? // 레거시
   licenseNumber   String?  // 자격증 번호 (레거시)

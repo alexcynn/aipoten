@@ -5,7 +5,7 @@ import { handleDatabaseError } from '@/lib/db-error-handler'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password, phone, address, addressDetail } = await request.json()
+    const { name, email, password, phone, address, addressDetail, children } = await request.json()
 
     // 입력 데이터 검증
     if (!name || !email || !password) {
@@ -13,6 +13,23 @@ export async function POST(request: NextRequest) {
         { error: '이름, 이메일, 비밀번호는 필수 항목입니다.' },
         { status: 400 }
       )
+    }
+
+    // 아이 정보 검증
+    if (!children || children.length === 0) {
+      return NextResponse.json(
+        { error: '최소 1명의 아이 정보를 입력해주세요.' },
+        { status: 400 }
+      )
+    }
+
+    for (const child of children) {
+      if (!child.name || !child.birthDate || !child.gender) {
+        return NextResponse.json(
+          { error: '아이의 이름, 생년월일, 성별은 필수 항목입니다.' },
+          { status: 400 }
+        )
+      }
     }
 
     // 이메일 형식 검증
@@ -47,33 +64,52 @@ export async function POST(request: NextRequest) {
     // 비밀번호 해시화
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // 사용자 생성
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        phone: phone || null,
-        address: address || null,
-        addressDetail: addressDetail || null,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        address: true,
-        addressDetail: true,
-        createdAt: true,
-      }
+    // 트랜잭션으로 사용자와 아이 정보 생성
+    const result = await prisma.$transaction(async (tx) => {
+      // 사용자 생성
+      const user = await tx.user.create({
+        data: {
+          name,
+          email,
+          password: hashedPassword,
+          phone: phone || null,
+          address: address || null,
+          addressDetail: addressDetail || null,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          address: true,
+          addressDetail: true,
+          createdAt: true,
+        }
+      })
+
+      // 아이 정보 생성
+      const childrenData = await Promise.all(
+        children.map((child: any) =>
+          tx.child.create({
+            data: {
+              userId: user.id,
+              name: child.name,
+              birthDate: new Date(child.birthDate),
+              gender: child.gender,
+            }
+          })
+        )
+      )
+
+      return { user, children: childrenData }
     })
 
-    console.log(`✅ User created successfully: ${email} (ID: ${user.id})`)
+    console.log(`✅ User created successfully: ${email} (ID: ${result.user.id}) with ${result.children.length} children`)
 
     return NextResponse.json(
       {
         message: '회원가입이 완료되었습니다.',
-        user
+        user: result.user
       },
       { status: 201 }
     )

@@ -5,6 +5,12 @@ import { useRouter } from 'next/navigation'
 import { getSession } from 'next-auth/react'
 import Link from 'next/link'
 
+interface Child {
+  name: string
+  birthDate: string
+  gender: 'MALE' | 'FEMALE' | ''
+}
+
 export default function SignupPage() {
   const [formData, setFormData] = useState({
     name: '',
@@ -15,6 +21,9 @@ export default function SignupPage() {
     address: '',
     addressDetail: '',
   })
+  const [children, setChildren] = useState<Child[]>([
+    { name: '', birthDate: '', gender: '' }
+  ])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -36,6 +45,22 @@ export default function SignupPage() {
       ...formData,
       [e.target.name]: e.target.value,
     })
+  }
+
+  const addChild = () => {
+    setChildren([...children, { name: '', birthDate: '', gender: '' }])
+  }
+
+  const removeChild = (index: number) => {
+    if (children.length > 1) {
+      setChildren(children.filter((_, i) => i !== index))
+    }
+  }
+
+  const updateChild = (index: number, field: keyof Child, value: string) => {
+    const updated = [...children]
+    updated[index] = { ...updated[index], [field]: value }
+    setChildren(updated)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,6 +90,22 @@ export default function SignupPage() {
       return
     }
 
+    // 아이 정보 검증
+    if (children.length === 0 || !children[0].name) {
+      setError('최소 1명의 아이 정보를 입력해주세요.')
+      setIsLoading(false)
+      return
+    }
+
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i]
+      if (!child.name || !child.birthDate || !child.gender) {
+        setError(`${i + 1}번째 아이의 정보를 모두 입력해주세요.`)
+        setIsLoading(false)
+        return
+      }
+    }
+
     try {
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
@@ -78,6 +119,7 @@ export default function SignupPage() {
           phone: formData.phone,
           address: formData.address,
           addressDetail: formData.addressDetail,
+          children: children,
         }),
       })
 
@@ -248,6 +290,98 @@ export default function SignupPage() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
               />
+            </div>
+
+            {/* 아이 정보 섹션 */}
+            <div className="pt-4 border-t border-gray-200">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">아이 정보 <span className="text-red-500">*</span></h3>
+                <button
+                  type="button"
+                  onClick={addChild}
+                  className="px-3 py-1 text-sm bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                >
+                  + 아이 추가
+                </button>
+              </div>
+
+              {children.map((child, index) => (
+                <div key={index} className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="font-medium text-gray-700">아이 {index + 1}</h4>
+                    {children.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeChild(index)}
+                        className="text-red-600 text-sm hover:underline"
+                      >
+                        삭제
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        이름 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={child.name}
+                        onChange={(e) => updateChild(index, 'name', e.target.value)}
+                        placeholder="아이 이름"
+                        required
+                        className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green sm:text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        생년월일 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={child.birthDate}
+                        onChange={(e) => updateChild(index, 'birthDate', e.target.value)}
+                        required
+                        className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green sm:text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        성별 <span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`gender-${index}`}
+                            value="MALE"
+                            checked={child.gender === 'MALE'}
+                            onChange={(e) => updateChild(index, 'gender', e.target.value)}
+                            required
+                            className="mr-2"
+                          />
+                          남자
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`gender-${index}`}
+                            value="FEMALE"
+                            checked={child.gender === 'FEMALE'}
+                            onChange={(e) => updateChild(index, 'gender', e.target.value)}
+                            required
+                            className="mr-2"
+                          />
+                          여자
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 

@@ -67,6 +67,13 @@ const DEGREE_TYPES = [
   { value: 'DOCTORATE', label: '박사' },
 ]
 
+const BANKS = [
+  'KB국민은행', '신한은행', '우리은행', '하나은행', 'NH농협은행',
+  'IBK기업은행', 'SC제일은행', '씨티은행', '케이뱅크', '카카오뱅크',
+  '토스뱅크', '대구은행', '부산은행', '경남은행', '광주은행',
+  '전북은행', '제주은행', '새마을금고', '신협', '우체국'
+]
+
 export default function TherapistRegisterPage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
@@ -91,6 +98,9 @@ export default function TherapistRegisterPage() {
   const [educations, setEducations] = useState<Education[]>([
     { degree: 'BACHELOR', school: '', major: '', graduationYear: '' }
   ])
+  const [bank, setBank] = useState('')
+  const [accountNumber, setAccountNumber] = useState('')
+  const [accountHolder, setAccountHolder] = useState('')
 
   // Step 3: Certifications & Experience
   const [isPreTherapist, setIsPreTherapist] = useState(false)
@@ -202,6 +212,18 @@ export default function TherapistRegisterPage() {
       alert('세션 비용을 입력해주세요.')
       return false
     }
+    if (!bank) {
+      alert('은행을 선택해주세요.')
+      return false
+    }
+    if (!accountNumber) {
+      alert('계좌번호를 입력해주세요.')
+      return false
+    }
+    if (!accountHolder) {
+      alert('예금주를 입력해주세요.')
+      return false
+    }
     return true
   }
 
@@ -248,6 +270,9 @@ export default function TherapistRegisterPage() {
           serviceAreas,
           sessionFee: parseInt(sessionFee),
           educations,
+          bank,
+          accountNumber,
+          accountHolder,
           isPreTherapist,
           certifications: isPreTherapist ? [] : certifications,
           experiences: isPreTherapist ? [] : experiences,
@@ -543,6 +568,60 @@ export default function TherapistRegisterPage() {
                       required
                     />
                     <span className="ml-2 text-gray-600">원</span>
+                  </div>
+                </div>
+
+                {/* 은행 정보 */}
+                <div className="pt-4 border-t border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">계좌 정보</h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        은행 <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={bank}
+                        onChange={(e) => setBank(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-accent focus:border-transparent"
+                        required
+                      >
+                        <option value="">은행을 선택하세요</option>
+                        {BANKS.map((bankName) => (
+                          <option key={bankName} value={bankName}>
+                            {bankName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        계좌번호 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={accountNumber}
+                        onChange={(e) => setAccountNumber(e.target.value.replace(/[^0-9-]/g, ''))}
+                        placeholder="123-456-789012"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-accent focus:border-transparent"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        예금주 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={accountHolder}
+                        onChange={(e) => setAccountHolder(e.target.value)}
+                        placeholder="홍길동"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-accent focus:border-transparent"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
 
