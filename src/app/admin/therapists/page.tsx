@@ -23,6 +23,14 @@ interface Experience {
   description?: string
 }
 
+interface Education {
+  id?: string
+  degree: string
+  school: string
+  major: string
+  graduationYear: string
+}
+
 interface PendingUpdateRequest {
   id: string
   requestData: {
@@ -37,6 +45,7 @@ interface PendingUpdateRequest {
     serviceAreas: string[]
     sessionFee?: number
     education?: string
+    educations?: Education[]
     isPreTherapist: boolean
     certifications: any[]
     experiences: any[]
@@ -60,6 +69,8 @@ interface TherapistProfile {
   serviceAreas: string[]
   sessionFee?: number
   education?: string
+  educations?: Education[]
+  isPreTherapist?: boolean
   certifications: Certification[]
   experiences: Experience[]
   approvalStatus: string
@@ -89,6 +100,7 @@ export default function AdminTherapistsPage() {
   const [selectedTherapist, setSelectedTherapist] = useState<TherapistProfile | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [newStatus, setNewStatus] = useState<string>('')
+  const [modalDetailTab, setModalDetailTab] = useState<'info' | 'education' | 'certifications' | 'experience'>('info')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -124,6 +136,7 @@ export default function AdminTherapistsPage() {
   const openModal = (therapist: TherapistProfile) => {
     setSelectedTherapist(therapist)
     setNewStatus(therapist.approvalStatus)
+    setModalDetailTab('info')
     setIsModalOpen(true)
   }
 
@@ -216,6 +229,35 @@ export default function AdminTherapistsPage() {
     } catch (error) {
       console.error('프로필 수정 승인 중 오류 발생:', error)
       alert('승인 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleRejectProfileUpdate = async (therapistId: string) => {
+    const reason = prompt('프로필 수정 요청 거부 사유를 입력해주세요:')
+    if (!reason) return
+
+    if (!confirm('프로필 수정 요청을 거부하시겠습니까?')) return
+
+    try {
+      const response = await fetch(`/api/admin/therapists/${therapistId}/reject-profile-update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason }),
+      })
+
+      if (response.ok) {
+        alert('프로필 수정 요청이 거부되었습니다.')
+        await fetchTherapists()
+        closeModal()
+      } else {
+        const data = await response.json()
+        alert(data.error || '거부에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('프로필 수정 거부 중 오류 발생:', error)
+      alert('거부 중 오류가 발생했습니다.')
     }
   }
 
@@ -337,6 +379,61 @@ export default function AdminTherapistsPage() {
       BEHAVIORAL_THERAPY: '행동치료',
     }
     return labels[specialty] || specialty
+  }
+
+  const getDegreeLabel = (degree: string) => {
+    const labels: { [key: string]: string } = {
+      HIGH_SCHOOL: '고등학교 졸업',
+      ASSOCIATE: '전문학사',
+      BACHELOR: '학사',
+      MASTER: '석사',
+      DOCTORATE: '박사',
+    }
+    return labels[degree] || degree
+  }
+
+  const getAgeRangeLabel = (ageRange: string) => {
+    const labels: { [key: string]: string } = {
+      AGE_0_12: '0-12개월',
+      AGE_13_24: '13-24개월',
+      AGE_25_36: '25-36개월',
+      AGE_37_48: '37-48개월',
+      AGE_49_60: '49-60개월',
+      AGE_5_7: '5-7세',
+      AGE_8_PLUS: '8세 이상',
+    }
+    return labels[ageRange] || ageRange
+  }
+
+  const getServiceAreaLabel = (area: string) => {
+    const labels: { [key: string]: string } = {
+      GANGNAM: '강남구',
+      SEOCHO: '서초구',
+      SONGPA: '송파구',
+      GANGDONG: '강동구',
+      GWANGJIN: '광진구',
+      SEONGDONG: '성동구',
+      JUNG: '중구',
+      YONGSAN: '용산구',
+      SEONGBUK: '성북구',
+      GANGBUK: '강북구',
+      DOBONG: '도봉구',
+      NOWON: '노원구',
+      EUNPYEONG: '은평구',
+      SEODAEMUN: '서대문구',
+      MAPO: '마포구',
+      YANGCHEON: '양천구',
+      GANGSEO: '강서구',
+      GURO: '구로구',
+      GEUMCHEON: '금천구',
+      YEONGDEUNGPO: '영등포구',
+      DONGJAK: '동작구',
+      GWANAK: '관악구',
+      DONGDAEMUN: '동대문구',
+      JUNGNANG: '중랑구',
+      JONGNO: '종로구',
+    }
+    return labels[area] || area
   }
 
   const getStatusBadge = (status: string) => {
@@ -637,397 +734,418 @@ export default function AdminTherapistsPage() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
               {/* 모달 헤더 */}
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">치료사 상세 정보</h2>
-                <button
-                  onClick={closeModal}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 z-10">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">치료사 상세 정보</h2>
+                    {selectedTherapist.isPreTherapist && (
+                      <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                        예비 치료사
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={closeModal}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* 탭 네비게이션 */}
+                <div className="border-b border-gray-200 -mb-px">
+                  <nav className="flex space-x-8">
+                    <button
+                      onClick={() => setModalDetailTab('info')}
+                      className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                        modalDetailTab === 'info'
+                          ? 'border-green-500 text-green-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      기본 정보
+                    </button>
+                    <button
+                      onClick={() => setModalDetailTab('education')}
+                      className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                        modalDetailTab === 'education'
+                          ? 'border-green-500 text-green-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      학력
+                    </button>
+                    {!selectedTherapist.isPreTherapist && (
+                      <>
+                        <button
+                          onClick={() => setModalDetailTab('certifications')}
+                          className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                            modalDetailTab === 'certifications'
+                              ? 'border-green-500 text-green-600'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          자격증
+                        </button>
+                        <button
+                          onClick={() => setModalDetailTab('experience')}
+                          className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                            modalDetailTab === 'experience'
+                              ? 'border-green-500 text-green-600'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          경력
+                        </button>
+                      </>
+                    )}
+                  </nav>
+                </div>
               </div>
 
               {/* 모달 본문 */}
-              <div className="px-6 py-6 space-y-6">
-                {/* 기본 정보 */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">기본 정보</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">이름</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedTherapist.user.name}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">이메일</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedTherapist.user.email}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">전화번호</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedTherapist.user.phone}</p>
-                    </div>
-                    {selectedTherapist.gender && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">성별</label>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {selectedTherapist.gender === 'MALE' ? '남성' : '여성'}
-                        </p>
-                      </div>
-                    )}
-                    {selectedTherapist.birthYear && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">생년</label>
-                        <p className="mt-1 text-sm text-gray-900">{selectedTherapist.birthYear}년</p>
-                      </div>
-                    )}
-                    {selectedTherapist.address && (
-                      <div className="col-span-2">
-                        <label className="text-sm font-medium text-gray-500">주소</label>
-                        <p className="mt-1 text-sm text-gray-900">{selectedTherapist.address}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 전문 정보 */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">전문 정보</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">전문 분야</label>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {selectedTherapist.specialties.map((specialty) => (
-                          <span
-                            key={specialty}
-                            className="inline-flex px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full"
-                          >
-                            {getSpecialtyLabel(specialty)}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    {selectedTherapist.childAgeRanges.length > 0 && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">대상 아동 연령</label>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {selectedTherapist.childAgeRanges.join(', ')}
-                        </p>
-                      </div>
-                    )}
-                    {selectedTherapist.serviceAreas.length > 0 && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">서비스 가능 지역</label>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {selectedTherapist.serviceAreas.join(', ')}
-                        </p>
-                      </div>
-                    )}
-                    {selectedTherapist.sessionFee && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">상담료 (50분 기준)</label>
-                        <p className="mt-1 text-sm text-gray-900">
-                          ₩{selectedTherapist.sessionFee.toLocaleString()}
-                        </p>
-                      </div>
-                    )}
-                    {selectedTherapist.education && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">학력</label>
-                        <p className="mt-1 text-sm text-gray-900">{selectedTherapist.education}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 자격증 정보 */}
-                {selectedTherapist.certifications.length > 0 && (
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">자격증 정보</h3>
-                    <div className="space-y-4">
-                      {selectedTherapist.certifications.map((cert, index) => (
-                        <div key={cert.id} className="border-l-4 border-blue-500 pl-4">
-                          <h4 className="font-medium text-gray-900">{cert.name}</h4>
-                          <p className="text-sm text-gray-600">발급기관: {cert.issuingOrganization}</p>
-                          <p className="text-sm text-gray-600">
-                            취득일: {new Date(cert.issueDate).toLocaleDateString('ko-KR')}
-                          </p>
-                          {cert.filePath && (
-                            <a
-                              href={cert.filePath}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-blue-600 hover:underline"
-                            >
-                              첨부파일 보기
-                            </a>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 경력 정보 */}
-                {selectedTherapist.experiences.length > 0 && (
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">경력 정보</h3>
-                    <div className="space-y-4">
-                      {selectedTherapist.experiences.map((exp, index) => (
-                        <div key={exp.id} className="border-l-4 border-green-500 pl-4">
-                          <div className="flex items-center space-x-2">
-                            <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-200 text-gray-700 rounded">
-                              {exp.employmentType === 'INSTITUTION' ? '기관' : '프리랜서'}
-                            </span>
-                            <h4 className="font-medium text-gray-900">
-                              {exp.institutionName || '프리랜서'}
-                            </h4>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">
-                            분야: {getSpecialtyLabel(exp.specialty)}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            기간: {new Date(exp.startDate).toLocaleDateString('ko-KR')} ~{' '}
-                            {exp.endDate
-                              ? new Date(exp.endDate).toLocaleDateString('ko-KR')
-                              : '현재'}
-                          </p>
-                          {exp.description && (
-                            <p className="text-sm text-gray-600 mt-2">{exp.description}</p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 프로필 수정 요청 정보 */}
+              <div className="px-6 py-6">
+                {/* 프로필 수정 요청 알림 */}
                 {selectedTherapist.profileUpdateRequested && selectedTherapist.pendingUpdateRequest && (
-                  <div className="bg-orange-50 rounded-lg p-4 border-2 border-orange-200">
-                    <div className="flex items-center space-x-2 mb-3">
+                  <div className="bg-orange-50 rounded-lg p-3 border border-orange-200 mb-4">
+                    <div className="flex items-center space-x-2">
                       <svg className="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
-                      <h3 className="text-lg font-semibold text-orange-900">프로필 수정 요청 비교</h3>
+                      <p className="text-sm font-medium text-orange-900">
+                        프로필 수정 요청이 있습니다. 변경 사항이 주황색으로 표시됩니다.
+                      </p>
+                    </div>
+                    <div className="mt-2 flex gap-3">
+                      <button
+                        onClick={() => handleApproveProfileUpdate(selectedTherapist.id)}
+                        className="px-3 py-1 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 transition-colors"
+                      >
+                        전체 승인
+                      </button>
+                      <button
+                        onClick={() => handleRejectProfileUpdate(selectedTherapist.id)}
+                        className="px-3 py-1 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 transition-colors"
+                      >
+                        전체 거부
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 기본 정보 탭 */}
+                {modalDetailTab === 'info' && (
+                  <div className="space-y-6">
+                    {/* 기본 정보 */}
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">기본 정보</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">이름</label>
+                          <p className="mt-1 text-sm text-gray-900">{selectedTherapist.user.name}</p>
+                          {selectedTherapist.pendingUpdateRequest && selectedTherapist.user.name !== selectedTherapist.pendingUpdateRequest.requestData.name && (
+                            <p className="mt-1 text-sm text-orange-900 font-medium">→ {selectedTherapist.pendingUpdateRequest.requestData.name}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">이메일</label>
+                          <p className="mt-1 text-sm text-gray-900">{selectedTherapist.user.email}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">전화번호</label>
+                          <p className="mt-1 text-sm text-gray-900">{selectedTherapist.user.phone}</p>
+                          {selectedTherapist.pendingUpdateRequest && selectedTherapist.user.phone !== selectedTherapist.pendingUpdateRequest.requestData.phone && (
+                            <p className="mt-1 text-sm text-orange-900 font-medium">→ {selectedTherapist.pendingUpdateRequest.requestData.phone}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">성별</label>
+                          <p className="mt-1 text-sm text-gray-900">{selectedTherapist.gender === 'MALE' ? '남성' : selectedTherapist.gender === 'FEMALE' ? '여성' : '미입력'}</p>
+                          {selectedTherapist.pendingUpdateRequest && selectedTherapist.gender !== selectedTherapist.pendingUpdateRequest.requestData.gender && (
+                            <p className="mt-1 text-sm text-orange-900 font-medium">→ {selectedTherapist.pendingUpdateRequest.requestData.gender === 'MALE' ? '남성' : selectedTherapist.pendingUpdateRequest.requestData.gender === 'FEMALE' ? '여성' : '미입력'}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">생년</label>
+                          <p className="mt-1 text-sm text-gray-900">{selectedTherapist.birthYear ? `${selectedTherapist.birthYear}년` : '미입력'}</p>
+                          {selectedTherapist.pendingUpdateRequest && selectedTherapist.birthYear !== selectedTherapist.pendingUpdateRequest.requestData.birthYear && (
+                            <p className="mt-1 text-sm text-orange-900 font-medium">→ {selectedTherapist.pendingUpdateRequest.requestData.birthYear}년</p>
+                          )}
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-sm font-medium text-gray-500">주소</label>
+                          <p className="mt-1 text-sm text-gray-900">{selectedTherapist.address || '미입력'}</p>
+                          {selectedTherapist.pendingUpdateRequest && selectedTherapist.address !== selectedTherapist.pendingUpdateRequest.requestData.address && (
+                            <p className="mt-1 text-sm text-orange-900 font-medium">→ {selectedTherapist.pendingUpdateRequest.requestData.address}</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="space-y-4 mt-4">
-                      {/* Request Info */}
-                      <div className="bg-white rounded p-3">
-                        <div className="text-sm text-orange-700">
-                          <strong>요청 시각:</strong> {new Date(selectedTherapist.pendingUpdateRequest.requestedAt).toLocaleString('ko-KR')}
-                        </div>
-                        {selectedTherapist.pendingUpdateRequest.memo && (
-                          <div className="text-sm text-orange-700 mt-1">
-                            <strong>메모:</strong> {selectedTherapist.pendingUpdateRequest.memo}
+                    {/* 전문 정보 */}
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">전문 정보</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 mb-2 block">전문 분야</label>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedTherapist.specialties.map((specialty) => (
+                              <span key={specialty} className="px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
+                                {getSpecialtyLabel(specialty)}
+                              </span>
+                            ))}
                           </div>
-                        )}
-                      </div>
-
-                      {/* Comparison Table */}
-                      <div className="bg-white rounded overflow-hidden">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-100">
-                            <tr>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">항목</th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">현재</th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">변경 요청</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-200">
-                            {/* Name */}
-                            {selectedTherapist.user.name !== selectedTherapist.pendingUpdateRequest.requestData.name && (
-                              <tr className="bg-yellow-50">
-                                <td className="px-3 py-2 text-sm font-medium text-gray-900">이름</td>
-                                <td className="px-3 py-2 text-sm text-gray-500">{selectedTherapist.user.name}</td>
-                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">{selectedTherapist.pendingUpdateRequest.requestData.name}</td>
-                              </tr>
-                            )}
-                            {/* Phone */}
-                            {selectedTherapist.user.phone !== selectedTherapist.pendingUpdateRequest.requestData.phone && (
-                              <tr className="bg-yellow-50">
-                                <td className="px-3 py-2 text-sm font-medium text-gray-900">전화번호</td>
-                                <td className="px-3 py-2 text-sm text-gray-500">{selectedTherapist.user.phone}</td>
-                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">{selectedTherapist.pendingUpdateRequest.requestData.phone}</td>
-                              </tr>
-                            )}
-                            {/* Gender */}
-                            {selectedTherapist.gender !== selectedTherapist.pendingUpdateRequest.requestData.gender && (
-                              <tr className="bg-yellow-50">
-                                <td className="px-3 py-2 text-sm font-medium text-gray-900">성별</td>
-                                <td className="px-3 py-2 text-sm text-gray-500">{selectedTherapist.gender === 'MALE' ? '남성' : selectedTherapist.gender === 'FEMALE' ? '여성' : '-'}</td>
-                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">{selectedTherapist.pendingUpdateRequest.requestData.gender === 'MALE' ? '남성' : selectedTherapist.pendingUpdateRequest.requestData.gender === 'FEMALE' ? '여성' : '-'}</td>
-                              </tr>
-                            )}
-                            {/* Birth Year */}
-                            {selectedTherapist.birthYear !== selectedTherapist.pendingUpdateRequest.requestData.birthYear && (
-                              <tr className="bg-yellow-50">
-                                <td className="px-3 py-2 text-sm font-medium text-gray-900">생년</td>
-                                <td className="px-3 py-2 text-sm text-gray-500">{selectedTherapist.birthYear || '-'}</td>
-                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">{selectedTherapist.pendingUpdateRequest.requestData.birthYear || '-'}</td>
-                              </tr>
-                            )}
-                            {/* Address */}
-                            {selectedTherapist.address !== selectedTherapist.pendingUpdateRequest.requestData.address && (
-                              <tr className="bg-yellow-50">
-                                <td className="px-3 py-2 text-sm font-medium text-gray-900">주소</td>
-                                <td className="px-3 py-2 text-sm text-gray-500">{selectedTherapist.address || '-'}</td>
-                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">{selectedTherapist.pendingUpdateRequest.requestData.address || '-'}</td>
-                              </tr>
-                            )}
-                            {/* Specialties */}
-                            {JSON.stringify(selectedTherapist.specialties) !== JSON.stringify(selectedTherapist.pendingUpdateRequest.requestData.specialties) && (
-                              <tr className="bg-yellow-50">
-                                <td className="px-3 py-2 text-sm font-medium text-gray-900">전문 분야</td>
-                                <td className="px-3 py-2 text-sm text-gray-500">
-                                  {selectedTherapist.specialties.map(s => getSpecialtyLabel(s)).join(', ')}
-                                </td>
-                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">
-                                  {selectedTherapist.pendingUpdateRequest.requestData.specialties.map(s => getSpecialtyLabel(s)).join(', ')}
-                                </td>
-                              </tr>
-                            )}
-                            {/* Session Fee */}
-                            {selectedTherapist.sessionFee !== selectedTherapist.pendingUpdateRequest.requestData.sessionFee && (
-                              <tr className="bg-yellow-50">
-                                <td className="px-3 py-2 text-sm font-medium text-gray-900">세션 비용</td>
-                                <td className="px-3 py-2 text-sm text-gray-500">₩{selectedTherapist.sessionFee?.toLocaleString() || '-'}</td>
-                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">₩{selectedTherapist.pendingUpdateRequest.requestData.sessionFee?.toLocaleString() || '-'}</td>
-                              </tr>
-                            )}
-                            {/* Education */}
-                            {selectedTherapist.education !== selectedTherapist.pendingUpdateRequest.requestData.education && (
-                              <tr className="bg-yellow-50">
-                                <td className="px-3 py-2 text-sm font-medium text-gray-900">학력</td>
-                                <td className="px-3 py-2 text-sm text-gray-500">{selectedTherapist.education || '-'}</td>
-                                <td className="px-3 py-2 text-sm text-orange-900 font-medium">{selectedTherapist.pendingUpdateRequest.requestData.education || '-'}</td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-
-                      {/* Certifications and Experiences changes note */}
-                      {(selectedTherapist.pendingUpdateRequest.requestData.certifications.length > 0 ||
-                        selectedTherapist.pendingUpdateRequest.requestData.experiences.length > 0) && (
-                        <div className="bg-white rounded p-3 text-sm text-orange-700">
-                          <p className="font-medium">📋 자격증 및 경력 정보가 변경됩니다.</p>
-                          <p className="text-xs mt-1">• 자격증: {selectedTherapist.pendingUpdateRequest.requestData.certifications.length}개</p>
-                          <p className="text-xs">• 경력: {selectedTherapist.pendingUpdateRequest.requestData.experiences.length}개</p>
+                          {selectedTherapist.pendingUpdateRequest && JSON.stringify(selectedTherapist.specialties) !== JSON.stringify(selectedTherapist.pendingUpdateRequest.requestData.specialties) && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              <span className="text-sm text-orange-900 font-medium">→</span>
+                              {selectedTherapist.pendingUpdateRequest.requestData.specialties.map((specialty) => (
+                                <span key={specialty} className="px-3 py-1 text-sm font-medium bg-orange-100 text-orange-800 rounded-full">
+                                  {getSpecialtyLabel(specialty)}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
-
-                      <div className="pt-2">
-                        <button
-                          onClick={() => handleApproveProfileUpdate(selectedTherapist.id)}
-                          className="w-full px-4 py-2 bg-orange-600 text-white font-medium rounded-md hover:bg-orange-700 transition-colors"
-                        >
-                          프로필 수정 요청 승인
-                        </button>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 mb-2 block">아이 나이 범위</label>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedTherapist.childAgeRanges && selectedTherapist.childAgeRanges.length > 0 ? (
+                              selectedTherapist.childAgeRanges.map((range) => (
+                                <span key={range} className="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">
+                                  {getAgeRangeLabel(range)}
+                                </span>
+                              ))
+                            ) : (
+                              <p className="text-sm text-gray-400">미입력</p>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500 mb-2 block">서비스 가능 지역</label>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedTherapist.serviceAreas && selectedTherapist.serviceAreas.length > 0 ? (
+                              selectedTherapist.serviceAreas.map((area) => (
+                                <span key={area} className="px-3 py-1 text-sm font-medium bg-purple-100 text-purple-800 rounded-full">
+                                  {getServiceAreaLabel(area)}
+                                </span>
+                              ))
+                            ) : (
+                              <p className="text-sm text-gray-400">미입력</p>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">세션 비용 (50분 기준)</label>
+                          <p className="mt-1 text-sm text-gray-900">₩{selectedTherapist.sessionFee?.toLocaleString() || '-'}</p>
+                          {selectedTherapist.pendingUpdateRequest && selectedTherapist.sessionFee !== selectedTherapist.pendingUpdateRequest.requestData.sessionFee && (
+                            <p className="mt-1 text-sm text-orange-900 font-medium">→ ₩{selectedTherapist.pendingUpdateRequest.requestData.sessionFee?.toLocaleString()}</p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* 상태 정보 */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">상태 정보</h3>
+                {/* 학력 탭 */}
+                {modalDetailTab === 'education' && (
                   <div className="space-y-4">
-                    {/* 현재 상태 표시 */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">학력</h3>
+                    {selectedTherapist.educations && selectedTherapist.educations.length > 0 ? (
                       <div>
-                        <label className="text-sm font-medium text-gray-500">현재 상태</label>
-                        <div className="mt-1">{getStatusBadge(selectedTherapist.approvalStatus)}</div>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">가입일</label>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {new Date(selectedTherapist.createdAt).toLocaleDateString('ko-KR')}
-                        </p>
-                      </div>
-                      {selectedTherapist.approvedAt && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">승인일</label>
-                          <p className="mt-1 text-sm text-gray-900">
-                            {new Date(selectedTherapist.approvedAt).toLocaleDateString('ko-KR')}
-                          </p>
+                        <p className="text-sm font-medium text-gray-500 mb-3">현재 학력</p>
+                        <div className="space-y-3">
+                          {selectedTherapist.educations.map((edu, index) => (
+                            <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-gray-50 rounded-r">
+                              <h4 className="font-bold text-gray-900">{getDegreeLabel(edu.degree)}</h4>
+                              <p className="text-gray-700 mt-1">{edu.school} - {edu.major}</p>
+                              <p className="text-sm text-gray-500 mt-1">{edu.graduationYear} 졸업</p>
+                            </div>
+                          ))}
                         </div>
-                      )}
-                      {selectedTherapist.rejectedAt && (
-                        <div className="col-span-2">
-                          <label className="text-sm font-medium text-gray-500">거부 사유</label>
-                          <p className="mt-1 text-sm text-red-600">
-                            {selectedTherapist.rejectionReason}
-                          </p>
-                        </div>
-                      )}
-                      {selectedTherapist.profileUpdateApprovedAt && (
-                        <div className="col-span-2">
-                          <label className="text-sm font-medium text-gray-500">최근 프로필 수정 승인일</label>
-                          <p className="mt-1 text-sm text-gray-900">
-                            {new Date(selectedTherapist.profileUpdateApprovedAt).toLocaleDateString('ko-KR')}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* 상태 변경 */}
-                    <div className="border-t border-gray-200 pt-4">
-                      <label className="text-sm font-medium text-gray-700 mb-2 block">
-                        상태 변경
-                      </label>
-                      <div className="flex items-center space-x-3">
-                        <select
-                          value={newStatus}
-                          onChange={(e) => setNewStatus(e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                        >
-                          <option value="PENDING">신청</option>
-                          <option value="WAITING">대기</option>
-                          <option value="APPROVED">승인됨</option>
-                          <option value="REJECTED">거부됨</option>
-                        </select>
-                        <button
-                          onClick={handleStatusChange}
-                          disabled={newStatus === selectedTherapist.approvalStatus}
-                          className={`px-4 py-2 font-medium rounded-md transition-colors ${
-                            newStatus === selectedTherapist.approvalStatus
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-green-600 text-white hover:bg-green-700'
-                          }`}
-                        >
-                          변경
-                        </button>
                       </div>
-                    </div>
+                    ) : (
+                      <p className="text-gray-500 text-center py-8">등록된 학력 정보가 없습니다.</p>
+                    )}
+                    {selectedTherapist.pendingUpdateRequest?.requestData.educations &&
+                     JSON.stringify(selectedTherapist.educations) !== JSON.stringify(selectedTherapist.pendingUpdateRequest.requestData.educations) && (
+                      <div className="mt-6 pt-6 border-t border-orange-200">
+                        <p className="text-sm font-medium text-orange-900 mb-3">→ 변경 요청된 학력</p>
+                        <div className="space-y-3">
+                          {selectedTherapist.pendingUpdateRequest.requestData.educations.map((edu, index) => (
+                            <div key={index} className="border-l-4 border-orange-500 pl-4 py-2 bg-orange-50 rounded-r">
+                              <h4 className="font-bold text-orange-900">{getDegreeLabel(edu.degree)}</h4>
+                              <p className="text-orange-800 mt-1">{edu.school} - {edu.major}</p>
+                              <p className="text-sm text-orange-700 mt-1">{edu.graduationYear} 졸업</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
+                )}
+
+                {/* 자격증 탭 */}
+                {modalDetailTab === 'certifications' && !selectedTherapist.isPreTherapist && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">자격증</h3>
+                    {selectedTherapist.certifications.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedTherapist.certifications.map((cert) => (
+                          <div key={cert.id} className="border-l-4 border-blue-500 pl-4 py-2 bg-gray-50 rounded-r">
+                            <h4 className="font-bold text-gray-900">{cert.name}</h4>
+                            <p className="text-gray-700 mt-1">발급기관: {cert.issuingOrganization}</p>
+                            <p className="text-sm text-gray-500 mt-1">취득일: {new Date(cert.issueDate).toLocaleDateString('ko-KR')}</p>
+                            {cert.filePath && (
+                              <a href={cert.filePath} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline mt-1 inline-block">
+                                첨부파일 보기
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-center py-8">등록된 자격증 정보가 없습니다.</p>
+                    )}
+                    {selectedTherapist.pendingUpdateRequest?.requestData.certifications && selectedTherapist.pendingUpdateRequest.requestData.certifications.length > 0 && (
+                      <div className="mt-6 pt-6 border-t border-orange-200">
+                        <p className="text-sm font-medium text-orange-900 mb-3">→ 변경 요청된 자격증 ({selectedTherapist.pendingUpdateRequest.requestData.certifications.length}개)</p>
+                        <div className="space-y-3">
+                          {selectedTherapist.pendingUpdateRequest.requestData.certifications.map((cert: any, index: number) => (
+                            <div key={index} className="border-l-4 border-orange-500 pl-4 py-2 bg-orange-50 rounded-r">
+                              <h4 className="font-bold text-orange-900">{cert.name}</h4>
+                              <p className="text-orange-800 mt-1">발급기관: {cert.issuingOrganization}</p>
+                              <p className="text-sm text-orange-700 mt-1">취득일: {new Date(cert.issueDate).toLocaleDateString('ko-KR')}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 경력 탭 */}
+                {modalDetailTab === 'experience' && !selectedTherapist.isPreTherapist && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">경력</h3>
+                    {selectedTherapist.experiences.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedTherapist.experiences.map((exp) => (
+                          <div key={exp.id} className="border-l-4 border-purple-500 pl-4 py-2 bg-gray-50 rounded-r">
+                            <div className="flex items-center space-x-2">
+                              <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-200 text-gray-700 rounded">
+                                {exp.employmentType === 'INSTITUTION' ? '기관' : '프리랜서'}
+                              </span>
+                              <h4 className="font-bold text-gray-900">{exp.institutionName || '프리랜서'}</h4>
+                            </div>
+                            <p className="text-gray-700 mt-1">분야: {getSpecialtyLabel(exp.specialty)}</p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              기간: {new Date(exp.startDate).toLocaleDateString('ko-KR')} ~ {exp.endDate ? new Date(exp.endDate).toLocaleDateString('ko-KR') : '현재'}
+                            </p>
+                            {exp.description && <p className="text-gray-600 mt-2">{exp.description}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-center py-8">등록된 경력 정보가 없습니다.</p>
+                    )}
+                    {selectedTherapist.pendingUpdateRequest?.requestData.experiences && selectedTherapist.pendingUpdateRequest.requestData.experiences.length > 0 && (
+                      <div className="mt-6 pt-6 border-t border-orange-200">
+                        <p className="text-sm font-medium text-orange-900 mb-3">→ 변경 요청된 경력 ({selectedTherapist.pendingUpdateRequest.requestData.experiences.length}개)</p>
+                        <div className="space-y-3">
+                          {selectedTherapist.pendingUpdateRequest.requestData.experiences.map((exp: any, index: number) => (
+                            <div key={index} className="border-l-4 border-orange-500 pl-4 py-2 bg-orange-50 rounded-r">
+                              <div className="flex items-center space-x-2">
+                                <span className="inline-flex px-2 py-1 text-xs font-medium bg-orange-200 text-orange-900 rounded">
+                                  {exp.employmentType === 'INSTITUTION' ? '기관' : '프리랜서'}
+                                </span>
+                                <h4 className="font-bold text-orange-900">{exp.institutionName || '프리랜서'}</h4>
+                              </div>
+                              <p className="text-orange-800 mt-1">분야: {getSpecialtyLabel(exp.specialty)}</p>
+                              <p className="text-sm text-orange-700 mt-1">
+                                기간: {new Date(exp.startDate).toLocaleDateString('ko-KR')} ~ {exp.endDate ? new Date(exp.endDate).toLocaleDateString('ko-KR') : '현재'}
+                              </p>
+                              {exp.description && <p className="text-orange-700 mt-2">{exp.description}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* 모달 푸터 */}
-              <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end space-x-3">
-                {selectedTherapist.approvalStatus === 'WAITING' && (
-                  <>
-                    <button
-                      onClick={() => handleApprove(selectedTherapist.id)}
-                      className="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition-colors"
+              <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4">
+                {/* 상태 정보 */}
+                <div className="mb-4 grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <label className="text-xs font-medium text-gray-500">현재 상태</label>
+                    <div className="mt-1">{getStatusBadge(selectedTherapist.approvalStatus)}</div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500">가입일</label>
+                    <p className="mt-1 text-sm text-gray-900">{new Date(selectedTherapist.createdAt).toLocaleDateString('ko-KR')}</p>
+                  </div>
+                  {selectedTherapist.approvedAt && (
+                    <div>
+                      <label className="text-xs font-medium text-gray-500">승인일</label>
+                      <p className="mt-1 text-sm text-gray-900">{new Date(selectedTherapist.approvedAt).toLocaleDateString('ko-KR')}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* 상태 변경 및 버튼 */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <select
+                      value={newStatus}
+                      onChange={(e) => setNewStatus(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
-                      승인
-                    </button>
+                      <option value="PENDING">신청</option>
+                      <option value="WAITING">대기</option>
+                      <option value="APPROVED">승인됨</option>
+                      <option value="REJECTED">거부됨</option>
+                    </select>
                     <button
-                      onClick={() => handleReject(selectedTherapist.id)}
-                      className="px-4 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 transition-colors"
+                      onClick={handleStatusChange}
+                      disabled={newStatus === selectedTherapist.approvalStatus}
+                      className={`px-4 py-2 font-medium rounded-md transition-colors text-sm ${
+                        newStatus === selectedTherapist.approvalStatus
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-green-600 text-white hover:bg-green-700'
+                      }`}
                     >
-                      거부
+                      상태 변경
                     </button>
-                  </>
-                )}
-                <button
-                  onClick={closeModal}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-400 transition-colors"
-                >
-                  닫기
-                </button>
+                  </div>
+                  <div className="flex space-x-3">
+                    {selectedTherapist.approvalStatus === 'WAITING' && (
+                      <>
+                        <button
+                          onClick={() => handleApprove(selectedTherapist.id)}
+                          className="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition-colors"
+                        >
+                          승인
+                        </button>
+                        <button
+                          onClick={() => handleReject(selectedTherapist.id)}
+                          className="px-4 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 transition-colors"
+                        >
+                          거부
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={closeModal}
+                      className="px-4 py-2 bg-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-400 transition-colors"
+                    >
+                      닫기
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

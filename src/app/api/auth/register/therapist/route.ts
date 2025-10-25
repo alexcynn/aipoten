@@ -10,7 +10,8 @@ export async function POST(request: NextRequest) {
       email: body.email,
       isPreTherapist: body.isPreTherapist,
       hasCertifications: body.certifications?.length || 0,
-      hasExperiences: body.experiences?.length || 0
+      hasExperiences: body.experiences?.length || 0,
+      hasEducations: body.educations?.length || 0
     })
 
     const {
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
       childAgeRanges,   // array of age range strings
       serviceAreas,     // array of district names
       sessionFee,
+      educations,       // array of {degree, school, major, graduationYear}
 
       // Step 3: Certifications & Experience
       isPreTherapist,   // 예비 치료사 여부
@@ -114,6 +116,19 @@ export async function POST(request: NextRequest) {
             startDate: new Date(exp.startDate),
             endDate: exp.endDate ? new Date(exp.endDate) : null,
             description: exp.description || null,
+          }))
+        })
+      }
+
+      // 5. Create Educations
+      if (educations && educations.length > 0) {
+        await tx.education.createMany({
+          data: educations.map((edu: any) => ({
+            therapistProfileId: therapistProfile.id,
+            degree: edu.degree,
+            school: edu.school,
+            major: edu.major,
+            graduationYear: edu.graduationYear,
           }))
         })
       }

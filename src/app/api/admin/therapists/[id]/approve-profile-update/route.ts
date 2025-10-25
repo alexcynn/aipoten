@@ -65,11 +65,14 @@ export async function POST(
     // Parse request data
     const requestData = JSON.parse(updateRequest.requestData)
 
-    // Delete existing certifications and experiences
+    // Delete existing certifications, experiences, and educations
     await prisma.certification.deleteMany({
       where: { therapistProfileId: resolvedParams.id },
     })
     await prisma.experience.deleteMany({
+      where: { therapistProfileId: resolvedParams.id },
+    })
+    await prisma.education.deleteMany({
       where: { therapistProfileId: resolvedParams.id },
     })
 
@@ -85,7 +88,6 @@ export async function POST(
         childAgeRanges: JSON.stringify(requestData.childAgeRanges || []),
         serviceAreas: JSON.stringify(requestData.serviceAreas || []),
         sessionFee: requestData.sessionFee || null,
-        education: requestData.education || null,
         isPreTherapist: requestData.isPreTherapist || false,
         profileUpdateRequested: false,
         profileUpdateApprovedAt: new Date(),
@@ -124,6 +126,19 @@ export async function POST(
           startDate: new Date(exp.startDate),
           endDate: exp.endDate ? new Date(exp.endDate) : null,
           description: exp.description || null,
+        })),
+      })
+    }
+
+    // Create new educations
+    if (requestData.educations && requestData.educations.length > 0) {
+      await prisma.education.createMany({
+        data: requestData.educations.map((edu: any) => ({
+          therapistProfileId: resolvedParams.id,
+          degree: edu.degree,
+          school: edu.school,
+          major: edu.major,
+          graduationYear: edu.graduationYear,
         })),
       })
     }

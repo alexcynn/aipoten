@@ -415,6 +415,7 @@ model TherapistProfile {
   consultations    Consultation[]          // Phase 2 (MatchingRequest 관련)
   certifications   Certification[]
   experiences      Experience[]
+  educations       Education[]             // 학력
   timeSlots        TimeSlot[]              // Phase 3: 스케줄 슬롯
   bookings         Booking[]               @relation("TherapistBookings") // Phase 4: 예약
   profileUpdateRequests ProfileUpdateRequest[] // 프로필 수정 요청
@@ -504,6 +505,31 @@ model Experience {
 enum EmploymentType {
   INSTITUTION  // 기관
   FREELANCER   // 프리랜서
+}
+
+// 치료사 학력
+model Education {
+  id                String         @id @default(cuid())
+  therapistProfileId String
+  degree            DegreeType     // 학위
+  school            String         // 학교명
+  major             String         // 전공
+  graduationYear    String         // 졸업년도
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  // 관계
+  therapistProfile TherapistProfile @relation(fields: [therapistProfileId], references: [id], onDelete: Cascade)
+
+  @@map("educations")
+}
+
+enum DegreeType {
+  HIGH_SCHOOL  // 고등학교 졸업
+  ASSOCIATE    // 전문학사
+  BACHELOR     // 학사
+  MASTER       // 석사
+  DOCTORATE    // 박사
 }
 
 // 프로필 수정 요청 (임시 저장)

@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
         },
         certifications: true,
         experiences: true,
+        educations: true,
         profileUpdateRequests: {
           where: {
             status: 'PENDING'
@@ -50,6 +51,7 @@ export async function GET(request: NextRequest) {
       education: therapist.education,
       certifications: therapist.certifications,
       experiences: therapist.experiences,
+      educations: therapist.educations,
       approvalStatus: therapist.approvalStatus,
       status: therapist.status,
       approvedAt: therapist.approvedAt?.toISOString(),

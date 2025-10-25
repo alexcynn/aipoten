@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
         },
         certifications: true,
         experiences: true,
+        educations: true,
       }
     })
 

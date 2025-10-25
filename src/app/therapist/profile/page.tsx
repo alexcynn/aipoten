@@ -49,6 +49,7 @@ interface TherapistProfile {
   sessionFee?: number
   isPreTherapist: boolean
   education?: string
+  educations?: Education[]
   certifications: Certification[]
   experiences: Experience[]
   approvalStatus: string
@@ -91,9 +92,43 @@ const DEGREE_TYPES = [
   { value: 'DOCTORATE', label: '박사' },
 ]
 
+// 서비스 가능 지역 코드 변환 함수
+const getServiceAreaLabel = (area: string) => {
+  const labels: { [key: string]: string } = {
+    GANGNAM: '강남구',
+    SEOCHO: '서초구',
+    SONGPA: '송파구',
+    GANGDONG: '강동구',
+    GWANGJIN: '광진구',
+    SEONGDONG: '성동구',
+    JUNG: '중구',
+    YONGSAN: '용산구',
+    SEONGBUK: '성북구',
+    GANGBUK: '강북구',
+    DOBONG: '도봉구',
+    NOWON: '노원구',
+    EUNPYEONG: '은평구',
+    SEODAEMUN: '서대문구',
+    MAPO: '마포구',
+    YANGCHEON: '양천구',
+    GANGSEO: '강서구',
+    GURO: '구로구',
+    GEUMCHEON: '금천구',
+    YEONGDEUNGPO: '영등포구',
+    DONGJAK: '동작구',
+    GWANAK: '관악구',
+    DONGDAEMUN: '동대문구',
+    JUNGNANG: '중랑구',
+    JONGNO: '종로구',
+  }
+  return labels[area] || area
+}
+
 export default function TherapistProfilePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [activeTab, setActiveTab] = useState<'info' | 'education' | 'certifications' | 'experience'>('info')
   const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -152,6 +187,7 @@ export default function TherapistProfilePage() {
 
       if (response.ok) {
         const profileData = await response.json()
+        console.log('프로필 데이터:', profileData)
         setProfile(profileData)
 
         // Load existing data
@@ -348,7 +384,9 @@ export default function TherapistProfilePage() {
       }
 
       alert('프로필 수정 요청이 완료되었습니다. 관리자 승인 후 프로필이 변경됩니다.')
-      router.push('/dashboard/therapist')
+      setIsEditMode(false)
+      setCurrentStep(1)
+      await fetchProfile() // 프로필 새로고침
     } catch (error: any) {
       alert(error.message)
     } finally {
@@ -395,10 +433,276 @@ export default function TherapistProfilePage() {
           </div>
         )}
 
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+        {/* View Mode - Profile Display */}
+        {!isEditMode && !profile && (
+          <div className="bg-white shadow-lg rounded-lg p-6">
+            <p className="text-gray-600">프로필 정보를 불러오는 중입니다...</p>
+          </div>
+        )}
+
+        {!isEditMode && profile && (
+          <div className="space-y-6">
+            {console.log('보기 모드 렌더링, profile:', profile)}
+            {/* Header with Edit Button */}
+            <div className="bg-white shadow-lg rounded-lg p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">내 프로필</h1>
+                  {profile.isPreTherapist && (
+                    <span className="inline-block mt-2 px-4 py-1.5 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                      예비 치료사
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    if (hasPendingUpdate) {
+                      alert('프로필 수정 요청이 승인 대기 중입니다. 승인 후 다시 수정할 수 있습니다.')
+                      return
+                    }
+                    setIsEditMode(true)
+                    setCurrentStep(1)
+                  }}
+                  disabled={hasPendingUpdate}
+                  className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  프로필 수정
+                </button>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+              <div className="border-b border-gray-200">
+                <nav className="-mb-px flex">
+                  <button
+                    onClick={() => setActiveTab('info')}
+                    className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === 'info'
+                        ? 'border-green-500 text-green-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    기본 정보
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('education')}
+                    className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === 'education'
+                        ? 'border-green-500 text-green-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    학력
+                  </button>
+                  {!profile.isPreTherapist && (
+                    <>
+                      <button
+                        onClick={() => setActiveTab('certifications')}
+                        className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
+                          activeTab === 'certifications'
+                            ? 'border-green-500 text-green-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        자격증
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('experience')}
+                        className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
+                          activeTab === 'experience'
+                            ? 'border-green-500 text-green-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        경력
+                      </button>
+                    </>
+                  )}
+                </nav>
+              </div>
+
+              <div className="p-6">
+                {/* 기본 정보 탭 */}
+                {activeTab === 'info' && (
+                  <div className="space-y-6">
+                    {/* Basic Info Section */}
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">기본 정보</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500 mb-1">이름</label>
+                          <p className="text-lg text-gray-900">{profile.user.name}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500 mb-1">이메일</label>
+                          <p className="text-lg text-gray-900">{profile.user.email}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500 mb-1">성별</label>
+                          <p className="text-lg text-gray-900">{profile.gender === 'MALE' ? '남성' : profile.gender === 'FEMALE' ? '여성' : '미입력'}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500 mb-1">생년</label>
+                          <p className="text-lg text-gray-900">{profile.birthYear ? `${profile.birthYear}년생` : '미입력'}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500 mb-1">전화번호</label>
+                          <p className="text-lg text-gray-900">{profile.user.phone || '미입력'}</p>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-500 mb-1">주소</label>
+                          <p className="text-lg text-gray-900">{profile.address || '미입력'}</p>
+                          {profile.addressDetail && <p className="text-sm text-gray-600 mt-1">{profile.addressDetail}</p>}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Professional Info Section */}
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">전문 정보</h2>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500 mb-2">치료 전문 분야</label>
+                          <div className="flex flex-wrap gap-2">
+                            {profile.specialties && profile.specialties.length > 0 ? (
+                              profile.specialties.map((specialty) => (
+                                <span key={specialty} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                                  {THERAPY_TYPES.find(t => t.value === specialty)?.label || specialty}
+                                </span>
+                              ))
+                            ) : (
+                              <p className="text-gray-400 text-sm">미등록</p>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500 mb-2">아이 나이 범위</label>
+                          <div className="flex flex-wrap gap-2">
+                            {profile.childAgeRanges && profile.childAgeRanges.length > 0 ? (
+                              profile.childAgeRanges.map((range) => (
+                                <span key={range} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                                  {CHILD_AGE_RANGES.find(r => r.value === range)?.label || range}
+                                </span>
+                              ))
+                            ) : (
+                              <p className="text-gray-400 text-sm">미등록</p>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500 mb-2">서비스 가능 지역</label>
+                          <div className="flex flex-wrap gap-2">
+                            {profile.serviceAreas && profile.serviceAreas.length > 0 ? (
+                              profile.serviceAreas.map((area) => (
+                                <span key={area} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                                  {getServiceAreaLabel(area)}
+                                </span>
+                              ))
+                            ) : (
+                              <p className="text-gray-400 text-sm">미등록</p>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500 mb-1">세션 비용 (50분 기준)</label>
+                          <p className="text-lg text-gray-900">{profile.sessionFee?.toLocaleString()}원</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 학력 탭 */}
+                {activeTab === 'education' && (
+                  <div className="space-y-4">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">학력</h2>
+                    {profile.educations && profile.educations.length > 0 ? (
+                      <div className="space-y-4">
+                        {profile.educations.map((edu, index) => (
+                          <div key={index} className="border-l-4 border-green-500 pl-4 py-3 bg-gray-50 rounded-r">
+                            <h3 className="font-bold text-lg text-gray-900">
+                              {DEGREE_TYPES.find(d => d.value === edu.degree)?.label || edu.degree}
+                            </h3>
+                            <p className="text-gray-700 mt-1">{edu.school} - {edu.major}</p>
+                            <p className="text-sm text-gray-500 mt-1">{edu.graduationYear} 졸업</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-center py-8">등록된 학력 정보가 없습니다.</p>
+                    )}
+                  </div>
+                )}
+
+                {/* 자격증 탭 */}
+                {activeTab === 'certifications' && !profile.isPreTherapist && (
+                  <div className="space-y-4">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">자격증</h2>
+                    {profile.certifications && profile.certifications.length > 0 ? (
+                      <div className="space-y-4">
+                        {profile.certifications.map((cert, index) => (
+                          <div key={index} className="border-l-4 border-blue-500 pl-4 py-3 bg-gray-50 rounded-r">
+                            <h3 className="font-bold text-lg text-gray-900">{cert.name}</h3>
+                            <p className="text-gray-700 mt-1">{cert.issuingOrganization}</p>
+                            <p className="text-sm text-gray-500 mt-1">{new Date(cert.issueDate).toLocaleDateString('ko-KR')}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-center py-8">등록된 자격증 정보가 없습니다.</p>
+                    )}
+                  </div>
+                )}
+
+                {/* 경력 탭 */}
+                {activeTab === 'experience' && !profile.isPreTherapist && (
+                  <div className="space-y-4">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">경력</h2>
+                    {profile.experiences && profile.experiences.length > 0 ? (
+                      <div className="space-y-4">
+                        {profile.experiences.map((exp, index) => (
+                          <div key={index} className="border-l-4 border-purple-500 pl-4 py-3 bg-gray-50 rounded-r">
+                            <h3 className="font-bold text-lg text-gray-900">
+                              {exp.employmentType === 'INSTITUTION' ? '기관' : '프리랜서'} - {THERAPY_TYPES.find(t => t.value === exp.specialty)?.label}
+                            </h3>
+                            {exp.institutionName && <p className="text-gray-700 mt-1">{exp.institutionName}</p>}
+                            <p className="text-sm text-gray-500 mt-1">
+                              {new Date(exp.startDate).toLocaleDateString('ko-KR')} - {exp.endDate ? new Date(exp.endDate).toLocaleDateString('ko-KR') : '현재'}
+                            </p>
+                            {exp.description && <p className="text-gray-600 mt-2">{exp.description}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-center py-8">등록된 경력 정보가 없습니다.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Mode - Form */}
+        {isEditMode && (
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           {/* Progress Bar */}
           <div className="bg-slate-800 p-6">
-            <h1 className="text-2xl font-bold text-white mb-4">프로필 수정</h1>
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-2xl font-bold text-white">프로필 수정</h1>
+              <button
+                onClick={() => {
+                  if (confirm('수정을 취소하시겠습니까? 변경사항이 저장되지 않습니다.')) {
+                    setIsEditMode(false)
+                    setCurrentStep(1)
+                  }
+                }}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
+              >
+                취소
+              </button>
+            </div>
             <div className="relative flex justify-between items-center px-8 mb-4">
               {/* 연결선 */}
               <div className="absolute left-0 right-0 top-1/2 h-1 bg-white/30 -translate-y-1/2" style={{ left: 'calc(2rem + 28px)', right: 'calc(2rem + 28px)' }}></div>
@@ -1025,6 +1329,7 @@ export default function TherapistProfilePage() {
             </div>
           </div>
         </div>
+        )}
       </main>
     </div>
   )
