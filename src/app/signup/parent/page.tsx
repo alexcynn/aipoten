@@ -299,7 +299,13 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={addChild}
-                  className="px-3 py-1 text-sm bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                  className="px-3 py-1 text-sm rounded-md transition-colors"
+                  style={{
+                    backgroundColor: '#386646',
+                    color: '#FFFFFF'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#193149'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
                 >
                   + 아이 추가
                 </button>
@@ -395,7 +401,18 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-aipoten-green hover:bg-aipoten-navy focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-aipoten-green disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: isLoading ? '#386646' : '#386646',
+                color: '#FFFFFF',
+                opacity: isLoading ? 0.5 : 1
+              }}
+              onMouseEnter={(e) => {
+                if (!isLoading) e.currentTarget.style.backgroundColor = '#193149'
+              }}
+              onMouseLeave={(e) => {
+                if (!isLoading) e.currentTarget.style.backgroundColor = '#386646'
+              }}
             >
               {isLoading ? '가입 중...' : '회원가입'}
             </button>

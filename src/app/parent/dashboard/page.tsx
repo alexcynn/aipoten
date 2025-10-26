@@ -370,7 +370,22 @@ export default function ParentDashboardPage() {
                   </h2>
                   <button
                     onClick={() => setIsEditModalOpen(true)}
-                    className="px-3 py-1 text-sm text-aipoten-green border border-aipoten-green rounded-md hover:bg-aipoten-green hover:text-white transition-colors"
+                    className="px-3 py-1 text-sm rounded-md transition-colors"
+                    style={{
+                      color: '#386646',
+                      borderColor: '#386646',
+                      borderWidth: '1px',
+                      borderStyle: 'solid',
+                      backgroundColor: 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#386646'
+                      e.currentTarget.style.color = '#FFFFFF'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                      e.currentTarget.style.color = '#386646'
+                    }}
                   >
                     편집
                   </button>
@@ -447,7 +462,13 @@ export default function ParentDashboardPage() {
                         </p>
                         <Link
                           href="/parent/assessments/new"
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-aipoten-green hover:bg-aipoten-navy"
+                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md transition-colors"
+                          style={{
+                            backgroundColor: '#386646',
+                            color: '#FFFFFF'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#193149'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
                         >
                           첫 발달체크 시작하기
                         </Link>
@@ -647,7 +668,13 @@ export default function ParentDashboardPage() {
                         <p className="text-gray-600 mb-4">아직 추천 영상이 없습니다.</p>
                         <Link
                           href="/videos"
-                          className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                          className="inline-flex items-center px-4 py-2 rounded-md transition-colors"
+                          style={{
+                            backgroundColor: '#386646',
+                            color: '#FFFFFF'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#193149'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
                         >
                           전체 영상 보러가기
                         </Link>
@@ -942,7 +969,13 @@ export default function ParentDashboardPage() {
                       </p>
                       <Link
                         href="/parent/therapists?type=therapy"
-                        className="inline-flex items-center px-6 py-3 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors font-medium"
+                        className="inline-flex items-center px-6 py-3 rounded-md transition-colors font-medium"
+                        style={{
+                          backgroundColor: '#386646',
+                          color: '#FFFFFF'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#193149'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
                       >
                         전문 치료사 검색하기 →
                       </Link>
@@ -1023,7 +1056,22 @@ export default function ParentDashboardPage() {
                                   </div>
                                   <Link
                                     href={`/parent/bookings/${booking.id}`}
-                                    className="ml-3 px-3 py-1 bg-white text-aipoten-green border border-aipoten-green rounded-md hover:bg-aipoten-green hover:text-white transition-colors text-sm"
+                                    className="ml-3 px-3 py-1 rounded-md transition-colors text-sm"
+                                    style={{
+                                      color: '#386646',
+                                      borderColor: '#386646',
+                                      borderWidth: '1px',
+                                      borderStyle: 'solid',
+                                      backgroundColor: '#FFFFFF'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.backgroundColor = '#386646'
+                                      e.currentTarget.style.color = '#FFFFFF'
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.backgroundColor = '#FFFFFF'
+                                      e.currentTarget.style.color = '#386646'
+                                    }}
                                   >
                                     상세
                                   </Link>
@@ -1071,7 +1119,22 @@ export default function ParentDashboardPage() {
                                   </div>
                                   <Link
                                     href={`/parent/bookings/${booking.id}`}
-                                    className="ml-3 px-3 py-1 bg-white text-aipoten-green border border-aipoten-green rounded-md hover:bg-aipoten-green hover:text-white transition-colors text-sm"
+                                    className="ml-3 px-3 py-1 rounded-md transition-colors text-sm"
+                                    style={{
+                                      color: '#386646',
+                                      borderColor: '#386646',
+                                      borderWidth: '1px',
+                                      borderStyle: 'solid',
+                                      backgroundColor: '#FFFFFF'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.backgroundColor = '#386646'
+                                      e.currentTarget.style.color = '#FFFFFF'
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.backgroundColor = '#FFFFFF'
+                                      e.currentTarget.style.color = '#386646'
+                                    }}
                                   >
                                     상세
                                   </Link>
@@ -1144,7 +1207,13 @@ export default function ParentDashboardPage() {
                     <div className="space-y-4">
                       <Link
                         href="/parent/sessions/schedule"
-                        className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                        className="inline-flex items-center px-4 py-2 rounded-md transition-colors"
+                        style={{
+                          backgroundColor: '#386646',
+                          color: '#FFFFFF'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#193149'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
                       >
                         일정 확인하기
                       </Link>

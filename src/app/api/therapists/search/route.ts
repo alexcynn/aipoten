@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma'
  * 부모가 치료사를 검색하는 API
  *
  * Query Parameters:
+ * - type: 검색 유형 ("consultation" - 언어 컨설팅, "therapy" - 홈티)
  * - specialty: 전문 분야 (예: "SPEECH_THERAPY", "SENSORY_INTEGRATION")
  * - serviceArea: 서비스 지역 (예: "GANGNAM", "SEOCHO")
  * - childAgeRange: 아이 연령 범위 (예: "AGE_0_12", "AGE_13_24")
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
 
     // 검색 파라미터
+    const type = searchParams.get('type')
     const specialtyParam = searchParams.get('specialty')
     const serviceAreaParam = searchParams.get('serviceArea')
     const childAgeRangeParam = searchParams.get('childAgeRange')
@@ -43,6 +45,7 @@ export async function GET(request: NextRequest) {
     const childAgeRanges = childAgeRangeParam ? childAgeRangeParam.split(',').filter(Boolean) : []
 
     console.log('📥 치료사 검색 요청:', {
+      type,
       specialties,
       serviceAreas,
       childAgeRanges,
@@ -60,6 +63,11 @@ export async function GET(request: NextRequest) {
     // 기본 조회 조건: 승인된 치료사만
     const where: any = {
       approvalStatus: 'APPROVED'
+    }
+
+    // 언어 컨설팅 검색인 경우 권한이 있는 치료사만 필터링
+    if (type === 'consultation') {
+      where.canDoConsultation = true
     }
 
     // AND 조건들을 담을 배열

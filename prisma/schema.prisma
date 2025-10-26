@@ -381,6 +381,7 @@ model TherapistProfile {
   serviceAreas    String?  // JSON 배열: ["GANGNAM", "SEOCHO"]
   sessionFee      Int?     // 50분 기준 상담료 (원)
   isPreTherapist  Boolean  @default(false) // 예비 치료사 여부 (졸업 전)
+  canDoConsultation Boolean @default(false) // 언어 컨설팅 수행 가능 여부
 
   // 계좌 정보
   bank            String?  // 은행명

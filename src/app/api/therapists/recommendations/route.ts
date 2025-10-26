@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 발달체크 결과 조회
-    const assessment = await prisma.assessment.findUnique({
+    const assessment = await prisma.developmentAssessment.findUnique({
       where: { id: assessmentId },
       include: {
         results: true,
@@ -47,13 +47,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // 부모 권한 확인
+    // 부모 권한 확인 - Child는 userId로 User와 직접 연결되어 있음
     if (session.user.role === 'PARENT') {
-      const parent = await prisma.parentProfile.findUnique({
-        where: { userId: session.user.id },
-      })
-
-      if (!parent || assessment.child.parentId !== parent.id) {
+      if (assessment.child.userId !== session.user.id) {
         return NextResponse.json(
           { error: '권한이 없습니다.' },
           { status: 403 }

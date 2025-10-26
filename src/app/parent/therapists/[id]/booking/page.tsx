@@ -53,8 +53,11 @@ export default function BookingPage() {
   const [visitAddressDetail, setVisitAddressDetail] = useState('')
   const [parentNote, setParentNote] = useState('')
   const [userInfo, setUserInfo] = useState<any>(null)
+  const [depositName, setDepositName] = useState('')
+  const [depositDate, setDepositDate] = useState('')
+  const [systemSettings, setSystemSettings] = useState<any>(null)
 
-  // 사용자 정보 가져오기
+  // 사용자 정보 및 시스템 설정 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -68,12 +71,30 @@ export default function BookingPage() {
           if (data.addressDetail) {
             setVisitAddressDetail(data.addressDetail)
           }
+          // 입금자명 기본값 설정
+          if (data.name) {
+            setDepositName(data.name)
+          }
         }
       } catch (err) {
         console.error('사용자 정보 조회 실패:', err)
       }
     }
+
+    const fetchSystemSettings = async () => {
+      try {
+        const response = await fetch('/api/admin/system-settings')
+        if (response.ok) {
+          const data = await response.json()
+          setSystemSettings(data.settings)
+        }
+      } catch (err) {
+        console.error('시스템 설정 조회 실패:', err)
+      }
+    }
+
     fetchUserInfo()
+    fetchSystemSettings()
   }, [])
 
   // 자녀 목록 가져오기
@@ -179,6 +200,11 @@ export default function BookingPage() {
       return
     }
 
+    if (!depositName || !depositDate) {
+      setError('입금자명과 입금 예정일을 입력해주세요.')
+      return
+    }
+
     setIsLoading(true)
     setError('')
 
@@ -197,6 +223,8 @@ export default function BookingPage() {
           visitAddress,
           visitAddressDetail: visitAddressDetail || undefined,
           parentNote: parentNote || undefined,
+          depositName,
+          depositDate,
         }),
       })
 
@@ -250,39 +278,37 @@ export default function BookingPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-8">예약하기</h1>
 
         {/* 진행 단계 표시 */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-8 bg-slate-800 rounded-lg p-6 shadow-lg">
+          <div className="relative flex justify-between items-center px-8 mb-4">
+            {/* 배경 연결선 */}
+            <div className="absolute left-0 right-0 top-1/2 h-1 bg-white/30 -translate-y-1/2" style={{ left: 'calc(2rem + 28px)', right: 'calc(2rem + 28px)' }}></div>
+
+            {/* 진행된 연결선 */}
+            {step > 1 && (
+              <div className="absolute top-1/2 h-1 bg-green-500 -translate-y-1/2 transition-all duration-300" style={{
+                left: 'calc(2rem + 28px)',
+                width: step === 2 ? 'calc(50% - 2rem - 28px)' : 'calc(100% - 4rem - 56px)'
+              }}></div>
+            )}
+
+            {/* 단계 원들 */}
             {[1, 2, 3].map((s) => (
-              <div key={s} className="flex-1 flex items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    step >= s
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-200 text-gray-500'
-                  }`}
-                >
-                  {s}
-                </div>
-                {s < 3 && (
-                  <div
-                    className={`flex-1 h-1 mx-2 ${
-                      step > s ? 'bg-green-600' : 'bg-gray-200'
-                    }`}
-                  />
-                )}
+              <div
+                key={s}
+                className={`relative w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all leading-none z-10 ${
+                  step >= s
+                    ? 'bg-green-500 text-white border-green-500 shadow-lg'
+                    : 'bg-slate-800 text-white border-white/40'
+                }`}
+              >
+                {s}
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-2 text-sm">
-            <span className={step >= 1 ? 'text-green-600 font-medium' : 'text-gray-500'}>
-              날짜/시간
-            </span>
-            <span className={step >= 2 ? 'text-green-600 font-medium' : 'text-gray-500'}>
-              예약 정보
-            </span>
-            <span className={step >= 3 ? 'text-green-600 font-medium' : 'text-gray-500'}>
-              확인
-            </span>
+          <div className="flex justify-between px-4">
+            <span className={`text-sm text-left flex-1 ${step >= 1 ? 'text-green-400 font-medium' : 'text-white/70'}`}>날짜/시간</span>
+            <span className={`text-sm text-center flex-1 ${step >= 2 ? 'text-green-400 font-medium' : 'text-white/70'}`}>예약 정보</span>
+            <span className={`text-sm text-right flex-1 ${step >= 3 ? 'text-green-400 font-medium' : 'text-white/70'}`}>확인</span>
           </div>
         </div>
 
@@ -602,6 +628,65 @@ export default function BookingPage() {
                       <span>최종 금액</span>
                       <span>₩{finalFee.toLocaleString()}</span>
                     </div>
+                  </div>
+                </div>
+
+                {/* 입금 안내 */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-900 mb-3 flex items-center">
+                    <span className="mr-2">🏦</span>
+                    입금 계좌 안내
+                  </h3>
+                  {systemSettings ? (
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center">
+                        <span className="text-blue-700 font-medium w-24">은행:</span>
+                        <span className="text-blue-900">{systemSettings.bankName || '-'}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-blue-700 font-medium w-24">계좌번호:</span>
+                        <span className="text-blue-900 font-mono">{systemSettings.accountNumber || '-'}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-blue-700 font-medium w-24">예금주:</span>
+                        <span className="text-blue-900">{systemSettings.accountHolder || '-'}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-blue-700">계좌 정보를 불러오는 중...</p>
+                  )}
+                </div>
+
+                {/* 입금 정보 입력 */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      입금자명 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={depositName}
+                      onChange={(e) => setDepositName(e.target.value)}
+                      placeholder="입금하실 분의 성함"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      required
+                    />
+                    <p className="text-xs text-gray-500 mt-1">입금자명이 다를 경우 입금 확인이 지연될 수 있습니다.</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      입금 예정일 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={depositDate}
+                      onChange={(e) => setDepositDate(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      required
+                    />
+                    <p className="text-xs text-gray-500 mt-1">입금 예정일을 선택해주세요. 예정일 이후 입금 확인이 진행됩니다.</p>
                   </div>
                 </div>
               </div>

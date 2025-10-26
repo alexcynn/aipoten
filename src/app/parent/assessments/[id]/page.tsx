@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 
 interface AssessmentResult {
   id: string
@@ -156,6 +157,27 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
     )
   }
 
+  const getRadarChartData = () => {
+    if (!assessment || !assessment.results) return []
+
+    // 발달 수준을 4점 척도로 변환
+    const levelToScore = (level: string) => {
+      switch (level) {
+        case 'ADVANCED': return 4      // 빠른 수준
+        case 'NORMAL': return 3         // 또래 수준
+        case 'NEEDS_TRACKING': return 2 // 추적검사 요망
+        case 'NEEDS_ASSESSMENT': return 1 // 심화평가 권고
+        default: return 0
+      }
+    }
+
+    return assessment.results.map(result => ({
+      category: CATEGORY_LABELS[result.category] || result.category,
+      score: levelToScore(result.level),
+      fullMark: 4
+    }))
+  }
+
   if (status === 'loading' || isLoading) {
     return (
       <div className="min-h-screen bg-neutral-light flex items-center justify-center">
@@ -229,6 +251,61 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
                 </div>
                 <div className="text-sm text-gray-500 mb-4">종합 발달 수준</div>
                 <p className="text-gray-700">{interpretation.description}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Radar Chart */}
+          <div className="bg-white shadow rounded-lg mb-6">
+            <div className="px-4 py-5 sm:p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-6 text-center">발달 영역 종합 차트</h3>
+              <div className="flex justify-center">
+                <ResponsiveContainer width="100%" height={400}>
+                  <RadarChart data={getRadarChartData()}>
+                    <PolarGrid stroke="#e5e7eb" />
+                    <PolarAngleAxis
+                      dataKey="category"
+                      tick={{ fill: '#374151', fontSize: 14, fontWeight: 500 }}
+                    />
+                    <PolarRadiusAxis
+                      angle={90}
+                      domain={[0, 4]}
+                      tick={{ fill: '#9ca3af', fontSize: 12 }}
+                      ticks={[0, 1, 2, 3, 4]}
+                    />
+                    <Radar
+                      name="발달 점수"
+                      dataKey="score"
+                      stroke="#10b981"
+                      fill="#10b981"
+                      fillOpacity={0.6}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '0.5rem',
+                        padding: '0.75rem'
+                      }}
+                      formatter={(value: number) => {
+                        const levelText = value === 4 ? '빠른 수준' :
+                                        value === 3 ? '또래 수준' :
+                                        value === 2 ? '추적검사 요망' :
+                                        value === 1 ? '심화평가 권고' : '-'
+                        return [`${value}점 (${levelText})`, '발달 수준']
+                      }}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-4 text-center">
+                <p className="text-sm text-gray-600 mb-3">각 영역의 발달 수준을 시각적으로 확인할 수 있습니다.</p>
+                <div className="flex justify-center gap-4 text-xs text-gray-500">
+                  <span>4점: 빠른 수준</span>
+                  <span>3점: 또래 수준</span>
+                  <span>2점: 추적검사 요망</span>
+                  <span>1점: 심화평가 권고</span>
+                </div>
               </div>
             </div>
           </div>

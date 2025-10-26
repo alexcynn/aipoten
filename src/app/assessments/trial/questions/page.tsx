@@ -197,8 +197,11 @@ function TrialQuestionsContent() {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2.5">
                 <div
-                  className="bg-brand-accent h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
+                  className="h-2.5 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${progress}%`,
+                    backgroundColor: '#98C15E'
+                  }}
                 ></div>
               </div>
             </div>

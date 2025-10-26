@@ -84,6 +84,7 @@ interface TherapistProfile {
   profileUpdateNote?: string
   profileUpdateApprovedAt?: string
   pendingUpdateRequest?: PendingUpdateRequest | null
+  canDoConsultation?: boolean
   createdAt: string
 }
 
@@ -310,6 +311,40 @@ export default function AdminTherapistsPage() {
     } catch (error) {
       console.error('치료사 반려 중 오류 발생:', error)
       alert('반려 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleToggleConsultation = async (therapistId: string, currentValue: boolean) => {
+    const newValue = !currentValue
+    const message = newValue
+      ? '이 치료사에게 언어 컨설팅 권한을 부여하시겠습니까?'
+      : '이 치료사의 언어 컨설팅 권한을 제거하시겠습니까?'
+
+    if (!confirm(message)) return
+
+    try {
+      const response = await fetch(`/api/admin/therapists/${therapistId}/update-consultation-permission`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ canDoConsultation: newValue }),
+      })
+
+      if (response.ok) {
+        alert('언어 컨설팅 권한이 변경되었습니다.')
+        await fetchTherapists()
+        // Update the selected therapist state
+        if (selectedTherapist && selectedTherapist.id === therapistId) {
+          setSelectedTherapist({ ...selectedTherapist, canDoConsultation: newValue })
+        }
+      } else {
+        const data = await response.json()
+        alert(data.error || '권한 변경에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('권한 변경 중 오류 발생:', error)
+      alert('권한 변경 중 오류가 발생했습니다.')
     }
   }
 
@@ -596,6 +631,9 @@ export default function AdminTherapistsPage() {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       상태
                     </th>
+                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      언어 컨설팅
+                    </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       가입일
                     </th>
@@ -640,6 +678,7 @@ export default function AdminTherapistsPage() {
                         <option value="BEHAVIORAL_THERAPY">행동치료</option>
                       </select>
                     </th>
+                    <th scope="col" className="px-6 py-2"></th>
                     <th scope="col" className="px-6 py-2"></th>
                     <th scope="col" className="px-6 py-2"></th>
                     <th scope="col" className="px-6 py-2"></th>
@@ -691,6 +730,15 @@ export default function AdminTherapistsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(therapist.approvalStatus)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          therapist.canDoConsultation
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {therapist.canDoConsultation ? '가능' : '불가'}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(therapist.createdAt).toLocaleDateString('ko-KR')}
@@ -880,6 +928,20 @@ export default function AdminTherapistsPage() {
                           {selectedTherapist.pendingUpdateRequest && selectedTherapist.address !== selectedTherapist.pendingUpdateRequest.requestData.address && (
                             <p className="mt-1 text-sm text-orange-900 font-medium">→ {selectedTherapist.pendingUpdateRequest.requestData.address}</p>
                           )}
+                        </div>
+                        <div className="col-span-2">
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedTherapist.canDoConsultation || false}
+                              onChange={() => handleToggleConsultation(selectedTherapist.id, selectedTherapist.canDoConsultation || false)}
+                              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                            />
+                            <span className="text-sm font-medium text-gray-700">언어 컨설팅 권한 부여</span>
+                          </label>
+                          <p className="ml-6 mt-1 text-xs text-gray-500">
+                            이 옵션을 활성화하면 부모가 언어 컨설팅 검색 시 이 치료사를 찾을 수 있습니다.
+                          </p>
                         </div>
                       </div>
                     </div>

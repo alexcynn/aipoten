@@ -75,6 +75,8 @@ function AssessmentContent() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [completionMessage, setCompletionMessage] = useState<string | null>(null)
+  const [categoryCompleted, setCategoryCompleted] = useState<string | null>(null)
+  const [showCategoryTransition, setShowCategoryTransition] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -239,19 +241,35 @@ function AssessmentContent() {
     return questionGroups.size
   }
 
+  const getActualCategoryOrder = () => {
+    // 질문의 실제 order 기준으로 카테고리 순서 결정
+    const categories = allQuestions
+      .filter(q => q.level === 'Q1' && !q.isWarning)
+      .sort((a, b) => a.order - b.order)
+      .map(q => q.category)
+
+    // 중복 제거하면서 순서 유지
+    return Array.from(new Set(categories))
+  }
+
   const getCategoryProgress = () => {
     const progress: Record<string, { completed: number; total: number }> = {}
+    const orderedCategories = getActualCategoryOrder()
 
-    CATEGORY_ORDER.forEach(category => {
+    orderedCategories.forEach(category => {
       const categoryQuestions = allQuestions.filter(q => q.category === category && q.level === 'Q1' && !q.isWarning)
+
+      // 각 Q1 그룹(questionNumber)에서 Q1, Q2, Q3 중 하나라도 응답이 있으면 완료로 간주
       const completedInCategory = categoryQuestions.filter(q1 => {
-        return responses.some(r =>
-          r.questionId === q1.id ||
-          responses.some(r2 => {
-            const q2 = allQuestions.find(q => q.questionNumber === q1.questionNumber && q.category === q1.category && q.level === 'Q2')
-            const q3 = allQuestions.find(q => q.questionNumber === q1.questionNumber && q.category === q1.category && q.level === 'Q3')
-            return (q2 && r2.questionId === q2.id) || (q3 && r2.questionId === q3.id)
-          })
+        // 해당 Q1 그룹의 모든 질문 (Q1, Q2, Q3) 찾기
+        const groupQuestions = allQuestions.filter(q =>
+          q.category === q1.category &&
+          q.questionNumber === q1.questionNumber
+        )
+
+        // 이 그룹의 질문 중 하나라도 응답이 있으면 완료
+        return groupQuestions.some(gq =>
+          responses.some(r => r.questionId === gq.id)
         )
       }).length
 
@@ -294,10 +312,8 @@ function AssessmentContent() {
       score,
     }
 
-    setResponses(prev => {
-      const filtered = prev.filter(r => r.questionId !== currentQuestion.id)
-      return [...filtered, newResponse]
-    })
+    const updatedResponses = [...responses.filter(r => r.questionId !== currentQuestion.id), newResponse]
+    setResponses(updatedResponses)
 
     // 다음 질문으로 이동 로직
     setTimeout(() => {
@@ -349,14 +365,26 @@ function AssessmentContent() {
       }
 
       if (shouldMoveToNext) {
-        setCurrentQuestionIndex(targetIndex)
-
         // 다음 질문의 카테고리 확인
         const updatedPath = getQuestionsPath()
         const nextQuestion = updatedPath[targetIndex]
+
+        // 카테고리가 변경되는지 확인
         if (nextQuestion && nextQuestion.category !== prevCategory) {
-          checkCategoryCompletion(prevCategory, nextQuestion.category)
+          // 현재 카테고리가 완료되었는지 확인
+          const progress = getCategoryProgress()
+          const categoryProgress = progress[prevCategory]
+
+          if (categoryProgress && categoryProgress.completed === categoryProgress.total) {
+            // 카테고리 완료 - 전환 화면 표시
+            setCategoryCompleted(prevCategory)
+            setShowCategoryTransition(true)
+            setCurrentQuestionIndex(targetIndex)
+            return
+          }
         }
+
+        setCurrentQuestionIndex(targetIndex)
       }
     }, 300)
   }
@@ -407,8 +435,43 @@ function AssessmentContent() {
     }
   }
 
+  const handleContinueToNextCategory = () => {
+    setShowCategoryTransition(false)
+    setCategoryCompleted(null)
+  }
+
+  const getNextCategoryLabel = () => {
+    if (!categoryCompleted) return null
+    const orderedCategories = getActualCategoryOrder()
+    const currentIndex = orderedCategories.indexOf(categoryCompleted)
+    if (currentIndex === -1 || currentIndex === orderedCategories.length - 1) return null
+    const nextCategory = orderedCategories[currentIndex + 1]
+    return CATEGORY_LABELS[nextCategory] || null
+  }
+
+  const isLastCategory = () => {
+    if (!categoryCompleted) return false
+    const orderedCategories = getActualCategoryOrder()
+    return orderedCategories.indexOf(categoryCompleted) === orderedCategories.length - 1
+  }
+
   const handleComplete = () => {
-    // TODO: 경고 질문 처리 추가
+    // 마지막 카테고리 확인
+    const currentQuestion = getCurrentQuestion()
+    if (currentQuestion) {
+      const currentCategory = currentQuestion.category
+      const orderedCategories = getActualCategoryOrder()
+      const lastCategory = orderedCategories[orderedCategories.length - 1]
+
+      if (currentCategory === lastCategory) {
+        // 마지막 카테고리 완료 화면 표시
+        setCategoryCompleted(currentCategory)
+        setShowCategoryTransition(true)
+        return
+      }
+    }
+
+    // 경고 질문이 없으면 바로 제출
     handleSubmit()
   }
 
@@ -527,14 +590,17 @@ function AssessmentContent() {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3">
                       <div
-                        className="bg-aipoten-green h-3 rounded-full transition-all duration-300"
-                        style={{ width: `${progress}%` }}
+                        className="h-3 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${progress}%`,
+                          backgroundColor: '#386646'
+                        }}
                       ></div>
                     </div>
 
                     {/* Category Progress Indicators */}
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {CATEGORY_ORDER.map(category => {
+                      {getActualCategoryOrder().map(category => {
                         const categoryProgress = getCategoryProgress()[category]
                         if (!categoryProgress || categoryProgress.total === 0) return null
 
@@ -569,8 +635,44 @@ function AssessmentContent() {
                   </div>
                 )}
 
-                {/* Current Question */}
-                {currentQuestion ? (
+                {/* Category Transition Screen */}
+                {showCategoryTransition && categoryCompleted ? (
+                  <div className="text-center py-12">
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+                      style={{ backgroundColor: '#10b981' }}>
+                      <span className="text-white text-4xl">✓</span>
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                      {CATEGORY_LABELS[categoryCompleted]} 영역 완료!
+                    </h2>
+                    <p className="text-gray-600 mb-8 text-lg">
+                      {isLastCategory()
+                        ? '모든 발달 영역 평가를 완료하셨습니다!'
+                        : `다음은 ${getNextCategoryLabel()} 영역입니다.`
+                      }
+                    </p>
+                    <button
+                      onClick={isLastCategory() ? handleSubmit : handleContinueToNextCategory}
+                      disabled={isSubmitting}
+                      className="px-8 py-4 text-lg font-medium rounded-lg shadow-lg transition-all disabled:opacity-50"
+                      style={{
+                        backgroundColor: '#386646',
+                        color: '#FFFFFF'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSubmitting) e.currentTarget.style.backgroundColor = '#193149'
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSubmitting) e.currentTarget.style.backgroundColor = '#386646'
+                      }}
+                    >
+                      {isLastCategory()
+                        ? (isSubmitting ? '저장 중...' : '발달체크 결과 보기')
+                        : `${getNextCategoryLabel()} 발달체크 계속하기`
+                      }
+                    </button>
+                  </div>
+                ) : currentQuestion ? (
                   <div className="space-y-6">
                     <div className="bg-gray-50 p-6 rounded-lg">
                       <div className="flex items-center justify-between mb-4">
