@@ -35,6 +35,8 @@ model User {
   matchingRequests     MatchingRequest[]
   consultations        Consultation[]       // Phase 2 (MatchingRequest 관련)
   bookings             Booking[]            @relation("ParentBookings") // Phase 4 예약
+  refundRequests       RefundRequest[]      // 환불 요청
+  processedRefunds     RefundRequest[]      @relation("ProcessedRefunds") // 처리한 환불 요청
 
   @@map("users")
 }
@@ -694,13 +696,20 @@ enum SessionType {
 
 // 예약 상태 (Phase 4)
 enum BookingStatus {
-  PENDING_CONFIRMATION  // 결제 완료, 치료사 확인 대기
-  CONFIRMED             // 치료사 확인 완료
-  IN_PROGRESS           // 세션 진행 중
-  COMPLETED             // 세션 완료
+  PENDING_PAYMENT       // 결제대기
+  BOOKING_IN_PROGRESS   // 예약 중 (결제 완료, 치료사 확인 대기)
+  CONFIRMED             // 예약 확인 (치료사 확인 완료)
+  SESSION_COMPLETED     // 세션 완료
+  SETTLEMENT_COMPLETED  // 정산 완료
+  REFUNDED              // 환불
   CANCELLED             // 취소됨
-  NO_SHOW               // 노쇼
-  REJECTED              // 치료사가 거절
+
+  // 레거시 상태 (하위 호환성)
+  PENDING_CONFIRMATION  // -> BOOKING_IN_PROGRESS
+  IN_PROGRESS           // -> CONFIRMED
+  COMPLETED             // -> SESSION_COMPLETED
+  NO_SHOW               // -> CANCELLED
+  REJECTED              // -> CANCELLED
 }
 
 // 예약 (상담/치료) - Phase 4
@@ -758,9 +767,17 @@ model Booking {
   paymentId             String?             // 결제 ID (토스페이먼츠 등)
   paidAt                DateTime?
 
+  // 정산 정보
+  settlementAmount      Int?                // 치료사 정산 금액
+  settledAt             DateTime?           // 정산 완료 시간
+  settlementNote        String?             // 정산 메모
+
   // 메모
   parentNote            String?             // 부모 메모 (특이사항 등)
   therapistNote         String?             // 치료사 메모
+
+  // 관계
+  refundRequests        RefundRequest[]     // 환불 요청 내역
 
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
@@ -771,4 +788,80 @@ model Booking {
   @@index([status])
   @@index([scheduledAt])
   @@map("bookings")
+}
+
+// 환불 요청
+enum RefundRequestStatus {
+  PENDING   // 대기 중
+  APPROVED  // 승인됨
+  REJECTED  // 거부됨
+}
+
+model RefundRequest {
+  id                String              @id @default(cuid())
+
+  // 관계
+  bookingId         String
+  booking           Booking             @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  requestedBy       String              // 부모 사용자 ID
+  requestedByUser   User                @relation(fields: [requestedBy], references: [id], onDelete: Cascade)
+
+  // 요청 정보
+  reason            String              // 환불 사유
+  requestedAmount   Int                 // 요청 환불 금액
+
+  status            RefundRequestStatus @default(PENDING)
+
+  // 관리자 처리
+  processedBy       String?             // 처리한 관리자 ID
+  processedByUser   User?               @relation("ProcessedRefunds", fields: [processedBy], references: [id], onDelete: SetNull)
+  processedAt       DateTime?
+
+  approvedAmount    Int?                // 승인된 환불 금액
+  rejectionReason   String?             // 거부 사유
+  adminNote         String?             // 관리자 메모
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([bookingId])
+  @@index([requestedBy])
+  @@index([status])
+  @@map("refund_requests")
+}
+
+// 시스템 설정 (아이포텐 계좌 정보 및 기본 요금)
+model SystemSettings {
+  id                  String   @id @default("system")
+
+  // 아이포텐 입금 계좌 정보
+  bankName            String?  // 은행명
+  accountNumber       String?  // 계좌번호
+  accountHolder       String?  // 예금주
+
+  // 언어 컨설팅 기본 요금
+  consultationBaseFee Int?     @default(150000)
+
+  updatedAt           DateTime @updatedAt
+  updatedBy           String?  // 수정한 관리자 ID
+
+  @@map("system_settings")
+}
+
+// 발달 영역과 치료 분야 매핑 (치료사 추천용)
+model TherapyMapping {
+  id                   String              @id @default(cuid())
+  developmentCategory  DevelopmentCategory // 발달 영역 (GROSS_MOTOR, FINE_MOTOR, etc.)
+  therapyType          TherapyType         // 추천 치료 분야
+  priority             Int                 @default(0) // 우선순위 (낮을수록 높음)
+  isActive             Boolean             @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([developmentCategory, therapyType])
+  @@index([developmentCategory])
+  @@index([isActive])
+  @@map("therapy_mappings")
 }

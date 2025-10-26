@@ -15,7 +15,10 @@ import {
   Menu,
   X,
   LogOut,
-  ChevronLeft
+  ChevronLeft,
+  Settings,
+  MessageSquare,
+  Home
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -40,9 +43,12 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
     { href: '/admin/dashboard', label: '대시보드', icon: <LayoutDashboard size={20} /> },
     { href: '/admin/users', label: '사용자 관리', icon: <Users size={20} /> },
     { href: '/admin/therapists', label: '치료사 관리', icon: <UserCog size={20} /> },
-    { href: '/admin/bookings', label: '예약 관리', icon: <Calendar size={20} /> },
     { href: '/admin/children', label: '아이 프로필', icon: <Baby size={20} /> },
     { href: '/admin/assessments', label: '발달체크 현황', icon: <BarChart3 size={20} /> },
+    { href: '/admin/consultations', label: '언어 컨설팅', icon: <MessageSquare size={20} /> },
+    { href: '/admin/therapies', label: '홈티 관리', icon: <Home size={20} /> },
+    { href: '/admin/refunds', label: '환불 요청', icon: <Calendar size={20} /> },
+    { href: '/admin/settings', label: '시스템 설정', icon: <Settings size={20} /> },
   ]
 
   const isActive = (href: string) => {

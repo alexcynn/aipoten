@@ -24,9 +24,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
 
     // 검색 파라미터
-    const specialty = searchParams.get('specialty')
-    const serviceArea = searchParams.get('serviceArea')
-    const childAgeRange = searchParams.get('childAgeRange')
+    const specialtyParam = searchParams.get('specialty')
+    const serviceAreaParam = searchParams.get('serviceArea')
+    const childAgeRangeParam = searchParams.get('childAgeRange')
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const dayOfWeek = searchParams.get('dayOfWeek')
@@ -37,10 +37,15 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
 
+    // 다중 선택 필터를 배열로 변환
+    const specialties = specialtyParam ? specialtyParam.split(',').filter(Boolean) : []
+    const serviceAreas = serviceAreaParam ? serviceAreaParam.split(',').filter(Boolean) : []
+    const childAgeRanges = childAgeRangeParam ? childAgeRangeParam.split(',').filter(Boolean) : []
+
     console.log('📥 치료사 검색 요청:', {
-      specialty,
-      serviceArea,
-      childAgeRange,
+      specialties,
+      serviceAreas,
+      childAgeRanges,
       startDate,
       endDate,
       dayOfWeek,
@@ -57,25 +62,39 @@ export async function GET(request: NextRequest) {
       approvalStatus: 'APPROVED'
     }
 
-    // 전문 분야 필터
-    if (specialty) {
-      where.specialties = {
-        contains: specialty
-      }
+    // AND 조건들을 담을 배열
+    const andConditions: any[] = []
+
+    // 전문 분야 필터 (다중 선택 지원 - 선택된 것 중 하나라도 있으면 매칭)
+    if (specialties.length > 0) {
+      andConditions.push({
+        OR: specialties.map(specialty => ({
+          specialties: { contains: specialty }
+        }))
+      })
     }
 
-    // 서비스 지역 필터
-    if (serviceArea) {
-      where.serviceAreas = {
-        contains: serviceArea
-      }
+    // 서비스 지역 필터 (다중 선택 지원)
+    if (serviceAreas.length > 0) {
+      andConditions.push({
+        OR: serviceAreas.map(area => ({
+          serviceAreas: { contains: area }
+        }))
+      })
     }
 
-    // 아이 연령 범위 필터
-    if (childAgeRange) {
-      where.childAgeRanges = {
-        contains: childAgeRange
-      }
+    // 아이 연령 범위 필터 (다중 선택 지원)
+    if (childAgeRanges.length > 0) {
+      andConditions.push({
+        OR: childAgeRanges.map(range => ({
+          childAgeRanges: { contains: range }
+        }))
+      })
+    }
+
+    // AND 조건이 있으면 where에 추가
+    if (andConditions.length > 0) {
+      where.AND = andConditions
     }
 
     // 상담료 필터

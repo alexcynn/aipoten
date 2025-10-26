@@ -27,13 +27,26 @@ function TherapistsSearchPageContent() {
   const bookingType = searchParams.get('type') || 'therapy' // 'consultation' | 'therapy'
   const isConsultation = bookingType === 'consultation'
 
+  // URL 파라미터에서 자동 필터 읽기
+  const urlSpecialties = searchParams.get('specialties')
+  const urlAgeRange = searchParams.get('ageRange')
+  const isAutoFilter = searchParams.get('autoFilter') === 'true'
+
   const [therapists, setTherapists] = useState<Therapist[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // 필터 상태
-  const [specialty, setSpecialty] = useState(isConsultation ? 'SPEECH_THERAPY' : '')
-  const [serviceArea, setServiceArea] = useState('')
+  // 필터 상태 (다중 선택 지원)
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(() => {
+    if (isConsultation) return ['SPEECH_THERAPY']
+    if (urlSpecialties) return urlSpecialties.split(',').filter(Boolean)
+    return []
+  })
+  const [selectedServiceAreas, setSelectedServiceAreas] = useState<string[]>([])
+  const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>(() => {
+    if (urlAgeRange) return [urlAgeRange]
+    return []
+  })
   const [maxFee, setMaxFee] = useState('')
   const [dayOfWeek, setDayOfWeek] = useState('')
   const [timeRange, setTimeRange] = useState('')
@@ -46,8 +59,9 @@ function TherapistsSearchPageContent() {
 
     try {
       const params = new URLSearchParams()
-      if (specialty) params.append('specialty', specialty)
-      if (serviceArea) params.append('serviceArea', serviceArea)
+      if (selectedSpecialties.length > 0) params.append('specialty', selectedSpecialties.join(','))
+      if (selectedServiceAreas.length > 0) params.append('serviceArea', selectedServiceAreas.join(','))
+      if (selectedAgeRanges.length > 0) params.append('childAgeRange', selectedAgeRanges.join(','))
       if (maxFee) params.append('maxFee', maxFee)
       if (dayOfWeek) params.append('dayOfWeek', dayOfWeek)
       if (timeRange) params.append('timeRange', timeRange)
@@ -71,21 +85,51 @@ function TherapistsSearchPageContent() {
     fetchTherapists()
   }, [])
 
+  // 체크박스 토글 핸들러
+  const toggleSpecialty = (value: string) => {
+    if (isConsultation) return // 언어 컨설팅에서는 변경 불가
+    setSelectedSpecialties(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    )
+  }
+
+  const toggleServiceArea = (value: string) => {
+    setSelectedServiceAreas(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    )
+  }
+
+  const toggleAgeRange = (value: string) => {
+    setSelectedAgeRanges(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    )
+  }
+
   const specialtyOptions = [
-    { value: '', label: '전체' },
     { value: 'SPEECH_THERAPY', label: '언어치료' },
     { value: 'SENSORY_INTEGRATION', label: '감각통합' },
     { value: 'PLAY_THERAPY', label: '놀이치료' },
     { value: 'ART_THERAPY', label: '미술치료' },
     { value: 'MUSIC_THERAPY', label: '음악치료' },
+    { value: 'OCCUPATIONAL_THERAPY', label: '작업치료' },
+    { value: 'COGNITIVE_THERAPY', label: '인지치료' },
+    { value: 'BEHAVIORAL_THERAPY', label: '행동치료' },
   ]
 
   const areaOptions = [
-    { value: '', label: '전체' },
     { value: 'GANGNAM', label: '강남구' },
     { value: 'SEOCHO', label: '서초구' },
     { value: 'SONGPA', label: '송파구' },
     { value: 'GANGDONG', label: '강동구' },
+  ]
+
+  const ageRangeOptions = [
+    { value: 'AGE_0_12', label: '0-12개월' },
+    { value: 'AGE_13_24', label: '13-24개월' },
+    { value: 'AGE_25_36', label: '2-3세' },
+    { value: 'AGE_37_48', label: '3-4세' },
+    { value: 'AGE_49_60', label: '4-5세' },
+    { value: 'AGE_5_7', label: '5-7세' },
   ]
 
   const dayOfWeekOptions = [
@@ -119,101 +163,158 @@ function TherapistsSearchPageContent() {
               언어치료 전문가의 1회 방문 컨설팅을 예약하세요
             </p>
           )}
+          {isAutoFilter && (
+            <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
+              <p className="text-green-800">
+                ✅ 발달체크 결과를 바탕으로 추천 치료 분야가 자동으로 선택되었습니다.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* 검색 필터 */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-6">
+            {/* 전문 분야 (체크박스) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
                 전문 분야 {isConsultation && <span className="text-xs text-gray-500">(언어치료 고정)</span>}
               </label>
-              <select
-                value={specialty}
-                onChange={(e) => setSpecialty(e.target.value)}
-                disabled={isConsultation}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100 disabled:cursor-not-allowed"
-              >
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {specialtyOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
+                  <label
+                    key={option.value}
+                    className={`flex items-center space-x-2 p-2 border rounded-md cursor-pointer transition-colors ${
+                      selectedSpecialties.includes(option.value)
+                        ? 'bg-green-50 border-green-500'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    } ${isConsultation ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedSpecialties.includes(option.value)}
+                      onChange={() => toggleSpecialty(option.value)}
+                      disabled={isConsultation}
+                      className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span className="text-sm text-gray-700">{option.label}</span>
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
 
+            {/* 서비스 지역 (체크박스) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
                 서비스 지역
               </label>
-              <select
-                value={serviceArea}
-                onChange={(e) => setServiceArea(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              >
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {areaOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
+                  <label
+                    key={option.value}
+                    className={`flex items-center space-x-2 p-2 border rounded-md cursor-pointer transition-colors ${
+                      selectedServiceAreas.includes(option.value)
+                        ? 'bg-green-50 border-green-500'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedServiceAreas.includes(option.value)}
+                      onChange={() => toggleServiceArea(option.value)}
+                      className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span className="text-sm text-gray-700">{option.label}</span>
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
 
+            {/* 아이 연령 (체크박스) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                요일
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                아이 연령
               </label>
-              <select
-                value={dayOfWeek}
-                onChange={(e) => setDayOfWeek(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              >
-                {dayOfWeekOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {ageRangeOptions.map((option) => (
+                  <label
+                    key={option.value}
+                    className={`flex items-center space-x-2 p-2 border rounded-md cursor-pointer transition-colors ${
+                      selectedAgeRanges.includes(option.value)
+                        ? 'bg-green-50 border-green-500'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedAgeRanges.includes(option.value)}
+                      onChange={() => toggleAgeRange(option.value)}
+                      className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span className="text-sm text-gray-700">{option.label}</span>
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                시간대
-              </label>
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              >
-                {timeRangeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* 기타 필터 */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  요일
+                </label>
+                <select
+                  value={dayOfWeek}
+                  onChange={(e) => setDayOfWeek(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  {dayOfWeekOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                최대 상담료
-              </label>
-              <input
-                type="number"
-                value={maxFee}
-                onChange={(e) => setMaxFee(e.target.value)}
-                placeholder="예: 100000"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  시간대
+                </label>
+                <select
+                  value={timeRange}
+                  onChange={(e) => setTimeRange(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  {timeRangeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="flex items-end">
-              <button
-                onClick={fetchTherapists}
-                disabled={isLoading}
-                className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
-              >
-                {isLoading ? '검색 중...' : '검색'}
-              </button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  최대 상담료
+                </label>
+                <input
+                  type="number"
+                  value={maxFee}
+                  onChange={(e) => setMaxFee(e.target.value)}
+                  placeholder="예: 100000"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  onClick={fetchTherapists}
+                  disabled={isLoading}
+                  className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+                >
+                  {isLoading ? '검색 중...' : '검색'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

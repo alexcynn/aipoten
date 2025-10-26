@@ -52,6 +52,7 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
   const [assessment, setAssessment] = useState<Assessment | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -115,6 +116,44 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
       return { level: '또래 수준', color: 'text-blue-600', description: '대체로 또래 수준의 발달을 보이고 있습니다.' }
     }
     return { level: '빠른 수준', color: 'text-green-600', description: '빠른 발달을 보이고 있습니다.' }
+  }
+
+  const handleTherapistRecommendation = async () => {
+    if (!assessment) return
+
+    setIsLoadingRecommendations(true)
+    try {
+      const response = await fetch(`/api/therapists/recommendations?assessmentId=${assessment.id}`)
+      const data = await response.json()
+
+      if (response.ok) {
+        // 추천 치료 분야와 연령대를 쿼리 파라미터로 전달하여 치료사 검색 페이지로 이동
+        const params = new URLSearchParams()
+        if (data.recommendedSpecialties && data.recommendedSpecialties.length > 0) {
+          params.append('specialties', data.recommendedSpecialties.join(','))
+        }
+        if (data.childAgeRange) {
+          params.append('ageRange', data.childAgeRange)
+        }
+        params.append('autoFilter', 'true') // 자동 필터 적용 표시
+
+        router.push(`/parent/therapists?${params.toString()}`)
+      } else {
+        alert(data.error || '추천 치료사를 불러오는 중 오류가 발생했습니다.')
+      }
+    } catch (error) {
+      console.error('치료사 추천 오류:', error)
+      alert('서버 오류가 발생했습니다.')
+    } finally {
+      setIsLoadingRecommendations(false)
+    }
+  }
+
+  const hasBelowLevelResults = () => {
+    if (!assessment || !assessment.results) return false
+    return assessment.results.some(
+      r => r.level === 'NEEDS_TRACKING' || r.level === 'NEEDS_ASSESSMENT'
+    )
   }
 
   if (status === 'loading' || isLoading) {
@@ -223,7 +262,7 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
           <div className="mt-6 bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">추천 활동</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Link
                   href={`/videos?childId=${assessment.child.id}&age=${assessment.ageInMonths}`}
                   className="p-4 border-2 border-gray-200 rounded-lg hover:border-aipoten-green hover:bg-gray-50 transition-colors"
@@ -268,6 +307,26 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
                     </div>
                   </div>
                 </Link>
+
+                {hasBelowLevelResults() && (
+                  <button
+                    onClick={handleTherapistRecommendation}
+                    disabled={isLoadingRecommendations}
+                    className="p-4 border-2 border-green-500 rounded-lg hover:border-green-600 hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                  >
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-3">
+                        <span className="text-white">👨‍⚕️</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">치료사 추천</h4>
+                        <p className="text-sm text-gray-500">
+                          {isLoadingRecommendations ? '로딩 중...' : '맞춤 치료사 찾기'}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                )}
               </div>
             </div>
           </div>

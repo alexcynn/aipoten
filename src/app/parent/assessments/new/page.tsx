@@ -34,12 +34,15 @@ interface QuestionResponse {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  GROSS_MOTOR: '대근육 운동',
-  FINE_MOTOR: '소근육 운동',
+  GROSS_MOTOR: '대근육',
+  FINE_MOTOR: '소근육',
   LANGUAGE: '언어',
   COGNITIVE: '인지',
   SOCIAL: '사회성',
+  EMOTIONAL: '정서',
 }
+
+const CATEGORY_ORDER = ['GROSS_MOTOR', 'FINE_MOTOR', 'COGNITIVE', 'LANGUAGE', 'SOCIAL', 'EMOTIONAL']
 
 const FOUR_POINT_OPTIONS = [
   { value: '잘함', score: 3 },
@@ -71,6 +74,7 @@ function AssessmentContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [completionMessage, setCompletionMessage] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -235,9 +239,52 @@ function AssessmentContent() {
     return questionGroups.size
   }
 
+  const getCategoryProgress = () => {
+    const progress: Record<string, { completed: number; total: number }> = {}
+
+    CATEGORY_ORDER.forEach(category => {
+      const categoryQuestions = allQuestions.filter(q => q.category === category && q.level === 'Q1' && !q.isWarning)
+      const completedInCategory = categoryQuestions.filter(q1 => {
+        return responses.some(r =>
+          r.questionId === q1.id ||
+          responses.some(r2 => {
+            const q2 = allQuestions.find(q => q.questionNumber === q1.questionNumber && q.category === q1.category && q.level === 'Q2')
+            const q3 = allQuestions.find(q => q.questionNumber === q1.questionNumber && q.category === q1.category && q.level === 'Q3')
+            return (q2 && r2.questionId === q2.id) || (q3 && r2.questionId === q3.id)
+          })
+        )
+      }).length
+
+      progress[category] = { completed: completedInCategory, total: categoryQuestions.length }
+    })
+
+    return progress
+  }
+
+  const checkCategoryCompletion = (prevCategory: string | null, newCategory: string | null) => {
+    if (!prevCategory || prevCategory === newCategory) return
+
+    const progress = getCategoryProgress()
+    const categoryProgress = progress[prevCategory]
+
+    if (categoryProgress && categoryProgress.completed === categoryProgress.total) {
+      const nextCategoryIndex = CATEGORY_ORDER.indexOf(newCategory || '')
+      const nextCategoryLabel = newCategory && CATEGORY_LABELS[newCategory] ? CATEGORY_LABELS[newCategory] : null
+
+      const message = nextCategoryLabel
+        ? `😊 훌륭해요! ${CATEGORY_LABELS[prevCategory]} 영역을 모두 마쳤어요. 이제 ${nextCategoryLabel} 영역으로 넘어가볼게요!`
+        : `😊 훌륭해요! ${CATEGORY_LABELS[prevCategory]} 영역을 모두 마쳤어요!`
+
+      setCompletionMessage(message)
+      setTimeout(() => setCompletionMessage(null), 4000)
+    }
+  }
+
   const handleAnswer = (answer: string, score: number) => {
     const currentQuestion = getCurrentQuestion()
     if (!currentQuestion) return
+
+    const prevCategory = currentQuestion.category
 
     // 현재 질문에 대한 응답 저장
     const newResponse: QuestionResponse = {
@@ -254,25 +301,62 @@ function AssessmentContent() {
 
     // 다음 질문으로 이동 로직
     setTimeout(() => {
+      const path = getQuestionsPath()
+      const nextIndex = currentQuestionIndex + 1
+      let shouldMoveToNext = false
+      let targetIndex = nextIndex
+
       if (currentQuestion.level === 'Q1') {
         // Q1에서 "대체로 못함" 또는 "전혀 못함" 선택 시 Q2로
         if (answer === '대체로 못함' || answer === '전혀 못함') {
-          setCurrentQuestionIndex(prev => prev + 1)
+          shouldMoveToNext = true
         } else {
           // 다음 Q1 그룹으로
-          moveToNextQuestion()
+          const nextQ1Index = findNextQ1Index()
+          if (nextQ1Index !== -1) {
+            shouldMoveToNext = true
+            targetIndex = nextQ1Index
+          } else {
+            handleComplete()
+            return
+          }
         }
       } else if (currentQuestion.level === 'Q2') {
         // Q2에서 "못함" 선택 시 Q3로
         if (answer === '못함') {
-          setCurrentQuestionIndex(prev => prev + 1)
+          shouldMoveToNext = true
         } else {
           // 다음 Q1 그룹으로
-          moveToNextQuestion()
+          const nextQ1Index = findNextQ1Index()
+          if (nextQ1Index !== -1) {
+            shouldMoveToNext = true
+            targetIndex = nextQ1Index
+          } else {
+            handleComplete()
+            return
+          }
         }
       } else {
         // Q3 완료 후 다음 Q1 그룹으로
-        moveToNextQuestion()
+        const nextQ1Index = findNextQ1Index()
+        if (nextQ1Index !== -1) {
+          shouldMoveToNext = true
+          targetIndex = nextQ1Index
+        } else {
+          handleComplete()
+          return
+        }
+      }
+
+      if (shouldMoveToNext) {
+        setCurrentQuestionIndex(targetIndex)
+
+        // 다음 질문의 카테고리 확인
+        const updatedPath = getQuestionsPath()
+        const nextQuestion = updatedPath[targetIndex]
+        if (nextQuestion && nextQuestion.category !== prevCategory) {
+          checkCategoryCompletion(prevCategory, nextQuestion.category)
+        }
       }
     }, 300)
   }
@@ -430,17 +514,60 @@ function AssessmentContent() {
                   {/* Progress Bar */}
                   <div className="mb-4">
                     <div className="flex justify-between text-sm text-gray-600 mb-2">
-                      <span>진행률</span>
+                      <span>
+                        {currentQuestion ? (
+                          <span className="font-medium text-aipoten-green">
+                            {CATEGORY_LABELS[currentQuestion.category]} 영역 테스트 중
+                          </span>
+                        ) : (
+                          <span>진행률</span>
+                        )}
+                      </span>
                       <span>{getCompletedQuestions()} / {getTotalQuestions()}</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-3">
                       <div
-                        className="bg-aipoten-green h-2 rounded-full transition-all duration-300"
+                        className="bg-aipoten-green h-3 rounded-full transition-all duration-300"
                         style={{ width: `${progress}%` }}
                       ></div>
                     </div>
+
+                    {/* Category Progress Indicators */}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {CATEGORY_ORDER.map(category => {
+                        const categoryProgress = getCategoryProgress()[category]
+                        if (!categoryProgress || categoryProgress.total === 0) return null
+
+                        const isCompleted = categoryProgress.completed === categoryProgress.total
+                        const isCurrent = currentQuestion?.category === category
+
+                        return (
+                          <div
+                            key={category}
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              isCompleted
+                                ? 'bg-green-100 text-green-800'
+                                : isCurrent
+                                ? 'bg-blue-100 text-blue-800 font-medium'
+                                : 'bg-gray-100 text-gray-600'
+                            }`}
+                          >
+                            {CATEGORY_LABELS[category]} {categoryProgress.completed}/{categoryProgress.total}
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
                 </div>
+
+                {/* Completion Message */}
+                {completionMessage && (
+                  <div className="mb-6 p-4 bg-green-50 border-2 border-green-300 rounded-lg text-center animate-fade-in">
+                    <p className="text-green-800 font-medium text-lg">
+                      {completionMessage}
+                    </p>
+                  </div>
+                )}
 
                 {/* Current Question */}
                 {currentQuestion ? (

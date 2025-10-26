@@ -79,7 +79,9 @@ export default function ParentDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<'assessments' | 'videos' | 'therapists' | 'sessions'>('assessments')
+  const [activeTab, setActiveTab] = useState<'assessments' | 'videos' | 'consultation' | 'therapy' | 'sessions'>('assessments')
+  const [consultationSubTab, setConsultationSubTab] = useState<'pending' | 'in_progress' | 'history'>('pending')
+  const [therapySubTab, setTherapySubTab] = useState<'pending' | 'in_progress' | 'history'>('pending')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -188,22 +190,16 @@ export default function ParentDashboardPage() {
           setRecommendedTherapists(therapistsData.therapists || [])
         }
 
-        // 예약 목록 가져오기
+        // 예약 목록 가져오기 (모든 예약)
         const bookingsRes = await fetch('/api/bookings')
         if (bookingsRes.ok) {
           const bookingsData = await bookingsRes.json()
           const bookingsArray = bookingsData.bookings || []
-          // 확정된 예약 중 앞으로 있을 예약만 필터링
-          const upcomingBookings = bookingsArray
-            .filter((b: any) =>
-              (b.status === 'CONFIRMED' || b.status === 'PENDING_CONFIRMATION') &&
-              new Date(b.scheduledAt) > new Date()
-            )
-            .sort((a: any, b: any) =>
-              new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
-            )
-            .slice(0, 3)
-          setMyBookings(upcomingBookings)
+          // 모든 예약을 저장 (날짜순 정렬)
+          const sortedBookings = bookingsArray.sort((a: any, b: any) =>
+            new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()
+          )
+          setMyBookings(sortedBookings)
         }
       } catch (error) {
         console.error('치료사 및 예약 조회 오류:', error)
@@ -269,6 +265,35 @@ export default function ParentDashboardPage() {
       console.error('프로필 사진 업데이트 오류:', error)
     }
   }
+
+  // 예약 필터링 함수
+  const filterBookings = (bookings: any[], sessionType: 'CONSULTATION' | 'THERAPY', state: 'pending' | 'in_progress' | 'history') => {
+    const filtered = bookings.filter((b: any) => b.sessionType === sessionType)
+
+    if (state === 'pending') {
+      // 결제 대기: paidAt이 null인 예약
+      return filtered.filter((b: any) => !b.paidAt)
+    } else if (state === 'in_progress') {
+      // 진행 중: paidAt이 있고, completedSessions < sessionCount
+      return filtered.filter((b: any) => b.paidAt && b.completedSessions < b.sessionCount)
+    } else {
+      // 기록: completedSessions === sessionCount 또는 status가 COMPLETED/CANCELLED
+      return filtered.filter((b: any) =>
+        b.completedSessions === b.sessionCount ||
+        b.status === 'COMPLETED' ||
+        b.status === 'CANCELLED'
+      )
+    }
+  }
+
+  // 필터된 예약 목록
+  const consultationPendingBookings = filterBookings(myBookings, 'CONSULTATION', 'pending')
+  const consultationInProgressBookings = filterBookings(myBookings, 'CONSULTATION', 'in_progress')
+  const consultationHistoryBookings = filterBookings(myBookings, 'CONSULTATION', 'history')
+
+  const therapyPendingBookings = filterBookings(myBookings, 'THERAPY', 'pending')
+  const therapyInProgressBookings = filterBookings(myBookings, 'THERAPY', 'in_progress')
+  const therapyHistoryBookings = filterBookings(myBookings, 'THERAPY', 'history')
 
   if (status === 'loading' || isLoading) {
     return (
@@ -461,14 +486,24 @@ export default function ParentDashboardPage() {
                     추천영상
                   </button>
                   <button
-                    onClick={() => setActiveTab('therapists')}
+                    onClick={() => setActiveTab('consultation')}
                     className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                      activeTab === 'therapists'
+                      activeTab === 'consultation'
                         ? 'border-aipoten-green text-aipoten-green'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
                   >
-                    치료사 찾기
+                    언어 컨설팅 예약
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('therapy')}
+                    className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === 'therapy'
+                        ? 'border-aipoten-green text-aipoten-green'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    홈티 예약
                   </button>
                   <button
                     onClick={() => setActiveTab('sessions')}
@@ -690,199 +725,412 @@ export default function ParentDashboardPage() {
                   </div>
                 )}
 
-                {/* 치료사 찾기 탭 */}
-                {activeTab === 'therapists' && (
+                {/* 언어 컨설팅 예약 탭 */}
+                {activeTab === 'consultation' && (
                   <div className="space-y-6">
-                    {/* 두 가지 검색 옵션 */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* 방문 컨설팅 찾기 */}
-                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 border-2 border-blue-200 hover:border-blue-400 transition-all">
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">방문 컨설팅 찾기</h3>
-                        <p className="text-sm text-gray-600 mb-4">
-                          언어 발달 전문 치료사의 1회 컨설팅
-                        </p>
-                        <Link
-                          href="/parent/therapists?type=consultation"
-                          className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium w-full justify-center"
-                        >
-                          언어치료 컨설팅 예약하기 →
-                        </Link>
-                      </div>
-
-                      {/* 치료사 찾기 */}
-                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-6 border-2 border-green-200 hover:border-green-400 transition-all">
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">치료사 찾기</h3>
-                        <p className="text-sm text-gray-600 mb-4">
-                          정기 치료를 위한 전문 치료사 검색
-                        </p>
-                        <Link
-                          href="/parent/therapists?type=therapy"
-                          className="inline-flex items-center px-6 py-3 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors font-medium w-full justify-center"
-                        >
-                          전문 치료사 검색하기 →
-                        </Link>
-                      </div>
+                    {/* 예약하기 버튼 */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 border-2 border-blue-200">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">언어 컨설팅 찾기</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        언어 발달 전문 치료사의 1회 컨설팅
+                      </p>
+                      <Link
+                        href="/parent/therapists?type=consultation"
+                        className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+                      >
+                        언어치료 컨설팅 예약하기 →
+                      </Link>
                     </div>
 
-                    {/* 다가오는 예약 */}
-                    {myBookings.length > 0 && (
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-md font-semibold text-gray-700">다가오는 예약</h4>
-                          <Link
-                            href="/parent/bookings"
-                            className="text-sm text-aipoten-green hover:text-aipoten-navy"
-                          >
-                            전체 보기 →
-                          </Link>
-                        </div>
-                        <div className="space-y-3">
-                          {myBookings.map((booking: any) => (
-                            <div
-                              key={booking.id}
-                              className="bg-blue-50 border border-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-semibold text-gray-900">
-                                      {booking.therapist.user.name} 치료사
-                                    </span>
-                                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                      booking.status === 'CONFIRMED'
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-yellow-100 text-yellow-800'
-                                    }`}>
-                                      {booking.status === 'CONFIRMED' ? '확정됨' : '확인 대기'}
-                                    </span>
-                                  </div>
-                                  <div className="text-sm text-gray-600">
-                                    📅 {new Date(booking.scheduledAt).toLocaleDateString('ko-KR', {
-                                      month: 'long',
-                                      day: 'numeric',
-                                      weekday: 'short'
-                                    })}{' '}
-                                    {booking.timeSlot.startTime}
-                                  </div>
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    {booking.sessionType === 'CONSULTATION' ? '방문 컨설팅' : '치료'} • {booking.child.name}
-                                  </div>
-                                </div>
-                                <Link
-                                  href={`/parent/bookings/${booking.id}`}
-                                  className="ml-3 px-3 py-1 bg-white text-aipoten-green border border-aipoten-green rounded-md hover:bg-aipoten-green hover:text-white transition-colors text-sm"
-                                >
-                                  상세
-                                </Link>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    {/* Sub-tabs */}
+                    <div className="border-b border-gray-200">
+                      <nav className="flex -mb-px gap-2">
+                        <button
+                          onClick={() => setConsultationSubTab('pending')}
+                          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                            consultationSubTab === 'pending'
+                              ? 'border-blue-600 text-blue-600'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          결제 대기 ({consultationPendingBookings.length})
+                        </button>
+                        <button
+                          onClick={() => setConsultationSubTab('in_progress')}
+                          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                            consultationSubTab === 'in_progress'
+                              ? 'border-blue-600 text-blue-600'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          진행 중 ({consultationInProgressBookings.length})
+                        </button>
+                        <button
+                          onClick={() => setConsultationSubTab('history')}
+                          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                            consultationSubTab === 'history'
+                              ? 'border-blue-600 text-blue-600'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          컨설팅 기록 ({consultationHistoryBookings.length})
+                        </button>
+                      </nav>
+                    </div>
 
-                    {/* 추천 치료사 */}
+                    {/* Sub-tab Content */}
                     <div>
-                      <h4 className="text-md font-semibold text-gray-700 mb-3">추천 치료사</h4>
-                      {recommendedTherapists.length === 0 ? (
-                        <div className="text-center py-12 bg-gray-50 rounded-lg">
-                          <div className="text-4xl mb-4">👨‍⚕️</div>
-                          <p className="text-gray-600 mb-4">추천 치료사 정보를 불러오는 중입니다...</p>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {recommendedTherapists.map((therapist: any) => (
-                            <div
-                              key={therapist.id}
-                              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
-                            >
-                              <div className="mb-3">
-                                <h5 className="font-semibold text-gray-900 mb-1">
-                                  {therapist.user.name} 치료사
-                                </h5>
-                                {therapist.education && (
-                                  <p className="text-xs text-gray-600">{therapist.education}</p>
-                                )}
-                              </div>
-
-                              {/* 전문 분야 */}
-                              {therapist.specialties && therapist.specialties.length > 0 && (
-                                <div className="mb-3">
-                                  <div className="flex flex-wrap gap-1">
-                                    {therapist.specialties.slice(0, 2).map((spec: string, idx: number) => {
-                                      const specLabels: Record<string, string> = {
-                                        SPEECH_THERAPY: '언어치료',
-                                        SENSORY_INTEGRATION: '감각통합',
-                                        PLAY_THERAPY: '놀이치료',
-                                        ART_THERAPY: '미술치료',
-                                        MUSIC_THERAPY: '음악치료',
-                                        OCCUPATIONAL_THERAPY: '작업치료',
-                                        COGNITIVE_THERAPY: '인지치료',
-                                        BEHAVIORAL_THERAPY: '행동치료',
-                                      }
-                                      return (
-                                        <span
-                                          key={idx}
-                                          className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
-                                        >
-                                          {specLabels[spec] || spec}
-                                        </span>
-                                      )
-                                    })}
-                                    {therapist.specialties.length > 2 && (
-                                      <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-                                        +{therapist.specialties.length - 2}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* 서비스 지역 */}
-                              {therapist.serviceAreas && therapist.serviceAreas.length > 0 && (
-                                <div className="mb-3">
-                                  <div className="text-xs text-gray-600">
-                                    📍 {therapist.serviceAreas.slice(0, 2).map((area: string) => {
-                                      const areaLabels: Record<string, string> = {
-                                        GANGNAM: '강남구',
-                                        SEOCHO: '서초구',
-                                        SONGPA: '송파구',
-                                        GANGDONG: '강동구',
-                                      }
-                                      return areaLabels[area] || area
-                                    }).join(', ')}
-                                    {therapist.serviceAreas.length > 2 && ' 외'}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* 세션 비용 */}
-                              {therapist.sessionFee && (
-                                <div className="mb-3 pb-3 border-b border-gray-200">
-                                  <span className="text-sm font-bold text-gray-900">
-                                    ₩{therapist.sessionFee.toLocaleString()}
-                                  </span>
-                                  <span className="text-xs text-gray-500 ml-1">/ 50분</span>
-                                </div>
-                              )}
-
-                              {/* 버튼 */}
-                              <div className="flex gap-2">
-                                <Link
-                                  href={`/parent/therapists/${therapist.id}`}
-                                  className="flex-1 text-center px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
-                                >
-                                  프로필
-                                </Link>
-                                <Link
-                                  href={`/parent/therapists/${therapist.id}/booking`}
-                                  className="flex-1 text-center px-3 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors text-sm font-medium"
-                                >
-                                  예약
-                                </Link>
-                              </div>
+                      {consultationSubTab === 'pending' && (
+                        <div className="space-y-3">
+                          {consultationPendingBookings.length === 0 ? (
+                            <div className="text-center py-12 bg-gray-50 rounded-lg">
+                              <div className="text-4xl mb-4">📋</div>
+                              <p className="text-gray-600">결제 대기 중인 컨설팅이 없습니다.</p>
                             </div>
-                          ))}
+                          ) : (
+                            consultationPendingBookings.map((booking: any) => (
+                              <div
+                                key={booking.id}
+                                className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-semibold text-gray-900">
+                                        {booking.therapist.user.name} 치료사
+                                      </span>
+                                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        결제 대기
+                                      </span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                      📅 {new Date(booking.scheduledAt).toLocaleDateString('ko-KR', {
+                                        month: 'long',
+                                        day: 'numeric',
+                                        weekday: 'short'
+                                      })}{' '}
+                                      {booking.timeSlot?.startTime || '시간 미정'}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {booking.child.name} • ₩{booking.finalFee.toLocaleString()}
+                                    </div>
+                                  </div>
+                                  <Link
+                                    href={`/parent/bookings/${booking.id}`}
+                                    className="ml-3 px-3 py-1 bg-white text-blue-600 border border-blue-600 rounded-md hover:bg-blue-600 hover:text-white transition-colors text-sm"
+                                  >
+                                    상세
+                                  </Link>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+
+                      {consultationSubTab === 'in_progress' && (
+                        <div className="space-y-3">
+                          {consultationInProgressBookings.length === 0 ? (
+                            <div className="text-center py-12 bg-gray-50 rounded-lg">
+                              <div className="text-4xl mb-4">📝</div>
+                              <p className="text-gray-600">진행 중인 컨설팅이 없습니다.</p>
+                            </div>
+                          ) : (
+                            consultationInProgressBookings.map((booking: any) => (
+                              <div
+                                key={booking.id}
+                                className="bg-green-50 border border-green-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-semibold text-gray-900">
+                                        {booking.therapist.user.name} 치료사
+                                      </span>
+                                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        진행 중
+                                      </span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                      📅 {new Date(booking.scheduledAt).toLocaleDateString('ko-KR', {
+                                        month: 'long',
+                                        day: 'numeric',
+                                        weekday: 'short'
+                                      })}{' '}
+                                      {booking.timeSlot?.startTime || '시간 미정'}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {booking.child.name} • {booking.completedSessions}/{booking.sessionCount}회 완료
+                                    </div>
+                                  </div>
+                                  <Link
+                                    href={`/parent/bookings/${booking.id}`}
+                                    className="ml-3 px-3 py-1 bg-white text-green-600 border border-green-600 rounded-md hover:bg-green-600 hover:text-white transition-colors text-sm"
+                                  >
+                                    상세
+                                  </Link>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+
+                      {consultationSubTab === 'history' && (
+                        <div className="space-y-3">
+                          {consultationHistoryBookings.length === 0 ? (
+                            <div className="text-center py-12 bg-gray-50 rounded-lg">
+                              <div className="text-4xl mb-4">📚</div>
+                              <p className="text-gray-600">컨설팅 기록이 없습니다.</p>
+                            </div>
+                          ) : (
+                            consultationHistoryBookings.map((booking: any) => (
+                              <div
+                                key={booking.id}
+                                className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-semibold text-gray-900">
+                                        {booking.therapist.user.name} 치료사
+                                      </span>
+                                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                        booking.status === 'COMPLETED'
+                                          ? 'bg-blue-100 text-blue-800'
+                                          : 'bg-gray-100 text-gray-800'
+                                      }`}>
+                                        {booking.status === 'COMPLETED' ? '완료' : '취소됨'}
+                                      </span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                      📅 {new Date(booking.scheduledAt).toLocaleDateString('ko-KR', {
+                                        month: 'long',
+                                        day: 'numeric',
+                                        weekday: 'short'
+                                      })}{' '}
+                                      {booking.timeSlot?.startTime || '시간 미정'}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {booking.child.name}
+                                    </div>
+                                  </div>
+                                  <Link
+                                    href={`/parent/bookings/${booking.id}`}
+                                    className="ml-3 px-3 py-1 bg-white text-gray-600 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors text-sm"
+                                  >
+                                    상세
+                                  </Link>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* 홈티 예약 탭 */}
+                {activeTab === 'therapy' && (
+                  <div className="space-y-6">
+                    {/* 예약하기 버튼 */}
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-6 border-2 border-green-200">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">홈티 찾기</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        정기 치료를 위한 전문 치료사 검색
+                      </p>
+                      <Link
+                        href="/parent/therapists?type=therapy"
+                        className="inline-flex items-center px-6 py-3 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors font-medium"
+                      >
+                        전문 치료사 검색하기 →
+                      </Link>
+                    </div>
+
+                    {/* Sub-tabs */}
+                    <div className="border-b border-gray-200">
+                      <nav className="flex -mb-px gap-2">
+                        <button
+                          onClick={() => setTherapySubTab('pending')}
+                          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                            therapySubTab === 'pending'
+                              ? 'border-aipoten-green text-aipoten-green'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          결제 대기 홈티 ({therapyPendingBookings.length})
+                        </button>
+                        <button
+                          onClick={() => setTherapySubTab('in_progress')}
+                          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                            therapySubTab === 'in_progress'
+                              ? 'border-aipoten-green text-aipoten-green'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          진행 중 홈티 ({therapyInProgressBookings.length})
+                        </button>
+                        <button
+                          onClick={() => setTherapySubTab('history')}
+                          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                            therapySubTab === 'history'
+                              ? 'border-aipoten-green text-aipoten-green'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          홈티 기록 ({therapyHistoryBookings.length})
+                        </button>
+                      </nav>
+                    </div>
+
+                    {/* Sub-tab Content */}
+                    <div>
+                      {therapySubTab === 'pending' && (
+                        <div className="space-y-3">
+                          {therapyPendingBookings.length === 0 ? (
+                            <div className="text-center py-12 bg-gray-50 rounded-lg">
+                              <div className="text-4xl mb-4">📋</div>
+                              <p className="text-gray-600">결제 대기 중인 홈티가 없습니다.</p>
+                            </div>
+                          ) : (
+                            therapyPendingBookings.map((booking: any) => (
+                              <div
+                                key={booking.id}
+                                className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-semibold text-gray-900">
+                                        {booking.therapist.user.name} 치료사
+                                      </span>
+                                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        결제 대기
+                                      </span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                      📅 {new Date(booking.scheduledAt).toLocaleDateString('ko-KR', {
+                                        month: 'long',
+                                        day: 'numeric',
+                                        weekday: 'short'
+                                      })}{' '}
+                                      {booking.timeSlot?.startTime || '시간 미정'}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {booking.child.name} • {booking.sessionCount}회 • ₩{booking.finalFee.toLocaleString()}
+                                    </div>
+                                  </div>
+                                  <Link
+                                    href={`/parent/bookings/${booking.id}`}
+                                    className="ml-3 px-3 py-1 bg-white text-aipoten-green border border-aipoten-green rounded-md hover:bg-aipoten-green hover:text-white transition-colors text-sm"
+                                  >
+                                    상세
+                                  </Link>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+
+                      {therapySubTab === 'in_progress' && (
+                        <div className="space-y-3">
+                          {therapyInProgressBookings.length === 0 ? (
+                            <div className="text-center py-12 bg-gray-50 rounded-lg">
+                              <div className="text-4xl mb-4">📝</div>
+                              <p className="text-gray-600">진행 중인 홈티가 없습니다.</p>
+                            </div>
+                          ) : (
+                            therapyInProgressBookings.map((booking: any) => (
+                              <div
+                                key={booking.id}
+                                className="bg-green-50 border border-green-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-semibold text-gray-900">
+                                        {booking.therapist.user.name} 치료사
+                                      </span>
+                                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        진행 중
+                                      </span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                      📅 {new Date(booking.scheduledAt).toLocaleDateString('ko-KR', {
+                                        month: 'long',
+                                        day: 'numeric',
+                                        weekday: 'short'
+                                      })}{' '}
+                                      {booking.timeSlot?.startTime || '시간 미정'}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {booking.child.name} • {booking.completedSessions}/{booking.sessionCount}회 완료
+                                    </div>
+                                  </div>
+                                  <Link
+                                    href={`/parent/bookings/${booking.id}`}
+                                    className="ml-3 px-3 py-1 bg-white text-aipoten-green border border-aipoten-green rounded-md hover:bg-aipoten-green hover:text-white transition-colors text-sm"
+                                  >
+                                    상세
+                                  </Link>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+
+                      {therapySubTab === 'history' && (
+                        <div className="space-y-3">
+                          {therapyHistoryBookings.length === 0 ? (
+                            <div className="text-center py-12 bg-gray-50 rounded-lg">
+                              <div className="text-4xl mb-4">📚</div>
+                              <p className="text-gray-600">홈티 기록이 없습니다.</p>
+                            </div>
+                          ) : (
+                            therapyHistoryBookings.map((booking: any) => (
+                              <div
+                                key={booking.id}
+                                className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-semibold text-gray-900">
+                                        {booking.therapist.user.name} 치료사
+                                      </span>
+                                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                        booking.status === 'COMPLETED'
+                                          ? 'bg-blue-100 text-blue-800'
+                                          : 'bg-gray-100 text-gray-800'
+                                      }`}>
+                                        {booking.status === 'COMPLETED' ? '완료' : '취소됨'}
+                                      </span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                      📅 {new Date(booking.scheduledAt).toLocaleDateString('ko-KR', {
+                                        month: 'long',
+                                        day: 'numeric',
+                                        weekday: 'short'
+                                      })}{' '}
+                                      {booking.timeSlot?.startTime || '시간 미정'}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {booking.child.name} • {booking.sessionCount}회
+                                    </div>
+                                  </div>
+                                  <Link
+                                    href={`/parent/bookings/${booking.id}`}
+                                    className="ml-3 px-3 py-1 bg-white text-gray-600 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors text-sm"
+                                  >
+                                    상세
+                                  </Link>
+                                </div>
+                              </div>
+                            ))
+                          )}
                         </div>
                       )}
                     </div>
