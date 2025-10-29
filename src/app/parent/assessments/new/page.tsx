@@ -252,7 +252,8 @@ function AssessmentContent() {
     return Array.from(new Set(categories))
   }
 
-  const getCategoryProgress = () => {
+  const getCategoryProgress = (currentResponses?: QuestionResponse[]) => {
+    const responsesToUse = currentResponses || responses
     const progress: Record<string, { completed: number; total: number }> = {}
     const orderedCategories = getActualCategoryOrder()
 
@@ -269,7 +270,7 @@ function AssessmentContent() {
 
         // 이 그룹의 질문 중 하나라도 응답이 있으면 완료
         return groupQuestions.some(gq =>
-          responses.some(r => r.questionId === gq.id)
+          responsesToUse.some(r => r.questionId === gq.id)
         )
       }).length
 
@@ -371,8 +372,8 @@ function AssessmentContent() {
 
         // 카테고리가 변경되는지 확인
         if (nextQuestion && nextQuestion.category !== prevCategory) {
-          // 현재 카테고리가 완료되었는지 확인
-          const progress = getCategoryProgress()
+          // 현재 카테고리가 완료되었는지 확인 - 최신 응답 배열 전달
+          const progress = getCategoryProgress(updatedResponses)
           const categoryProgress = progress[prevCategory]
 
           if (categoryProgress && categoryProgress.completed === categoryProgress.total) {

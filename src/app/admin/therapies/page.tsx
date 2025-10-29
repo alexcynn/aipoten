@@ -5,6 +5,8 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AdminLayout from '@/components/layout/AdminLayout'
+import ChildInfoModal from '@/components/modals/ChildInfoModal'
+import TherapistInfoModal from '@/components/modals/TherapistInfoModal'
 
 interface Therapy {
   id: string
@@ -28,13 +30,57 @@ interface Therapy {
     name: string
     birthDate: string
     gender: string
+    gestationalWeeks: number | null
+    birthWeight: number | null
+    currentHeight: number | null
+    currentWeight: number | null
+    medicalHistory: string | null
+    familyHistory: string | null
+    treatmentHistory: string | null
+    notes: string | null
   }
   therapist: {
     id: string
+    userId: string
+    gender: string | null
+    birthYear: number | null
+    address: string | null
+    addressDetail: string | null
+    specialties: string | null
+    childAgeRanges: string | null
+    serviceAreas: string | null
+    sessionFee: number | null
+    isPreTherapist: boolean
+    canDoConsultation: boolean
+    education: string | null
+    introduction: string | null
     user: {
       name: string
+      email: string
       phone: string | null
     }
+    certifications?: Array<{
+      id: string
+      name: string
+      issuingOrganization: string
+      issueDate: string
+    }>
+    experiences?: Array<{
+      id: string
+      employmentType: string
+      institutionName: string | null
+      specialty: string
+      startDate: string
+      endDate: string | null
+      description: string | null
+    }>
+    educations?: Array<{
+      id: string
+      degree: string
+      school: string
+      major: string
+      graduationYear: string
+    }>
   }
   timeSlot: {
     date: string
@@ -60,6 +106,12 @@ export default function AdminTherapiesPage() {
   const [therapies, setTherapies] = useState<Therapy[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED'>('ALL')
+
+  // Modal states
+  const [selectedChild, setSelectedChild] = useState<any>(null)
+  const [selectedTherapist, setSelectedTherapist] = useState<any>(null)
+  const [isChildModalOpen, setIsChildModalOpen] = useState(false)
+  const [isTherapistModalOpen, setIsTherapistModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -89,6 +141,16 @@ export default function AdminTherapiesPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleOpenChildModal = (child: any) => {
+    setSelectedChild(child)
+    setIsChildModalOpen(true)
+  }
+
+  const handleOpenTherapistModal = (therapist: any) => {
+    setSelectedTherapist(therapist)
+    setIsTherapistModalOpen(true)
   }
 
   if (status === 'loading' || isLoading) {
@@ -182,10 +244,7 @@ export default function AdminTherapiesPage() {
                       상태
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      비용
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      결제
+                      작업
                     </th>
                   </tr>
                 </thead>
@@ -196,17 +255,27 @@ export default function AdminTherapiesPage() {
                         <div className="text-sm font-medium text-gray-900">
                           {therapy.parentUser.name}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {therapy.child.name} ({therapy.child.gender === 'MALE' ? '남' : '여'})
-                        </div>
+                        <button
+                          onClick={() => handleOpenChildModal(therapy.child)}
+                          className="text-left"
+                        >
+                          <div className="text-sm text-aipoten-green hover:text-aipoten-navy cursor-pointer">
+                            {therapy.child.name} ({therapy.child.gender === 'MALE' ? '남' : '여'})
+                          </div>
+                        </button>
                         <div className="text-xs text-gray-400">
                           {therapy.parentUser.phone || therapy.parentUser.email}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {therapy.therapist.user.name}
-                        </div>
+                        <button
+                          onClick={() => handleOpenTherapistModal(therapy.therapist)}
+                          className="text-left"
+                        >
+                          <div className="text-sm text-aipoten-green hover:text-aipoten-navy cursor-pointer">
+                            {therapy.therapist.user.name}
+                          </div>
+                        </button>
                         <div className="text-xs text-gray-500">
                           {therapy.therapist.user.phone}
                         </div>
@@ -241,22 +310,13 @@ export default function AdminTherapiesPage() {
                           {statusLabels[therapy.status]?.label || therapy.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          ₩{therapy.finalFee.toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {therapy.paidAt ? (
-                          <div>
-                            <div className="text-sm text-green-600 font-medium">결제 완료</div>
-                            <div className="text-xs text-gray-500">
-                              {new Date(therapy.paidAt).toLocaleDateString('ko-KR')}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-sm text-orange-600 font-medium">결제 대기</div>
-                        )}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <a
+                          href={`/admin/therapies/${therapy.id}`}
+                          className="text-aipoten-green hover:text-aipoten-navy"
+                        >
+                          상세보기
+                        </a>
                       </td>
                     </tr>
                   ))}
@@ -266,6 +326,18 @@ export default function AdminTherapiesPage() {
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      <ChildInfoModal
+        child={selectedChild}
+        isOpen={isChildModalOpen}
+        onClose={() => setIsChildModalOpen(false)}
+      />
+      <TherapistInfoModal
+        therapist={selectedTherapist}
+        isOpen={isTherapistModalOpen}
+        onClose={() => setIsTherapistModalOpen(false)}
+      />
     </AdminLayout>
   )
 }

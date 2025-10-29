@@ -31,7 +31,6 @@ export async function POST(
       where: { id: bookingId },
       select: {
         id: true,
-        paymentStatus: true,
         status: true,
       },
     })
@@ -43,25 +42,23 @@ export async function POST(
       )
     }
 
-    if (booking.paymentStatus !== 'PENDING') {
+    if (booking.status !== 'PENDING_PAYMENT') {
       return NextResponse.json(
         { error: '결제 대기 중인 예약만 승인할 수 있습니다.' },
         { status: 400 }
       )
     }
 
-    // 결제 상태를 PAID로, 예약 상태를 PENDING_CONFIRMATION(치료사 확인 대기)로 변경
+    // 결제 상태를 PAID로, 예약 상태를 BOOKING_IN_PROGRESS로 변경
     const updatedBooking = await prisma.booking.update({
       where: { id: bookingId },
       data: {
-        paymentStatus: 'PAID',
         paidAt: new Date(),
-        // 결제 완료 시 예약 상태가 PENDING_CONFIRMATION이 아니면 그대로 유지
-        ...(booking.status === 'PENDING_CONFIRMATION' ? {} : {}),
+        // 결제 대기 상태면 예약 중 상태로 변경
+        status: booking.status === 'PENDING_PAYMENT' ? 'BOOKING_IN_PROGRESS' : booking.status,
       },
       select: {
         id: true,
-        paymentStatus: true,
         paidAt: true,
         status: true,
       },
@@ -71,7 +68,6 @@ export async function POST(
       message: '결제가 승인되었습니다.',
       booking: {
         id: updatedBooking.id,
-        paymentStatus: updatedBooking.paymentStatus,
         paidAt: updatedBooking.paidAt?.toISOString(),
         status: updatedBooking.status,
       },

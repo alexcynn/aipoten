@@ -61,23 +61,74 @@ export async function GET(request: NextRequest) {
             name: true,
             birthDate: true,
             gender: true,
+            gestationalWeeks: true,
+            birthWeight: true,
+            currentHeight: true,
+            currentWeight: true,
+            medicalHistory: true,
+            familyHistory: true,
+            treatmentHistory: true,
+            notes: true,
           },
         },
         therapist: {
           include: {
+            userId: true,
+            gender: true,
+            birthYear: true,
+            address: true,
+            addressDetail: true,
+            specialties: true,
+            childAgeRanges: true,
+            serviceAreas: true,
+            sessionFee: true,
+            isPreTherapist: true,
+            canDoConsultation: true,
+            education: true,
+            introduction: true,
             user: {
               select: {
                 name: true,
+                email: true,
                 phone: true,
+              },
+            },
+            certifications: {
+              select: {
+                id: true,
+                name: true,
+                issuingOrganization: true,
+                issueDate: true,
+              },
+            },
+            experiences: {
+              select: {
+                id: true,
+                employmentType: true,
+                institutionName: true,
+                specialty: true,
+                startDate: true,
+                endDate: true,
+                description: true,
+              },
+            },
+            educations: {
+              select: {
+                id: true,
+                degree: true,
+                school: true,
+                major: true,
+                graduationYear: true,
               },
             },
           },
         },
         timeSlot: true,
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: [
+        { bookingGroupId: 'asc' },
+        { scheduledAt: 'asc' },
+      ],
     })
 
     return NextResponse.json({

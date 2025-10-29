@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import AdminLayout from '@/components/layout/AdminLayout'
+import ChildInfoModal from '@/components/modals/ChildInfoModal'
+import TherapistInfoModal from '@/components/modals/TherapistInfoModal'
 
 interface Consultation {
   id: string
@@ -31,13 +33,57 @@ interface Consultation {
     name: string
     birthDate: string
     gender: string
+    gestationalWeeks: number | null
+    birthWeight: number | null
+    currentHeight: number | null
+    currentWeight: number | null
+    medicalHistory: string | null
+    familyHistory: string | null
+    treatmentHistory: string | null
+    notes: string | null
   }
   therapist: {
     id: string
+    userId: string
+    gender: string | null
+    birthYear: number | null
+    address: string | null
+    addressDetail: string | null
+    specialties: string | null
+    childAgeRanges: string | null
+    serviceAreas: string | null
+    sessionFee: number | null
+    isPreTherapist: boolean
+    canDoConsultation: boolean
+    education: string | null
+    introduction: string | null
     user: {
       name: string
+      email: string
       phone: string | null
     }
+    certifications?: Array<{
+      id: string
+      name: string
+      issuingOrganization: string
+      issueDate: string
+    }>
+    experiences?: Array<{
+      id: string
+      employmentType: string
+      institutionName: string | null
+      specialty: string
+      startDate: string
+      endDate: string | null
+      description: string | null
+    }>
+    educations?: Array<{
+      id: string
+      degree: string
+      school: string
+      major: string
+      graduationYear: string
+    }>
   }
   timeSlot: {
     date: string
@@ -76,14 +122,13 @@ export default function AdminConsultationsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED'>('ALL')
 
-  // 편집 상태
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editFee, setEditFee] = useState<number>(0)
-  const [editSettlementId, setEditSettlementId] = useState<string | null>(null)
-  const [editSettlementAmount, setEditSettlementAmount] = useState<number>(0)
-  const [editSettlementNote, setEditSettlementNote] = useState<string>('')
-
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  // Modal states
+  const [selectedChild, setSelectedChild] = useState<any>(null)
+  const [selectedTherapist, setSelectedTherapist] = useState<any>(null)
+  const [isChildModalOpen, setIsChildModalOpen] = useState(false)
+  const [isTherapistModalOpen, setIsTherapistModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -116,73 +161,6 @@ export default function AdminConsultationsPage() {
     }
   }
 
-  const handleEditFee = (consultation: Consultation) => {
-    setEditingId(consultation.id)
-    setEditFee(consultation.finalFee)
-  }
-
-  const handleSaveFee = async (id: string) => {
-    try {
-      const response = await fetch(`/api/admin/consultations/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          finalFee: editFee,
-          originalFee: editFee,
-        }),
-      })
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: '비용이 수정되었습니다.' })
-        setEditingId(null)
-        fetchConsultations()
-      } else {
-        const data = await response.json()
-        setMessage({ type: 'error', text: data.error || '수정 중 오류가 발생했습니다.' })
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: '서버 오류가 발생했습니다.' })
-    }
-
-    setTimeout(() => setMessage(null), 3000)
-  }
-
-  const handleEditSettlement = (consultation: Consultation) => {
-    setEditSettlementId(consultation.id)
-    setEditSettlementAmount(consultation.settlementAmount || consultation.finalFee)
-    setEditSettlementNote(consultation.settlementNote || '')
-  }
-
-  const handleSaveSettlement = async (id: string) => {
-    try {
-      const response = await fetch(`/api/admin/bookings/${id}/settlement`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          settlementAmount: editSettlementAmount,
-          settlementNote: editSettlementNote,
-        }),
-      })
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: '정산이 완료되었습니다.' })
-        setEditSettlementId(null)
-        fetchConsultations()
-      } else {
-        const data = await response.json()
-        setMessage({ type: 'error', text: data.error || '정산 처리 중 오류가 발생했습니다.' })
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: '서버 오류가 발생했습니다.' })
-    }
-
-    setTimeout(() => setMessage(null), 3000)
-  }
-
   const handleStatusChange = async (id: string, newStatus: string) => {
     if (!confirm(`상태를 "${statusLabels[newStatus]?.label}"(으)로 변경하시겠습니까?`)) {
       return
@@ -209,6 +187,16 @@ export default function AdminConsultationsPage() {
     }
 
     setTimeout(() => setMessage(null), 3000)
+  }
+
+  const handleOpenChildModal = (child: any) => {
+    setSelectedChild(child)
+    setIsChildModalOpen(true)
+  }
+
+  const handleOpenTherapistModal = (therapist: any) => {
+    setSelectedTherapist(therapist)
+    setIsTherapistModalOpen(true)
   }
 
   if (status === 'loading' || isLoading) {
@@ -316,19 +304,16 @@ export default function AdminConsultationsPage() {
                       부모/아이
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      치료사
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       일정
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      세션 진행
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       상태
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      비용
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      결제
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      정산
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       작업
@@ -342,11 +327,29 @@ export default function AdminConsultationsPage() {
                         <div className="text-sm font-medium text-gray-900">
                           {consultation.parentUser.name}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {consultation.child.name} ({consultation.child.gender === 'MALE' ? '남' : '여'})
-                        </div>
+                        <button
+                          onClick={() => handleOpenChildModal(consultation.child)}
+                          className="text-left"
+                        >
+                          <div className="text-sm text-aipoten-green hover:text-aipoten-navy cursor-pointer">
+                            {consultation.child.name} ({consultation.child.gender === 'MALE' ? '남' : '여'})
+                          </div>
+                        </button>
                         <div className="text-xs text-gray-400">
                           {consultation.parentUser.phone || consultation.parentUser.email}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <button
+                          onClick={() => handleOpenTherapistModal(consultation.therapist)}
+                          className="text-left"
+                        >
+                          <div className="text-sm text-aipoten-green hover:text-aipoten-navy cursor-pointer">
+                            {consultation.therapist.user.name}
+                          </div>
+                        </button>
+                        <div className="text-xs text-gray-500">
+                          {consultation.therapist.user.phone}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -355,6 +358,19 @@ export default function AdminConsultationsPage() {
                         </div>
                         <div className="text-sm text-gray-500">
                           {consultation.timeSlot.startTime} - {consultation.timeSlot.endTime}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {consultation.completedSessions} / {consultation.sessionCount} 회
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                          <div
+                            className="bg-aipoten-green h-2 rounded-full"
+                            style={{
+                              width: `${(consultation.completedSessions / consultation.sessionCount) * 100}%`,
+                            }}
+                          ></div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -374,117 +390,13 @@ export default function AdminConsultationsPage() {
                           <option value="CANCELLED">취소</option>
                         </select>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingId === consultation.id ? (
-                          <input
-                            type="number"
-                            value={editFee}
-                            onChange={(e) => setEditFee(parseInt(e.target.value))}
-                            className="w-32 px-2 py-1 border border-gray-300 rounded-md text-sm"
-                            step="1000"
-                          />
-                        ) : (
-                          <div className="text-sm text-gray-900">
-                            ₩{consultation.finalFee.toLocaleString()}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {consultation.paidAt ? (
-                          <div>
-                            <div className="text-sm text-green-600 font-medium">결제 완료</div>
-                            <div className="text-xs text-gray-500">
-                              {new Date(consultation.paidAt).toLocaleDateString('ko-KR')}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-sm text-orange-600 font-medium">결제 대기</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        {editSettlementId === consultation.id ? (
-                          <div className="space-y-2">
-                            <input
-                              type="number"
-                              value={editSettlementAmount}
-                              onChange={(e) => setEditSettlementAmount(parseInt(e.target.value))}
-                              className="w-32 px-2 py-1 border border-gray-300 rounded-md text-sm"
-                              placeholder="정산 금액"
-                              step="1000"
-                            />
-                            <input
-                              type="text"
-                              value={editSettlementNote}
-                              onChange={(e) => setEditSettlementNote(e.target.value)}
-                              className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
-                              placeholder="정산 메모"
-                            />
-                          </div>
-                        ) : consultation.settledAt ? (
-                          <div>
-                            <div className="text-sm text-purple-600 font-medium">
-                              ₩{consultation.settlementAmount?.toLocaleString()}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {new Date(consultation.settledAt).toLocaleDateString('ko-KR')}
-                            </div>
-                            {consultation.settlementNote && (
-                              <div className="text-xs text-gray-400">{consultation.settlementNote}</div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="text-sm text-gray-400">미정산</div>
-                        )}
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {editingId === consultation.id ? (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleSaveFee(consultation.id)}
-                              className="text-green-600 hover:text-green-900"
-                            >
-                              저장
-                            </button>
-                            <button
-                              onClick={() => setEditingId(null)}
-                              className="text-gray-600 hover:text-gray-900"
-                            >
-                              취소
-                            </button>
-                          </div>
-                        ) : editSettlementId === consultation.id ? (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleSaveSettlement(consultation.id)}
-                              className="text-green-600 hover:text-green-900"
-                            >
-                              정산
-                            </button>
-                            <button
-                              onClick={() => setEditSettlementId(null)}
-                              className="text-gray-600 hover:text-gray-900"
-                            >
-                              취소
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col gap-1">
-                            <button
-                              onClick={() => handleEditFee(consultation)}
-                              className="text-aipoten-green hover:text-aipoten-navy"
-                            >
-                              비용 수정
-                            </button>
-                            {!consultation.settledAt && consultation.status === 'SESSION_COMPLETED' && (
-                              <button
-                                onClick={() => handleEditSettlement(consultation)}
-                                className="text-purple-600 hover:text-purple-900"
-                              >
-                                정산 처리
-                              </button>
-                            )}
-                          </div>
-                        )}
+                        <a
+                          href={`/admin/consultations/${consultation.id}`}
+                          className="text-aipoten-green hover:text-aipoten-navy"
+                        >
+                          상세보기
+                        </a>
                       </td>
                     </tr>
                   ))}
@@ -494,6 +406,18 @@ export default function AdminConsultationsPage() {
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      <ChildInfoModal
+        child={selectedChild}
+        isOpen={isChildModalOpen}
+        onClose={() => setIsChildModalOpen(false)}
+      />
+      <TherapistInfoModal
+        therapist={selectedTherapist}
+        isOpen={isTherapistModalOpen}
+        onClose={() => setIsTherapistModalOpen(false)}
+      />
     </AdminLayout>
   )
 }

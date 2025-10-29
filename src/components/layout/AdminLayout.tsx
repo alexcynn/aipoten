@@ -18,7 +18,8 @@ import {
   ChevronLeft,
   Settings,
   MessageSquare,
-  Home
+  Home,
+  CreditCard
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -47,6 +48,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
     { href: '/admin/assessments', label: '발달체크 현황', icon: <BarChart3 size={20} /> },
     { href: '/admin/consultations', label: '언어 컨설팅', icon: <MessageSquare size={20} /> },
     { href: '/admin/therapies', label: '홈티 관리', icon: <Home size={20} /> },
+    { href: '/admin/payments', label: '결제 관리', icon: <CreditCard size={20} /> },
     { href: '/admin/refunds', label: '환불 요청', icon: <Calendar size={20} /> },
     { href: '/admin/settings', label: '시스템 설정', icon: <Settings size={20} /> },
   ]
