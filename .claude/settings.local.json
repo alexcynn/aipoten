@@ -16,7 +16,11 @@
       "Bash(npm run:*)",
       "Bash(set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=다시 해줘)",
       "Bash(copy srcappadminconsultationspage.tsx srcappadmintherapiespage.tsx)",
-      "Bash(del scriptscheck-assessment.ts)"
+      "Bash(del scriptscheck-assessment.ts)",
+      "Bash(set \"PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=계속해\")",
+      "Bash(cmd /c \"set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=계속해&& npx prisma migrate reset --force\")",
+      "Bash($env:PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"계속해\")",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"계속해\" npx prisma migrate reset:*)"
     ],
     "deny": [],
     "ask": []

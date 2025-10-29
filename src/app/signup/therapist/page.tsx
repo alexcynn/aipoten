@@ -107,9 +107,7 @@ export default function TherapistRegisterPage() {
   const [certifications, setCertifications] = useState<Certification[]>([
     { name: '', issuingOrganization: '', issueDate: '' }
   ])
-  const [experiences, setExperiences] = useState<Experience[]>([
-    { employmentType: 'INSTITUTION', specialty: 'SPEECH_THERAPY', startDate: '' }
-  ])
+  const [experiences, setExperiences] = useState<Experience[]>([])
 
   const handleSpecialtyToggle = (value: string) => {
     setSpecialties(prev =>
@@ -228,17 +226,20 @@ export default function TherapistRegisterPage() {
   }
 
   const validateStep3 = () => {
-    // 예비 치료사가 아닌 경우에만 자격증/경력 검증
+    // 예비 치료사가 아닌 경우에만 자격증 검증
     if (!isPreTherapist) {
       if (certifications.some(c => !c.name || !c.issuingOrganization || !c.issueDate)) {
         alert('모든 자격증 정보를 입력해주세요.')
         return false
       }
-      if (experiences.some(e => !e.specialty || !e.startDate)) {
-        alert('모든 경력 정보를 입력해주세요.')
-        return false
-      }
     }
+
+    // 경력이 입력되어 있는 경우에만 검증 (선택 사항)
+    if (experiences.length > 0 && experiences.some(e => !e.specialty || !e.startDate)) {
+      alert('입력하신 경력 정보를 완성해주세요. (근무형태, 치료분야, 시작일은 필수입니다)')
+      return false
+    }
+
     return true
   }
 
@@ -844,19 +845,23 @@ export default function TherapistRegisterPage() {
                     </button>
                   </div>
 
+                  {experiences.length === 0 && (
+                    <p className="text-sm text-gray-500 mb-4">
+                      경력은 선택 사항입니다. 필요한 경우 "+ 경력 추가" 버튼을 클릭해주세요.
+                    </p>
+                  )}
+
                   {experiences.map((exp, index) => (
                     <div key={index} className="mb-6 p-4 border border-gray-300 rounded-md bg-gray-50">
                       <div className="flex justify-between items-center mb-3">
                         <h4 className="font-medium text-gray-900">경력 {index + 1}</h4>
-                        {experiences.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeExperience(index)}
-                            className="text-red-600 text-sm hover:underline"
-                          >
-                            삭제
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeExperience(index)}
+                          className="text-red-600 text-sm hover:underline"
+                        >
+                          삭제
+                        </button>
                       </div>
 
                       <div className="space-y-3">

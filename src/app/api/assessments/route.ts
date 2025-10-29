@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { childId, ageInMonths, totalScore, responses } = await request.json()
+    const { childId, ageInMonths, totalScore, responses, concernsText } = await request.json()
 
     if (!childId || !ageInMonths) {
       return NextResponse.json(
@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
         status: 'COMPLETED',
         totalScore: totalScore || 0,
         completedAt: new Date(),
+        concernsText: concernsText || null,
         responses: {
           create: responses?.map((r: any) => ({
             questionId: r.questionId,

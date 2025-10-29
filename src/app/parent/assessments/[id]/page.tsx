@@ -20,6 +20,9 @@ interface Assessment {
   ageInMonths: number
   totalScore: number
   createdAt: string
+  concernsText?: string | null
+  aiAnalysis?: string | null
+  aiAnalyzedAt?: string | null
   child: {
     id: string
     name: string
@@ -54,6 +57,8 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false)
+  const [isGeneratingAnalysis, setIsGeneratingAnalysis] = useState(false)
+  const [analysisError, setAnalysisError] = useState('')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -155,6 +160,38 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
     return assessment.results.some(
       r => r.level === 'NEEDS_TRACKING' || r.level === 'NEEDS_ASSESSMENT'
     )
+  }
+
+  const handleGenerateAnalysis = async () => {
+    if (!assessment) return
+
+    setIsGeneratingAnalysis(true)
+    setAnalysisError('')
+
+    try {
+      const response = await fetch(`/api/assessments/${assessment.id}/analyze`, {
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'AI 분석 생성 중 오류가 발생했습니다.')
+      }
+
+      const data = await response.json()
+
+      // 분석 결과를 현재 assessment에 반영
+      setAssessment(prev => prev ? {
+        ...prev,
+        aiAnalysis: data.data.aiAnalysis,
+        aiAnalyzedAt: data.data.aiAnalyzedAt,
+      } : null)
+    } catch (error: any) {
+      console.error('AI 분석 생성 오류:', error)
+      setAnalysisError(error.message)
+    } finally {
+      setIsGeneratingAnalysis(false)
+    }
   }
 
   const getRadarChartData = () => {
@@ -332,6 +369,89 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
                   )
                 })}
               </div>
+            </div>
+          </div>
+
+          {/* AI Analysis Section */}
+          <div className="mt-6 bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">AI 종합 분석</h3>
+                {!assessment.aiAnalysis && (
+                  <button
+                    onClick={handleGenerateAnalysis}
+                    disabled={isGeneratingAnalysis}
+                    className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: '#386646' }}
+                    onMouseEnter={(e) => {
+                      if (!isGeneratingAnalysis) e.currentTarget.style.backgroundColor = '#193149'
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isGeneratingAnalysis) e.currentTarget.style.backgroundColor = '#386646'
+                    }}
+                  >
+                    {isGeneratingAnalysis ? '분석 생성 중...' : 'AI 분석 생성하기'}
+                  </button>
+                )}
+              </div>
+
+              {analysisError && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-600">{analysisError}</p>
+                </div>
+              )}
+
+              {isGeneratingAnalysis && (
+                <div className="py-8 text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto mb-4"></div>
+                  <p className="text-gray-600">AI가 발달체크 결과를 분석하고 있습니다...</p>
+                  <p className="text-sm text-gray-500 mt-2">잠시만 기다려주세요 (약 10-20초 소요)</p>
+                </div>
+              )}
+
+              {assessment.aiAnalysis && !isGeneratingAnalysis && (
+                <div className="prose max-w-none">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-blue-800 m-0">
+                      아래 분석은 AI가 자동으로 생성한 내용입니다. 참고용으로만 활용하시고, 정확한 진단은 전문가와 상담하시기 바랍니다.
+                    </p>
+                  </div>
+                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                    {assessment.aiAnalysis}
+                  </div>
+                  {assessment.aiAnalyzedAt && (
+                    <p className="text-xs text-gray-500 mt-4 mb-0">
+                      분석 생성 시간: {new Date(assessment.aiAnalyzedAt).toLocaleString('ko-KR')}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {!assessment.aiAnalysis && !isGeneratingAnalysis && !analysisError && (
+                <div className="py-8 text-center">
+                  <div className="text-4xl mb-4">🤖</div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">
+                    AI 분석을 생성하세요
+                  </h4>
+                  <p className="text-gray-600 mb-4">
+                    발달체크 결과와 {assessment.concernsText ? '작성하신 우려 사항을 바탕으로' : ''} AI가 맞춤 분석을 제공합니다.
+                  </p>
+                  <ul className="text-sm text-gray-600 text-left max-w-md mx-auto space-y-2">
+                    <li className="flex items-start">
+                      <span className="mr-2">✓</span>
+                      <span>영역별 발달 수준 상세 분석</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">✓</span>
+                      <span>월령에 맞는 맞춤 육아 팁 및 활동 추천</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">✓</span>
+                      <span>전문가 상담 필요성 판단</span>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 

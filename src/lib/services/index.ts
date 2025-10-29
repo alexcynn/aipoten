@@ -9,6 +9,11 @@ export { AssessmentService } from './assessmentService'
 export { BoardService } from './boardService'
 export { VideoService } from './videoService'
 
+// AI/ML 서비스
+export * from './vertexAIService'
+export * from './embeddingService'
+export * from './ragService'
+
 // 서비스 관련 타입들도 함께 export
 export type {
   CreateUserData,

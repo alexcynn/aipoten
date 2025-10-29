@@ -77,6 +77,8 @@ function AssessmentContent() {
   const [completionMessage, setCompletionMessage] = useState<string | null>(null)
   const [categoryCompleted, setCategoryCompleted] = useState<string | null>(null)
   const [showCategoryTransition, setShowCategoryTransition] = useState(false)
+  const [showConcernsStep, setShowConcernsStep] = useState(false)
+  const [concernsText, setConcernsText] = useState('')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -441,6 +443,11 @@ function AssessmentContent() {
     setCategoryCompleted(null)
   }
 
+  const handleMoveToConcernsStep = () => {
+    setShowCategoryTransition(false)
+    setShowConcernsStep(true)
+  }
+
   const getNextCategoryLabel = () => {
     if (!categoryCompleted) return null
     const orderedCategories = getActualCategoryOrder()
@@ -501,6 +508,7 @@ function AssessmentContent() {
             answer: r.answer,
             score: r.score,
           })),
+          concernsText: concernsText.trim() || null,
         }),
       })
 
@@ -653,7 +661,7 @@ function AssessmentContent() {
                       }
                     </p>
                     <button
-                      onClick={isLastCategory() ? handleSubmit : handleContinueToNextCategory}
+                      onClick={isLastCategory() ? handleMoveToConcernsStep : handleContinueToNextCategory}
                       disabled={isSubmitting}
                       className="px-8 py-4 text-lg font-medium rounded-lg shadow-lg transition-all disabled:opacity-50"
                       style={{
@@ -668,10 +676,66 @@ function AssessmentContent() {
                       }}
                     >
                       {isLastCategory()
-                        ? (isSubmitting ? '저장 중...' : '발달체크 결과 보기')
+                        ? '다음'
                         : `${getNextCategoryLabel()} 발달체크 계속하기`
                       }
                     </button>
+                  </div>
+                ) : showConcernsStep ? (
+                  /* 서술형 우려 사항 질문 */
+                  <div className="py-8">
+                    <div className="text-center mb-8">
+                      <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                        마지막 질문입니다
+                      </h2>
+                      <p className="text-lg text-gray-600">
+                        아이의 발달에 대해 특별히 궁금하거나 우려되는 점이 있으신가요?
+                      </p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        (선택 사항) 작성하신 내용은 AI 분석에 반영되어 더 맞춤화된 피드백을 제공합니다.
+                      </p>
+                    </div>
+
+                    <div className="max-w-2xl mx-auto">
+                      <textarea
+                        value={concernsText}
+                        onChange={(e) => setConcernsText(e.target.value)}
+                        placeholder="예: 또래 아이들에 비해 말이 느린 것 같아 걱정됩니다..."
+                        rows={6}
+                        maxLength={1000}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aipoten-green focus:border-transparent resize-none"
+                      />
+                      <div className="text-right text-sm text-gray-500 mt-2">
+                        {concernsText.length} / 1000
+                      </div>
+
+                      <div className="flex gap-3 mt-6">
+                        <button
+                          onClick={() => {
+                            setConcernsText('')
+                            handleSubmit()
+                          }}
+                          disabled={isSubmitting}
+                          className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                        >
+                          건너뛰기
+                        </button>
+                        <button
+                          onClick={handleSubmit}
+                          disabled={isSubmitting}
+                          className="flex-1 px-6 py-3 text-white rounded-lg transition-colors disabled:opacity-50"
+                          style={{ backgroundColor: '#386646' }}
+                          onMouseEnter={(e) => {
+                            if (!isSubmitting) e.currentTarget.style.backgroundColor = '#193149'
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isSubmitting) e.currentTarget.style.backgroundColor = '#386646'
+                          }}
+                        >
+                          {isSubmitting ? '저장 중...' : '제출하고 결과 보기'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 ) : currentQuestion ? (
                   <div className="space-y-6">

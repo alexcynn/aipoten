@@ -1236,19 +1236,23 @@ export default function TherapistProfilePage() {
                         </button>
                       </div>
 
+                      {experiences.length === 0 && (
+                        <p className="text-sm text-gray-500 mb-4">
+                          등록된 경력이 없습니다. 필요한 경우 "+ 경력 추가" 버튼을 클릭해주세요.
+                        </p>
+                      )}
+
                       {experiences.map((exp, index) => (
                         <div key={index} className="mb-6 p-4 border border-gray-300 rounded-md bg-gray-50">
                           <div className="flex justify-between items-center mb-3">
                             <h4 className="font-medium text-gray-900">경력 {index + 1}</h4>
-                            {experiences.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => removeExperience(index)}
-                                className="text-red-600 text-sm hover:underline"
-                              >
-                                삭제
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              onClick={() => removeExperience(index)}
+                              className="text-red-600 text-sm hover:underline"
+                            >
+                              삭제
+                            </button>
                           </div>
 
                           <div className="space-y-3">

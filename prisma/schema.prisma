@@ -37,6 +37,7 @@ model User {
   bookings             Booking[]            @relation("ParentBookings") // Phase 4 예약
   refundRequests       RefundRequest[]      // 환불 요청
   processedRefunds     RefundRequest[]      @relation("ProcessedRefunds") // 처리한 환불 요청
+  inquiries            Inquiry[]            // 1:1 문의
 
   @@map("users")
 }
@@ -132,6 +133,11 @@ model DevelopmentAssessment {
   totalScore   Float                 @default(0)
   completedAt  DateTime?
   createdAt    DateTime              @default(now())
+
+  // AI 분석 관련
+  concernsText String?               // 부모의 서술형 우려 사항
+  aiAnalysis   String?               // LLM 종합 분석 결과
+  aiAnalyzedAt DateTime?             // AI 분석 시간
 
   // 관계
   child     Child                   @relation(fields: [childId], references: [id], onDelete: Cascade)
@@ -952,4 +958,65 @@ model Payment {
   @@index([status])
   @@index([paidAt])
   @@map("payments")
+}
+
+// ===== 1:1 문의 시스템 =====
+
+// 문의 카테고리
+enum InquiryCategory {
+  SERVICE       // 서비스 이용 문의
+  PAYMENT       // 결제/환불 문의
+  TECHNICAL     // 기술 지원
+  OTHER         // 기타
+}
+
+// 문의 상태
+enum InquiryStatus {
+  PENDING       // 답변 대기
+  IN_PROGRESS   // 처리 중
+  RESOLVED      // 해결됨
+  CLOSED        // 종료됨
+}
+
+// 문의 모델
+model Inquiry {
+  id           String          @id @default(cuid())
+  userId       String
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category     InquiryCategory
+  title        String
+  content      String
+  status       InquiryStatus   @default(PENDING)
+  response     String?
+  respondedBy  String?         // 관리자 ID
+  respondedAt  DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("inquiries")
+}
+
+// ===== RAG 지식 베이스 시스템 =====
+
+// 지식 베이스 (발달 이정표 및 전문 지식)
+model KnowledgeBase {
+  id          String               @id @default(cuid())
+  title       String               // 제목
+  content     String               // 본문 내용
+  category    DevelopmentCategory? // 발달 영역 (선택 사항)
+  ageMin      Int?                 // 최소 월령 (선택 사항)
+  ageMax      Int?                 // 최대 월령 (선택 사항)
+  embedding   String?              // 벡터 임베딩 (JSON 배열로 저장)
+  tags        String?              // 태그 (JSON 배열)
+  isActive    Boolean              @default(true)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+  @@index([ageMin, ageMax])
+  @@map("knowledge_base")
 }
