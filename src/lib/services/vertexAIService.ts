@@ -166,3 +166,120 @@ export async function generateAssessmentAnalysis(
     maxOutputTokens: 3000,
   });
 }
+
+/**
+ * 상담일지 생성용 프롬프트 생성
+ */
+export function createSessionReportPrompt(formData: {
+  childName: string;
+  sessionType: string;
+  sessionNumber: number;
+  sessionGoal: string;
+  observation: string;
+  activities: string;
+  materials?: string;
+  strengths?: string;
+  concerns?: string;
+  homeCoaching?: string;
+  nextPlan?: string;
+}): string {
+  const sessionTypeNames: Record<string, string> = {
+    SPEECH_THERAPY: '언어치료',
+    SENSORY_INTEGRATION: '감각통합',
+    PLAY_THERAPY: '놀이치료',
+    ART_THERAPY: '미술치료',
+    MUSIC_THERAPY: '음악치료',
+    OCCUPATIONAL_THERAPY: '작업치료',
+    COGNITIVE_THERAPY: '인지치료',
+    BEHAVIORAL_THERAPY: '행동치료',
+  };
+
+  const sessionTypeName = sessionTypeNames[formData.sessionType] || formData.sessionType;
+
+  return `당신은 아동 발달 치료 전문가입니다. 치료사가 작성한 세션 기록을 바탕으로 부모님께서 이해하기 쉽도록 상세하고 따뜻한 톤의 상담일지를 작성해주세요.
+
+## 세션 정보
+- 자녀명: ${formData.childName}
+- 세션 유형: ${sessionTypeName}
+- 회차: ${formData.sessionNumber}회차
+- 세션 목표: ${formData.sessionGoal}
+
+## 아동 상태 및 관찰
+${formData.observation}
+
+## 오늘 진행한 활동
+${formData.activities}
+
+${formData.materials ? `## 사용한 교구/자료\n${formData.materials}\n` : ''}
+
+${formData.strengths ? `## 관찰된 강점\n${formData.strengths}\n` : ''}
+
+${formData.concerns ? `## 주의가 필요한 부분\n${formData.concerns}\n` : ''}
+
+${formData.homeCoaching ? `## 가정에서 해보면 좋을 활동\n${formData.homeCoaching}\n` : ''}
+
+${formData.nextPlan ? `## 다음 세션 계획\n${formData.nextPlan}\n` : ''}
+
+## 요청사항
+위 정보를 바탕으로 부모님께 전달할 상담일지를 작성해주세요. 다음 구조로 작성해주세요:
+
+1. **오늘 세션 개요**
+   - 세션의 전반적인 목표와 진행 내용을 2-3문장으로 요약
+
+2. **아이의 상태 및 관찰 내용**
+   - 세션 중 관찰된 아이의 상태, 기분, 참여도 등을 자세히 설명
+   - 긍정적인 부분과 주의가 필요한 부분을 균형있게 설명
+
+3. **진행한 활동과 아이의 반응**
+   - 어떤 활동을 했는지, 아이가 어떻게 반응했는지 구체적으로 설명
+   - 사용한 교구나 자료가 있다면 함께 언급
+
+4. **눈에 띄는 강점과 발전**
+   - 아이가 잘하는 부분, 이전보다 나아진 부분을 구체적으로 설명
+   - 부모님이 자녀의 성장을 느낄 수 있도록 격려하는 톤
+
+5. **주의 깊게 살펴볼 부분**
+   - 발달이나 행동에서 주의가 필요한 부분이 있다면 부드럽게 설명
+   - 걱정스럽게 들리지 않도록 발전 가능성과 함께 언급
+
+6. **가정에서의 활동 제안**
+   - 일상생활에서 부모님과 함께 할 수 있는 활동 제안
+   - 구체적이고 실천 가능한 팁 제공
+
+7. **다음 세션 안내**
+   - 다음 세션에서 집중할 내용이나 목표 안내
+   - 연속성 있는 치료 계획 공유
+
+**작성 시 유의사항:**
+- 전문 용어는 가능한 쉬운 말로 풀어서 설명
+- 따뜻하고 격려하는 톤 유지
+- 긍정적인 면과 개선이 필요한 면을 균형있게 전달
+- 구체적인 예시를 들어 이해하기 쉽게 작성
+- 마크다운 형식으로 작성
+
+부모님이 읽으시면서 자녀의 발달과 치료 과정을 명확히 이해하고, 가정에서도 도움을 줄 수 있도록 작성해주세요.`;
+}
+
+/**
+ * 상담일지 자동 생성
+ */
+export async function generateSessionReport(formData: {
+  childName: string;
+  sessionType: string;
+  sessionNumber: number;
+  sessionGoal: string;
+  observation: string;
+  activities: string;
+  materials?: string;
+  strengths?: string;
+  concerns?: string;
+  homeCoaching?: string;
+  nextPlan?: string;
+}): Promise<string> {
+  const prompt = createSessionReportPrompt(formData);
+
+  return await generateText(prompt, {
+    temperature: 0.7,
+    maxOutputTokens: 4000, // 상담일지는 더 길 수 있으므로 토큰 수 증가
+  });
+}

@@ -77,6 +77,11 @@ export default function BookingDetailPage() {
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [cancellationReason, setCancellationReason] = useState('')
   const [isCancelling, setIsCancelling] = useState(false)
+  const [paymentInfo, setPaymentInfo] = useState({
+    bankName: '국민은행',
+    accountNumber: '123-456-78901',
+    accountHolder: '아이포텐',
+  })
 
   useEffect(() => {
     fetchBooking()
@@ -84,13 +89,29 @@ export default function BookingDetailPage() {
 
   const fetchBooking = async () => {
     try {
-      const response = await fetch(`/api/bookings/${bookingId}`)
-      const data = await response.json()
+      const [bookingRes, settingsRes] = await Promise.all([
+        fetch(`/api/bookings/${bookingId}`),
+        fetch('/api/admin/settings'),
+      ])
 
-      if (response.ok) {
-        setBooking(data.booking)
+      const bookingData = await bookingRes.json()
+
+      if (bookingRes.ok) {
+        setBooking(bookingData.booking)
       } else {
-        setError(data.error || '예약 정보를 불러올 수 없습니다.')
+        setError(bookingData.error || '예약 정보를 불러올 수 없습니다.')
+      }
+
+      // 결제 정보 가져오기
+      if (settingsRes.ok) {
+        const settingsData = await settingsRes.json()
+        if (settingsData.bankName) {
+          setPaymentInfo({
+            bankName: settingsData.bankName,
+            accountNumber: settingsData.accountNumber,
+            accountHolder: settingsData.accountHolder,
+          })
+        }
       }
     } catch (err) {
       setError('서버 오류가 발생했습니다.')
@@ -327,19 +348,19 @@ export default function BookingDetailPage() {
                     <div className="flex justify-between">
                       <span className="text-blue-700">은행:</span>
                       <span className="text-blue-900 font-medium">
-                        {process.env.NEXT_PUBLIC_PAYMENT_BANK_NAME || '국민은행'}
+                        {paymentInfo.bankName}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-blue-700">계좌번호:</span>
                       <span className="text-blue-900 font-medium">
-                        {process.env.NEXT_PUBLIC_PAYMENT_ACCOUNT_NUMBER || '123-456-78901'}
+                        {paymentInfo.accountNumber}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-blue-700">예금주:</span>
                       <span className="text-blue-900 font-medium">
-                        {process.env.NEXT_PUBLIC_PAYMENT_ACCOUNT_HOLDER || '아이포텐'}
+                        {paymentInfo.accountHolder}
                       </span>
                     </div>
                     <div className="flex justify-between border-t border-blue-300 pt-2 mt-2">

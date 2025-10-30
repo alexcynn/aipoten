@@ -89,6 +89,8 @@ export default function ParentDashboardPage() {
     title: '',
     content: '',
   })
+  const [sessionRecords, setSessionRecords] = useState<any[]>([])
+  const [recordsFilter, setRecordsFilter] = useState<'ALL' | 'CONSULTATION' | 'THERAPY'>('ALL')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -225,6 +227,13 @@ export default function ParentDashboardPage() {
     }
   }, [activeTab])
 
+  // 세션 기록 조회
+  useEffect(() => {
+    if (activeTab === 'sessions') {
+      fetchSessionRecords()
+    }
+  }, [activeTab])
+
   const fetchInquiries = async () => {
     try {
       const response = await fetch('/api/inquiry')
@@ -234,6 +243,34 @@ export default function ParentDashboardPage() {
       }
     } catch (error) {
       console.error('문의 목록 조회 오류:', error)
+    }
+  }
+
+  const fetchSessionRecords = async () => {
+    try {
+      // 모든 예약의 세션 정보를 가져옴
+      const allSessions: any[] = []
+
+      for (const booking of myBookings) {
+        const response = await fetch(`/api/bookings/${booking.id}/sessions`)
+        if (response.ok) {
+          const data = await response.json()
+          // 완료된 세션만 필터링 (상담일지가 있는 세션)
+          const completedSessions = data.sessions.filter((s: any) => s.therapistNote)
+          completedSessions.forEach((s: any) => {
+            allSessions.push({
+              ...s,
+              booking: data.booking,
+            })
+          })
+        }
+      }
+
+      // 날짜순 정렬 (최신순)
+      allSessions.sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime())
+      setSessionRecords(allSessions)
+    } catch (error) {
+      console.error('세션 기록 조회 오류:', error)
     }
   }
 
@@ -1268,27 +1305,128 @@ export default function ParentDashboardPage() {
                   </div>
                 )}
 
-                {/* 세션 일정 탭 */}
+                {/* 세션 기록 탭 */}
                 {activeTab === 'sessions' && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">치료 세션 일정</h3>
-                    <div className="space-y-4">
-                      <Link
-                        href="/parent/sessions/schedule"
-                        className="inline-flex items-center px-4 py-2 rounded-md transition-colors"
-                        style={{
-                          backgroundColor: '#386646',
-                          color: '#FFFFFF'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#193149'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
-                      >
-                        일정 확인하기
-                      </Link>
-                      <div className="text-sm text-gray-500">
-                        예약된 치료 세션 일정을 확인하고 관리할 수 있습니다.
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">세션 기록 (홈티/언어컨설팅)</h3>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setRecordsFilter('ALL')}
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                            recordsFilter === 'ALL'
+                              ? 'bg-aipoten-green text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          전체
+                        </button>
+                        <button
+                          onClick={() => setRecordsFilter('CONSULTATION')}
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                            recordsFilter === 'CONSULTATION'
+                              ? 'bg-aipoten-green text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          언어컨설팅
+                        </button>
+                        <button
+                          onClick={() => setRecordsFilter('THERAPY')}
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                            recordsFilter === 'THERAPY'
+                              ? 'bg-aipoten-green text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          홈티
+                        </button>
                       </div>
                     </div>
+
+                    {sessionRecords.length === 0 ? (
+                      <div className="text-center py-12 bg-gray-50 rounded-lg">
+                        <div className="text-4xl mb-4">📋</div>
+                        <p className="text-gray-600 mb-2">세션 기록이 없습니다.</p>
+                        <p className="text-sm text-gray-500">
+                          세션이 완료되면 치료사님이 작성한 상담일지를 확인하실 수 있습니다.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {sessionRecords
+                          .filter(record => {
+                            if (recordsFilter === 'ALL') return true
+                            return record.booking.sessionType === recordsFilter
+                          })
+                          .map((session: any) => {
+                            const sessionTypeLabel = session.booking.sessionType === 'CONSULTATION' ? '언어컨설팅' : '홈티'
+
+                            return (
+                              <div
+                                key={session.id}
+                                className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                              >
+                                <div className="flex items-start justify-between mb-4">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        {sessionTypeLabel}
+                                      </span>
+                                      <span className="text-sm font-medium text-gray-900">
+                                        {session.sessionNumber}회차
+                                      </span>
+                                      <span className="text-sm text-gray-500">
+                                        {session.booking.therapist.user.name} 치료사
+                                      </span>
+                                    </div>
+                                    <div className="text-sm text-gray-600 mb-1">
+                                      📅 {new Date(session.scheduledAt).toLocaleDateString('ko-KR', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        weekday: 'short'
+                                      })}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {session.booking.child.name}
+                                    </div>
+                                  </div>
+                                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                    완료
+                                  </span>
+                                </div>
+
+                                {/* 상담일지 내용 */}
+                                <div className="border-t border-gray-200 pt-4">
+                                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                    <span>📝</span>
+                                    상담일지
+                                  </h4>
+                                  <div className="prose prose-sm max-w-none">
+                                    <div
+                                      className="text-sm text-gray-700 whitespace-pre-wrap"
+                                      dangerouslySetInnerHTML={{
+                                        __html: session.therapistNote.replace(/\n/g, '<br>')
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* 부모 피드백 (있는 경우) */}
+                                {session.parentFeedback && (
+                                  <div className="border-t border-gray-200 mt-4 pt-4">
+                                    <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                                      부모님 피드백
+                                    </h4>
+                                    <p className="text-sm text-gray-700">{session.parentFeedback}</p>
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
+                      </div>
+                    )}
                   </div>
                 )}
 
