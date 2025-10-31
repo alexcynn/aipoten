@@ -768,7 +768,7 @@ export default function AdminTherapistsPage() {
                           >
                             상세
                           </button>
-                          {therapist.approvalStatus === 'WAITING' && (
+                          {(therapist.approvalStatus === 'PENDING' || therapist.approvalStatus === 'WAITING') && (
                             <>
                               <button
                                 onClick={() => handleApprove(therapist.id)}
@@ -1210,7 +1210,7 @@ export default function AdminTherapistsPage() {
                     </button>
                   </div>
                   <div className="flex space-x-3">
-                    {selectedTherapist.approvalStatus === 'WAITING' && (
+                    {(selectedTherapist.approvalStatus === 'PENDING' || selectedTherapist.approvalStatus === 'WAITING') && (
                       <>
                         <button
                           onClick={() => handleApprove(selectedTherapist.id)}

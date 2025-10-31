@@ -403,7 +403,7 @@ model TherapistProfile {
   consultationFee Int?     // 상담료 (원) (레거시)
 
   // 승인 관련
-  approvalStatus  ApprovalStatus @default(WAITING)
+  approvalStatus  ApprovalStatus @default(PENDING)
   approvedAt      DateTime?
   approvedBy      String?  // 승인한 관리자 ID
   rejectedAt      DateTime?

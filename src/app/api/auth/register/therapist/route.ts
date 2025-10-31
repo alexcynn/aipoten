@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
           accountNumber: accountNumber || null,
           accountHolder: accountHolder || null,
           isPreTherapist: isPreTherapist || false,
-          approvalStatus: 'WAITING', // 대기 상태 (로그인 가능)
+          approvalStatus: 'PENDING', // 신청 상태 (회원가입 직후)
           status: 'PENDING',
         }
       })
