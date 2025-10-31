@@ -2,6 +2,9 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth-config"
 import { prisma } from "@/lib/prisma"
 
+// Re-export authOptions for convenience
+export { authOptions }
+
 export async function getSession() {
   return await getServerSession(authOptions)
 }

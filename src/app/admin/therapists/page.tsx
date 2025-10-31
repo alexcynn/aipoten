@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import AdminLayout from '@/components/layout/AdminLayout'
+import Pagination from '@/components/admin/Pagination'
 
 interface Certification {
   id: string
@@ -102,6 +103,8 @@ export default function AdminTherapistsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [newStatus, setNewStatus] = useState<string>('')
   const [modalDetailTab, setModalDetailTab] = useState<'info' | 'education' | 'certifications' | 'experience'>('info')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   useEffect(() => {
     if (status === 'loading') return
@@ -118,6 +121,11 @@ export default function AdminTherapistsPage() {
 
     fetchTherapists()
   }, [session, status, router])
+
+  // Reset to page 1 when search term or specialty filter changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, specialtyFilter])
 
   const fetchTherapists = async () => {
     try {
@@ -389,6 +397,12 @@ export default function AdminTherapistsPage() {
     return true
   })
 
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(filteredTherapists.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedTherapists = filteredTherapists.slice(startIndex, endIndex)
+
   // 각 탭의 숫자 계산 (전체 데이터 기준, 단 activeTab이 updateRequests일 때는 제외)
   const getFilterCount = (statusFilter: string) => {
     // 프로필 수정 요청 탭에서는 필터 숫자를 표시하지 않음
@@ -530,6 +544,7 @@ export default function AdminTherapistsPage() {
                 setFilter('ALL')
                 setSearchTerm('')
                 setSpecialtyFilter('')
+                setCurrentPage(1)
               }}
               className={`py-3 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'list'
@@ -544,6 +559,7 @@ export default function AdminTherapistsPage() {
                 setActiveTab('updateRequests')
                 setSearchTerm('')
                 setSpecialtyFilter('')
+                setCurrentPage(1)
               }}
               className={`py-3 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'updateRequests'
@@ -574,6 +590,7 @@ export default function AdminTherapistsPage() {
                       // 필터 변경 시 검색어와 전문분야 필터 초기화
                       setSearchTerm('')
                       setSpecialtyFilter('')
+                      setCurrentPage(1)
                     }}
                     className={`py-2 px-1 border-b-2 font-medium text-sm ${
                       filter === statusFilter
@@ -687,7 +704,7 @@ export default function AdminTherapistsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredTherapists.map((therapist) => (
+                  {paginatedTherapists.map((therapist) => (
                     <tr key={therapist.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -774,6 +791,15 @@ export default function AdminTherapistsPage() {
                 </tbody>
               </table>
             </div>
+            {filteredTherapists.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={filteredTherapists.length}
+              />
+            )}
           </div>
         )}
 

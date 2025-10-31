@@ -3,16 +3,15 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import AdminHeader from '@/components/admin/AdminHeader'
+import AdminLayout from '@/components/layout/AdminLayout'
 
 interface KnowledgeItem {
   id: string
   title: string
   content: string
-  category: string | null
+  category: string
   ageMin: number | null
   ageMax: number | null
-  tags: string | null
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -39,7 +38,7 @@ export default function KnowledgeBasePage() {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    category: '',
+    category: 'GROSS_MOTOR',
     ageMin: '',
     ageMax: '',
     isActive: true,
@@ -80,7 +79,7 @@ export default function KnowledgeBasePage() {
     setFormData({
       title: '',
       content: '',
-      category: '',
+      category: 'GROSS_MOTOR',
       ageMin: '',
       ageMax: '',
       isActive: true,
@@ -93,7 +92,7 @@ export default function KnowledgeBasePage() {
     setFormData({
       title: item.title,
       content: item.content,
-      category: item.category || '',
+      category: item.category,
       ageMin: item.ageMin?.toString() || '',
       ageMax: item.ageMax?.toString() || '',
       isActive: item.isActive,
@@ -121,7 +120,7 @@ export default function KnowledgeBasePage() {
           ...formData,
           ageMin: formData.ageMin ? parseInt(formData.ageMin) : null,
           ageMax: formData.ageMax ? parseInt(formData.ageMax) : null,
-          category: formData.category || null,
+          category: formData.category,
         }),
       })
 
@@ -174,33 +173,29 @@ export default function KnowledgeBasePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminHeader />
-
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 sm:px-0">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">지식 베이스 관리</h1>
-              <p className="mt-1 text-sm text-gray-600">
-                AI 분석에 활용될 발달 이정표 및 전문 지식을 관리합니다.
-              </p>
-            </div>
-            <button
-              onClick={handleCreate}
-              className="px-4 py-2 bg-aipoten-green text-white rounded-lg hover:bg-aipoten-navy transition-colors"
-            >
-              지식 항목 추가
-            </button>
+    <AdminLayout title="지식 베이스 관리">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="text-gray-600">
+              발달체크 결과 분석에 활용되는 발달 이정표 지식을 관리합니다.
+            </p>
           </div>
+          <button
+            onClick={handleCreate}
+            className="px-4 py-2 bg-aipoten-green text-white rounded-lg hover:bg-aipoten-navy transition-colors"
+          >
+            지식 항목 추가
+          </button>
+        </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
 
-          <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="bg-white shadow rounded-lg overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -239,7 +234,7 @@ export default function KnowledgeBasePage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm text-gray-900">
-                          {item.category ? CATEGORY_LABELS[item.category] || item.category : '전체'}
+                          {CATEGORY_LABELS[item.category] || item.category}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -278,8 +273,7 @@ export default function KnowledgeBasePage() {
               </tbody>
             </table>
           </div>
-        </div>
-      </main>
+      </div>
 
       {/* Modal */}
       {showModal && (
@@ -321,14 +315,14 @@ export default function KnowledgeBasePage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    카테고리
+                    카테고리 *
                   </label>
                   <select
+                    required
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aipoten-green focus:border-transparent"
                   >
-                    <option value="">전체</option>
                     {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
                       <option key={key} value={key}>
                         {label}
@@ -401,6 +395,6 @@ export default function KnowledgeBasePage() {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   )
 }

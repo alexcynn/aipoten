@@ -20,7 +20,10 @@
       "Bash(set \"PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=계속해\")",
       "Bash(cmd /c \"set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=계속해&& npx prisma migrate reset --force\")",
       "Bash($env:PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"계속해\")",
-      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"계속해\" npx prisma migrate reset:*)"
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"계속해\" npx prisma migrate reset:*)",
+      "Bash(sqlite3:*)",
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []

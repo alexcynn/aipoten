@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-config';
-import { generateAndSaveEmbedding } from '@/lib/services/ragService';
 import type { DevelopmentCategory } from '@prisma/client';
 
 /**
@@ -59,7 +58,6 @@ export async function GET(request: NextRequest) {
         category: true,
         ageMin: true,
         ageMax: true,
-        tags: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
@@ -106,12 +104,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, content, category, ageMin, ageMax, tags, isActive } = body;
+    const { title, content, category, ageMin, ageMax, isActive } = body;
 
     // 유효성 검사
-    if (!title || !content) {
+    if (!title || !content || !category) {
       return NextResponse.json(
-        { error: '제목과 내용은 필수입니다.' },
+        { error: '제목, 내용, 카테고리는 필수입니다.' },
         { status: 400 }
       );
     }
@@ -121,17 +119,11 @@ export async function POST(request: NextRequest) {
       data: {
         title,
         content,
-        category: category || null,
+        category: category as DevelopmentCategory,
         ageMin: ageMin ? parseInt(ageMin) : null,
         ageMax: ageMax ? parseInt(ageMax) : null,
-        tags: tags ? JSON.stringify(tags) : null,
         isActive: isActive !== undefined ? isActive : true,
       },
-    });
-
-    // 백그라운드에서 임베딩 생성 (비동기)
-    generateAndSaveEmbedding(knowledgeItem.id).catch((error) => {
-      console.error('임베딩 생성 실패:', error);
     });
 
     return NextResponse.json(

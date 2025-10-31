@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
         _count: {
           select: {
             children: true,
-            consultations: true
+            consultations: true,
+            bookings: true
           }
         }
       },

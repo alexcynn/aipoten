@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-config';
-import { generateAndSaveEmbedding } from '@/lib/services/ragService';
+import type { DevelopmentCategory } from '@prisma/client';
 
 /**
  * GET /api/admin/knowledge-base/[id]
@@ -79,7 +79,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { title, content, category, ageMin, ageMax, tags, isActive } = body;
+    const { title, content, category, ageMin, ageMax, isActive } = body;
 
     // 기존 항목 존재 확인
     const existingItem = await prisma.knowledgeBase.findUnique({
@@ -98,12 +98,11 @@ export async function PATCH(
 
     if (title !== undefined) updateData.title = title;
     if (content !== undefined) updateData.content = content;
-    if (category !== undefined) updateData.category = category || null;
+    if (category !== undefined) updateData.category = category as DevelopmentCategory;
     if (ageMin !== undefined)
       updateData.ageMin = ageMin ? parseInt(ageMin) : null;
     if (ageMax !== undefined)
       updateData.ageMax = ageMax ? parseInt(ageMax) : null;
-    if (tags !== undefined) updateData.tags = tags ? JSON.stringify(tags) : null;
     if (isActive !== undefined) updateData.isActive = isActive;
 
     // 지식 항목 업데이트
@@ -111,13 +110,6 @@ export async function PATCH(
       where: { id: params.id },
       data: updateData,
     });
-
-    // 제목이나 내용이 변경된 경우 임베딩 재생성
-    if (title !== undefined || content !== undefined) {
-      generateAndSaveEmbedding(params.id).catch((error) => {
-        console.error('임베딩 재생성 실패:', error);
-      });
-    }
 
     return NextResponse.json({
       success: true,
