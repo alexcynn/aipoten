@@ -18,10 +18,12 @@ interface Consultation {
   originalFee: number
   completedSessions: number
   sessionCount: number
+  totalSessions: number
   settlementAmount: number | null
   settledAt: string | null
   settlementNote: string | null
   createdAt: string
+  currentStatus: string // 5단계 상태
   parentUser: {
     id: string
     name: string
@@ -85,11 +87,17 @@ interface Consultation {
       graduationYear: string
     }>
   }
-  timeSlot: {
-    date: string
-    startTime: string
-    endTime: string
-  }
+  bookings?: Array<{
+    id: string
+    sessionNumber: number
+    status: string
+    timeSlot?: {
+      id: string
+      date: string
+      startTime: string
+      endTime: string
+    }
+  }>
 }
 
 interface AccountInfo {
@@ -101,16 +109,34 @@ interface AccountInfo {
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   PENDING_PAYMENT: { label: '결제대기', color: 'bg-gray-100 text-gray-800' },
-  BOOKING_IN_PROGRESS: { label: '예약 중', color: 'bg-yellow-100 text-yellow-800' },
-  CONFIRMED: { label: '예약 확인', color: 'bg-blue-100 text-blue-800' },
-  SESSION_COMPLETED: { label: '세션 완료', color: 'bg-green-100 text-green-800' },
-  SETTLEMENT_COMPLETED: { label: '정산 완료', color: 'bg-purple-100 text-purple-800' },
-  REFUNDED: { label: '환불', color: 'bg-red-100 text-red-800' },
+  PENDING_CONFIRMATION: { label: '예약대기', color: 'bg-yellow-100 text-yellow-800' },
+  CONFIRMED: { label: '진행예정', color: 'bg-blue-100 text-blue-800' },
+  COMPLETED: { label: '완료', color: 'bg-green-100 text-green-800' },
   CANCELLED: { label: '취소', color: 'bg-red-100 text-red-800' },
-  // 레거시
-  PENDING_CONFIRMATION: { label: '예약 중', color: 'bg-yellow-100 text-yellow-800' },
-  IN_PROGRESS: { label: '진행 중', color: 'bg-blue-100 text-blue-800' },
-  COMPLETED: { label: '완료', color: 'bg-gray-100 text-gray-800' },
+}
+
+const specialtyLabels: Record<string, string> = {
+  SPEECH_THERAPY: '언어치료',
+  PLAY_THERAPY: '놀이치료',
+  ART_THERAPY: '미술치료',
+  MUSIC_THERAPY: '음악치료',
+  BEHAVIORAL_THERAPY: '행동치료',
+  SENSORY_INTEGRATION: '감각통합',
+  PHYSICAL_THERAPY: '물리치료',
+  OCCUPATIONAL_THERAPY: '작업치료',
+}
+
+const formatSpecialties = (specialties: string | null) => {
+  if (!specialties) return '-'
+  try {
+    const parsed = JSON.parse(specialties)
+    if (Array.isArray(parsed)) {
+      return parsed.map(s => specialtyLabels[s] || s).join(', ')
+    }
+    return specialties
+  } catch {
+    return specialties
+  }
 }
 
 export default function AdminConsultationsPage() {
@@ -120,7 +146,7 @@ export default function AdminConsultationsPage() {
   const [consultations, setConsultations] = useState<Consultation[]>([])
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED'>('ALL')
+  const [filter, setFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PENDING_CONFIRMATION' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'>('ALL')
 
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
@@ -159,34 +185,6 @@ export default function AdminConsultationsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleStatusChange = async (id: string, newStatus: string) => {
-    if (!confirm(`상태를 "${statusLabels[newStatus]?.label}"(으)로 변경하시겠습니까?`)) {
-      return
-    }
-
-    try {
-      const response = await fetch(`/api/admin/bookings/${id}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      })
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: '상태가 변경되었습니다.' })
-        fetchConsultations()
-      } else {
-        const data = await response.json()
-        setMessage({ type: 'error', text: data.error || '상태 변경 중 오류가 발생했습니다.' })
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: '서버 오류가 발생했습니다.' })
-    }
-
-    setTimeout(() => setMessage(null), 3000)
   }
 
   const handleOpenChildModal = (child: any) => {
@@ -245,7 +243,7 @@ export default function AdminConsultationsPage() {
 
         {/* 필터 */}
         <div className="bg-white shadow rounded-lg p-4">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setFilter('ALL')}
               className={`px-4 py-2 rounded-md text-sm font-medium ${
@@ -257,24 +255,34 @@ export default function AdminConsultationsPage() {
               전체 ({consultations.length})
             </button>
             <button
-              onClick={() => setFilter('PENDING')}
+              onClick={() => setFilter('PENDING_PAYMENT')}
               className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'PENDING'
+                filter === 'PENDING_PAYMENT'
                   ? 'bg-aipoten-green text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              결제 대기
+              결제대기
             </button>
             <button
-              onClick={() => setFilter('IN_PROGRESS')}
+              onClick={() => setFilter('PENDING_CONFIRMATION')}
               className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'IN_PROGRESS'
+                filter === 'PENDING_CONFIRMATION'
                   ? 'bg-aipoten-green text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              진행 중
+              예약대기
+            </button>
+            <button
+              onClick={() => setFilter('CONFIRMED')}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                filter === 'CONFIRMED'
+                  ? 'bg-aipoten-green text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              진행예정
             </button>
             <button
               onClick={() => setFilter('COMPLETED')}
@@ -284,7 +292,17 @@ export default function AdminConsultationsPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              완료/취소
+              완료
+            </button>
+            <button
+              onClick={() => setFilter('CANCELLED')}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                filter === 'CANCELLED'
+                  ? 'bg-aipoten-green text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              취소
             </button>
           </div>
         </div>
@@ -307,10 +325,16 @@ export default function AdminConsultationsPage() {
                       치료사
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      치료 유형
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      주소
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       일정
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      세션 진행
+                      1회 비용
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       상태
@@ -352,51 +376,60 @@ export default function AdminConsultationsPage() {
                           {consultation.therapist.user.phone}
                         </div>
                       </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {formatSpecialties(consultation.therapist.specialties)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {consultation.therapist.address}
+                          {consultation.therapist.addressDetail && `, ${consultation.therapist.addressDetail}`}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {new Date(consultation.scheduledAt).toLocaleDateString('ko-KR')}
+                          {consultation.bookings?.[0]?.timeSlot?.date
+                            ? new Date(consultation.bookings[0].timeSlot.date).toLocaleDateString('ko-KR')
+                            : new Date(consultation.scheduledAt).toLocaleDateString('ko-KR')}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {consultation.timeSlot.startTime} - {consultation.timeSlot.endTime}
+                          {consultation.bookings?.[0]?.timeSlot?.startTime && consultation.bookings?.[0]?.timeSlot?.endTime
+                            ? `${consultation.bookings[0].timeSlot.startTime} - ${consultation.bookings[0].timeSlot.endTime}`
+                            : '시간 미정'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {consultation.completedSessions} / {consultation.sessionCount} 회
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                          <div
-                            className="bg-aipoten-green h-2 rounded-full"
-                            style={{
-                              width: `${(consultation.completedSessions / consultation.sessionCount) * 100}%`,
-                            }}
-                          ></div>
+                          ₩{consultation.therapist.sessionFee?.toLocaleString() || '-'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <select
-                          value={consultation.status}
-                          onChange={(e) => handleStatusChange(consultation.id, e.target.value)}
+                        <span
                           className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            statusLabels[consultation.status]?.color || 'bg-gray-100 text-gray-800'
-                          } border-none cursor-pointer`}
+                            statusLabels[consultation.currentStatus]?.color || 'bg-gray-100 text-gray-800'
+                          }`}
                         >
-                          <option value="PENDING_PAYMENT">결제대기</option>
-                          <option value="BOOKING_IN_PROGRESS">예약 중</option>
-                          <option value="CONFIRMED">예약 확인</option>
-                          <option value="SESSION_COMPLETED">세션 완료</option>
-                          <option value="SETTLEMENT_COMPLETED">정산 완료</option>
-                          <option value="REFUNDED">환불</option>
-                          <option value="CANCELLED">취소</option>
-                        </select>
+                          {statusLabels[consultation.currentStatus]?.label || consultation.currentStatus}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a
-                          href={`/admin/consultations/${consultation.id}`}
-                          className="text-aipoten-green hover:text-aipoten-navy"
-                        >
-                          상세보기
-                        </a>
+                        <div className="flex flex-col gap-1">
+                          <a
+                            href={`/admin/consultations/${consultation.id}`}
+                            className="text-aipoten-green hover:text-aipoten-navy"
+                          >
+                            상세보기
+                          </a>
+                          {consultation.currentStatus === 'COMPLETED' && (
+                            <a
+                              href={`/admin/consultations/${consultation.id}/journal`}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              상담일지
+                            </a>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

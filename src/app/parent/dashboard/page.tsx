@@ -79,7 +79,7 @@ export default function ParentDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<'assessments' | 'videos' | 'consultation' | 'therapy' | 'sessions' | 'inquiry'>('assessments')
+  const [activeTab, setActiveTab] = useState<'assessments' | 'videos' | 'consultation' | 'therapy' | 'sessions' | 'payments' | 'inquiry'>('assessments')
   const [consultationSubTab, setConsultationSubTab] = useState<'pending' | 'in_progress' | 'history'>('pending')
   const [therapySubTab, setTherapySubTab] = useState<'pending' | 'in_progress' | 'history'>('pending')
   const [inquiries, setInquiries] = useState<any[]>([])
@@ -91,6 +91,9 @@ export default function ParentDashboardPage() {
   })
   const [sessionRecords, setSessionRecords] = useState<any[]>([])
   const [recordsFilter, setRecordsFilter] = useState<'ALL' | 'CONSULTATION' | 'THERAPY'>('ALL')
+  const [payments, setPayments] = useState<any[]>([])
+  const [paymentsFilter, setPaymentsFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PAID' | 'REFUNDED'>('ALL')
+  const [accountInfo, setAccountInfo] = useState<any>(null)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -273,6 +276,26 @@ export default function ParentDashboardPage() {
       console.error('세션 기록 조회 오류:', error)
     }
   }
+
+  const fetchPayments = async () => {
+    try {
+      const response = await fetch(`/api/parent/payments?status=${paymentsFilter}`)
+      if (response.ok) {
+        const data = await response.json()
+        setPayments(data.payments || [])
+        setAccountInfo(data.accountInfo || null)
+      }
+    } catch (error) {
+      console.error('결제 내역 조회 오류:', error)
+    }
+  }
+
+  // payments 탭이 활성화되면 결제 내역 불러오기
+  useEffect(() => {
+    if (activeTab === 'payments') {
+      fetchPayments()
+    }
+  }, [activeTab, paymentsFilter])
 
   const handleInquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -630,6 +653,16 @@ export default function ParentDashboardPage() {
                     }`}
                   >
                     세션 일정
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('payments')}
+                    className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === 'payments'
+                        ? 'border-aipoten-green text-aipoten-green'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    결제
                   </button>
                   <button
                     onClick={() => setActiveTab('inquiry')}
@@ -1427,6 +1460,262 @@ export default function ParentDashboardPage() {
                           })}
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* 결제 탭 */}
+                {activeTab === 'payments' && (
+                  <div className="space-y-6">
+                    {/* 필터 버튼 */}
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">결제 내역</h3>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setPaymentsFilter('ALL')}
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                            paymentsFilter === 'ALL'
+                              ? 'bg-aipoten-green text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          전체
+                        </button>
+                        <button
+                          onClick={() => setPaymentsFilter('PENDING_PAYMENT')}
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                            paymentsFilter === 'PENDING_PAYMENT'
+                              ? 'bg-aipoten-green text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          입금 대기
+                        </button>
+                        <button
+                          onClick={() => setPaymentsFilter('PAID')}
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                            paymentsFilter === 'PAID'
+                              ? 'bg-aipoten-green text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          결제 완료
+                        </button>
+                        <button
+                          onClick={() => setPaymentsFilter('REFUNDED')}
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                            paymentsFilter === 'REFUNDED'
+                              ? 'bg-aipoten-green text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          환불
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* 입금 대기 시 계좌 안내 */}
+                    {paymentsFilter === 'PENDING_PAYMENT' && accountInfo && (
+                      <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+                        <h4 className="text-md font-semibold text-gray-900 mb-3">입금 계좌 안내</h4>
+                        <div className="space-y-2 text-sm">
+                          <p>
+                            <span className="font-medium text-gray-700">은행:</span>{' '}
+                            <span className="text-gray-900">{accountInfo.bankName}</span>
+                          </p>
+                          <p>
+                            <span className="font-medium text-gray-700">계좌번호:</span>{' '}
+                            <span className="text-gray-900 font-mono">{accountInfo.accountNumber}</span>
+                          </p>
+                          <p>
+                            <span className="font-medium text-gray-700">예금주:</span>{' '}
+                            <span className="text-gray-900">{accountInfo.accountHolder}</span>
+                          </p>
+                        </div>
+                        <p className="text-xs text-yellow-800 mt-3">
+                          ※ 입금 시 입금자명은 신청자명과 동일해야 하며, 입금 확인 후 예약이 확정됩니다.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* 결제 목록 */}
+                    <div>
+                      {payments.length === 0 ? (
+                        <div className="text-center py-12 bg-gray-50 rounded-lg">
+                          <div className="text-4xl mb-4">💳</div>
+                          <p className="text-gray-600 mb-2">결제 내역이 없습니다.</p>
+                          <p className="text-sm text-gray-500">
+                            언어 컨설팅 또는 홈티 예약 후 결제 내역을 확인하실 수 있습니다.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {payments.map((payment: any) => {
+                            const statusLabels: Record<string, { label: string; color: string }> = {
+                              PENDING_PAYMENT: { label: '입금 대기', color: 'bg-orange-100 text-orange-800' },
+                              PAID: { label: '결제 완료', color: 'bg-green-100 text-green-800' },
+                              REFUNDED: { label: '전액 환불', color: 'bg-red-100 text-red-800' },
+                              PARTIALLY_REFUNDED: { label: '부분 환불', color: 'bg-yellow-100 text-yellow-800' },
+                              FAILED: { label: '결제 실패', color: 'bg-gray-100 text-gray-800' },
+                            }
+
+                            const statusInfo = statusLabels[payment.status] || statusLabels.PENDING_PAYMENT
+                            const sessionTypeLabel = payment.sessionType === 'CONSULTATION' ? '언어 컨설팅' : '홈티'
+                            const progress = payment.completedSessions || 0
+                            const total = payment.totalSessions
+
+                            return (
+                              <div
+                                key={payment.id}
+                                className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow"
+                              >
+                                <div className="flex items-start justify-between mb-4">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}>
+                                        {statusInfo.label}
+                                      </span>
+                                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                                        {sessionTypeLabel}
+                                      </span>
+                                    </div>
+                                    <h4 className="text-lg font-semibold text-gray-900 mb-1">
+                                      {payment.therapist.user.name} 치료사
+                                    </h4>
+                                    <p className="text-sm text-gray-600 mb-2">
+                                      {payment.child.name} • {total}회 패키지
+                                    </p>
+                                    {payment.status === 'PAID' && (
+                                      <div className="mb-2">
+                                        <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
+                                          <span>진행률</span>
+                                          <span className="font-medium">
+                                            {progress} / {total}회
+                                          </span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                          <div
+                                            className="bg-aipoten-green h-2 rounded-full transition-all"
+                                            style={{ width: `${(progress / total) * 100}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="border-t border-gray-200 pt-4">
+                                  <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                                    <div>
+                                      <span className="text-gray-600">결제일:</span>{' '}
+                                      <span className="text-gray-900">
+                                        {payment.createdAt
+                                          ? new Date(payment.createdAt).toLocaleDateString('ko-KR')
+                                          : '-'}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="text-gray-600">결제금액:</span>{' '}
+                                      <span className="text-gray-900 font-semibold">
+                                        ₩{payment.finalFee?.toLocaleString()}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {payment.discountRate > 0 && (
+                                    <p className="text-xs text-gray-500 mb-3">
+                                      원가: ₩{payment.originalFee?.toLocaleString()} (할인율: {payment.discountRate}%)
+                                    </p>
+                                  )}
+
+                                  {payment.status === 'PENDING_PAYMENT' && (
+                                    <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-sm">
+                                      <p className="text-yellow-900 font-medium mb-1">입금 안내</p>
+                                      <p className="text-yellow-800 text-xs">
+                                        위 계좌로 입금해주시면 관리자가 확인 후 예약이 확정됩니다.
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {payment.status === 'PAID' && payment.paidAt && (
+                                    <p className="text-xs text-gray-500">
+                                      입금 확인일: {new Date(payment.paidAt).toLocaleString('ko-KR')}
+                                    </p>
+                                  )}
+
+                                  {(payment.status === 'REFUNDED' || payment.status === 'PARTIALLY_REFUNDED') && (
+                                    <div className="bg-red-50 border border-red-200 rounded p-3 text-sm mt-2">
+                                      <p className="text-red-900 font-medium">
+                                        환불 금액: ₩{payment.refundAmount?.toLocaleString()}
+                                      </p>
+                                      {payment.refundReason && (
+                                        <p className="text-red-800 text-xs mt-1">사유: {payment.refundReason}</p>
+                                      )}
+                                      {payment.refundedAt && (
+                                        <p className="text-red-800 text-xs mt-1">
+                                          환불일: {new Date(payment.refundedAt).toLocaleDateString('ko-KR')}
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* 예약된 세션 목록 (결제 완료 시에만) */}
+                                {payment.status === 'PAID' && payment.bookings && payment.bookings.length > 0 && (
+                                  <div className="border-t border-gray-200 mt-4 pt-4">
+                                    <h5 className="text-sm font-semibold text-gray-900 mb-3">예약된 세션</h5>
+                                    <div className="space-y-2">
+                                      {payment.bookings.map((booking: any) => (
+                                        <div
+                                          key={booking.id}
+                                          className={`flex items-center justify-between text-sm p-2 rounded ${
+                                            booking.status === 'COMPLETED'
+                                              ? 'bg-green-50'
+                                              : booking.status === 'CANCELLED'
+                                              ? 'bg-gray-50'
+                                              : 'bg-blue-50'
+                                          }`}
+                                        >
+                                          <div className="flex items-center gap-2">
+                                            <span className="font-medium text-gray-700">
+                                              {booking.sessionNumber}회차
+                                            </span>
+                                            {booking.scheduledAt && (
+                                              <span className="text-gray-600">
+                                                {new Date(booking.scheduledAt).toLocaleDateString('ko-KR', {
+                                                  month: 'short',
+                                                  day: 'numeric',
+                                                })}
+                                              </span>
+                                            )}
+                                          </div>
+                                          <span
+                                            className={`text-xs px-2 py-0.5 rounded ${
+                                              booking.status === 'COMPLETED'
+                                                ? 'bg-green-100 text-green-800'
+                                                : booking.status === 'CANCELLED'
+                                                ? 'bg-gray-100 text-gray-800'
+                                                : 'bg-blue-100 text-blue-800'
+                                            }`}
+                                          >
+                                            {booking.status === 'COMPLETED'
+                                              ? '완료'
+                                              : booking.status === 'CANCELLED'
+                                              ? '취소'
+                                              : booking.status === 'SCHEDULED'
+                                              ? '예정'
+                                              : booking.status}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 

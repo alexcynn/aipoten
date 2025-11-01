@@ -7,16 +7,18 @@ import AdminLayout from '@/components/layout/AdminLayout'
 import ChildInfoModal from '@/components/modals/ChildInfoModal'
 import TherapistInfoModal from '@/components/modals/TherapistInfoModal'
 
-interface PaymentGroup {
-  groupId: string
-  bookingIds: string[]
+interface Payment {
+  id: string
   sessionType: string
-  totalFee: number
   totalSessions: number
-  completedSessions: number
+  originalFee: number
+  discountRate: number
+  finalFee: number
   status: string
   paidAt: string | null
   refundAmount: number | null
+  refundedAt: string | null
+  completedSessions: number
   parentUser: {
     id: string
     name: string
@@ -25,9 +27,9 @@ interface PaymentGroup {
   }
   child: any
   therapist: any
-  scheduledAt: string
+  bookings: any[]
+  refundRequests: any[]
   createdAt: string
-  bookingCount: number
 }
 
 interface AccountInfo {
@@ -37,23 +39,21 @@ interface AccountInfo {
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  PENDING_PAYMENT: { label: '결제대기', color: 'bg-orange-100 text-orange-800' },
-  BOOKING_IN_PROGRESS: { label: '예약 중', color: 'bg-yellow-100 text-yellow-800' },
-  CONFIRMED: { label: '예약 확인', color: 'bg-blue-100 text-blue-800' },
-  SESSION_COMPLETED: { label: '세션 완료', color: 'bg-green-100 text-green-800' },
-  SETTLEMENT_COMPLETED: { label: '정산 완료', color: 'bg-purple-100 text-purple-800' },
-  REFUNDED: { label: '환불', color: 'bg-red-100 text-red-800' },
-  CANCELLED: { label: '취소', color: 'bg-red-100 text-red-800' },
+  PENDING_PAYMENT: { label: '입금 대기', color: 'bg-orange-100 text-orange-800' },
+  PAID: { label: '결제 완료', color: 'bg-green-100 text-green-800' },
+  REFUNDED: { label: '전액 환불', color: 'bg-red-100 text-red-800' },
+  PARTIALLY_REFUNDED: { label: '부분 환불', color: 'bg-yellow-100 text-yellow-800' },
+  FAILED: { label: '결제 실패', color: 'bg-gray-100 text-gray-800' },
 }
 
 export default function AdminPaymentsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
-  const [payments, setPayments] = useState<PaymentGroup[]>([])
+  const [payments, setPayments] = useState<Payment[]>([])
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'PAID' | 'REFUNDED'>('ALL')
+  const [filter, setFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PAID' | 'REFUNDED'>('ALL')
 
   // 모달 상태
   const [selectedChild, setSelectedChild] = useState<any>(null)
@@ -99,16 +99,13 @@ export default function AdminPaymentsPage() {
     }
   }
 
-  const handleConfirmPayment = async (groupId: string) => {
+  const handleConfirmPayment = async (paymentId: string) => {
     if (!confirm('입금을 확인하고 결제를 승인하시겠습니까?')) {
       return
     }
 
     try {
-      const payment = payments.find((p) => p.groupId === groupId)
-      if (!payment) return
-
-      const response = await fetch(`/api/admin/bookings/${payment.bookingIds[0]}/confirm-payment`, {
+      const response = await fetch(`/api/admin/payments/${paymentId}/confirm`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,11 +113,11 @@ export default function AdminPaymentsPage() {
       })
 
       if (response.ok) {
-        setMessage({ type: 'success', text: '결제가 승인되었습니다.' })
+        setMessage({ type: 'success', text: '입금이 확인되었습니다.' })
         fetchPayments()
       } else {
         const data = await response.json()
-        setMessage({ type: 'error', text: data.error || '결제 승인에 실패했습니다.' })
+        setMessage({ type: 'error', text: data.error || '입금 확인에 실패했습니다.' })
       }
     } catch (error) {
       setMessage({ type: 'error', text: '서버 오류가 발생했습니다.' })
@@ -129,13 +126,13 @@ export default function AdminPaymentsPage() {
     setTimeout(() => setMessage(null), 3000)
   }
 
-  const handleStartRefund = (payment: PaymentGroup) => {
-    setRefundingGroupId(payment.groupId)
-    setRefundAmount(payment.totalFee)
+  const handleStartRefund = (payment: Payment) => {
+    setRefundingGroupId(payment.id)
+    setRefundAmount(payment.finalFee)
     setRefundReason('')
   }
 
-  const handleProcessRefund = async (groupId: string) => {
+  const handleProcessRefund = async (paymentId: string) => {
     if (!refundAmount || refundAmount <= 0) {
       setMessage({ type: 'error', text: '환불 금액을 입력해주세요.' })
       setTimeout(() => setMessage(null), 3000)
@@ -147,7 +144,7 @@ export default function AdminPaymentsPage() {
     }
 
     try {
-      const response = await fetch(`/api/admin/payments/${groupId}/refund`, {
+      const response = await fetch(`/api/admin/payments/${paymentId}/refund`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -201,8 +198,8 @@ export default function AdminPaymentsPage() {
   }
 
   const pendingCount = payments.filter((p) => p.status === 'PENDING_PAYMENT').length
-  const paidCount = payments.filter((p) => p.paidAt && p.status !== 'REFUNDED').length
-  const refundedCount = payments.filter((p) => p.status === 'REFUNDED').length
+  const paidCount = payments.filter((p) => p.status === 'PAID').length
+  const refundedCount = payments.filter((p) => p.status === 'REFUNDED' || p.status === 'PARTIALLY_REFUNDED').length
 
   return (
     <AdminLayout title="결제 관리">
@@ -244,14 +241,14 @@ export default function AdminPaymentsPage() {
               전체 ({payments.length})
             </button>
             <button
-              onClick={() => setFilter('PENDING')}
+              onClick={() => setFilter('PENDING_PAYMENT')}
               className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'PENDING'
+                filter === 'PENDING_PAYMENT'
                   ? 'bg-aipoten-green text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              결제 대기 ({pendingCount})
+              입금 대기 ({pendingCount})
             </button>
             <button
               onClick={() => setFilter('PAID')}
@@ -312,7 +309,7 @@ export default function AdminPaymentsPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {payments.map((payment) => (
-                    <tr key={payment.groupId}>
+                    <tr key={payment.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => handleOpenChildModal(payment.child)}
@@ -346,10 +343,10 @@ export default function AdminPaymentsPage() {
                         <div className="text-sm text-gray-900">
                           {payment.sessionType === 'CONSULTATION' ? '언어 컨설팅' : '홈티'}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {payment.totalSessions}회
-                          {payment.bookingCount > 1 && ` (${payment.bookingCount}건 묶음)`}
-                        </div>
+                        <div className="text-sm text-gray-500">{payment.totalSessions}회</div>
+                        {payment.discountRate > 0 && (
+                          <div className="text-xs text-red-600">{payment.discountRate}% 할인</div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
@@ -366,8 +363,13 @@ export default function AdminPaymentsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-semibold text-gray-900">
-                          ₩{payment.totalFee.toLocaleString()}
+                          ₩{payment.finalFee.toLocaleString()}
                         </div>
+                        {payment.discountRate > 0 && (
+                          <div className="text-xs text-gray-500 line-through">
+                            ₩{payment.originalFee.toLocaleString()}
+                          </div>
+                        )}
                         {payment.refundAmount && (
                           <div className="text-xs text-red-600">
                             환불: ₩{payment.refundAmount.toLocaleString()}
@@ -389,7 +391,7 @@ export default function AdminPaymentsPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {refundingGroupId === payment.groupId ? (
+                        {refundingGroupId === payment.id ? (
                           <div className="space-y-2">
                             <input
                               type="number"
@@ -408,7 +410,7 @@ export default function AdminPaymentsPage() {
                             />
                             <div className="flex gap-2">
                               <button
-                                onClick={() => handleProcessRefund(payment.groupId)}
+                                onClick={() => handleProcessRefund(payment.id)}
                                 className="text-red-600 hover:text-red-900"
                               >
                                 확인
@@ -429,13 +431,13 @@ export default function AdminPaymentsPage() {
                           <div className="flex flex-col gap-1">
                             {payment.status === 'PENDING_PAYMENT' && (
                               <button
-                                onClick={() => handleConfirmPayment(payment.groupId)}
+                                onClick={() => handleConfirmPayment(payment.id)}
                                 className="text-green-600 hover:text-green-900"
                               >
                                 입금 확인
                               </button>
                             )}
-                            {payment.paidAt && payment.status !== 'REFUNDED' && (
+                            {payment.status === 'PAID' && (
                               <button
                                 onClick={() => handleStartRefund(payment)}
                                 className="text-red-600 hover:text-red-900"
