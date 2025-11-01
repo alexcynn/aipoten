@@ -628,20 +628,15 @@ export default function TherapistDashboardPage() {
                           </div>
                         </div>
 
-                        {/* 답변이 있는 경우 */}
-                        {inquiry.response && (
-                          <div className="mt-3 pt-3 border-t border-gray-200 bg-green-50 rounded-md p-3">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-xs font-semibold text-green-800">관리자 답변</span>
-                              {inquiry.respondedAt && (
-                                <span className="text-xs text-gray-500">
-                                  {new Date(inquiry.respondedAt).toLocaleDateString('ko-KR')}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-gray-700 whitespace-pre-wrap">{inquiry.response}</p>
-                          </div>
-                        )}
+                        {/* 상세보기 버튼 */}
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <Link
+                            href={`/inquiries/${inquiry.id}`}
+                            className="inline-block px-3 py-1.5 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                          >
+                            상세보기 / 메시지
+                          </Link>
+                        </div>
                       </div>
                     )
                   })}

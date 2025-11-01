@@ -980,23 +980,48 @@ enum InquiryStatus {
 
 // 문의 모델
 model Inquiry {
-  id           String          @id @default(cuid())
+  id           String           @id @default(cuid())
   userId       String
-  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   category     InquiryCategory
   title        String
-  content      String
-  status       InquiryStatus   @default(PENDING)
-  response     String?
-  respondedBy  String?         // 관리자 ID
+  content      String           // 최초 문의 내용
+  status       InquiryStatus    @default(PENDING)
+  response     String?          // 레거시 필드 (기존 데이터 유지용)
+  respondedBy  String?          // 관리자 ID
   respondedAt  DateTime?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  // 메시지 관계
+  messages     InquiryMessage[]
 
   @@index([userId])
   @@index([status])
   @@index([createdAt])
   @@map("inquiries")
+}
+
+// 문의 메시지 모델 (1:1 문의 채팅용)
+model InquiryMessage {
+  id         String              @id @default(cuid())
+  inquiryId  String
+  inquiry    Inquiry             @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  senderId   String              // 발신자 ID (User 또는 관리자)
+  senderType MessageSenderType   // USER 또는 ADMIN
+  content    String              // 메시지 내용
+  isRead     Boolean             @default(false) // 읽음 여부
+  createdAt  DateTime            @default(now())
+
+  @@index([inquiryId])
+  @@index([createdAt])
+  @@map("inquiry_messages")
+}
+
+// 메시지 발신자 유형
+enum MessageSenderType {
+  USER   // 일반 사용자 (부모/치료사)
+  ADMIN  // 관리자
 }
 
 // ===== RAG 지식 베이스 시스템 =====

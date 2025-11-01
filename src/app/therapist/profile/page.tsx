@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Header from '@/components/layout/Header'
+import AddressSearchInput from '@/components/common/AddressSearchInput'
 
 type TherapyType = 'SPEECH_THERAPY' | 'SENSORY_INTEGRATION' | 'PLAY_THERAPY' | 'ART_THERAPY' | 'MUSIC_THERAPY' | 'OCCUPATIONAL_THERAPY' | 'COGNITIVE_THERAPY' | 'BEHAVIORAL_THERAPY'
 type EmploymentType = 'INSTITUTION' | 'FREELANCER'
@@ -193,61 +194,69 @@ export default function TherapistProfilePage() {
 
   const fetchProfile = async () => {
     try {
+      console.log('프로필 조회 API 호출 시작...')
       const response = await fetch('/api/therapist/profile')
+      console.log('API 응답 상태:', response.status)
 
-      if (response.ok) {
-        const profileData = await response.json()
-        console.log('프로필 데이터:', profileData)
-        setProfile(profileData)
-
-        // Load existing data
-        setName(profileData.user.name || '')
-        setEmail(profileData.user.email || '')
-        setGender(profileData.gender || '')
-        setBirthYear(profileData.birthYear?.toString() || '')
-        setPhone(profileData.user.phone || '')
-        setAddress(profileData.address || '')
-        setAddressDetail(profileData.addressDetail || '')
-        setSpecialties(profileData.specialties || [])
-        setChildAgeRanges(profileData.childAgeRanges || [])
-        setServiceAreas(profileData.serviceAreas || [])
-        setSessionFee(profileData.sessionFee?.toString() || '')
-        setBank(profileData.bank || '')
-        setAccountNumber(profileData.accountNumber || '')
-        setAccountHolder(profileData.accountHolder || '')
-        setIsPreTherapist(profileData.isPreTherapist || false)
-
-        if (profileData.educations && profileData.educations.length > 0) {
-          setEducations(profileData.educations.map((edu: any) => ({
-            degree: edu.degree || 'BACHELOR',
-            school: edu.school || '',
-            major: edu.major || '',
-            graduationYear: edu.graduationYear || ''
-          })))
-        }
-
-        if (profileData.certifications && profileData.certifications.length > 0) {
-          setCertifications(profileData.certifications.map((cert: any) => ({
-            name: cert.name || '',
-            issuingOrganization: cert.issuingOrganization || '',
-            issueDate: cert.issueDate ? cert.issueDate.split('T')[0] : '',
-            filePath: cert.filePath || ''
-          })))
-        }
-
-        if (profileData.experiences && profileData.experiences.length > 0) {
-          setExperiences(profileData.experiences.map((exp: any) => ({
-            employmentType: exp.employmentType || 'INSTITUTION',
-            institutionName: exp.institutionName || '',
-            specialty: exp.specialty || 'SPEECH_THERAPY',
-            startDate: exp.startDate ? exp.startDate.split('T')[0] : '',
-            endDate: exp.endDate ? exp.endDate.split('T')[0] : '',
-            description: exp.description || ''
-          })))
-        }
-
-        setHasPendingUpdate(profileData.profileUpdateRequested || false)
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('API 에러:', errorData)
+        alert(`프로필을 불러올 수 없습니다: ${errorData.error || '알 수 없는 오류'}`)
+        setIsLoading(false)
+        return
       }
+
+      const profileData = await response.json()
+      console.log('프로필 데이터:', profileData)
+      setProfile(profileData)
+
+      // Load existing data
+      setName(profileData.user.name || '')
+      setEmail(profileData.user.email || '')
+      setGender(profileData.gender || '')
+      setBirthYear(profileData.birthYear?.toString() || '')
+      setPhone(profileData.user.phone || '')
+      setAddress(profileData.address || '')
+      setAddressDetail(profileData.addressDetail || '')
+      setSpecialties(profileData.specialties || [])
+      setChildAgeRanges(profileData.childAgeRanges || [])
+      setServiceAreas(profileData.serviceAreas || [])
+      setSessionFee(profileData.sessionFee?.toString() || '')
+      setBank(profileData.bank || '')
+      setAccountNumber(profileData.accountNumber || '')
+      setAccountHolder(profileData.accountHolder || '')
+      setIsPreTherapist(profileData.isPreTherapist || false)
+
+      if (profileData.educations && profileData.educations.length > 0) {
+        setEducations(profileData.educations.map((edu: any) => ({
+          degree: edu.degree || 'BACHELOR',
+          school: edu.school || '',
+          major: edu.major || '',
+          graduationYear: edu.graduationYear || ''
+        })))
+      }
+
+      if (profileData.certifications && profileData.certifications.length > 0) {
+        setCertifications(profileData.certifications.map((cert: any) => ({
+          name: cert.name || '',
+          issuingOrganization: cert.issuingOrganization || '',
+          issueDate: cert.issueDate ? cert.issueDate.split('T')[0] : '',
+          filePath: cert.filePath || ''
+        })))
+      }
+
+      if (profileData.experiences && profileData.experiences.length > 0) {
+        setExperiences(profileData.experiences.map((exp: any) => ({
+          employmentType: exp.employmentType || 'INSTITUTION',
+          institutionName: exp.institutionName || '',
+          specialty: exp.specialty || 'SPEECH_THERAPY',
+          startDate: exp.startDate ? exp.startDate.split('T')[0] : '',
+          endDate: exp.endDate ? exp.endDate.split('T')[0] : '',
+          description: exp.description || ''
+        })))
+      }
+
+      setHasPendingUpdate(profileData.profileUpdateRequested || false)
     } catch (error) {
       console.error('프로필 조회 오류:', error)
     } finally {
@@ -855,23 +864,12 @@ export default function TherapistProfilePage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">주소</label>
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="서울시 강남구..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent mb-2"
-                  />
-                  <input
-                    type="text"
-                    value={addressDetail}
-                    onChange={(e) => setAddressDetail(e.target.value)}
-                    placeholder="상세주소"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
+                <AddressSearchInput
+                  address={address}
+                  addressDetail={addressDetail}
+                  onAddressChange={setAddress}
+                  onAddressDetailChange={setAddressDetail}
+                />
               </div>
             )}
 

@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       totalPosts,
       totalNews,
       totalTherapists,
-      totalConsultations,
+      totalBookings,
       pendingTherapists,
       monthlyRevenue
     ] = await Promise.all([
@@ -40,22 +40,25 @@ export async function GET(request: NextRequest) {
       prisma.developmentAssessment.count(),
       prisma.video.count(),
       prisma.post.count(),
-      prisma.news.count(),
+      prisma.post.count({
+        where: { boardId: 'news' }
+      }),
       prisma.therapistProfile.count(),
-      prisma.consultation.count(),
+      prisma.booking.count(),
       prisma.therapistProfile.count({
         where: { status: 'PENDING' }
       }),
-      prisma.consultation.aggregate({
+      prisma.booking.aggregate({
         where: {
-          status: 'COMPLETED',
-          paymentStatus: 'PAID',
+          paidAt: {
+            not: null
+          },
           createdAt: {
             gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
           }
         },
         _sum: {
-          fee: true
+          finalFee: true
         }
       })
     ])
@@ -94,9 +97,9 @@ export async function GET(request: NextRequest) {
       posts: totalPosts,
       news: totalNews,
       therapists: totalTherapists,
-      consultations: totalConsultations,
+      bookings: totalBookings,
       pendingTherapists,
-      monthlyRevenue: monthlyRevenue._sum.fee || 0,
+      monthlyRevenue: monthlyRevenue._sum.finalFee || 0,
       recentUsers,
       recentActivities
     }

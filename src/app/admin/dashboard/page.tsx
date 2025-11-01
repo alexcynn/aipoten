@@ -14,7 +14,7 @@ interface Stats {
   posts: number
   news: number
   therapists: number
-  consultations: number
+  bookings: number
   pendingTherapists: number
   monthlyRevenue: number
   recentUsers: number
@@ -122,11 +122,11 @@ export default function AdminPage() {
               <div className="bg-white p-6 rounded-lg shadow">
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
-                    <span className="text-2xl">💬</span>
+                    <span className="text-2xl">📅</span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">상담</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.consultations}회</p>
+                    <p className="text-sm font-medium text-gray-500">예약</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats.bookings}건</p>
                   </div>
                 </div>
               </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
+import AddressSearchInput from '@/components/common/AddressSearchInput'
 
 type TherapyType = 'SPEECH_THERAPY' | 'SENSORY_INTEGRATION' | 'PLAY_THERAPY' | 'ART_THERAPY' | 'MUSIC_THERAPY' | 'OCCUPATIONAL_THERAPY' | 'COGNITIVE_THERAPY' | 'BEHAVIORAL_THERAPY'
 type EmploymentType = 'INSTITUTION' | 'FREELANCER'
@@ -452,23 +453,12 @@ export default function TherapistRegisterPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">주소</label>
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="서울시 강남구..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-accent focus:border-transparent mb-2"
-                  />
-                  <input
-                    type="text"
-                    value={addressDetail}
-                    onChange={(e) => setAddressDetail(e.target.value)}
-                    placeholder="상세주소"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-accent focus:border-transparent"
-                  />
-                </div>
+                <AddressSearchInput
+                  address={address}
+                  addressDetail={addressDetail}
+                  onAddressChange={setAddress}
+                  onAddressDetailChange={setAddressDetail}
+                />
               </div>
             )}
 

@@ -39,9 +39,9 @@ export const authOptions: NextAuthOptions = {
         if (user.role === 'THERAPIST' && user.therapistProfile) {
           const approvalStatus = user.therapistProfile.approvalStatus
 
-          // WAITING 또는 APPROVED 상태만 로그인 허용
-          if (approvalStatus !== 'WAITING' && approvalStatus !== 'APPROVED') {
-            throw new Error('승인 대기 중이거나 거절된 계정입니다.')
+          // PENDING, WAITING, APPROVED 상태만 로그인 허용 (거절된 경우만 차단)
+          if (approvalStatus === 'REJECTED') {
+            throw new Error('계정이 거절되었습니다. 관리자에게 문의해주세요.')
           }
         }
 

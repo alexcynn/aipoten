@@ -5,12 +5,12 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -22,6 +22,8 @@ export async function POST(
         { status: 403 }
       )
     }
+
+    const { id } = await params
 
     const body = await request.json()
     const { response, status } = body
@@ -36,7 +38,7 @@ export async function POST(
 
     // 문의 존재 여부 확인
     const inquiry = await prisma.inquiry.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     })
 
     if (!inquiry) {
@@ -48,7 +50,7 @@ export async function POST(
 
     // 답변 저장
     const updatedInquiry = await prisma.inquiry.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         response,
         respondedBy: session.user.id,

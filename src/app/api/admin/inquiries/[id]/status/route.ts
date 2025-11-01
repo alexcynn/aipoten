@@ -5,13 +5,13 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 import { InquiryStatus } from '@prisma/client'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -23,6 +23,8 @@ export async function PATCH(
         { status: 403 }
       )
     }
+
+    const { id } = await params
 
     const body = await request.json()
     const { status } = body
@@ -37,7 +39,7 @@ export async function PATCH(
 
     // 문의 존재 여부 확인
     const inquiry = await prisma.inquiry.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     })
 
     if (!inquiry) {
@@ -49,7 +51,7 @@ export async function PATCH(
 
     // 상태 변경
     const updatedInquiry = await prisma.inquiry.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         status,
       },
@@ -60,6 +62,10 @@ export async function PATCH(
             name: true,
             email: true,
             role: true,
+            phone: true,
+            address: true,
+            addressDetail: true,
+            therapistProfile: true,
           },
         },
       },

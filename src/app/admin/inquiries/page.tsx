@@ -1,9 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import AdminLayout from '@/components/layout/AdminLayout'
+
+interface InquiryMessage {
+  id: string
+  inquiryId: string
+  senderId: string
+  senderType: 'USER' | 'ADMIN'
+  content: string
+  isRead: boolean
+  createdAt: string
+}
 
 interface Inquiry {
   id: string
@@ -12,9 +22,6 @@ interface Inquiry {
   title: string
   content: string
   status: string
-  response: string | null
-  respondedBy: string | null
-  respondedAt: string | null
   createdAt: string
   updatedAt: string
   user: {
@@ -22,20 +29,26 @@ interface Inquiry {
     name: string
     email: string
     role: string
+    phone?: string
+    address?: string
+    addressDetail?: string
+    therapistProfile?: any
   }
 }
 
 export default function AdminInquiriesPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
   const [inquiries, setInquiries] = useState<Inquiry[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'>('ALL')
-  const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'SERVICE' | 'PAYMENT' | 'TECHNICAL' | 'OTHER'>('ALL')
-  const [searchTerm, setSearchTerm] = useState('')
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
-  const [responseText, setResponseText] = useState('')
-  const [responseStatus, setResponseStatus] = useState('RESOLVED')
+  const [messages, setMessages] = useState<InquiryMessage[]>([])
+  const [newMessage, setNewMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSendingMessage, setIsSendingMessage] = useState(false)
+  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'>('ALL')
+  const [showUserModal, setShowUserModal] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -53,392 +66,422 @@ export default function AdminInquiriesPage() {
     fetchInquiries()
   }, [session, status, router])
 
+  // 메시지 목록 자동 스크롤
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  // 자동 새로고침 (선택된 문의의 메시지만)
+  useEffect(() => {
+    if (!selectedInquiry) return
+
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/admin/inquiries/${selectedInquiry.id}/messages`)
+        if (response.ok) {
+          const data = await response.json()
+          setMessages(data.messages || [])
+        }
+      } catch (error) {
+        console.error('메시지 자동 새로고침 오류:', error)
+      }
+    }, 10000) // 10초마다
+
+    return () => clearInterval(interval)
+  }, [selectedInquiry?.id])
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
   const fetchInquiries = async () => {
     try {
       const response = await fetch('/api/admin/inquiries')
       if (response.ok) {
         const data = await response.json()
         setInquiries(data.inquiries || [])
+      } else {
+        const errorData = await response.json()
+        console.error('문의 목록 조회 실패:', response.status, errorData)
+        alert(`문의 목록을 불러올 수 없습니다: ${errorData.error || '알 수 없는 오류'}`)
       }
     } catch (error) {
-      console.error('문의 목록을 가져오는 중 오류 발생:', error)
+      console.error('문의 목록 조회 오류:', error)
+      alert('문의 목록 조회 중 오류가 발생했습니다.')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleRespond = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!selectedInquiry || !responseText.trim()) {
-      alert('답변 내용을 입력해주세요.')
-      return
-    }
-
+  const fetchMessages = async (inquiryId: string) => {
     try {
-      const response = await fetch(`/api/admin/inquiries/${selectedInquiry.id}/respond`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          response: responseText,
-          status: responseStatus,
-        }),
-      })
-
+      const response = await fetch(`/api/admin/inquiries/${inquiryId}/messages`)
       if (response.ok) {
-        alert('답변이 등록되었습니다.')
-        setSelectedInquiry(null)
-        setResponseText('')
-        setResponseStatus('RESOLVED')
-        fetchInquiries()
-      } else {
         const data = await response.json()
-        alert(data.error || '답변 등록에 실패했습니다.')
+        setMessages(data.messages || [])
       }
     } catch (error) {
-      console.error('답변 등록 중 오류:', error)
-      alert('답변 등록 중 오류가 발생했습니다.')
+      console.error('메시지 조회 오류:', error)
     }
   }
 
-  const handleStatusChange = async (inquiryId: string, newStatus: string) => {
+  const handleSelectInquiry = async (inquiry: Inquiry) => {
+    setSelectedInquiry(inquiry)
+    await fetchMessages(inquiry.id)
+  }
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!selectedInquiry || !newMessage.trim() || isSendingMessage) {
+      return
+    }
+
+    setIsSendingMessage(true)
+
     try {
-      const response = await fetch(`/api/admin/inquiries/${inquiryId}/status`, {
+      const response = await fetch(`/api/admin/inquiries/${selectedInquiry.id}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: newMessage.trim() }),
+      })
+
+      if (response.ok) {
+        setNewMessage('')
+        await fetchMessages(selectedInquiry.id)
+        await fetchInquiries()
+      } else {
+        const data = await response.json()
+        alert(data.error || '메시지 전송에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('메시지 전송 오류:', error)
+      alert('메시지 전송 중 오류가 발생했습니다.')
+    } finally {
+      setIsSendingMessage(false)
+    }
+  }
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!selectedInquiry) return
+
+    try {
+      const response = await fetch(`/api/admin/inquiries/${selectedInquiry.id}/status`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       })
 
       if (response.ok) {
-        fetchInquiries()
-      } else {
-        const data = await response.json()
-        alert(data.error || '상태 변경에 실패했습니다.')
+        await fetchInquiries()
+        setSelectedInquiry({ ...selectedInquiry, status: newStatus })
       }
     } catch (error) {
-      console.error('상태 변경 중 오류:', error)
-      alert('상태 변경 중 오류가 발생했습니다.')
+      console.error('상태 변경 오류:', error)
     }
   }
 
-  const filteredInquiries = inquiries.filter(inquiry => {
-    const matchesStatusFilter = filter === 'ALL' || inquiry.status === filter
-    const matchesCategoryFilter = categoryFilter === 'ALL' || inquiry.category === categoryFilter
-    const matchesSearch =
-      inquiry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inquiry.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inquiry.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inquiry.user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesStatusFilter && matchesCategoryFilter && matchesSearch
-  })
-
-  const categoryLabels: Record<string, string> = {
-    SERVICE: '서비스 이용',
-    PAYMENT: '결제/환불',
-    TECHNICAL: '기술 지원',
-    OTHER: '기타',
-  }
-
-  const statusLabels: Record<string, { text: string; color: string }> = {
-    PENDING: { text: '답변 대기', color: 'bg-yellow-100 text-yellow-800' },
-    IN_PROGRESS: { text: '처리 중', color: 'bg-blue-100 text-blue-800' },
-    RESOLVED: { text: '해결됨', color: 'bg-green-100 text-green-800' },
-    CLOSED: { text: '종료됨', color: 'bg-gray-100 text-gray-800' },
-  }
-
-  const roleLabels: Record<string, string> = {
-    PARENT: '부모',
-    THERAPIST: '치료사',
-    ADMIN: '관리자',
-  }
-
-  if (status === 'loading' || isLoading) {
+  const getStatusBadge = (status: string) => {
+    const styles = {
+      PENDING: 'bg-yellow-100 text-yellow-800',
+      IN_PROGRESS: 'bg-blue-100 text-blue-800',
+      RESOLVED: 'bg-green-100 text-green-800',
+      CLOSED: 'bg-gray-100 text-gray-800',
+    }
+    const labels = {
+      PENDING: '대기',
+      IN_PROGRESS: '처리중',
+      RESOLVED: '해결됨',
+      CLOSED: '종료됨',
+    }
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
-        </div>
-      </div>
+      <span className={`px-2 py-1 text-xs font-medium rounded-full ${styles[status as keyof typeof styles]}`}>
+        {labels[status as keyof typeof labels]}
+      </span>
     )
   }
 
-  if (!session) {
-    return null
+  const getCategoryLabel = (category: string) => {
+    const labels = {
+      SERVICE: '서비스',
+      PAYMENT: '결제',
+      TECHNICAL: '기술',
+      OTHER: '기타',
+    }
+    return labels[category as keyof typeof labels] || category
+  }
+
+  const filteredInquiries = inquiries.filter(inquiry => {
+    if (filter !== 'ALL' && inquiry.status !== filter) return false
+    return true
+  })
+
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-96">
+          <div className="text-gray-500">로딩 중...</div>
+        </div>
+      </AdminLayout>
+    )
   }
 
   return (
-    <AdminLayout title="1:1 문의 관리">
+    <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <div className="mb-6">
-            <p className="mt-2 text-gray-600">
-              사용자의 문의를 확인하고 답변할 수 있습니다.
-            </p>
+        {/* 헤더 */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-900">1:1 문의 관리</h1>
+          <div className="flex gap-2">
+            {(['ALL', 'PENDING', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  filter === f
+                    ? 'bg-green-600 text-white'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {f === 'ALL' ? '전체' : f === 'PENDING' ? '대기' : f === 'IN_PROGRESS' ? '처리중' : f === 'RESOLVED' ? '해결됨' : '종료됨'}
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* Search and Filters */}
-          <div className="mb-6 space-y-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="제목, 내용, 사용자 이름 또는 이메일로 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green focus:border-transparent"
-              />
+        {/* 메인 컨텐츠 */}
+        <div className="grid grid-cols-3 gap-6 h-[calc(100vh-250px)]">
+          {/* 문의 목록 */}
+          <div className="col-span-1 bg-white rounded-lg shadow overflow-hidden">
+            <div className="p-4 bg-gray-50 border-b">
+              <h2 className="font-semibold text-gray-900">문의 목록</h2>
+              <p className="text-sm text-gray-600 mt-1">총 {filteredInquiries.length}건</p>
             </div>
-
-            {/* Status Filter */}
-            <div className="flex flex-wrap gap-2">
-              <span className="text-sm font-medium text-gray-700 flex items-center">상태:</span>
-              {['ALL', 'PENDING', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].map((status) => (
-                <button
-                  key={status}
-                  onClick={() => setFilter(status as any)}
-                  className={`px-3 py-1 text-sm font-medium rounded-md ${
-                    filter === status
-                      ? 'bg-aipoten-green text-white'
-                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {status === 'ALL' && '전체'}
-                  {status === 'PENDING' && '답변 대기'}
-                  {status === 'IN_PROGRESS' && '처리 중'}
-                  {status === 'RESOLVED' && '해결됨'}
-                  {status === 'CLOSED' && '종료됨'}
-                </button>
-              ))}
-            </div>
-
-            {/* Category Filter */}
-            <div className="flex flex-wrap gap-2">
-              <span className="text-sm font-medium text-gray-700 flex items-center">카테고리:</span>
-              {['ALL', 'SERVICE', 'PAYMENT', 'TECHNICAL', 'OTHER'].map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setCategoryFilter(category as any)}
-                  className={`px-3 py-1 text-sm font-medium rounded-md ${
-                    categoryFilter === category
-                      ? 'bg-aipoten-green text-white'
-                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {category === 'ALL' ? '전체' : categoryLabels[category]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Stats Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white p-4 rounded-lg shadow">
-              <div className="text-sm text-gray-600">전체 문의</div>
-              <div className="text-2xl font-bold text-gray-900">{inquiries.length}</div>
-            </div>
-            <div className="bg-yellow-50 p-4 rounded-lg shadow">
-              <div className="text-sm text-yellow-800">답변 대기</div>
-              <div className="text-2xl font-bold text-yellow-900">
-                {inquiries.filter(i => i.status === 'PENDING').length}
-              </div>
-            </div>
-            <div className="bg-blue-50 p-4 rounded-lg shadow">
-              <div className="text-sm text-blue-800">처리 중</div>
-              <div className="text-2xl font-bold text-blue-900">
-                {inquiries.filter(i => i.status === 'IN_PROGRESS').length}
-              </div>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg shadow">
-              <div className="text-sm text-green-800">해결됨</div>
-              <div className="text-2xl font-bold text-green-900">
-                {inquiries.filter(i => i.status === 'RESOLVED').length}
-              </div>
-            </div>
-          </div>
-
-          {/* Inquiries List */}
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            {filteredInquiries.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-4xl mb-4">💬</div>
-                <p className="text-gray-500">
-                  {searchTerm || filter !== 'ALL' || categoryFilter !== 'ALL'
-                    ? '검색 결과가 없습니다.'
-                    : '문의 내역이 없습니다.'}
-                </p>
-              </div>
-            ) : (
-              <ul className="divide-y divide-gray-200">
-                {filteredInquiries.map((inquiry) => (
-                  <li key={inquiry.id} className="hover:bg-gray-50">
-                    <div className="px-4 py-4 sm:px-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              statusLabels[inquiry.status]?.color || 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {statusLabels[inquiry.status]?.text || inquiry.status}
-                            </span>
-                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700">
-                              {categoryLabels[inquiry.category]}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {roleLabels[inquiry.user.role]} • {inquiry.user.name}
-                            </span>
-                          </div>
-                          <h4 className="text-sm font-semibold text-gray-900 mb-1">{inquiry.title}</h4>
-                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{inquiry.content}</p>
-                          <div className="text-xs text-gray-500">
-                            {new Date(inquiry.createdAt).toLocaleString('ko-KR')}
-                            {inquiry.respondedAt && (
-                              <span> • 답변일: {new Date(inquiry.respondedAt).toLocaleString('ko-KR')}</span>
-                            )}
-                          </div>
-
-                          {/* Response */}
-                          {inquiry.response && (
-                            <div className="mt-3 p-3 bg-green-50 rounded-md border border-green-200">
-                              <div className="text-xs font-semibold text-green-800 mb-1">관리자 답변</div>
-                              <p className="text-sm text-gray-700 whitespace-pre-wrap">{inquiry.response}</p>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="ml-4 flex flex-col gap-2">
-                          <button
-                            onClick={() => {
-                              setSelectedInquiry(inquiry)
-                              setResponseText(inquiry.response || '')
-                              setResponseStatus(inquiry.status)
-                            }}
-                            className="px-3 py-1 text-xs rounded-md transition-colors"
-                            style={{
-                              backgroundColor: '#386646',
-                              color: '#FFFFFF'
-                            }}
-                          >
-                            {inquiry.response ? '답변 수정' : '답변하기'}
-                          </button>
-
-                          {inquiry.status !== 'CLOSED' && (
-                            <select
-                              value={inquiry.status}
-                              onChange={(e) => handleStatusChange(inquiry.id, e.target.value)}
-                              className="text-xs border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-aipoten-green"
-                            >
-                              <option value="PENDING">답변 대기</option>
-                              <option value="IN_PROGRESS">처리 중</option>
-                              <option value="RESOLVED">해결됨</option>
-                              <option value="CLOSED">종료됨</option>
-                            </select>
-                          )}
-                        </div>
+            <div className="overflow-y-auto h-[calc(100%-80px)]">
+              {filteredInquiries.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  문의가 없습니다
+                </div>
+              ) : (
+                filteredInquiries.map((inquiry) => (
+                  <div
+                    key={inquiry.id}
+                    onClick={() => handleSelectInquiry(inquiry)}
+                    className={`p-4 border-b cursor-pointer transition-colors hover:bg-gray-50 ${
+                      selectedInquiry?.id === inquiry.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900 text-sm line-clamp-1">
+                          {inquiry.title}
+                        </h3>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {inquiry.user.name} ({inquiry.user.role === 'PARENT' ? '부모' : '치료사'})
+                        </p>
+                      </div>
+                      <div className="ml-2">
+                        {getStatusBadge(inquiry.status)}
                       </div>
                     </div>
-                  </li>
-                ))}
-              </ul>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500">
+                        {getCategoryLabel(inquiry.category)}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {new Date(inquiry.createdAt).toLocaleDateString('ko-KR')}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* 메시지 영역 */}
+          <div className="col-span-2 bg-white rounded-lg shadow flex flex-col">
+            {selectedInquiry ? (
+              <>
+                {/* 채팅 헤더 */}
+                <div className="p-4 border-b bg-gray-50">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h2 className="font-semibold text-gray-900">{selectedInquiry.title}</h2>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {selectedInquiry.user.name} ({selectedInquiry.user.role === 'PARENT' ? '부모' : '치료사'})
+                        {selectedInquiry.user.email && ` • ${selectedInquiry.user.email}`}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        <strong>최초 문의:</strong> {selectedInquiry.content}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setShowUserModal(true)}
+                        className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                      >
+                        사용자 정보
+                      </button>
+                      <select
+                        value={selectedInquiry.status}
+                        onChange={(e) => handleStatusChange(e.target.value)}
+                        className="px-3 py-1.5 border border-gray-300 rounded text-sm"
+                      >
+                        <option value="PENDING">대기</option>
+                        <option value="IN_PROGRESS">처리중</option>
+                        <option value="RESOLVED">해결됨</option>
+                        <option value="CLOSED">종료됨</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 메시지 목록 */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {messages.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">
+                      아직 메시지가 없습니다. 첫 메시지를 보내보세요!
+                    </div>
+                  ) : (
+                    messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.senderType === 'ADMIN' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                            message.senderType === 'ADMIN'
+                              ? 'bg-green-600 text-white'
+                              : 'bg-gray-100 text-gray-900'
+                          }`}
+                        >
+                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                          <p className={`text-xs mt-1 ${
+                            message.senderType === 'ADMIN' ? 'text-green-100' : 'text-gray-500'
+                          }`}>
+                            {new Date(message.createdAt).toLocaleString('ko-KR')}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* 메시지 입력 */}
+                <form onSubmit={handleSendMessage} className="p-4 border-t bg-gray-50">
+                  <div className="flex gap-2">
+                    <textarea
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="메시지를 입력하세요..."
+                      rows={3}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                      disabled={isSendingMessage}
+                    />
+                    <button
+                      type="submit"
+                      disabled={isSendingMessage || !newMessage.trim()}
+                      className="px-6 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSendingMessage ? '전송중...' : '전송'}
+                    </button>
+                  </div>
+                </form>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-gray-500">
+                왼쪽에서 문의를 선택하세요
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Response Modal */}
-      {selectedInquiry && (
+      {/* 사용자 정보 모달 */}
+      {showUserModal && selectedInquiry && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">문의 답변</h3>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">사용자 정보</h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {selectedInquiry.user.role === 'PARENT' ? '부모' : '치료사'} 정보
+                  </p>
+                </div>
                 <button
-                  onClick={() => {
-                    setSelectedInquiry(null)
-                    setResponseText('')
-                    setResponseStatus('RESOLVED')
-                  }}
+                  onClick={() => setShowUserModal(false)}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <span className="text-2xl">×</span>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
+            </div>
 
-              {/* Inquiry Details */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                    {categoryLabels[selectedInquiry.category]}
-                  </span>
-                  <span className="text-xs text-gray-600">
-                    {roleLabels[selectedInquiry.user.role]} • {selectedInquiry.user.name} ({selectedInquiry.user.email})
-                  </span>
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-2">{selectedInquiry.title}</h4>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap mb-2">{selectedInquiry.content}</p>
-                <div className="text-xs text-gray-500">
-                  {new Date(selectedInquiry.createdAt).toLocaleString('ko-KR')}
+            <div className="p-6 space-y-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">기본 정보</h3>
+                <div className="bg-gray-50 p-4 rounded-md space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">이름</span>
+                    <span className="text-sm font-medium text-gray-900">{selectedInquiry.user.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">이메일</span>
+                    <span className="text-sm font-medium text-gray-900">{selectedInquiry.user.email}</span>
+                  </div>
+                  {selectedInquiry.user.phone && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">전화번호</span>
+                      <span className="text-sm font-medium text-gray-900">{selectedInquiry.user.phone}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">사용자 유형</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {selectedInquiry.user.role === 'PARENT' ? '부모' : '치료사'}
+                    </span>
+                  </div>
+                  {selectedInquiry.user.address && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">주소</span>
+                      <span className="text-sm font-medium text-gray-900 text-right">
+                        {selectedInquiry.user.address}
+                        {selectedInquiry.user.addressDetail && `, ${selectedInquiry.user.addressDetail}`}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Response Form */}
-              <form onSubmit={handleRespond} className="space-y-4">
+              {/* 치료사 추가 정보 */}
+              {selectedInquiry.user.role === 'THERAPIST' && selectedInquiry.user.therapistProfile && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    답변 내용
-                  </label>
-                  <textarea
-                    value={responseText}
-                    onChange={(e) => setResponseText(e.target.value)}
-                    placeholder="답변 내용을 입력해주세요"
-                    rows={8}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
-                    required
-                  />
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">치료사 정보</h3>
+                  <div className="bg-gray-50 p-4 rounded-md space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">승인 상태</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {selectedInquiry.user.therapistProfile.approvalStatus === 'APPROVED' ? '승인됨' :
+                         selectedInquiry.user.therapistProfile.approvalStatus === 'PENDING' ? '신청' :
+                         selectedInquiry.user.therapistProfile.approvalStatus === 'WAITING' ? '대기' : '거절됨'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
+              )}
+            </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    문의 상태
-                  </label>
-                  <select
-                    value={responseStatus}
-                    onChange={(e) => setResponseStatus(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
-                  >
-                    <option value="IN_PROGRESS">처리 중</option>
-                    <option value="RESOLVED">해결됨</option>
-                    <option value="CLOSED">종료됨</option>
-                  </select>
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    type="submit"
-                    className="px-6 py-2 rounded-md transition-colors font-medium"
-                    style={{
-                      backgroundColor: '#386646',
-                      color: '#FFFFFF'
-                    }}
-                  >
-                    답변 등록
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedInquiry(null)
-                      setResponseText('')
-                      setResponseStatus('RESOLVED')
-                    }}
-                    className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors font-medium"
-                  >
-                    취소
-                  </button>
-                </div>
-              </form>
+            <div className="p-6 border-t bg-gray-50">
+              <button
+                onClick={() => setShowUserModal(false)}
+                className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                닫기
+              </button>
             </div>
           </div>
         </div>
