@@ -14,10 +14,15 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
+        console.log('🔐 [AUTH] Starting authorization...')
+        console.log('🔐 [AUTH] Email:', credentials?.email)
+
         if (!credentials?.email || !credentials?.password) {
+          console.log('❌ [AUTH] Missing credentials')
           return null
         }
 
+        console.log('🔍 [AUTH] Looking up user...')
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
           include: {
@@ -26,14 +31,21 @@ export const authOptions: NextAuthOptions = {
         })
 
         if (!user || !user.password) {
+          console.log('❌ [AUTH] User not found or no password')
           return null
         }
+
+        console.log('✅ [AUTH] User found:', user.email, user.role)
+        console.log('🔑 [AUTH] Comparing passwords...')
 
         const isValid = await bcrypt.compare(credentials.password, user.password)
 
         if (!isValid) {
+          console.log('❌ [AUTH] Password mismatch')
           return null
         }
+
+        console.log('✅ [AUTH] Password valid')
 
         // 치료사인 경우 승인 상태 확인
         if (user.role === 'THERAPIST' && user.therapistProfile) {

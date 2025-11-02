@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import AdminLayout from '@/components/layout/AdminLayout'
-import ChildInfoModal from '@/components/modals/ChildInfoModal'
+import ParentInfoModal from '@/components/modals/ParentInfoModal'
 import TherapistInfoModal from '@/components/modals/TherapistInfoModal'
+import ReviewViewModal from '@/components/modals/ReviewViewModal'
+import JournalViewModal from '@/components/modals/JournalViewModal'
+import { Star } from 'lucide-react'
 
 interface Therapy {
   id: string
@@ -138,10 +140,13 @@ export default function AdminTherapiesPage() {
   const [filter, setFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PENDING_CONFIRMATION' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'>('ALL')
 
   // Modal states
-  const [selectedChild, setSelectedChild] = useState<any>(null)
+  const [selectedParentId, setSelectedParentId] = useState<string | null>(null)
   const [selectedTherapist, setSelectedTherapist] = useState<any>(null)
-  const [isChildModalOpen, setIsChildModalOpen] = useState(false)
+  const [isParentModalOpen, setIsParentModalOpen] = useState(false)
   const [isTherapistModalOpen, setIsTherapistModalOpen] = useState(false)
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+  const [isJournalModalOpen, setIsJournalModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -173,14 +178,24 @@ export default function AdminTherapiesPage() {
     }
   }
 
-  const handleOpenChildModal = (child: any) => {
-    setSelectedChild(child)
-    setIsChildModalOpen(true)
+  const handleOpenParentModal = (parentId: string) => {
+    setSelectedParentId(parentId)
+    setIsParentModalOpen(true)
   }
 
   const handleOpenTherapistModal = (therapist: any) => {
     setSelectedTherapist(therapist)
     setIsTherapistModalOpen(true)
+  }
+
+  const handleOpenReviewModal = (bookingId: string) => {
+    setSelectedBookingId(bookingId)
+    setIsReviewModalOpen(true)
+  }
+
+  const handleOpenJournalModal = (bookingId: string) => {
+    setSelectedBookingId(bookingId)
+    setIsJournalModalOpen(true)
   }
 
   if (status === 'loading' || isLoading) {
@@ -326,6 +341,9 @@ export default function AdminTherapiesPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       1회 비용
                     </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      평점
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       상태
                     </th>
@@ -338,14 +356,19 @@ export default function AdminTherapiesPage() {
                   {therapies.map((therapy) => (
                     <tr key={therapy.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {therapy.parentUser.name}
-                        </div>
                         <button
-                          onClick={() => handleOpenChildModal(therapy.child)}
+                          onClick={() => handleOpenParentModal(therapy.parentUser.id)}
                           className="text-left"
                         >
-                          <div className="text-sm text-aipoten-green hover:text-aipoten-navy cursor-pointer">
+                          <div className="text-sm font-medium text-aipoten-green hover:text-aipoten-navy cursor-pointer">
+                            {therapy.parentUser.name}
+                          </div>
+                        </button>
+                        <button
+                          onClick={() => handleOpenParentModal(therapy.parentUser.id)}
+                          className="text-left"
+                        >
+                          <div className="text-sm text-gray-600 hover:text-aipoten-navy cursor-pointer">
                             {therapy.child.name} ({therapy.child.gender === 'MALE' ? '남' : '여'})
                           </div>
                         </button>
@@ -395,6 +418,18 @@ export default function AdminTherapiesPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
+                        {therapy.bookings?.[0]?.review ? (
+                          <div className="flex items-center justify-center space-x-1">
+                            <Star className="fill-yellow-400 text-yellow-400" size={16} />
+                            <span className="text-sm font-semibold text-gray-900">
+                              {therapy.bookings[0].review.rating}.0
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="text-center text-sm text-gray-400">-</div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             statusLabels[therapy.currentStatus]?.color || 'bg-gray-100 text-gray-800'
@@ -404,20 +439,22 @@ export default function AdminTherapiesPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex flex-col gap-1">
-                          <a
-                            href={`/admin/therapies/${therapy.id}`}
-                            className="text-aipoten-green hover:text-aipoten-navy"
-                          >
-                            상세보기
-                          </a>
-                          {therapy.currentStatus === 'COMPLETED' && (
-                            <a
-                              href={`/admin/therapies/${therapy.id}/journal`}
-                              className="text-blue-600 hover:text-blue-800"
+                        <div className="flex space-x-2">
+                          {therapy.bookings?.[0]?.review && (
+                            <button
+                              onClick={() => handleOpenReviewModal(therapy.bookings[0].id)}
+                              className="px-3 py-1 bg-yellow-500 text-white text-xs font-medium rounded hover:bg-yellow-600 transition-colors"
+                            >
+                              리뷰보기
+                            </button>
+                          )}
+                          {therapy.bookings?.[0]?.therapistNote && (
+                            <button
+                              onClick={() => handleOpenJournalModal(therapy.bookings[0].id)}
+                              className="px-3 py-1 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition-colors"
                             >
                               상담일지
-                            </a>
+                            </button>
                           )}
                         </div>
                       </td>
@@ -431,15 +468,25 @@ export default function AdminTherapiesPage() {
       </div>
 
       {/* Modals */}
-      <ChildInfoModal
-        child={selectedChild}
-        isOpen={isChildModalOpen}
-        onClose={() => setIsChildModalOpen(false)}
+      <ParentInfoModal
+        parentId={selectedParentId}
+        isOpen={isParentModalOpen}
+        onClose={() => setIsParentModalOpen(false)}
       />
       <TherapistInfoModal
         therapist={selectedTherapist}
         isOpen={isTherapistModalOpen}
         onClose={() => setIsTherapistModalOpen(false)}
+      />
+      <ReviewViewModal
+        bookingId={selectedBookingId}
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+      />
+      <JournalViewModal
+        bookingId={selectedBookingId}
+        isOpen={isJournalModalOpen}
+        onClose={() => setIsJournalModalOpen(false)}
       />
     </AdminLayout>
   )

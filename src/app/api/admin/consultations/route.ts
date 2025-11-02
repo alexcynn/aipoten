@@ -169,6 +169,7 @@ export async function GET(request: NextRequest) {
         bookings: {
           include: {
             timeSlot: true,
+            review: true,
           },
           orderBy: {
             sessionNumber: 'asc',

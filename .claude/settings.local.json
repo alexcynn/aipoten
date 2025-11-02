@@ -30,7 +30,10 @@
       "Bash(npx tsc:*)",
       "Bash(cmd /c \"rmdir /s /q src\\app\\api\\admin\\payments\\[groupId]\")",
       "Bash(cmd /c \"dir src\\app\\api\\admin\\payments /b\")",
-      "Bash(cmd /c \"if exist .next rmdir /s /q .next && echo .next deleted\")"
+      "Bash(cmd /c \"if exist .next rmdir /s /q .next && echo .next deleted\")",
+      "Bash(cmd /c \"set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes&& npx prisma migrate reset --force\")",
+      "Bash($env:PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"yes\")",
+      "Bash(cmd /c \"if exist .next rmdir /s /q .next && echo Build cache cleaned\")"
     ],
     "deny": [],
     "ask": []

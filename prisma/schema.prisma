@@ -38,6 +38,7 @@ model User {
   refundRequests       RefundRequest[]      // 환불 요청
   processedRefunds     RefundRequest[]      @relation("ProcessedRefunds") // 처리한 환불 요청
   inquiries            Inquiry[]            // 1:1 문의
+  reviews              Review[]             // 작성한 리뷰
 
   @@map("users")
 }
@@ -709,6 +710,9 @@ model Booking {
   parentNote            String?             // 부모 메모 (특이사항 등)
   therapistNote         String?             // 치료사 상담일지
 
+  // 리뷰 (1:1 관계)
+  review                Review?
+
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 
@@ -719,6 +723,30 @@ model Booking {
   @@index([status])
   @@index([scheduledAt])
   @@map("bookings")
+}
+
+// 리뷰 (세션 완료 후 부모가 작성)
+model Review {
+  id                String              @id @default(cuid())
+
+  // 예약 참조 (1:1)
+  bookingId         String              @unique
+  booking           Booking             @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  // 작성자 (부모)
+  parentUserId      String
+  parentUser        User                @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
+
+  // 리뷰 내용
+  rating            Int                 // 1-5점
+  content           String?             // 리뷰 텍스트 (선택)
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([parentUserId])
+  @@index([rating])
+  @@map("reviews")
 }
 
 // 환불 요청
