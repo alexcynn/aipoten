@@ -243,64 +243,94 @@ export default function AdminConsultationsPage() {
 
         {/* 필터 */}
         <div className="bg-white shadow rounded-lg p-4">
-          <div className="flex gap-2 flex-wrap">
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button
               onClick={() => setFilter('ALL')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'ALL'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: filter === 'ALL' ? '#386646' : '#F3F4F6',
+                color: filter === 'ALL' ? '#FFFFFF' : '#374151',
+              }}
             >
               전체 ({consultations.length})
             </button>
             <button
               onClick={() => setFilter('PENDING_PAYMENT')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'PENDING_PAYMENT'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: filter === 'PENDING_PAYMENT' ? '#386646' : '#F3F4F6',
+                color: filter === 'PENDING_PAYMENT' ? '#FFFFFF' : '#374151',
+              }}
             >
               결제대기
             </button>
             <button
               onClick={() => setFilter('PENDING_CONFIRMATION')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'PENDING_CONFIRMATION'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: filter === 'PENDING_CONFIRMATION' ? '#386646' : '#F3F4F6',
+                color: filter === 'PENDING_CONFIRMATION' ? '#FFFFFF' : '#374151',
+              }}
             >
               예약대기
             </button>
             <button
               onClick={() => setFilter('CONFIRMED')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'CONFIRMED'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: filter === 'CONFIRMED' ? '#386646' : '#F3F4F6',
+                color: filter === 'CONFIRMED' ? '#FFFFFF' : '#374151',
+              }}
             >
               진행예정
             </button>
             <button
               onClick={() => setFilter('COMPLETED')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'COMPLETED'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: filter === 'COMPLETED' ? '#386646' : '#F3F4F6',
+                color: filter === 'COMPLETED' ? '#FFFFFF' : '#374151',
+              }}
             >
               완료
             </button>
             <button
               onClick={() => setFilter('CANCELLED')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'CANCELLED'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: filter === 'CANCELLED' ? '#386646' : '#F3F4F6',
+                color: filter === 'CANCELLED' ? '#FFFFFF' : '#374151',
+              }}
             >
               취소
             </button>

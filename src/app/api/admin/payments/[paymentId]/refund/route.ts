@@ -51,30 +51,34 @@ export async function POST(
     }
 
     // 환불 불가능한 상태 체크
-    if (payment.status === 'REFUNDED' || payment.status === 'PARTIALLY_REFUNDED') {
+    if (payment.status === 'REFUNDED') {
       return NextResponse.json(
-        { error: '이미 환불된 결제입니다.' },
+        { error: '이미 전액 환불된 결제입니다.' },
         { status: 400 }
       )
     }
 
-    if (payment.status !== 'PAID') {
+    if (payment.status !== 'PAID' && payment.status !== 'PARTIALLY_REFUNDED') {
       return NextResponse.json(
         { error: '결제 완료된 건만 환불할 수 있습니다.' },
         { status: 400 }
       )
     }
 
-    // 환불 금액이 결제 금액보다 큰지 체크
-    if (refundAmount > payment.finalFee) {
+    // 이미 환불된 금액 확인
+    const alreadyRefunded = payment.refundAmount || 0
+    const totalRefund = alreadyRefunded + refundAmount
+
+    // 총 환불 금액이 결제 금액보다 큰지 체크
+    if (totalRefund > payment.finalFee) {
       return NextResponse.json(
-        { error: '환불 금액이 결제 금액보다 클 수 없습니다.' },
+        { error: `환불 금액이 결제 금액을 초과할 수 없습니다. (이미 환불: ₩${alreadyRefunded.toLocaleString()})` },
         { status: 400 }
       )
     }
 
     // 완전 환불인지 부분 환불인지 판단
-    const isFullRefund = refundAmount === payment.finalFee
+    const isFullRefund = totalRefund >= payment.finalFee
     const newStatus = isFullRefund ? 'REFUNDED' : 'PARTIALLY_REFUNDED'
 
     // 환불 처리
@@ -85,35 +89,22 @@ export async function POST(
         data: {
           status: newStatus,
           refundedAt: new Date(),
-          refundAmount,
-          refundReason,
+          refundAmount: totalRefund,
+          refundReason: refundReason || payment.refundReason || '관리자 환불',
         },
       }),
-      // 예약들 취소 처리
+      // 예약들 취소 처리 (완료되지 않은 세션만)
       prisma.booking.updateMany({
         where: {
           paymentId: paymentId,
-          status: 'SCHEDULED', // 아직 진행하지 않은 세션만 취소
+          status: {
+            in: ['PENDING_CONFIRMATION', 'CONFIRMED', 'SCHEDULED'], // 아직 진행하지 않은 세션만 취소
+          },
         },
         data: {
           status: 'CANCELLED',
           cancelledAt: new Date(),
-          cancelledBy: session.user.id,
-          cancellationReason: refundReason,
-        },
-      }),
-      // 환불 요청 기록 생성
-      prisma.refundRequest.create({
-        data: {
-          paymentId: paymentId,
-          requestedBy: payment.parentUserId,
-          reason: refundReason || '관리자 직접 환불',
-          requestedAmount: refundAmount,
-          status: 'APPROVED',
-          processedBy: session.user.id,
-          processedAt: new Date(),
-          approvedAmount: refundAmount,
-          adminNote: '관리자가 직접 환불 처리함',
+          cancellationReason: refundReason || '관리자 환불',
         },
       }),
     ])

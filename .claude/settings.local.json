@@ -29,7 +29,8 @@
       "Bash(cmd /c \"set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes&& npx prisma db push --force-reset --skip-generate\")",
       "Bash(npx tsc:*)",
       "Bash(cmd /c \"rmdir /s /q src\\app\\api\\admin\\payments\\[groupId]\")",
-      "Bash(cmd /c \"dir src\\app\\api\\admin\\payments /b\")"
+      "Bash(cmd /c \"dir src\\app\\api\\admin\\payments /b\")",
+      "Bash(cmd /c \"if exist .next rmdir /s /q .next && echo .next deleted\")"
     ],
     "deny": [],
     "ask": []

@@ -81,6 +81,7 @@ export default function AdminPaymentsPage() {
       return
     }
 
+    console.log('Current filter:', filter)
     fetchPayments()
   }, [session, status, router, filter])
 
@@ -128,7 +129,10 @@ export default function AdminPaymentsPage() {
 
   const handleStartRefund = (payment: Payment) => {
     setRefundingGroupId(payment.id)
-    setRefundAmount(payment.finalFee)
+    // 이미 환불된 금액을 제외한 남은 금액을 기본값으로 설정
+    const alreadyRefunded = payment.refundAmount || 0
+    const remainingAmount = payment.finalFee - alreadyRefunded
+    setRefundAmount(remainingAmount)
     setRefundReason('')
   }
 
@@ -155,17 +159,23 @@ export default function AdminPaymentsPage() {
         }),
       })
 
+      console.log('환불 API 응답 상태:', response.status, response.ok)
+
       if (response.ok) {
+        const data = await response.json()
+        console.log('환불 성공 응답:', data)
         setMessage({ type: 'success', text: '환불이 완료되었습니다.' })
         setRefundingGroupId(null)
         setRefundAmount(0)
         setRefundReason('')
-        fetchPayments()
+        await fetchPayments()
       } else {
-        const data = await response.json()
+        const data = await response.json().catch(() => ({ error: '응답 파싱 실패' }))
+        console.error('환불 실패 응답:', data)
         setMessage({ type: 'error', text: data.error || '환불 처리에 실패했습니다.' })
       }
     } catch (error) {
+      console.error('환불 처리 예외:', error)
       setMessage({ type: 'error', text: '서버 오류가 발생했습니다.' })
     }
 
@@ -229,44 +239,76 @@ export default function AdminPaymentsPage() {
 
         {/* 필터 */}
         <div className="bg-white shadow rounded-lg p-4">
-          <div className="flex gap-2">
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button
-              onClick={() => setFilter('ALL')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'ALL'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              onClick={() => {
+                console.log('Filter clicked: ALL')
+                setFilter('ALL')
+              }}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: filter === 'ALL' ? '#386646' : '#F3F4F6',
+                color: filter === 'ALL' ? '#FFFFFF' : '#374151',
+              }}
             >
               전체 ({payments.length})
             </button>
             <button
-              onClick={() => setFilter('PENDING_PAYMENT')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'PENDING_PAYMENT'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              onClick={() => {
+                console.log('Filter clicked: PENDING_PAYMENT')
+                setFilter('PENDING_PAYMENT')
+              }}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: filter === 'PENDING_PAYMENT' ? '#386646' : '#F3F4F6',
+                color: filter === 'PENDING_PAYMENT' ? '#FFFFFF' : '#374151',
+              }}
             >
               입금 대기 ({pendingCount})
             </button>
             <button
-              onClick={() => setFilter('PAID')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'PAID'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              onClick={() => {
+                console.log('Filter clicked: PAID')
+                setFilter('PAID')
+              }}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: filter === 'PAID' ? '#386646' : '#F3F4F6',
+                color: filter === 'PAID' ? '#FFFFFF' : '#374151',
+              }}
             >
               결제 완료 ({paidCount})
             </button>
             <button
-              onClick={() => setFilter('REFUNDED')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                filter === 'REFUNDED'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              onClick={() => {
+                console.log('Filter clicked: REFUNDED')
+                setFilter('REFUNDED')
+              }}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: filter === 'REFUNDED' ? '#386646' : '#F3F4F6',
+                color: filter === 'REFUNDED' ? '#FFFFFF' : '#374151',
+              }}
             >
               환불 ({refundedCount})
             </button>
@@ -397,7 +439,7 @@ export default function AdminPaymentsPage() {
                               type="number"
                               value={refundAmount}
                               onChange={(e) => setRefundAmount(parseInt(e.target.value) || 0)}
-                              className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
+                              className="w-32 px-2 py-1 border border-gray-300 rounded-md text-sm"
                               placeholder="환불 금액"
                               step="1000"
                             />
@@ -405,7 +447,7 @@ export default function AdminPaymentsPage() {
                               type="text"
                               value={refundReason}
                               onChange={(e) => setRefundReason(e.target.value)}
-                              className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
+                              className="w-48 px-2 py-1 border border-gray-300 rounded-md text-sm"
                               placeholder="환불 사유"
                             />
                             <div className="flex gap-2">
@@ -437,12 +479,12 @@ export default function AdminPaymentsPage() {
                                 입금 확인
                               </button>
                             )}
-                            {payment.status === 'PAID' && (
+                            {(payment.status === 'PAID' || payment.status === 'PARTIALLY_REFUNDED') && (
                               <button
                                 onClick={() => handleStartRefund(payment)}
                                 className="text-red-600 hover:text-red-900"
                               >
-                                환불 처리
+                                {payment.status === 'PARTIALLY_REFUNDED' ? '추가 환불' : '환불 처리'}
                               </button>
                             )}
                           </div>
