@@ -33,32 +33,44 @@ export async function GET(
             name: true,
             birthDate: true,
             gender: true,
+            gestationalWeeks: true,
+            birthWeight: true,
+            currentHeight: true,
+            currentWeight: true,
+            medicalHistory: true,
             createdAt: true
           }
         },
-        consultations: {
+        bookings: {
           select: {
             id: true,
             scheduledAt: true,
             status: true,
-            fee: true,
+            sessionNumber: true,
             child: {
               select: {
                 name: true
+              }
+            },
+            therapist: {
+              select: {
+                user: {
+                  select: {
+                    name: true
+                  }
+                }
+              }
+            },
+            payment: {
+              select: {
+                sessionType: true,
+                finalFee: true,
+                totalSessions: true
               }
             }
           },
           orderBy: {
             scheduledAt: 'desc'
-          }
-        },
-        therapistProfile: {
-          select: {
-            id: true,
-            specialty: true,
-            experience: true,
-            status: true,
-            consultationFee: true
           }
         }
       }
@@ -78,17 +90,38 @@ export async function GET(
       phone: user.phone,
       role: user.role,
       avatar: user.avatar,
+      address: user.address,
+      addressDetail: user.addressDetail,
       createdAt: user.createdAt.toISOString(),
       children: user.children.map(child => ({
         ...child,
         birthDate: child.birthDate.toISOString(),
         createdAt: child.createdAt.toISOString()
       })),
-      consultations: user.consultations.map(consultation => ({
-        ...consultation,
-        scheduledAt: consultation.scheduledAt.toISOString()
-      })),
-      therapistProfile: user.therapistProfile
+      consultations: user.bookings
+        .filter(b => b.payment.sessionType === 'CONSULTATION')
+        .map(booking => ({
+          id: booking.id,
+          scheduledAt: booking.scheduledAt.toISOString(),
+          status: booking.status,
+          childName: booking.child.name,
+          therapistName: booking.therapist.user.name,
+          fee: booking.payment.finalFee,
+          sessionNumber: booking.sessionNumber,
+          totalSessions: booking.payment.totalSessions
+        })),
+      therapies: user.bookings
+        .filter(b => b.payment.sessionType === 'THERAPY')
+        .map(booking => ({
+          id: booking.id,
+          scheduledAt: booking.scheduledAt.toISOString(),
+          status: booking.status,
+          childName: booking.child.name,
+          therapistName: booking.therapist.user.name,
+          fee: booking.payment.finalFee,
+          sessionNumber: booking.sessionNumber,
+          totalSessions: booking.payment.totalSessions
+        }))
     }
 
     return NextResponse.json(formattedUser)

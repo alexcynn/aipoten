@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import AdminLayout from '@/components/layout/AdminLayout'
 import Pagination from '@/components/admin/Pagination'
+import ParentInfoModal from '@/components/modals/ParentInfoModal'
 
 interface User {
   id: string
@@ -29,6 +29,8 @@ export default function AdminUsersPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [selectedParentId, setSelectedParentId] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const itemsPerPage = 10
 
   useEffect(() => {
@@ -66,13 +68,34 @@ export default function AdminUsersPage() {
     }
   }
 
+  const handleOpenModal = (userId: string) => {
+    setSelectedParentId(userId)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedParentId(null)
+  }
+
   // 부모만 필터링
-  const filteredUsers = users.filter(user => {
-    const isParent = user.role === 'PARENT'
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    return isParent && matchesSearch
+  const parentUsers = users.filter(user => user.role === 'PARENT')
+
+  const filteredUsers = parentUsers.filter(user => {
+    if (!searchTerm) return true
+    const searchLower = searchTerm.toLowerCase()
+    return user.name.toLowerCase().includes(searchLower) ||
+           user.email.toLowerCase().includes(searchLower) ||
+           user.phone.includes(searchTerm)
   })
+
+  // 통계 계산
+  const stats = {
+    total: parentUsers.length,
+    totalChildren: parentUsers.reduce((sum, u) => sum + u._count.children, 0),
+    totalConsultations: parentUsers.reduce((sum, u) => sum + u._count.consultations, 0),
+    totalBookings: parentUsers.reduce((sum, u) => sum + u._count.bookings, 0),
+  }
 
   // 페이지네이션 계산
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
@@ -98,26 +121,40 @@ export default function AdminUsersPage() {
   return (
     <AdminLayout title="부모 관리">
       <div className="space-y-6">
-        <div>
-          <div className="mb-6">
-            <p className="mt-2 text-gray-600">
+        {/* 통계 */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="flex justify-between items-center">
+            <p className="text-gray-600">
               플랫폼에 가입한 부모 회원을 관리할 수 있습니다.
             </p>
+            <div className="flex items-center space-x-4 text-sm">
+              <div>
+                전체 <span className="font-semibold text-gray-900">{stats.total}</span>명
+                <span className="mx-2">|</span>
+                아이 <span className="font-semibold text-blue-600">{stats.totalChildren}</span>명
+                <span className="mx-2">|</span>
+                언어 컨설팅 <span className="font-semibold text-green-600">{stats.totalConsultations}</span>회
+                <span className="mx-2">|</span>
+                홈티 <span className="font-semibold text-purple-600">{stats.totalBookings}</span>회
+              </div>
+            </div>
           </div>
+        </div>
 
-          {/* Search */}
-          <div className="mb-6">
-            <input
-              type="text"
-              placeholder="이름 또는 이메일로 검색..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green focus:border-transparent"
-            />
-          </div>
+        {/* 검색 */}
+        <div className="bg-white shadow rounded-lg p-4">
+          <input
+            type="text"
+            placeholder="이름, 이메일, 전화번호로 검색..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green focus:border-transparent"
+          />
+        </div>
 
-          {/* Parents Table */}
-          {filteredUsers.length === 0 ? (
+        {/* 부모 목록 */}
+        {filteredUsers.length === 0 ? (
+          <div className="bg-white shadow rounded-lg">
             <div className="text-center py-12">
               <div className="text-gray-400 text-6xl mb-4">👨‍👩‍👧‍👦</div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -127,7 +164,8 @@ export default function AdminUsersPage() {
                 {searchTerm ? '다른 검색어를 시도해보세요.' : '부모 회원 가입을 기다리고 있습니다.'}
               </p>
             </div>
-          ) : (
+          </div>
+        ) : (
             <div className="bg-white shadow overflow-hidden sm:rounded-lg">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -205,12 +243,12 @@ export default function AdminUsersPage() {
                           {new Date(user.createdAt).toLocaleDateString('ko-KR')}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <Link
-                            href={`/admin/users/${user.id}`}
+                          <button
+                            onClick={() => handleOpenModal(user.id)}
                             className="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
                           >
                             상세
-                          </Link>
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -227,9 +265,15 @@ export default function AdminUsersPage() {
                 />
               )}
             </div>
-          )}
-        </div>
+        )}
       </div>
+
+      {/* 부모 정보 모달 */}
+      <ParentInfoModal
+        parentId={selectedParentId}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </AdminLayout>
   )
 }

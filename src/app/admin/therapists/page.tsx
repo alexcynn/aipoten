@@ -518,19 +518,22 @@ export default function AdminTherapistsPage() {
   return (
     <AdminLayout title="치료사 관리">
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <p className="text-gray-600">
-            치료사 가입 승인 및 프로필 관리를 할 수 있습니다.
-          </p>
-          <div className="flex items-center space-x-4 text-sm">
-            <div>
-              전체 <span className="font-semibold text-gray-900">{stats.total}</span>명
-              <span className="mx-2">|</span>
-              신청 <span className="font-semibold text-blue-600">{stats.pending}</span>명
-              <span className="mx-2">|</span>
-              대기 <span className="font-semibold text-yellow-600">{stats.waiting}</span>명
-              <span className="mx-2">|</span>
-              수정 요청 <span className="font-semibold text-orange-600">{stats.updateRequests}</span>명
+        {/* 통계 */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="flex justify-between items-center">
+            <p className="text-gray-600">
+              치료사 가입 승인 및 프로필 관리를 할 수 있습니다.
+            </p>
+            <div className="flex items-center space-x-4 text-sm">
+              <div>
+                전체 <span className="font-semibold text-gray-900">{stats.total}</span>명
+                <span className="mx-2">|</span>
+                신청 <span className="font-semibold text-blue-600">{stats.pending}</span>명
+                <span className="mx-2">|</span>
+                대기 <span className="font-semibold text-yellow-600">{stats.waiting}</span>명
+                <span className="mx-2">|</span>
+                수정 요청 <span className="font-semibold text-orange-600">{stats.updateRequests}</span>명
+              </div>
             </div>
           </div>
         </div>
@@ -579,15 +582,14 @@ export default function AdminTherapistsPage() {
 
         {/* Filter Tabs (치료사 목록 탭에서만 표시) */}
         {activeTab === 'list' && (
-          <div className="mb-6">
-            <div className="border-b border-gray-200">
+          <div className="bg-white shadow rounded-lg p-4">
+            <div className="border-b border-gray-200 mb-4">
               <nav className="-mb-px flex space-x-8">
                 {['ALL', 'PENDING', 'WAITING', 'APPROVED', 'REJECTED'].map((statusFilter) => (
                   <button
                     key={statusFilter}
                     onClick={() => {
                       setFilter(statusFilter as any)
-                      // 필터 변경 시 검색어와 전문분야 필터 초기화
                       setSearchTerm('')
                       setSpecialtyFilter('')
                       setCurrentPage(1)
@@ -610,19 +612,57 @@ export default function AdminTherapistsPage() {
                 ))}
               </nav>
             </div>
+            {/* 검색 필터 */}
+            <div className="grid grid-cols-3 gap-4">
+              <input
+                type="text"
+                placeholder="이름, 이메일, 전화번호로 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              />
+              <select
+                value={specialtyFilter}
+                onChange={(e) => setSpecialtyFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              >
+                <option value="">전문분야: 전체</option>
+                <option value="SPEECH_THERAPY">언어치료</option>
+                <option value="SENSORY_INTEGRATION">감각통합</option>
+                <option value="PLAY_THERAPY">놀이치료</option>
+                <option value="ART_THERAPY">미술치료</option>
+                <option value="MUSIC_THERAPY">음악치료</option>
+                <option value="OCCUPATIONAL_THERAPY">작업치료</option>
+                <option value="COGNITIVE_THERAPY">인지치료</option>
+                <option value="BEHAVIORAL_THERAPY">행동치료</option>
+              </select>
+              <button
+                onClick={() => {
+                  setSearchTerm('')
+                  setSpecialtyFilter('')
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                초기화
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Therapists Table */}
+        {/* 치료사 목록 */}
         {filteredTherapists.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">👨‍⚕️</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {filter === 'ALL' ? '등록된 치료사가 없습니다' : `${filter === 'PENDING' ? '승인 대기 중인' : filter === 'APPROVED' ? '승인된' : '거부된'} 치료사가 없습니다`}
-            </h3>
-            <p className="text-gray-500">
-              새로운 치료사 가입을 기다리고 있습니다.
-            </p>
+          <div className="bg-white shadow rounded-lg">
+            <div className="text-center py-12">
+              <div className="text-gray-400 text-6xl mb-4">👨‍⚕️</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm || specialtyFilter ? '검색 결과가 없습니다' :
+                 filter === 'ALL' ? '등록된 치료사가 없습니다' :
+                 `${filter === 'PENDING' ? '승인 대기 중인' : filter === 'APPROVED' ? '승인된' : '거부된'} 치료사가 없습니다`}
+              </h3>
+              <p className="text-gray-500">
+                {searchTerm || specialtyFilter ? '다른 검색어를 시도해보세요.' : '새로운 치료사 가입을 기다리고 있습니다.'}
+              </p>
+            </div>
           </div>
         ) : (
           <div className="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -657,50 +697,6 @@ export default function AdminTherapistsPage() {
                     <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       관리
                     </th>
-                  </tr>
-                  {/* 검색 필터 행 */}
-                  <tr className="bg-white">
-                    <th scope="col" className="px-6 py-2">
-                      <input
-                        type="text"
-                        placeholder="이름 검색..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                      />
-                    </th>
-                    <th scope="col" className="px-6 py-2">
-                      <input
-                        type="text"
-                        placeholder="이메일/전화"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                      />
-                    </th>
-                    <th scope="col" className="px-6 py-2">
-                      <select
-                        value={specialtyFilter}
-                        onChange={(e) => setSpecialtyFilter(e.target.value)}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                      >
-                        <option value="">전체</option>
-                        <option value="SPEECH_THERAPY">언어치료</option>
-                        <option value="SENSORY_INTEGRATION">감각통합</option>
-                        <option value="PLAY_THERAPY">놀이치료</option>
-                        <option value="ART_THERAPY">미술치료</option>
-                        <option value="MUSIC_THERAPY">음악치료</option>
-                        <option value="OCCUPATIONAL_THERAPY">작업치료</option>
-                        <option value="COGNITIVE_THERAPY">인지치료</option>
-                        <option value="BEHAVIORAL_THERAPY">행동치료</option>
-                      </select>
-                    </th>
-                    <th scope="col" className="px-6 py-2"></th>
-                    <th scope="col" className="px-6 py-2"></th>
-                    <th scope="col" className="px-6 py-2"></th>
-                    <th scope="col" className="px-6 py-2"></th>
-                    <th scope="col" className="px-6 py-2"></th>
-                    <th scope="col" className="px-6 py-2"></th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">

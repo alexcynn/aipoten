@@ -33,8 +33,16 @@ export async function GET(request: NextRequest) {
         _count: {
           select: {
             children: true,
-            consultations: true,
             bookings: true
+          }
+        },
+        bookings: {
+          select: {
+            payment: {
+              select: {
+                sessionType: true
+              }
+            }
           }
         }
       },
@@ -51,7 +59,11 @@ export async function GET(request: NextRequest) {
       role: user.role,
       avatar: user.avatar,
       createdAt: user.createdAt.toISOString(),
-      _count: user._count
+      _count: {
+        children: user._count.children,
+        consultations: user.bookings.filter(b => b.payment.sessionType === 'CONSULTATION').length,
+        bookings: user.bookings.filter(b => b.payment.sessionType === 'THERAPY').length
+      }
     }))
 
     return NextResponse.json(formattedUsers)
