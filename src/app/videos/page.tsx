@@ -12,12 +12,12 @@ interface Video {
   id: string
   title: string
   description: string
-  url: string
+  videoUrl: string
   thumbnailUrl: string | null
-  category: string
-  ageMin: number
-  ageMax: number
+  targetAgeMin: number
+  targetAgeMax: number
   duration: number
+  isPublished: boolean
   createdAt: string
 }
 
@@ -35,26 +35,9 @@ function VideosContent() {
   const [children, setChildren] = useState<Child[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedChildId, setSelectedChildId] = useState<string>('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(1)
   const videosPerPage = 12
-
-  const categories = [
-    '전체',
-    '대근육 발달',
-    '소근육 발달',
-    '언어 발달',
-    '인지 발달',
-    '사회성 발달',
-    '감정 발달',
-    '창의성',
-    '음악/리듬',
-    '미술/그리기',
-    '책 읽기',
-    '수학/숫자',
-    '과학/탐구'
-  ]
 
   useEffect(() => {
     const fetchData = async () => {
@@ -116,17 +99,12 @@ function VideosContent() {
       return false
     }
 
-    // 카테고리 필터
-    if (selectedCategory && selectedCategory !== '전체' && video.category !== selectedCategory) {
-      return false
-    }
-
     // 아이 나이 필터
     if (selectedChildId) {
       const child = children.find(c => c.id === selectedChildId)
       if (child) {
         const ageInMonths = calculateAge(child.birthDate)
-        if (ageInMonths < video.ageMin || ageInMonths > video.ageMax) {
+        if (ageInMonths < video.targetAgeMin || ageInMonths > video.targetAgeMax) {
           return false
         }
       }
@@ -156,13 +134,13 @@ function VideosContent() {
   // 필터 변경 시 첫 페이지로 리셋
   useEffect(() => {
     setCurrentPage(1)
-  }, [selectedChildId, selectedCategory, searchQuery])
+  }, [selectedChildId, searchQuery])
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-light flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: '#386646' }}></div>
           <p className="mt-4 text-gray-600">로딩 중...</p>
         </div>
       </div>
@@ -188,8 +166,10 @@ function VideosContent() {
             {session?.user?.role === 'ADMIN' && (
               <Link
                 href="/videos/new"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm"
+                className="inline-flex items-center px-4 py-2 border-0 text-sm font-medium rounded-md shadow-sm transition-colors"
                 style={{ backgroundColor: '#386646', color: 'white' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2d4f36'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
               >
                 영상 추가
               </Link>
@@ -198,7 +178,7 @@ function VideosContent() {
 
           {/* Filters */}
           <div className="bg-white shadow rounded-lg p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Child Selection */}
               <div>
                 <label htmlFor="child-select" className="block text-sm font-medium text-gray-700 mb-2">
@@ -214,25 +194,6 @@ function VideosContent() {
                   {children.map((child) => (
                     <option key={child.id} value={child.id}>
                       {child.name} ({getAgeText(child.birthDate)})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Category Selection */}
-              <div>
-                <label htmlFor="category-select" className="block text-sm font-medium text-gray-700 mb-2">
-                  카테고리
-                </label>
-                <select
-                  id="category-select"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green"
-                >
-                  {categories.map((category) => (
-                    <option key={category} value={category === '전체' ? '' : category}>
-                      {category}
                     </option>
                   ))}
                 </select>
@@ -271,10 +232,12 @@ function VideosContent() {
                 <button
                   onClick={() => {
                     setSelectedChildId('')
-                    setSelectedCategory('')
                     setSearchQuery('')
                   }}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy"
+                  className="inline-flex items-center px-4 py-2 border-0 text-sm font-medium rounded-md shadow-sm transition-colors"
+                  style={{ backgroundColor: '#386646', color: 'white' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2d4f36'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
                 >
                   필터 초기화
                 </button>
@@ -314,16 +277,22 @@ function VideosContent() {
                   {/* Content */}
                   <div className="p-4">
                     <div className="mb-2">
-                      <span className="inline-block bg-aipoten-accent bg-opacity-20 text-aipoten-green text-xs px-2 py-1 rounded-full">
-                        {video.category}
-                      </span>
-                      <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full ml-1">
-                        {video.ageMin}-{video.ageMax}개월
+                      {!video.isPublished && (
+                        <span className="inline-block bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full mr-1">
+                          비공개
+                        </span>
+                      )}
+                      <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                        {video.targetAgeMin}-{video.targetAgeMax}개월
                       </span>
                     </div>
 
                     <Link href={`/videos/${video.id}`}>
-                      <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 hover:text-aipoten-green cursor-pointer">
+                      <h3
+                        className="font-medium text-gray-900 mb-2 line-clamp-2 cursor-pointer transition-colors"
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#386646'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = '#111827'}
+                      >
                         {video.title}
                       </h3>
                     </Link>
@@ -369,10 +338,13 @@ function VideosContent() {
                           </>
                         )}
                         <a
-                          href={video.url}
+                          href={video.videoUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-aipoten-green hover:bg-aipoten-navy"
+                          className="inline-flex items-center px-3 py-2 border-0 text-sm font-medium rounded-md transition-colors"
+                          style={{ backgroundColor: '#386646', color: 'white' }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2d4f36'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
                         >
                           시청
                         </a>
@@ -448,7 +420,7 @@ function VideosContent() {
             <div className="mt-8 bg-white shadow rounded-lg p-6">
               <div className="text-center">
                 <p className="text-gray-600">
-                  총 <span className="font-semibold text-aipoten-green">{filteredVideos.length}</span>개의 영상이 있습니다
+                  총 <span className="font-semibold" style={{ color: '#386646' }}>{filteredVideos.length}</span>개의 영상이 있습니다
                   {selectedChildId && (
                     <>
                       {' '}• {children.find(c => c.id === selectedChildId)?.name}님의 연령에 맞는 영상입니다
@@ -469,7 +441,7 @@ export default function VideosPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-neutral-light flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: '#386646' }}></div>
           <p className="mt-4 text-gray-600">로딩 중...</p>
         </div>
       </div>

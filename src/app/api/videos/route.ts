@@ -6,6 +6,8 @@ import { authOptions } from '@/lib/auth-config'
 // 영상 목록 조회 및 추천
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '12')
@@ -16,8 +18,11 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit
 
-    let whereCondition: any = {
-      isPublished: true
+    let whereCondition: any = {}
+
+    // 관리자가 아닌 경우만 공개된 영상만 조회
+    if (session?.user?.role !== 'ADMIN') {
+      whereCondition.isPublished = true
     }
 
     // 연령별 필터링
@@ -70,6 +75,7 @@ export async function GET(request: NextRequest) {
           viewCount: true,
           bookmarkCount: true,
           priority: true,
+          isPublished: true,
           createdAt: true
         },
         orderBy,

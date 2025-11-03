@@ -20,6 +20,7 @@ interface Video {
   developmentCategories: string[]
   recommendedForLevels: string[]
   viewCount: number
+  isPublished: boolean
   createdAt: string
 }
 
@@ -228,7 +229,14 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
 
                 {/* 영상 정보 */}
                 <div className="p-6">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-3">{video.title}</h1>
+                  <div className="flex items-start gap-2 mb-3">
+                    <h1 className="text-2xl font-bold text-gray-900">{video.title}</h1>
+                    {!video.isPublished && (
+                      <span className="inline-block bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full mt-1">
+                        비공개
+                      </span>
+                    )}
+                  </div>
 
                   <div className="flex flex-wrap gap-2 mb-4">
                     {video.developmentCategories.map((cat) => (

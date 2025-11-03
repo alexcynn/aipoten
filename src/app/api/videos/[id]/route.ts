@@ -9,6 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions)
     const { id } = await params
 
     // 조회수 증가
@@ -17,8 +18,14 @@ export async function GET(
       data: { viewCount: { increment: 1 } }
     })
 
+    // 영상 조회 (관리자가 아닌 경우만 isPublished 조건 추가)
+    const whereCondition: any = { id }
+    if (session?.user?.role !== 'ADMIN') {
+      whereCondition.isPublished = true
+    }
+
     const video = await prisma.video.findUnique({
-      where: { id, isPublished: true }
+      where: whereCondition
     })
 
     if (!video) {
