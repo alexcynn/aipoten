@@ -163,7 +163,7 @@ export async function generateAssessmentAnalysis(
 
   return await generateText(prompt, {
     temperature: 0.7,
-    maxOutputTokens: 3000,
+    maxOutputTokens: 10000, // 3000 → 10000으로 증가 (약 3배 이상)
   });
 }
 

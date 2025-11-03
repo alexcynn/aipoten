@@ -307,7 +307,7 @@ export default function TherapistDashboardPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             <Link
               href="/therapist/profile"
               className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
@@ -372,6 +372,23 @@ export default function TherapistDashboardPage() {
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-gray-900">상담 관리</h3>
                   <p className="text-sm text-gray-500">상담 내역</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              href="/therapist/journal-test"
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-white bg-opacity-20 rounded flex items-center justify-center">
+                    <span className="text-white">✨</span>
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-lg font-medium text-white">AI 상담일지</h3>
+                  <p className="text-sm text-purple-100">자동 생성 테스트</p>
                 </div>
               </div>
             </Link>

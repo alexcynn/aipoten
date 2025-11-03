@@ -11,7 +11,7 @@ import { generateRAGContext } from '@/lib/services/ragService';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -23,9 +23,11 @@ export async function POST(
       );
     }
 
+    const { id } = await params;
+
     // 발달체크 조회 (권한 확인 포함)
     const assessment = await prisma.developmentAssessment.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         child: true,
         results: true,
@@ -71,20 +73,23 @@ export async function POST(
       });
     }
 
-    // 1. RAG 컨텍스트 생성
-    const ragContext = await generateRAGContext({
-      ageInMonths: assessment.ageInMonths,
-      results: assessment.results.map((r) => ({
-        category: r.category,
-        score: r.score,
-        level: r.level,
-      })),
-      concernsText: assessment.concernsText || undefined,
-    });
+    // 커스텀 프롬프트 받기 (선택사항)
+    const body = await request.json().catch(() => ({}));
+    const customPrompt = body.customPrompt;
 
-    // 2. LLM 분석 생성
-    const aiAnalysis = await generateAssessmentAnalysis(
-      {
+    let aiAnalysis: string;
+
+    if (customPrompt) {
+      // 커스텀 프롬프트 사용
+      const { generateText } = await import('@/lib/services/vertexAIService');
+      aiAnalysis = await generateText(customPrompt, {
+        temperature: 0.7,
+        maxOutputTokens: 10000, // 3000 → 10000으로 증가
+      });
+    } else {
+      // 기본 프롬프트 사용
+      // 1. RAG 컨텍스트 생성
+      const ragContext = await generateRAGContext({
         ageInMonths: assessment.ageInMonths,
         results: assessment.results.map((r) => ({
           category: r.category,
@@ -92,13 +97,26 @@ export async function POST(
           level: r.level,
         })),
         concernsText: assessment.concernsText || undefined,
-      },
-      ragContext
-    );
+      });
+
+      // 2. LLM 분석 생성
+      aiAnalysis = await generateAssessmentAnalysis(
+        {
+          ageInMonths: assessment.ageInMonths,
+          results: assessment.results.map((r) => ({
+            category: r.category,
+            score: r.score,
+            level: r.level,
+          })),
+          concernsText: assessment.concernsText || undefined,
+        },
+        ragContext
+      );
+    }
 
     // 3. 분석 결과 저장
     const updatedAssessment = await prisma.developmentAssessment.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         aiAnalysis,
         aiAnalyzedAt: new Date(),

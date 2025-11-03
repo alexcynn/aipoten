@@ -65,11 +65,7 @@ export async function PATCH(
     }
 
     // 관리자 권한 확인
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
-    })
-
-    if (user?.role !== 'ADMIN') {
+    if (session.user.role !== 'ADMIN') {
       return NextResponse.json(
         { error: '관리자 권한이 필요합니다.' },
         { status: 403 }
@@ -149,11 +145,7 @@ export async function DELETE(
     }
 
     // 관리자 권한 확인
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
-    })
-
-    if (user?.role !== 'ADMIN') {
+    if (session.user.role !== 'ADMIN') {
       return NextResponse.json(
         { error: '관리자 권한이 필요합니다.' },
         { status: 403 }

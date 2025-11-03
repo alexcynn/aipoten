@@ -253,8 +253,10 @@ export default function AdminAssessmentDetailPage() {
           </div>
 
           {assessment.aiAnalysis ? (
-            <div className="prose max-w-none">
-              <div className="text-gray-700 whitespace-pre-wrap">{assessment.aiAnalysis}</div>
+            <div className="max-w-none">
+              <div className="max-h-[600px] overflow-y-auto bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <div className="text-gray-700 whitespace-pre-wrap leading-relaxed text-base">{assessment.aiAnalysis}</div>
+              </div>
             </div>
           ) : (
             <div className="text-center py-8">

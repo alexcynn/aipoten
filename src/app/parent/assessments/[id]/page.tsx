@@ -60,6 +60,12 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
   const [isGeneratingAnalysis, setIsGeneratingAnalysis] = useState(false)
   const [analysisError, setAnalysisError] = useState('')
 
+  // Prompt management
+  const [showPrompt, setShowPrompt] = useState(false)
+  const [customPrompt, setCustomPrompt] = useState('')
+  const [isPromptEdited, setIsPromptEdited] = useState(false)
+  const [showGuide, setShowGuide] = useState(false)
+
   useEffect(() => {
     if (status === 'loading') return
     if (!session) {
@@ -162,6 +168,76 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
     )
   }
 
+  // 프롬프트 생성 함수
+  const createAssessmentAnalysisPrompt = () => {
+    if (!assessment) return ''
+
+    const categoryNames: Record<string, string> = {
+      GROSS_MOTOR: '대근육 운동',
+      FINE_MOTOR: '소근육 운동',
+      LANGUAGE: '언어',
+      COGNITIVE: '인지',
+      SOCIAL: '사회성',
+    }
+
+    const levelNames: Record<string, string> = {
+      ADVANCED: '또래보다 빠른 수준',
+      NORMAL: '또래 수준',
+      NEEDS_TRACKING: '추적검사 권장',
+      NEEDS_ASSESSMENT: '심화평가 권장',
+    }
+
+    const resultsText = assessment.results
+      .map((r) => {
+        const category = categoryNames[r.category] || r.category
+        const level = levelNames[r.level] || r.level
+        return `- ${category}: ${r.score}점 (${level})`
+      })
+      .join('\n')
+
+    return `당신은 아동 발달 전문가입니다. 다음 발달체크 결과를 바탕으로 종합 분석을 제공해주세요.
+
+## 아이 정보
+- 월령: ${assessment.ageInMonths}개월
+
+## 발달체크 결과
+${resultsText}
+
+${assessment.concernsText ? `## 부모님의 우려 사항\n${assessment.concernsText}\n` : ''}
+
+## 참고할 전문 지식
+[RAG 시스템이 월령과 발달 영역에 맞는 전문 지식을 자동으로 가져옵니다]
+
+## 요청사항
+위 정보를 바탕으로 다음 내용을 포함한 종합 분석을 작성해주세요:
+
+1. **전반적인 발달 상태 요약** (2-3문장)
+2. **영역별 상세 분석**
+   - 각 발달 영역(대근육, 소근육, 언어, 인지, 사회성)에 대한 평가
+   - 강점 영역과 주의가 필요한 영역 구분
+3. **맞춤 육아 팁 및 활동 추천** (3-5가지)
+   - 월령에 맞는 구체적인 놀이 및 활동
+   - 일상생활에서 실천 가능한 팁
+4. **전문가 상담 필요성**
+   - 전문가 상담이 필요한지 여부
+   - 필요하다면 어떤 분야의 치료사와 상담이 도움이 될지
+
+응답은 마크다운 형식으로 작성하되, 부모님이 읽기 쉽고 따뜻한 톤으로 작성해주세요.`
+  }
+
+  // 프롬프트 미리보기 업데이트
+  const updatePromptPreview = () => {
+    if (!isPromptEdited) {
+      setCustomPrompt(createAssessmentAnalysisPrompt())
+    }
+  }
+
+  // 기본 프롬프트로 복원
+  const resetToDefaultPrompt = () => {
+    setCustomPrompt(createAssessmentAnalysisPrompt())
+    setIsPromptEdited(false)
+  }
+
   const handleGenerateAnalysis = async () => {
     if (!assessment) return
 
@@ -169,8 +245,19 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
     setAnalysisError('')
 
     try {
+      const body: any = {}
+
+      // 커스텀 프롬프트가 있으면 추가
+      if (isPromptEdited && customPrompt) {
+        body.customPrompt = customPrompt
+      }
+
       const response = await fetch(`/api/assessments/${assessment.id}/analyze`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
       })
 
       if (!response.ok) {
@@ -377,23 +464,152 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900">AI 종합 분석</h3>
-                {!assessment.aiAnalysis && (
+              </div>
+
+              {/* 프롬프트 관리 섹션 */}
+              {!assessment.aiAnalysis && (
+                <div className="mb-4 border-t border-gray-200 pt-4">
                   <button
-                    onClick={handleGenerateAnalysis}
-                    disabled={isGeneratingAnalysis}
-                    className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: '#386646' }}
-                    onMouseEnter={(e) => {
-                      if (!isGeneratingAnalysis) e.currentTarget.style.backgroundColor = '#193149'
+                    type="button"
+                    onClick={() => {
+                      setShowPrompt(!showPrompt)
+                      if (!showPrompt) {
+                        updatePromptPreview()
+                      }
                     }}
-                    onMouseLeave={(e) => {
-                      if (!isGeneratingAnalysis) e.currentTarget.style.backgroundColor = '#386646'
+                    style={{
+                      width: '100%',
+                      backgroundColor: '#F3F4F6',
+                      color: '#374151',
+                      padding: '12px',
+                      borderRadius: '6px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      border: '1px solid #D1D5DB',
                     }}
                   >
-                    {isGeneratingAnalysis ? '분석 생성 중...' : 'AI 분석 생성하기'}
+                    <span>🔧 프롬프트 보기/수정 (고급)</span>
+                    <span>{showPrompt ? '▲' : '▼'}</span>
                   </button>
-                )}
-              </div>
+
+                  {showPrompt && (
+                    <div className="mt-4 space-y-4">
+                      {/* 프롬프트 작성 가이드 */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg">
+                        <button
+                          type="button"
+                          onClick={() => setShowGuide(!showGuide)}
+                          className="w-full px-4 py-3 flex items-center justify-between text-left"
+                        >
+                          <span className="font-medium text-blue-900">📖 프롬프트 작성 가이드</span>
+                          <span className="text-blue-600">{showGuide ? '▲' : '▼'}</span>
+                        </button>
+
+                        {showGuide && (
+                          <div className="px-4 pb-4 text-sm text-blue-900 space-y-3">
+                            <div>
+                              <h4 className="font-semibold mb-1">✨ 효과적인 프롬프트 작성 팁</h4>
+                              <ul className="list-disc ml-5 space-y-1">
+                                <li><strong>역할 정의:</strong> AI의 역할을 명확히 지정하세요</li>
+                                <li><strong>구체적 지시:</strong> 원하는 출력 형식과 구조를 명확히 설명하세요</li>
+                                <li><strong>톤 조정:</strong> 따뜻한 톤, 전문적 톤 등 원하는 어조를 명시하세요</li>
+                                <li><strong>RAG 활용:</strong> 커스텀 프롬프트 사용 시 RAG 지식베이스가 자동으로 적용되지 않습니다</li>
+                              </ul>
+                            </div>
+
+                            <div>
+                              <h4 className="font-semibold mb-1">🎯 발달체크 분석 프롬프트 구조</h4>
+                              <ul className="list-disc ml-5 space-y-1 text-xs">
+                                <li>아이 정보 (월령)</li>
+                                <li>발달체크 결과 (영역별 점수와 수준)</li>
+                                <li>부모님의 우려 사항 (선택)</li>
+                                <li>요청사항 (전반적 요약, 영역별 분석, 육아 팁, 전문가 상담 필요성)</li>
+                              </ul>
+                            </div>
+
+                            <div>
+                              <h4 className="font-semibold mb-1">⚠️ 주의사항</h4>
+                              <ul className="list-disc ml-5 space-y-1">
+                                <li>커스텀 프롬프트 사용 시 RAG 지식베이스 참조가 비활성화됩니다</li>
+                                <li>전문 용어 사용 시 부모님이 이해하기 어려울 수 있습니다</li>
+                                <li>지나치게 긴 프롬프트는 생성 시간이 오래 걸릴 수 있습니다</li>
+                              </ul>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 프롬프트 편집기 */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            프롬프트 편집
+                          </label>
+                          <button
+                            type="button"
+                            onClick={resetToDefaultPrompt}
+                            style={{
+                              backgroundColor: '#EF4444',
+                              color: 'white',
+                              padding: '6px 12px',
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              fontWeight: '500',
+                              border: 'none',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            기본값으로 복원
+                          </button>
+                        </div>
+                        <textarea
+                          value={customPrompt || createAssessmentAnalysisPrompt()}
+                          onChange={(e) => {
+                            setCustomPrompt(e.target.value)
+                            setIsPromptEdited(true)
+                          }}
+                          rows={12}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green font-mono text-xs"
+                          style={{ backgroundColor: '#FAFAFA' }}
+                        />
+                        <p className="mt-1 text-xs text-gray-500">
+                          {isPromptEdited ? '⚠️ 프롬프트가 수정되었습니다. RAG 참조 없이 수정된 프롬프트로만 AI가 생성합니다.' : '기본 프롬프트를 사용합니다. RAG 시스템이 자동으로 관련 지식을 참조합니다.'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* AI 분석 생성 버튼 */}
+              {!assessment.aiAnalysis && (
+                <button
+                  onClick={handleGenerateAnalysis}
+                  disabled={isGeneratingAnalysis}
+                  style={{
+                    width: '100%',
+                    backgroundColor: isGeneratingAnalysis ? '#9CA3AF' : '#386646',
+                    color: 'white',
+                    padding: '12px',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    cursor: isGeneratingAnalysis ? 'not-allowed' : 'pointer',
+                    border: 'none',
+                    marginBottom: '16px',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isGeneratingAnalysis) e.currentTarget.style.backgroundColor = '#193149'
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isGeneratingAnalysis) e.currentTarget.style.backgroundColor = '#386646'
+                  }}
+                >
+                  {isGeneratingAnalysis ? '분석 생성 중...' : 'AI 분석 생성하기'}
+                </button>
+              )}
 
               {analysisError && (
                 <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -410,14 +626,16 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
               )}
 
               {assessment.aiAnalysis && !isGeneratingAnalysis && (
-                <div className="prose max-w-none">
+                <div className="max-w-none">
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <p className="text-sm text-blue-800 m-0">
                       아래 분석은 AI가 자동으로 생성한 내용입니다. 참고용으로만 활용하시고, 정확한 진단은 전문가와 상담하시기 바랍니다.
                     </p>
                   </div>
-                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-                    {assessment.aiAnalysis}
+                  <div className="max-h-[600px] overflow-y-auto bg-gray-50 rounded-lg p-6 border border-gray-200">
+                    <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-base">
+                      {assessment.aiAnalysis}
+                    </div>
                   </div>
                   {assessment.aiAnalyzedAt && (
                     <p className="text-xs text-gray-500 mt-4 mb-0">
