@@ -63,6 +63,9 @@ export default function ChildSelector({
             {calculateAge(selectedChild.birthDate)} •{' '}
             {selectedChild.gender === 'MALE' ? '남아' : '여아'}
           </div>
+          <div className="text-xs text-gray-500 mt-1">
+            생년월일: {new Date(selectedChild.birthDate).toLocaleDateString('ko-KR')}
+          </div>
         </div>
       </div>
     )
@@ -86,6 +89,9 @@ export default function ChildSelector({
         <div className="text-sm text-gray-600">
           {calculateAge(selectedChild.birthDate)} •{' '}
           {selectedChild.gender === 'MALE' ? '남아' : '여아'}
+        </div>
+        <div className="text-xs text-gray-500 mt-1">
+          생년월일: {new Date(selectedChild.birthDate).toLocaleDateString('ko-KR')}
         </div>
         <div className="text-xs text-gray-400 mt-1">
           {selectedIndex + 1} / {children.length}

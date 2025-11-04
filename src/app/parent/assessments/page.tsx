@@ -6,22 +6,66 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 
+interface AssessmentResult {
+  id: string
+  category: string
+  score: number
+  level: 'ADVANCED' | 'NORMAL' | 'NEEDS_TRACKING' | 'NEEDS_ASSESSMENT'
+}
+
 interface Assessment {
   id: string
   childId: string
   ageInMonths: number
   totalScore: number
   createdAt: string
+  completedAt?: string
   child: {
     id: string
     name: string
   }
+  results?: AssessmentResult[]
 }
 
 interface Child {
   id: string
   name: string
   birthDate: string
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  GROSS_MOTOR: '대근육',
+  FINE_MOTOR: '소근육',
+  COGNITIVE: '인지',
+  LANGUAGE: '언어',
+  SOCIAL: '사회성',
+  EMOTIONAL: '정서'
+}
+
+const LEVEL_LABELS: Record<string, { text: string; color: string; bgColor: string }> = {
+  ADVANCED: { text: '빠른 발달', color: '#1976D2', bgColor: '#E3F2FD' },
+  NORMAL: { text: '또래 수준', color: '#388E3C', bgColor: '#E8F5E9' },
+  NEEDS_TRACKING: { text: '추적 필요', color: '#F57C00', bgColor: '#FFF3E0' },
+  NEEDS_ASSESSMENT: { text: '심화 평가 필요', color: '#D32F2F', bgColor: '#FFEBEE' }
+}
+
+// 전체 발달 수준 판정 (가장 낮은 수준 기준)
+const getOverallLevel = (results?: AssessmentResult[]) => {
+  if (!results || results.length === 0) return 'NEEDS_ASSESSMENT'
+
+  const levelPriority = ['NEEDS_ASSESSMENT', 'NEEDS_TRACKING', 'NORMAL', 'ADVANCED']
+  let lowestLevel = 'ADVANCED'
+
+  for (const result of results) {
+    const currentPriority = levelPriority.indexOf(result.level)
+    const lowestPriority = levelPriority.indexOf(lowestLevel)
+
+    if (currentPriority < lowestPriority) {
+      lowestLevel = result.level
+    }
+  }
+
+  return lowestLevel
 }
 
 export default function AssessmentsPage() {
@@ -127,14 +171,17 @@ export default function AssessmentsPage() {
 
               {children.length > 0 ? (
                 <Link
-                  href="/assessments/new"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy"
+                  href="/parent/assessments/new"
+                  className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md shadow-md text-white transition-colors"
+                  style={{ backgroundColor: '#F78C6B' }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                 >
-                  새 발달체크 시작
+                  발달체크 시작하기
                 </Link>
               ) : (
                 <Link
-                  href="/children/new"
+                  href="/parent/children/new"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-blue hover:bg-aipoten-navy"
                 >
                   먼저 아이를 등록하세요
@@ -163,97 +210,100 @@ export default function AssessmentsPage() {
                   </p>
                   {children.length > 0 && (
                     <Link
-                      href="/assessments/new"
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy"
+                      href="/parent/assessments/new"
+                      className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md shadow-md text-white transition-colors"
+                      style={{ backgroundColor: '#F78C6B' }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                     >
-                      첫 번째 발달체크 시작
+                      첫 발달체크 시작하기
                     </Link>
                   )}
                 </div>
               ) : (
-                <div className="overflow-hidden">
-                  <div className="grid grid-cols-1 gap-4">
-                    {filteredAssessments.map((assessment) => (
-                      <div
+                <div className="space-y-4">
+                  {filteredAssessments.map((assessment) => {
+                    const date = new Date(assessment.createdAt)
+                    const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
+
+                    // 전체 발달 수준 판정
+                    const overallLevel = getOverallLevel(assessment.results)
+                    const levelInfo = LEVEL_LABELS[overallLevel] || LEVEL_LABELS['NEEDS_ASSESSMENT']
+
+                    return (
+                      <Link
                         key={assessment.id}
-                        className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                        href={`/parent/assessments/${assessment.id}`}
+                        className="block"
                       >
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-center mb-2">
-                              <h4 className="text-lg font-medium text-gray-900">
-                                {assessment.child.name}의 발달체크
-                              </h4>
-                              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-aipoten-accent bg-opacity-20 text-aipoten-green">
-                                {assessment.ageInMonths}개월
-                              </span>
+                        <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:border-aipoten-green transition-all cursor-pointer">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-3">
+                                <h4 className="text-lg font-semibold text-gray-900">
+                                  {assessment.child.name}의 발달체크
+                                </h4>
+                                <span className="text-sm font-medium text-gray-600">{formattedDate}</span>
+                                <span className="text-sm text-gray-500">
+                                  {assessment.ageInMonths}개월
+                                </span>
+                                <span
+                                  className="px-3 py-1 rounded-full text-xs font-medium"
+                                  style={{
+                                    backgroundColor: assessment.completedAt ? '#98C15E' : '#E5E7EB',
+                                    color: assessment.completedAt ? 'white' : '#6B7280'
+                                  }}
+                                >
+                                  {assessment.completedAt ? '완료' : '진행 중'}
+                                </span>
+                              </div>
+
+                              {/* 전체 발달 수준 표시 */}
+                              <div
+                                className="inline-block px-4 py-2 rounded-lg text-lg font-bold mb-3"
+                                style={{
+                                  backgroundColor: levelInfo.bgColor,
+                                  color: levelInfo.color
+                                }}
+                              >
+                                {levelInfo.text}
+                              </div>
+
+                              {/* 영역별 발달 수준 */}
+                              {assessment.results && assessment.results.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-3">
+                                  {assessment.results.map((result, idx) => {
+                                    const resultLevelInfo = LEVEL_LABELS[result.level] || LEVEL_LABELS['NEEDS_ASSESSMENT']
+                                    return (
+                                      <div
+                                        key={idx}
+                                        className="text-xs px-2 py-1 rounded font-medium"
+                                        style={{
+                                          backgroundColor: resultLevelInfo.bgColor,
+                                          color: resultLevelInfo.color
+                                        }}
+                                      >
+                                        {CATEGORY_LABELS[result.category] || result.category}: {resultLevelInfo.text}
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              )}
                             </div>
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <span>평가일: {new Date(assessment.createdAt).toLocaleDateString('ko-KR')}</span>
-                              <span>총점: {assessment.totalScore}점</span>
+                            <div className="ml-4">
+                              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
                             </div>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Link
-                              href={`/assessments/${assessment.id}`}
-                              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                            >
-                              자세히 보기
-                            </Link>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      </Link>
+                    )
+                  })}
                 </div>
               )}
             </div>
           </div>
-
-          {/* Quick Stats */}
-          {filteredAssessments.length > 0 && (
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-aipoten-blue rounded-full flex items-center justify-center mr-3">
-                    <span className="text-white font-bold">{filteredAssessments.length}</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">총 평가 횟수</p>
-                    <p className="text-lg font-semibold text-gray-900">{filteredAssessments.length}회</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-aipoten-green rounded-full flex items-center justify-center mr-3">
-                    <span className="text-white font-bold">📈</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">최근 평가</p>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {Math.max(...filteredAssessments.map(a => a.totalScore))}점
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-aipoten-orange rounded-full flex items-center justify-center mr-3">
-                    <span className="text-white font-bold">📊</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">평균 점수</p>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {Math.round(filteredAssessments.reduce((sum, a) => sum + a.totalScore, 0) / filteredAssessments.length)}점
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </main>
     </div>

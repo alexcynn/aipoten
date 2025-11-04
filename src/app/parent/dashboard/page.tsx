@@ -8,6 +8,7 @@ import ProfilePictureUpload from '@/components/ProfilePictureUpload'
 import Header from '@/components/layout/Header'
 import ChildSelector from '@/components/ChildSelector'
 import ChildEditModal from '@/components/ChildEditModal'
+import SessionsCalendar from '@/components/SessionsCalendar'
 
 interface Child {
   id: string
@@ -79,7 +80,7 @@ export default function ParentDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<'assessments' | 'videos' | 'consultation' | 'therapy' | 'sessions' | 'payments' | 'inquiry'>('assessments')
+  const [activeTab, setActiveTab] = useState<'videos' | 'consultation' | 'therapy' | 'sessions' | 'payments' | 'inquiry'>('videos')
   const [consultationSubTab, setConsultationSubTab] = useState<'pending' | 'in_progress' | 'history'>('pending')
   const [therapySubTab, setTherapySubTab] = useState<'pending' | 'in_progress' | 'history'>('pending')
   const [inquiries, setInquiries] = useState<any[]>([])
@@ -478,78 +479,33 @@ export default function ParentDashboardPage() {
             </div>
           </div>
 
-          {/* Selected Child Info - 아이가 있을 때만 표시 */}
+          {/* 최근 발달체크 카드 */}
           {selectedChildId && children.length > 0 && (
             <div className="bg-white overflow-hidden shadow rounded-lg mb-6">
               <div className="px-4 py-5 sm:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    {children.find(c => c.id === selectedChildId)?.name}의 정보
-                  </h2>
-                  <button
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="px-3 py-1 text-sm rounded-md transition-colors"
-                    style={{
-                      color: '#386646',
-                      borderColor: '#386646',
-                      borderWidth: '1px',
-                      borderStyle: 'solid',
-                      backgroundColor: 'transparent'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#386646'
-                      e.currentTarget.style.color = '#FFFFFF'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                      e.currentTarget.style.color = '#386646'
-                    }}
-                  >
-                    편집
-                  </button>
-                </div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">최근 발달체크</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* 기본 정보 */}
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-2">기본 정보</h3>
-                    <div className="space-y-2">
-                      {children.find(c => c.id === selectedChildId) && (
-                        <>
-                          <p className="text-sm text-gray-900">
-                            <span className="font-medium">나이:</span>{' '}
-                            {calculateAge(children.find(c => c.id === selectedChildId)!.birthDate)}
-                          </p>
-                          <p className="text-sm text-gray-900">
-                            <span className="font-medium">성별:</span>{' '}
-                            {children.find(c => c.id === selectedChildId)!.gender === 'MALE' ? '남아' : '여아'}
-                          </p>
-                          <p className="text-sm text-gray-900">
-                            <span className="font-medium">생년월일:</span>{' '}
-                            {new Date(children.find(c => c.id === selectedChildId)!.birthDate).toLocaleDateString('ko-KR')}
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                {latestAssessment ? (
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-sm font-medium text-gray-600">
+                            {children.find(c => c.id === selectedChildId)?.name}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {new Date(latestAssessment.createdAt).toLocaleDateString('ko-KR')}
+                          </span>
+                        </div>
 
-                  {/* 최근 발달체크 */}
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-2">최근 발달체크</h3>
-                    {latestAssessment ? (
-                      <div className="space-y-2">
-                        <p className="text-sm text-gray-900">
-                          <span className="font-medium">평가일:</span>{' '}
-                          {new Date(latestAssessment.createdAt).toLocaleDateString('ko-KR')}
-                        </p>
-                        <div>
-                          <span className="text-sm font-medium text-gray-900">발달 수준: </span>
+                        <div className="mb-3">
+                          <span className="text-sm font-medium text-gray-700 mr-2">발달 수준:</span>
                           {(() => {
                             const overallLevel = getOverallLevel(latestAssessment.results)
                             const levelInfo = LEVEL_LABELS[overallLevel] || LEVEL_LABELS['NEEDS_ASSESSMENT']
                             return (
                               <span
-                                className="inline-block px-3 py-1 rounded-full text-xs font-bold"
+                                className="inline-block px-4 py-2 rounded-full text-base font-bold"
                                 style={{
                                   backgroundColor: levelInfo.bgColor,
                                   color: levelInfo.color
@@ -560,40 +516,110 @@ export default function ParentDashboardPage() {
                             )
                           })()}
                         </div>
+
+                        {latestAssessment.results && latestAssessment.results.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {latestAssessment.results.map((result, idx) => {
+                              const resultLevelInfo = LEVEL_LABELS[result.level] || LEVEL_LABELS['NEEDS_ASSESSMENT']
+                              return (
+                                <div
+                                  key={idx}
+                                  className="text-xs px-3 py-1 rounded-full font-medium"
+                                  style={{
+                                    backgroundColor: resultLevelInfo.bgColor,
+                                    color: resultLevelInfo.color
+                                  }}
+                                >
+                                  {CATEGORY_LABELS[result.category] || result.category}: {resultLevelInfo.text}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+
                         {getNextCheckDate() && (
                           <p className="text-sm text-gray-600">
                             <span className="font-medium">다음 체크 권장:</span>{' '}
                             {getNextCheckDate()!.toLocaleDateString('ko-KR')}
                           </p>
                         )}
-                        <Link
-                          href={`/parent/assessments/${latestAssessment.id}`}
-                          className="inline-block text-sm text-aipoten-green hover:text-aipoten-navy font-medium"
-                        >
-                          자세히 보기 →
-                        </Link>
                       </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <p className="text-sm text-gray-500 mb-3">
-                          아직 발달체크 기록이 없습니다.
-                        </p>
-                        <Link
-                          href="/parent/assessments/new"
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md transition-colors"
-                          style={{
-                            backgroundColor: '#386646',
-                            color: '#FFFFFF'
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#193149'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
-                        >
-                          첫 발달체크 시작하기
-                        </Link>
-                      </div>
-                    )}
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Link
+                        href="/parent/assessments/new"
+                        className="inline-flex items-center px-6 py-3 rounded-md font-medium text-white transition-colors shadow-md"
+                        style={{ backgroundColor: '#F78C6B' }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                      >
+                        발달체크 시작하기
+                      </Link>
+                      <Link
+                        href="/parent/assessments"
+                        className="inline-flex items-center px-6 py-3 rounded-md font-medium transition-colors shadow-md"
+                        style={{
+                          color: '#386646',
+                          borderColor: '#386646',
+                          borderWidth: '2px',
+                          borderStyle: 'solid',
+                          backgroundColor: '#FFFFFF'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#386646'
+                          e.currentTarget.style.color = '#FFFFFF'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#FFFFFF'
+                          e.currentTarget.style.color = '#386646'
+                        }}
+                      >
+                        발달체크 기록 보기
+                      </Link>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-lg p-6 text-center">
+                    <div className="text-4xl mb-3">📋</div>
+                    <p className="text-gray-600 mb-4">아직 발달체크 기록이 없습니다.</p>
+                    <p className="text-sm text-gray-500 mb-6">
+                      우리 아이의 발달 상태를 체크해보세요.
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                      <Link
+                        href="/parent/assessments/new"
+                        className="inline-flex items-center px-6 py-3 rounded-md font-medium text-white transition-colors shadow-md"
+                        style={{ backgroundColor: '#F78C6B' }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                      >
+                        첫 발달체크 시작하기
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 세션 캘린더 - 모든 아이의 세션 일정 */}
+          {selectedChildId && children.length > 0 && (
+            <div className="bg-white overflow-hidden shadow rounded-lg mb-6">
+              <div className="px-4 py-5 sm:p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">모든 아이의 세션 일정</h2>
+                <SessionsCalendar
+                  sessions={myBookings
+                    .filter((booking: any) => booking.paidAt && booking.scheduledAt)
+                    .map((booking: any) => ({
+                      id: booking.id,
+                      scheduledAt: booking.scheduledAt,
+                      sessionType: booking.sessionType,
+                      status: booking.status,
+                      child: booking.child,
+                      therapist: booking.therapist
+                    }))}
+                />
               </div>
             </div>
           )}
@@ -604,16 +630,6 @@ export default function ParentDashboardPage() {
               {/* Tab Headers */}
               <div className="border-b border-gray-200">
                 <nav className="flex -mb-px">
-                  <button
-                    onClick={() => setActiveTab('assessments')}
-                    className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                      activeTab === 'assessments'
-                        ? 'border-aipoten-green text-aipoten-green'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    발달체크
-                  </button>
                   <button
                     onClick={() => setActiveTab('videos')}
                     className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
@@ -679,112 +695,6 @@ export default function ParentDashboardPage() {
 
               {/* Tab Content */}
               <div className="p-6">
-                {/* 발달체크 탭 */}
-                {activeTab === 'assessments' && (
-                  <div>
-                    {/* 발달체크 시작하기 버튼 */}
-                    <div className="mb-6">
-                      <Link
-                        href={`/parent/assessments/new?childId=${selectedChildId}`}
-                        style={{ backgroundColor: '#F78C6B' }}
-                        className="inline-flex items-center px-6 py-3 text-white rounded-md hover:opacity-90 transition-all font-medium text-lg shadow-md"
-                      >
-                        발달체크 시작하기
-                      </Link>
-                    </div>
-
-                    {/* 이전 발달체크 기록 */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">이전 발달체크 기록</h3>
-                      {assessments.length > 0 ? (
-                        <div className="space-y-4">
-                          {assessments.map((assessment) => {
-                            const date = new Date(assessment.createdAt)
-                            const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
-
-                            // 전체 발달 수준 판정
-                            const overallLevel = getOverallLevel(assessment.results)
-                            const levelInfo = LEVEL_LABELS[overallLevel] || LEVEL_LABELS['NEEDS_ASSESSMENT']
-
-                            return (
-                              <div
-                                key={assessment.id}
-                                className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
-                                      <span className="text-sm font-medium text-gray-600">{formattedDate}</span>
-                                      <span className="text-sm text-gray-500">
-                                        {assessment.ageInMonths}개월
-                                      </span>
-                                      <span
-                                        className="px-3 py-1 rounded-full text-xs font-medium"
-                                        style={{
-                                          backgroundColor: assessment.completedAt ? '#98C15E' : '#E5E7EB',
-                                          color: assessment.completedAt ? 'white' : '#6B7280'
-                                        }}
-                                      >
-                                        {assessment.completedAt ? '완료' : '진행 중'}
-                                      </span>
-                                    </div>
-
-                                    {/* 전체 발달 수준 표시 */}
-                                    <div
-                                      className="inline-block px-4 py-2 rounded-lg text-lg font-bold mb-3"
-                                      style={{
-                                        backgroundColor: levelInfo.bgColor,
-                                        color: levelInfo.color
-                                      }}
-                                    >
-                                      {levelInfo.text}
-                                    </div>
-
-                                    {/* 영역별 발달 수준 */}
-                                    {assessment.results && assessment.results.length > 0 && (
-                                      <div className="flex flex-wrap gap-2 mt-3">
-                                        {assessment.results.map((result, idx) => {
-                                          const resultLevelInfo = LEVEL_LABELS[result.level] || LEVEL_LABELS['NEEDS_ASSESSMENT']
-                                          return (
-                                            <div
-                                              key={idx}
-                                              className="text-xs px-2 py-1 rounded font-medium"
-                                              style={{
-                                                backgroundColor: resultLevelInfo.bgColor,
-                                                color: resultLevelInfo.color
-                                              }}
-                                            >
-                                              {CATEGORY_LABELS[result.category] || result.category}: {resultLevelInfo.text}
-                                            </div>
-                                          )
-                                        })}
-                                      </div>
-                                    )}
-                                  </div>
-                                  <Link
-                                    href={`/parent/assessments/${assessment.id}`}
-                                    style={{ color: '#386646' }}
-                                    className="ml-4 text-sm font-medium hover:opacity-70 underline"
-                                  >
-                                    자세히 보기 →
-                                  </Link>
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      ) : (
-                        <div className="bg-blue-50 rounded-lg p-6 text-center">
-                          <p className="text-blue-900 mb-2">아직 발달체크 기록이 없습니다.</p>
-                          <p className="text-sm text-blue-800">
-                            위의 "발달체크 시작하기" 버튼을 눌러 첫 발달체크를 진행해보세요.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
                 {/* 추천영상 탭 */}
                 {activeTab === 'videos' && (
                   <div>
