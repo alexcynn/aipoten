@@ -22,16 +22,26 @@ interface Consultation {
 }
 
 const statusMap: Record<string, string> = {
+  PENDING_CONFIRMATION: '예약대기',
+  CONFIRMED: '예약확정',
   SCHEDULED: '예약됨',
+  PENDING_SETTLEMENT: '정산대기',
+  SETTLEMENT_COMPLETED: '정산완료',
   COMPLETED: '완료됨',
   CANCELLED: '취소됨',
+  REFUNDED: '환불',
   NO_SHOW: '노쇼'
 }
 
 const statusColors: Record<string, string> = {
+  PENDING_CONFIRMATION: 'bg-yellow-100 text-yellow-800',
+  CONFIRMED: 'bg-blue-100 text-blue-800',
   SCHEDULED: 'bg-blue-100 text-blue-800',
+  PENDING_SETTLEMENT: 'bg-purple-100 text-purple-800',
+  SETTLEMENT_COMPLETED: 'bg-green-100 text-green-800',
   COMPLETED: 'bg-green-100 text-green-800',
   CANCELLED: 'bg-gray-100 text-gray-800',
+  REFUNDED: 'bg-red-100 text-red-800',
   NO_SHOW: 'bg-red-100 text-red-800'
 }
 

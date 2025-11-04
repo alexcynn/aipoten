@@ -10,7 +10,9 @@ interface SystemSettings {
   bankName: string | null
   accountNumber: string | null
   accountHolder: string | null
-  consultationBaseFee: number | null
+  settlementRate: number | null
+  consultationDefaultFee: number | null
+  consultationDefaultSettlement: number | null
 }
 
 interface TherapyMapping {
@@ -54,7 +56,9 @@ export default function AdminSettingsPage() {
   const [bankName, setBankName] = useState('')
   const [accountNumber, setAccountNumber] = useState('')
   const [accountHolder, setAccountHolder] = useState('')
-  const [consultationBaseFee, setConsultationBaseFee] = useState<number>(150000)
+  const [settlementRate, setSettlementRate] = useState<number>(5)
+  const [consultationDefaultFee, setConsultationDefaultFee] = useState<number>(150000)
+  const [consultationDefaultSettlement, setConsultationDefaultSettlement] = useState<number>(100000)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -85,7 +89,9 @@ export default function AdminSettingsPage() {
         setBankName(settingsData.bankName || '')
         setAccountNumber(settingsData.accountNumber || '')
         setAccountHolder(settingsData.accountHolder || '')
-        setConsultationBaseFee(settingsData.consultationBaseFee || 150000)
+        setSettlementRate(settingsData.settlementRate ?? 5)
+        setConsultationDefaultFee(settingsData.consultationDefaultFee ?? 150000)
+        setConsultationDefaultSettlement(settingsData.consultationDefaultSettlement ?? 100000)
       }
 
       if (mappingsRes.ok) {
@@ -103,6 +109,19 @@ export default function AdminSettingsPage() {
     setIsSaving(true)
     setMessage(null)
 
+    // 검증
+    if (settlementRate < 0 || settlementRate > 100) {
+      setMessage({ type: 'error', text: '정산율은 0~100 사이의 값이어야 합니다.' })
+      setIsSaving(false)
+      return
+    }
+
+    if (consultationDefaultSettlement > consultationDefaultFee) {
+      setMessage({ type: 'error', text: '언어컨설팅 정산금이 비용보다 클 수 없습니다.' })
+      setIsSaving(false)
+      return
+    }
+
     try {
       const response = await fetch('/api/admin/settings', {
         method: 'PUT',
@@ -113,7 +132,9 @@ export default function AdminSettingsPage() {
           bankName,
           accountNumber,
           accountHolder,
-          consultationBaseFee,
+          settlementRate,
+          consultationDefaultFee,
+          consultationDefaultSettlement,
         }),
       })
 
@@ -266,20 +287,90 @@ export default function AdminSettingsPage() {
             </div>
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              언어 컨설팅 기본 요금 (원)
-            </label>
-            <input
-              type="number"
-              value={consultationBaseFee}
-              onChange={(e) => setConsultationBaseFee(parseInt(e.target.value))}
-              className="w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
-              step="1000"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              새로운 언어 컨설팅 예약 시 기본으로 적용되는 비용입니다.
-            </p>
+          {/* 홈티 정산율 설정 */}
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h3 className="text-md font-semibold text-gray-800 mb-3">홈티 정산 설정</h3>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                플랫폼 수수료율 (%)
+              </label>
+              <div className="flex items-center gap-4">
+                <input
+                  type="number"
+                  value={settlementRate}
+                  onChange={(e) => setSettlementRate(parseFloat(e.target.value) || 0)}
+                  className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                />
+                <span className="text-sm text-gray-600">%</span>
+              </div>
+              <p className="text-sm text-gray-500 mt-2">
+                홈티(THERAPY) 예약 시 플랫폼 수수료율입니다. (0~100 사이 값)
+              </p>
+              <div className="mt-3 text-sm text-gray-600 bg-white p-3 rounded border border-gray-200">
+                <p className="font-medium mb-1">💡 계산 예시 (정산율 {settlementRate}%)</p>
+                <p>• 결제 금액: 100,000원</p>
+                <p>• 플랫폼 수수료: {Math.round(100000 * (settlementRate / 100)).toLocaleString()}원 ({settlementRate}%)</p>
+                <p>• 치료사 정산금: {(100000 - Math.round(100000 * (settlementRate / 100))).toLocaleString()}원</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 언어컨설팅 기본값 설정 */}
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <h3 className="text-md font-semibold text-gray-800 mb-3">언어컨설팅 기본값 설정</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  부모 결제 금액 (원)
+                </label>
+                <input
+                  type="number"
+                  value={consultationDefaultFee}
+                  onChange={(e) => setConsultationDefaultFee(parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                  step="1000"
+                  min="0"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  새 치료사 등록 시 기본값으로 적용됩니다.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  치료사 정산금 (원)
+                </label>
+                <input
+                  type="number"
+                  value={consultationDefaultSettlement}
+                  onChange={(e) => setConsultationDefaultSettlement(parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                  step="1000"
+                  min="0"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  새 치료사 등록 시 기본값으로 적용됩니다.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 text-sm text-gray-600 bg-white p-3 rounded border border-gray-200">
+              <p className="font-medium mb-1">💰 현재 설정 기준 플랫폼 수익</p>
+              <p>
+                • 플랫폼 수익: <strong className="text-aipoten-green text-base">
+                  {(consultationDefaultFee - consultationDefaultSettlement).toLocaleString()}원
+                </strong>
+                {consultationDefaultSettlement > consultationDefaultFee && (
+                  <span className="text-red-600 font-medium ml-2">⚠️ 정산금이 비용보다 큽니다!</span>
+                )}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                (부모 결제 금액 - 치료사 정산금)
+              </p>
+            </div>
           </div>
         </div>
 

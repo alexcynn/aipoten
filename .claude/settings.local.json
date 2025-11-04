@@ -34,7 +34,9 @@
       "Bash(cmd /c \"set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes&& npx prisma migrate reset --force\")",
       "Bash($env:PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"yes\")",
       "Bash(cmd /c \"if exist .next rmdir /s /q .next && echo Build cache cleaned\")",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes)",
+      "Bash(cmd /c \"if exist src\\app\\api\\therapist (dir src\\app\\api\\therapist /b) else (echo Directory not found)\")"
     ],
     "deny": [],
     "ask": []

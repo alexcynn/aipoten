@@ -50,19 +50,19 @@ interface Booking {
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  PENDING_CONFIRMATION: { label: '확인 대기', color: 'bg-yellow-100 text-yellow-800' },
-  CONFIRMED: { label: '확정됨', color: 'bg-green-100 text-green-800' },
-  IN_PROGRESS: { label: '진행 중', color: 'bg-blue-100 text-blue-800' },
-  COMPLETED: { label: '완료', color: 'bg-gray-100 text-gray-800' },
-  CANCELLED: { label: '취소됨', color: 'bg-red-100 text-red-800' },
-  REJECTED: { label: '거절됨', color: 'bg-red-100 text-red-800' },
-  NO_SHOW: { label: '노쇼', color: 'bg-red-100 text-red-800' },
+  PENDING_CONFIRMATION: { label: '예약대기', color: 'bg-yellow-100 text-yellow-800' },
+  CONFIRMED: { label: '예약확정', color: 'bg-blue-100 text-blue-800' },
+  PENDING_SETTLEMENT: { label: '완료', color: 'bg-green-100 text-green-800' },
+  SETTLEMENT_COMPLETED: { label: '완료', color: 'bg-green-100 text-green-800' },
+  REFUNDED: { label: '환불', color: 'bg-red-100 text-red-800' },
+  CANCELLED: { label: '취소', color: 'bg-red-100 text-red-800' },
 }
 
 const paymentStatusLabels: Record<string, { label: string; color: string }> = {
   PENDING: { label: '결제 대기', color: 'bg-orange-100 text-orange-800' },
   PAID: { label: '결제 완료', color: 'bg-green-100 text-green-800' },
-  REFUNDED: { label: '환불 완료', color: 'bg-gray-100 text-gray-800' },
+  PARTIALLY_REFUNDED: { label: '부분 환불', color: 'bg-yellow-100 text-yellow-800' },
+  REFUNDED: { label: '환불 완료', color: 'bg-red-100 text-red-800' },
   FAILED: { label: '결제 실패', color: 'bg-red-100 text-red-800' },
 }
 

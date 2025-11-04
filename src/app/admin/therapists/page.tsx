@@ -86,6 +86,8 @@ interface TherapistProfile {
   profileUpdateApprovedAt?: string
   pendingUpdateRequest?: PendingUpdateRequest | null
   canDoConsultation?: boolean
+  consultationFee?: number
+  consultationSettlementAmount?: number
   createdAt: string
 }
 
@@ -322,29 +324,62 @@ export default function AdminTherapistsPage() {
     }
   }
 
-  const handleToggleConsultation = async (therapistId: string, currentValue: boolean) => {
+  const handleToggleConsultation = async (
+    therapistId: string,
+    currentValue: boolean,
+    consultationFee?: number,
+    consultationSettlementAmount?: number
+  ) => {
     const newValue = !currentValue
-    const message = newValue
-      ? '이 치료사에게 언어 컨설팅 권한을 부여하시겠습니까?'
-      : '이 치료사의 언어 컨설팅 권한을 제거하시겠습니까?'
 
-    if (!confirm(message)) return
+    // 권한 제거하는 경우
+    if (!newValue) {
+      const message = '이 치료사의 언어 컨설팅 권한을 제거하시겠습니까?'
+      if (!confirm(message)) return
+    }
+    // 권한 부여하는 경우 - 비용 입력 필요
+    else {
+      // 모달이 열려있는 경우 입력 필드에서 값을 가져옴
+      // 모달이 닫혀있는 경우 프롬프트로 입력받음
+      if (!selectedTherapist) {
+        alert('치료사 상세 정보를 먼저 열어주세요.')
+        return
+      }
+    }
 
     try {
+      const body: any = { canDoConsultation: newValue }
+
+      // 권한을 부여하는 경우 비용과 정산금도 함께 전송
+      if (newValue) {
+        if (consultationFee !== undefined) {
+          body.consultationFee = consultationFee
+        }
+        if (consultationSettlementAmount !== undefined) {
+          body.consultationSettlementAmount = consultationSettlementAmount
+        }
+      }
+
       const response = await fetch(`/api/admin/therapists/${therapistId}/update-consultation-permission`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ canDoConsultation: newValue }),
+        body: JSON.stringify(body),
       })
 
       if (response.ok) {
-        alert('언어 컨설팅 권한이 변경되었습니다.')
+        const data = await response.json()
+        alert(data.message || '언어 컨설팅 권한이 변경되었습니다.')
         await fetchTherapists()
         // Update the selected therapist state
         if (selectedTherapist && selectedTherapist.id === therapistId) {
-          setSelectedTherapist({ ...selectedTherapist, canDoConsultation: newValue })
+          setSelectedTherapist({
+            ...selectedTherapist,
+            canDoConsultation: newValue,
+            consultationFee: data.therapistProfile.consultationFee,
+            consultationSettlementAmount: data.therapistProfile.consultationSettlementAmount
+          })
         }
       } else {
         const data = await response.json()
@@ -956,7 +991,10 @@ export default function AdminTherapistsPage() {
                             <input
                               type="checkbox"
                               checked={selectedTherapist.canDoConsultation || false}
-                              onChange={() => handleToggleConsultation(selectedTherapist.id, selectedTherapist.canDoConsultation || false)}
+                              onChange={(e) => {
+                                // 체크박스만 토글 (실제 저장은 버튼 클릭 시)
+                                setSelectedTherapist({ ...selectedTherapist, canDoConsultation: e.target.checked })
+                              }}
                               className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                             />
                             <span className="text-sm font-medium text-gray-700">언어 컨설팅 권한 부여</span>
@@ -964,6 +1002,61 @@ export default function AdminTherapistsPage() {
                           <p className="ml-6 mt-1 text-xs text-gray-500">
                             이 옵션을 활성화하면 부모가 언어 컨설팅 검색 시 이 치료사를 찾을 수 있습니다.
                           </p>
+
+                          {/* 언어 컨설팅 활성화 시 비용 입력 필드 표시 */}
+                          {selectedTherapist.canDoConsultation && (
+                            <div className="ml-6 mt-4 space-y-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  부모 결제 금액 (원)
+                                </label>
+                                <input
+                                  type="number"
+                                  value={selectedTherapist.consultationFee || 150000}
+                                  onChange={(e) => setSelectedTherapist({
+                                    ...selectedTherapist,
+                                    consultationFee: parseInt(e.target.value) || 0
+                                  })}
+                                  placeholder="150000"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  치료사 정산금 (원)
+                                </label>
+                                <input
+                                  type="number"
+                                  value={selectedTherapist.consultationSettlementAmount || 100000}
+                                  onChange={(e) => setSelectedTherapist({
+                                    ...selectedTherapist,
+                                    consultationSettlementAmount: parseInt(e.target.value) || 0
+                                  })}
+                                  placeholder="100000"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                                />
+                              </div>
+                              <div className="text-sm text-gray-600 bg-white p-2 rounded">
+                                <strong>플랫폼 수익:</strong> {(
+                                  (selectedTherapist.consultationFee || 150000) -
+                                  (selectedTherapist.consultationSettlementAmount || 100000)
+                                ).toLocaleString()}원
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 저장 버튼 */}
+                          <button
+                            onClick={() => handleToggleConsultation(
+                              selectedTherapist.id,
+                              !selectedTherapist.canDoConsultation, // 반대값을 전달 (토글 효과)
+                              selectedTherapist.consultationFee,
+                              selectedTherapist.consultationSettlementAmount
+                            )}
+                            className="ml-6 mt-3 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                          >
+                            언어 컨설팅 설정 저장
+                          </button>
                         </div>
                       </div>
                     </div>

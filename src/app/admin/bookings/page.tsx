@@ -40,19 +40,19 @@ interface Booking {
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  PENDING_CONFIRMATION: { label: '확인 대기', color: 'bg-yellow-100 text-yellow-800' },
-  CONFIRMED: { label: '확정됨', color: 'bg-green-100 text-green-800' },
-  IN_PROGRESS: { label: '진행 중', color: 'bg-blue-100 text-blue-800' },
-  COMPLETED: { label: '완료', color: 'bg-gray-100 text-gray-800' },
-  CANCELLED: { label: '취소됨', color: 'bg-red-100 text-red-800' },
-  REJECTED: { label: '거절됨', color: 'bg-red-100 text-red-800' },
-  NO_SHOW: { label: '노쇼', color: 'bg-red-100 text-red-800' },
+  PENDING_CONFIRMATION: { label: '예약대기', color: 'bg-yellow-100 text-yellow-800' },
+  CONFIRMED: { label: '예약확정', color: 'bg-blue-100 text-blue-800' },
+  PENDING_SETTLEMENT: { label: '정산대기', color: 'bg-purple-100 text-purple-800' },
+  SETTLEMENT_COMPLETED: { label: '정산완료', color: 'bg-green-100 text-green-800' },
+  REFUNDED: { label: '환불', color: 'bg-red-100 text-red-800' },
+  CANCELLED: { label: '취소', color: 'bg-gray-100 text-gray-800' },
 }
 
 const paymentStatusLabels: Record<string, { label: string; color: string }> = {
   PENDING: { label: '결제 대기', color: 'bg-orange-100 text-orange-800' },
   PAID: { label: '결제 완료', color: 'bg-green-100 text-green-800' },
-  REFUNDED: { label: '환불 완료', color: 'bg-gray-100 text-gray-800' },
+  PARTIALLY_REFUNDED: { label: '부분 환불', color: 'bg-yellow-100 text-yellow-800' },
+  REFUNDED: { label: '환불 완료', color: 'bg-red-100 text-red-800' },
   FAILED: { label: '결제 실패', color: 'bg-red-100 text-red-800' },
 }
 
@@ -61,7 +61,7 @@ export default function AdminBookingsPage() {
   const router = useRouter()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [filter, setFilter] = useState<'ALL' | 'PENDING'>('PENDING')
+  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'SETTLEMENT'>('PENDING')
   const [searchTerm, setSearchTerm] = useState('')
   const [confirmingPaymentId, setConfirmingPaymentId] = useState<string | null>(null)
 
@@ -122,9 +122,78 @@ export default function AdminBookingsPage() {
     }
   }
 
+  const handleProcessSettlement = async (bookingId: string) => {
+    const settlementNote = prompt('정산 메모를 입력하세요 (선택사항):')
+    if (settlementNote === null) return // 취소 클릭
+
+    try {
+      const response = await fetch(`/api/admin/bookings/${bookingId}/settlement`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ settlementNote }),
+      })
+
+      if (response.ok) {
+        alert('정산 처리가 완료되었습니다.')
+        await fetchBookings()
+      } else {
+        const data = await response.json()
+        alert(data.error || '정산 처리에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('정산 처리 중 오류 발생:', error)
+      alert('서버 오류가 발생했습니다.')
+    }
+  }
+
+  const handleProcessRefund = async (bookingId: string, booking: Booking) => {
+    const refundType = confirm('전액 환불하시겠습니까?\n확인 = 전액환불, 취소 = 부분환불')
+      ? 'FULL'
+      : 'PARTIAL'
+
+    let refundAmount = booking.finalFee
+    if (refundType === 'PARTIAL') {
+      const amountStr = prompt(`부분 환불 금액을 입력하세요 (최대: ${booking.finalFee}원):`)
+      if (!amountStr) return
+      refundAmount = parseInt(amountStr)
+      if (isNaN(refundAmount) || refundAmount <= 0 || refundAmount > booking.finalFee) {
+        alert('올바른 금액을 입력해주세요.')
+        return
+      }
+    }
+
+    const refundNote = prompt('환불 사유를 입력하세요 (선택사항):')
+    if (refundNote === null) return
+
+    try {
+      const response = await fetch(`/api/admin/bookings/${bookingId}/refund`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refundAmount, refundType, refundNote }),
+      })
+
+      if (response.ok) {
+        alert('환불 처리가 완료되었습니다.')
+        await fetchBookings()
+      } else {
+        const data = await response.json()
+        alert(data.error || '환불 처리에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('환불 처리 중 오류 발생:', error)
+      alert('서버 오류가 발생했습니다.')
+    }
+  }
+
   const filteredBookings = bookings.filter((booking) => {
     const matchesFilter =
-      filter === 'ALL' || (filter === 'PENDING' && booking.paymentStatus === 'PENDING')
+      filter === 'ALL' ||
+      (filter === 'PENDING' && booking.paymentStatus === 'PENDING') ||
+      (filter === 'SETTLEMENT' && booking.status === 'PENDING_SETTLEMENT')
     const matchesSearch =
       booking.parentUser.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.parentUser.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,6 +203,7 @@ export default function AdminBookingsPage() {
   })
 
   const pendingPaymentCount = bookings.filter((b) => b.paymentStatus === 'PENDING').length
+  const pendingSettlementCount = bookings.filter((b) => b.status === 'PENDING_SETTLEMENT').length
 
   if (status === 'loading' || isLoading) {
     return (
@@ -181,8 +251,25 @@ export default function AdminBookingsPage() {
                 }`}
               >
                 결제 대기
-                <span className="ml-2 bg-gray-200 text-gray-700 py-0.5 px-2 rounded-full text-xs">
+                <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
+                  filter === 'PENDING' ? 'bg-white text-aipoten-green' : 'bg-gray-200 text-gray-700'
+                }`}>
                   {pendingPaymentCount}
+                </span>
+              </button>
+              <button
+                onClick={() => setFilter('SETTLEMENT')}
+                className={`px-4 py-2 text-sm font-medium rounded-md ${
+                  filter === 'SETTLEMENT'
+                    ? 'bg-aipoten-green text-white'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                정산 대기
+                <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
+                  filter === 'SETTLEMENT' ? 'bg-white text-aipoten-green' : 'bg-gray-200 text-gray-700'
+                }`}>
+                  {pendingSettlementCount}
                 </span>
               </button>
               <button
@@ -194,7 +281,9 @@ export default function AdminBookingsPage() {
                 }`}
               >
                 전체
-                <span className="ml-2 bg-gray-200 text-gray-700 py-0.5 px-2 rounded-full text-xs">
+                <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
+                  filter === 'ALL' ? 'bg-white text-aipoten-green' : 'bg-gray-200 text-gray-700'
+                }`}>
                   {bookings.length}
                 </span>
               </button>
@@ -202,7 +291,7 @@ export default function AdminBookingsPage() {
           </div>
 
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
             <div className="bg-white p-6 rounded-lg shadow">
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
@@ -229,13 +318,13 @@ export default function AdminBookingsPage() {
 
             <div className="bg-white p-6 rounded-lg shadow">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                  <span className="text-2xl">✅</span>
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                  <span className="text-2xl">💵</span>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-500">결제 완료</p>
+                  <p className="text-sm font-medium text-gray-500">정산 대기</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {bookings.filter((b) => b.paymentStatus === 'PAID').length}건
+                    {bookings.filter((b) => b.status === 'PENDING_SETTLEMENT').length}건
                   </p>
                 </div>
               </div>
@@ -243,12 +332,26 @@ export default function AdminBookingsPage() {
 
             <div className="bg-white p-6 rounded-lg shadow">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                  <span className="text-2xl">✅</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">정산 완료</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {bookings.filter((b) => b.status === 'SETTLEMENT_COMPLETED').length}건
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mr-4">
                   <span className="text-2xl">💰</span>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500">총 결제액</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl font-bold text-gray-900">
                     ₩{bookings
                       .filter((b) => b.paymentStatus === 'PAID')
                       .reduce((sum, b) => sum + b.finalFee, 0)
@@ -264,7 +367,13 @@ export default function AdminBookingsPage() {
             <div className="text-center py-12">
               <div className="text-gray-400 text-6xl mb-4">📋</div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {searchTerm ? '검색 결과가 없습니다' : filter === 'PENDING' ? '결제 대기 중인 예약이 없습니다' : '예약이 없습니다'}
+                {searchTerm
+                  ? '검색 결과가 없습니다'
+                  : filter === 'PENDING'
+                  ? '결제 대기 중인 예약이 없습니다'
+                  : filter === 'SETTLEMENT'
+                  ? '정산 대기 중인 예약이 없습니다'
+                  : '예약이 없습니다'}
               </h3>
               <p className="text-gray-500">
                 {searchTerm ? '다른 검색어를 시도해보세요.' : '새로운 예약을 기다리고 있습니다.'}
@@ -342,9 +451,27 @@ export default function AdminBookingsPage() {
                             <button
                               onClick={() => handleConfirmPayment(booking.id)}
                               disabled={confirmingPaymentId === booking.id}
-                              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium whitespace-nowrap"
                             >
-                              {confirmingPaymentId === booking.id ? '처리 중...' : '결제 승인'}
+                              {confirmingPaymentId === booking.id ? '처리 중...' : '💰 결제 승인'}
+                            </button>
+                          )}
+
+                          {booking.status === 'PENDING_SETTLEMENT' && (
+                            <button
+                              onClick={() => handleProcessSettlement(booking.id)}
+                              className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm font-medium whitespace-nowrap"
+                            >
+                              💵 정산 처리
+                            </button>
+                          )}
+
+                          {booking.paymentStatus === 'PAID' && booking.status !== 'REFUNDED' && (
+                            <button
+                              onClick={() => handleProcessRefund(booking.id, booking)}
+                              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium whitespace-nowrap"
+                            >
+                              🔄 환불 처리
                             </button>
                           )}
                         </div>

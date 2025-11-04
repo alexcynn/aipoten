@@ -108,18 +108,34 @@ export async function POST(
       )
     }
 
-    // 상담일지 작성 및 완료 상태로 변경
+    // 상태 검증: CONFIRMED 상태에서만 상담일지 작성 가능
+    if (booking.status !== 'CONFIRMED') {
+      return NextResponse.json(
+        { error: `현재 상태(${booking.status})에서는 상담일지를 작성할 수 없습니다.` },
+        { status: 400 }
+      )
+    }
+
+    // 상담일지 작성 및 정산대기 상태로 자동 전환
     const updatedBooking = await prisma.booking.update({
       where: { id: params.id },
       data: {
         therapistNote: journal,
-        status: 'COMPLETED', // 상담일지 작성 시 자동 완료
+        status: 'PENDING_SETTLEMENT', // 상담일지 작성 시 자동으로 정산대기 상태로 전환
+        completedAt: new Date(), // 완료 시간 기록
       },
     })
 
+    console.log(`✅ 상담일지 작성 및 정산대기 전환: ${params.id}`)
+
     return NextResponse.json({
-      booking: updatedBooking,
-      message: '상담일지가 저장되었습니다.',
+      booking: {
+        id: updatedBooking.id,
+        status: updatedBooking.status,
+        therapistNote: updatedBooking.therapistNote,
+        completedAt: updatedBooking.completedAt,
+      },
+      message: '상담일지가 저장되었습니다. 정산 처리를 기다려주세요.',
     })
   } catch (error) {
     console.error('상담일지 작성 오류:', error)

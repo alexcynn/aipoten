@@ -386,9 +386,13 @@ model TherapistProfile {
   specialties     String?  // JSON 배열: ["SPEECH_THERAPY", "SENSORY_INTEGRATION"]
   childAgeRanges  String?  // JSON 배열: ["AGE_0_12", "AGE_13_24"]
   serviceAreas    String?  // JSON 배열: ["GANGNAM", "SEOCHO"]
-  sessionFee      Int?     // 50분 기준 상담료 (원)
+  sessionFee      Int?     // 50분 기준 상담료 (원) - 홈티용
   isPreTherapist  Boolean  @default(false) // 예비 치료사 여부 (졸업 전)
   canDoConsultation Boolean @default(false) // 언어 컨설팅 수행 가능 여부
+
+  // 언어컨설팅 비용 설정 (치료사별 개별 설정)
+  consultationFee              Int? @default(150000) // 언어컨설팅 부모 결제 금액 (원)
+  consultationSettlementAmount Int? @default(100000) // 언어컨설팅 치료사 정산금 (원)
 
   // 계좌 정보
   bank            String?  // 은행명
@@ -401,7 +405,7 @@ model TherapistProfile {
   experience      Int?     // 경력 (년) (레거시)
   education       String?  // 학력
   introduction    String?  // 자기소개
-  consultationFee Int?     // 상담료 (원) (레거시)
+  // consultationFee는 새로운 의미로 위에 재정의됨 (언어컨설팅 부모 결제 금액)
 
   // 승인 관련
   approvalStatus  ApprovalStatus @default(PENDING)
@@ -661,9 +665,11 @@ enum BookingStatus {
   PENDING_CONFIRMATION  // 확인 대기 (결제 완료, 치료사 확인 대기)
   CONFIRMED             // 확인 완료 (치료사 확인 완료, 진행 예정)
   SCHEDULED             // 예정됨 (결제 완료, 치료사 확인 완료) - 레거시
-  COMPLETED             // 세션 완료
+  PENDING_SETTLEMENT    // 정산대기 (세션 완료, 상담일지 작성됨, 정산 대기 중)
+  SETTLEMENT_COMPLETED  // 정산완료 (정산 처리 완료)
+  COMPLETED             // 세션 완료 - 레거시
   CANCELLED             // 취소됨
-  REJECTED              // 거절됨 (치료사가 거절)
+  REJECTED              // 거절됨 (치료사가 거절) - 미사용
   NO_SHOW               // 노쇼
 }
 
@@ -695,7 +701,8 @@ model Booking {
   status                BookingStatus       @default(SCHEDULED)
 
   // 완료 정보
-  completedAt           DateTime?           // 완료 일시
+  confirmedAt           DateTime?           // 치료사 예약 확인 시간
+  completedAt           DateTime?           // 완료 일시 (상담일지 작성 시간)
 
   // 취소 관리
   cancelledAt           DateTime?
@@ -799,8 +806,10 @@ model SystemSettings {
   accountNumber       String?  // 계좌번호
   accountHolder       String?  // 예금주
 
-  // 언어 컨설팅 기본 요금
-  consultationBaseFee Int?     @default(150000)
+  // 정산 관련 설정
+  settlementRate                Int? @default(5)      // 플랫폼 정산율 (%) - 홈티용
+  consultationDefaultFee        Int? @default(150000) // 언어컨설팅 기본 부모 결제 금액
+  consultationDefaultSettlement Int? @default(100000) // 언어컨설팅 기본 치료사 정산금
 
   updatedAt           DateTime @updatedAt
   updatedBy           String?  // 수정한 관리자 ID
@@ -858,6 +867,7 @@ model Payment {
   originalFee       Int           // 원가
   discountRate      Int           @default(0) // 할인율 (%)
   finalFee          Int           // 최종 결제 금액
+  platformFee       Int?          // 플랫폼 수수료 (계산된 값 저장)
 
   // 결제 정보
   status            PaymentStatus @default(PENDING_PAYMENT)

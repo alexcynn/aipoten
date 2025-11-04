@@ -318,6 +318,291 @@ const statusFilters = [
 ];
 ```
 
+## 💰 정산 시스템
+
+### 개요
+
+AI Poten 플랫폼은 **언어컨설팅**과 **홈티**에 대해 서로 다른 정산 방식을 사용합니다.
+이는 각 서비스의 특성과 비즈니스 모델을 반영한 설계입니다.
+
+### 정산 방식 비교
+
+| 구분 | 언어컨설팅 (CONSULTATION) | 홈티 (THERAPY) |
+|------|---------------------------|----------------|
+| **부모 결제 금액** | 치료사별 개별 설정 (기본값: 150,000원) | sessionFee × 횟수 × (1 - 할인율) |
+| **플랫폼 수수료** | 결제 금액 - 정산금 (고정 금액) | 결제 금액 × 정산율 (기본 5%) |
+| **치료사 정산금** | 치료사별 개별 설정 (기본값: 100,000원) | 결제 금액 - 플랫폼 수수료 |
+| **정산 계산** | 수동 설정 (미리 협의된 금액) | 자동 계산 (비율 기반) |
+
+### 언어컨설팅 정산 상세
+
+#### 비용 구조
+```
+부모 결제 금액: 150,000원 (기본값, 치료사별 변경 가능)
+치료사 정산금:   100,000원 (기본값, 치료사별 변경 가능)
+─────────────────────────────
+플랫폼 수익:      50,000원 (33.3%)
+```
+
+#### 설정 방법
+1. **시스템 기본값** (관리자 설정 페이지)
+   - `consultationDefaultFee`: 150,000원
+   - `consultationDefaultSettlement`: 100,000원
+
+2. **치료사별 개별 설정** (치료사 관리 페이지)
+   - 관리자가 치료사에게 언어컨설팅 권한을 부여할 때
+   - `TherapistProfile.consultationFee`: 부모 결제 금액
+   - `TherapistProfile.consultationSettlementAmount`: 치료사 정산금
+
+#### 예시
+```typescript
+// 치료사 A: 기본값 사용
+consultationFee: 150,000원
+consultationSettlementAmount: 100,000원
+→ 플랫폼 수익: 50,000원
+
+// 치료사 B: 경력이 많아 높은 비용 책정
+consultationFee: 180,000원
+consultationSettlementAmount: 120,000원
+→ 플랫폼 수익: 60,000원
+
+// 치료사 C: 신규 치료사로 낮은 비용 책정
+consultationFee: 120,000원
+consultationSettlementAmount: 80,000원
+→ 플랫폼 수익: 40,000원
+```
+
+### 홈티 정산 상세
+
+#### 비용 구조
+```
+예시: 1회 10만원, 4회 예약 (10% 할인 적용)
+
+원가:            400,000원
+할인 (10%):      -40,000원
+─────────────────────────────
+부모 결제 금액:  360,000원
+
+플랫폼 수수료 (5%): 18,000원
+─────────────────────────────
+치료사 정산금:   342,000원 (95%)
+```
+
+#### 설정 방법
+1. **시스템 정산율** (관리자 설정 페이지)
+   - `SystemSettings.settlementRate`: 5% (기본값)
+   - 관리자가 변경 가능 (0% ~ 100%)
+
+2. **자동 계산**
+   ```typescript
+   const finalFee = sessionFee * sessionCount * (1 - discountRate / 100)
+   const platformFee = Math.round(finalFee * (settlementRate / 100))
+   const settlementAmount = finalFee - platformFee
+   ```
+
+#### 할인율 정책
+| 예약 횟수 | 할인율 |
+|----------|--------|
+| 1~3회 | 0% |
+| 4~7회 | 10% |
+| 8~11회 | 15% |
+| 12회 이상 | 20% |
+
+### 정산 프로세스
+
+#### 1. 예약 생성 시
+```typescript
+// 언어컨설팅
+if (sessionType === 'CONSULTATION') {
+  const fee = therapist.consultationFee || systemSettings.consultationDefaultFee
+  const settlement = therapist.consultationSettlementAmount || systemSettings.consultationDefaultSettlement
+
+  payment.finalFee = fee
+  payment.platformFee = fee - settlement
+  // 정산금은 아직 저장하지 않음
+}
+
+// 홈티
+if (sessionType === 'THERAPY') {
+  const originalFee = therapist.sessionFee * sessionCount
+  const discountRate = calculateDiscount(sessionCount)
+  const finalFee = originalFee * (1 - discountRate / 100)
+  const platformFee = Math.round(finalFee * (systemSettings.settlementRate / 100))
+
+  payment.originalFee = originalFee
+  payment.discountRate = discountRate
+  payment.finalFee = finalFee
+  payment.platformFee = platformFee
+  // 정산금은 아직 저장하지 않음
+}
+```
+
+#### 2. 정산 처리 시 (관리자)
+```typescript
+// POST /api/admin/bookings/[id]/settlement
+
+// 자동 계산
+if (sessionType === 'CONSULTATION') {
+  // 언어컨설팅: 미리 설정된 정산금 사용
+  settlementAmount = therapist.consultationSettlementAmount
+} else {
+  // 홈티: 결제 금액 - 플랫폼 수수료
+  settlementAmount = payment.finalFee - payment.platformFee
+}
+
+// Payment 업데이트
+await prisma.payment.update({
+  where: { id: payment.id },
+  data: {
+    settlementAmount,
+    settledAt: new Date(),
+    settlementNote: '정산 완료'
+  }
+})
+
+// Booking 상태 변경
+await prisma.booking.update({
+  where: { id: booking.id },
+  data: {
+    status: 'SETTLEMENT_COMPLETED'
+  }
+})
+```
+
+### 데이터베이스 스키마
+
+#### TherapistProfile 모델
+```prisma
+model TherapistProfile {
+  // ... 기존 필드들
+
+  // 언어컨설팅 관련
+  canDoConsultation             Boolean @default(false)
+  consultationFee               Int?    @default(150000)  // 부모 결제 금액
+  consultationSettlementAmount  Int?    @default(100000)  // 치료사 정산금
+
+  // 홈티 관련
+  sessionFee                    Int?                      // 1회당 기본 상담료
+
+  // ... 나머지 필드들
+}
+```
+
+#### SystemSettings 모델
+```prisma
+model SystemSettings {
+  id String @id @default("system")
+
+  // 정산 관련 설정
+  settlementRate                Int? @default(5)         // 플랫폼 정산율 (%) - 홈티용
+  consultationDefaultFee        Int? @default(150000)    // 언어컨설팅 기본 비용
+  consultationDefaultSettlement Int? @default(100000)    // 언어컨설팅 기본 정산금
+
+  // 계좌 정보
+  bankName                      String?
+  accountNumber                 String?
+  accountHolder                 String?
+
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+```
+
+#### Payment 모델
+```prisma
+model Payment {
+  // 금액 정보
+  originalFee       Int              // 원가 (할인 전)
+  discountRate      Int @default(0)  // 할인율 (%)
+  finalFee          Int              // 최종 결제 금액
+  platformFee       Int?             // 플랫폼 수수료 (계산된 값)
+
+  // 정산 정보
+  settlementAmount  Int?             // 치료사 정산금
+  settledAt         DateTime?        // 정산 완료 시간
+  settlementNote    String?          // 정산 메모
+
+  // 환불 정보
+  refundAmount      Int?             // 환불 금액
+  refundedAt        DateTime?        // 환불 처리 시간
+  refundNote        String?          // 환불 사유
+
+  // ... 기타 필드들
+}
+```
+
+### 정산 금액 계산 예시
+
+#### 예시 1: 언어컨설팅
+```
+치료사: 김치료 (경력 10년)
+설정 비용: 180,000원
+설정 정산금: 120,000원
+
+→ 부모 결제: 180,000원
+→ 플랫폼 수익: 60,000원 (33.3%)
+→ 치료사 정산: 120,000원 (66.7%)
+```
+
+#### 예시 2: 홈티 (4회)
+```
+치료사: 이치료 (1회 100,000원)
+예약 횟수: 4회
+할인율: 10%
+정산율: 5%
+
+계산:
+원가 = 100,000 × 4 = 400,000원
+할인 = 400,000 × 10% = 40,000원
+최종 결제 = 400,000 - 40,000 = 360,000원
+
+플랫폼 수수료 = 360,000 × 5% = 18,000원
+치료사 정산 = 360,000 - 18,000 = 342,000원
+
+→ 부모 결제: 360,000원
+→ 플랫폼 수익: 18,000원 (5%)
+→ 치료사 정산: 342,000원 (95%)
+```
+
+#### 예시 3: 홈티 (12회)
+```
+치료사: 박치료 (1회 80,000원)
+예약 횟수: 12회
+할인율: 20%
+정산율: 5%
+
+계산:
+원가 = 80,000 × 12 = 960,000원
+할인 = 960,000 × 20% = 192,000원
+최종 결제 = 960,000 - 192,000 = 768,000원
+
+플랫폼 수수료 = 768,000 × 5% = 38,400원
+치료사 정산 = 768,000 - 38,400 = 729,600원
+
+→ 부모 결제: 768,000원
+→ 플랫폼 수익: 38,400원 (5%)
+→ 치료사 정산: 729,600원 (95%)
+```
+
+### 주의사항
+
+1. **언어컨설팅 비용 검증**
+   - `consultationFee >= consultationSettlementAmount` 필수
+   - 정산금이 결제 금액을 초과할 수 없음
+
+2. **정산율 범위**
+   - 0% ~ 100% 사이 값만 허용
+   - 변경 시 기존 예약에는 영향 없음 (생성 시점 값 사용)
+
+3. **정산 시점**
+   - 세션 완료 후 (PENDING_SETTLEMENT 상태)
+   - 관리자가 수동으로 처리
+   - 자동 계산으로 오류 방지
+
+4. **환불 시 정산 처리**
+   - 이미 정산된 경우: 정산금 회수 필요
+   - 정산 전 환불: 정산 불필요
+
 ## 🔧 API 설계
 
 ### 1. 치료사 예약 확인 API (신규)
@@ -568,6 +853,7 @@ npx prisma migrate deploy
 
 ---
 
-**문서 버전**: 1.0.0
+**문서 버전**: 2.0.0
 **최종 수정일**: 2025-11-04
 **작성자**: AI Poten 개발팀
+**변경사항**: 정산 시스템 상세 설명 추가 (언어컨설팅 vs 홈티 구분)

@@ -30,18 +30,22 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params
     const body = await request.json()
-    const { settlementAmount, settlementNote } = body
+    const { settlementNote } = body // settlementAmount는 자동 계산
 
-    if (!settlementAmount || settlementAmount <= 0) {
-      return NextResponse.json(
-        { error: '정산 금액이 필요합니다.' },
-        { status: 400 }
-      )
-    }
-
-    // 예약 조회
+    // 예약 조회 (Payment, Therapist 포함)
     const booking = await prisma.booking.findUnique({
       where: { id },
+      include: {
+        payment: {
+          include: {
+            therapist: {
+              select: {
+                consultationSettlementAmount: true,
+              },
+            },
+          },
+        },
+      },
     })
 
     if (!booking) {
@@ -51,18 +55,76 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // 정산 처리
-    const updatedBooking = await prisma.booking.update({
-      where: { id },
-      data: {
-        settlementAmount,
-        settlementNote,
-        settledAt: new Date(),
-        status: 'SETTLEMENT_COMPLETED',
-      },
+    // 상태 검증
+    if (booking.status !== 'PENDING_SETTLEMENT') {
+      return NextResponse.json(
+        { error: `현재 상태(${booking.status})에서는 정산 처리를 할 수 없습니다.` },
+        { status: 400 }
+      )
+    }
+
+    // 정산 금액 자동 계산
+    let settlementAmount: number
+
+    if (booking.sessionType === 'CONSULTATION') {
+      // 언어컨설팅: 미리 설정된 정산금 사용
+      settlementAmount = booking.payment.therapist.consultationSettlementAmount || 100000
+    } else {
+      // 홈티: 결제 금액 - 플랫폼 수수료
+      if (booking.payment.platformFee) {
+        settlementAmount = booking.payment.finalFee - booking.payment.platformFee
+      } else {
+        // platformFee가 없는 경우 (레거시 데이터) 정산율로 계산
+        const systemSettings = await prisma.systemSettings.findUnique({
+          where: { id: 'system' },
+        })
+        const settlementRate = systemSettings?.settlementRate || 5
+        const platformFee = Math.round(booking.payment.finalFee * (settlementRate / 100))
+        settlementAmount = booking.payment.finalFee - platformFee
+      }
+    }
+
+    console.log(`💰 정산 금액 자동 계산:`, {
+      bookingId: id,
+      sessionType: booking.sessionType,
+      settlementAmount,
     })
 
-    return NextResponse.json({ booking: updatedBooking })
+    // 트랜잭션으로 Booking 상태 변경 및 Payment 정산 정보 업데이트
+    const result = await prisma.$transaction(async (tx) => {
+      // Payment 정산 정보 업데이트
+      const updatedPayment = await tx.payment.update({
+        where: { id: booking.paymentId },
+        data: {
+          settlementAmount,
+          settledAt: new Date(),
+          settlementNote: settlementNote || '정산 완료',
+        },
+      })
+
+      // Booking 상태 변경
+      const updatedBooking = await tx.booking.update({
+        where: { id },
+        data: {
+          status: 'SETTLEMENT_COMPLETED',
+        },
+      })
+
+      return { booking: updatedBooking, payment: updatedPayment }
+    })
+
+    console.log(`✅ 정산 처리 완료: ${id}`)
+
+    return NextResponse.json({
+      success: true,
+      message: '정산 처리가 완료되었습니다.',
+      booking: result.booking,
+      payment: {
+        id: result.payment.id,
+        settlementAmount: result.payment.settlementAmount,
+        settledAt: result.payment.settledAt,
+      },
+    })
   } catch (error) {
     console.error('❌ 정산 처리 오류:', error)
     return NextResponse.json(

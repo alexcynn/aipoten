@@ -180,19 +180,54 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 요금 계산
-    const sessionFee = therapist.sessionFee || 0
-    const discountRate = sessionCount >= 12 ? 20 : sessionCount >= 8 ? 15 : sessionCount >= 4 ? 10 : 0
-    const originalFee = sessionFee * sessionCount
-    const finalFee = Math.round(originalFee * (1 - discountRate / 100))
-
-    console.log('💰 요금 계산:', {
-      sessionFee,
-      sessionCount,
-      discountRate,
-      originalFee,
-      finalFee
+    // 시스템 설정 조회 (정산율 및 기본값)
+    const systemSettings = await prisma.systemSettings.findUnique({
+      where: { id: 'system' },
     })
+
+    // 요금 계산 (세션 타입별 로직)
+    let sessionFee: number
+    let discountRate: number
+    let originalFee: number
+    let finalFee: number
+    let platformFee: number
+
+    if (sessionType === 'CONSULTATION') {
+      // 언어컨설팅: 치료사별 개별 설정 또는 시스템 기본값 사용
+      sessionFee = therapist.consultationFee || systemSettings?.consultationDefaultFee || 150000
+      const settlementAmount = therapist.consultationSettlementAmount || systemSettings?.consultationDefaultSettlement || 100000
+
+      discountRate = 0 // 언어컨설팅은 할인 없음
+      originalFee = sessionFee
+      finalFee = sessionFee
+      platformFee = sessionFee - settlementAmount // 고정 금액
+
+      console.log('💰 언어컨설팅 요금 계산:', {
+        sessionFee,
+        settlementAmount,
+        platformFee,
+        finalFee
+      })
+    } else {
+      // 홈티: 기존 로직 + 정산율 기반 플랫폼 수수료
+      sessionFee = therapist.sessionFee || 0
+      discountRate = sessionCount >= 12 ? 20 : sessionCount >= 8 ? 15 : sessionCount >= 4 ? 10 : 0
+      originalFee = sessionFee * sessionCount
+      finalFee = Math.round(originalFee * (1 - discountRate / 100))
+
+      const settlementRate = systemSettings?.settlementRate || 5
+      platformFee = Math.round(finalFee * (settlementRate / 100))
+
+      console.log('💰 홈티 요금 계산:', {
+        sessionFee,
+        sessionCount,
+        discountRate,
+        originalFee,
+        finalFee,
+        settlementRate,
+        platformFee
+      })
+    }
 
     // 예약 생성일로부터 48시간 후를 확인 마감시간으로 설정
     const confirmationDeadline = new Date()
