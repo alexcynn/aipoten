@@ -25,28 +25,50 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') // ALL, SCHEDULED, COMPLETED, CANCELLED
     const sessionType = searchParams.get('sessionType') // ALL, CONSULTATION, THERAPY
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
 
-    // 본인의 예약만 조회 (결제 완료된 것만)
+    // 본인의 예약만 조회
     const where: any = {
       parentUserId: session.user.id,
-      payment: {
-        status: 'PAID', // 결제 완료된 것만
-      },
     }
 
-    // 상태 필터
+    // 상태 필터 (다중 상태 지원)
     if (status && status !== 'ALL') {
-      where.status = status
+      const statusList = status.split(',')
+      if (statusList.length === 1) {
+        where.status = statusList[0]
+      } else {
+        where.status = { in: statusList }
+      }
     }
 
     // 세션 타입 필터
     if (sessionType && sessionType !== 'ALL') {
       where.payment = {
-        ...where.payment,
         sessionType: sessionType,
       }
     }
 
+    // 날짜 필터
+    if (startDate || endDate) {
+      where.scheduledAt = {}
+      if (startDate) {
+        where.scheduledAt.gte = new Date(startDate)
+      }
+      if (endDate) {
+        const endDateTime = new Date(endDate)
+        endDateTime.setHours(23, 59, 59, 999)
+        where.scheduledAt.lte = endDateTime
+      }
+    }
+
+    // 전체 개수 조회
+    const total = await prisma.booking.count({ where })
+
+    // 페이지네이션 적용
     const bookings = await prisma.booking.findMany({
       where,
       include: {
@@ -73,6 +95,7 @@ export async function GET(request: NextRequest) {
         therapist: {
           select: {
             id: true,
+            userId: true,
             user: {
               select: {
                 name: true,
@@ -85,15 +108,31 @@ export async function GET(request: NextRequest) {
           },
         },
         timeSlot: true,
+        review: {
+          select: {
+            id: true,
+            rating: true,
+            content: true,
+            createdAt: true,
+          },
+        },
       },
       orderBy: [
         { scheduledAt: 'desc' },
         { sessionNumber: 'asc' },
       ],
+      skip: (page - 1) * limit,
+      take: limit,
     })
 
     return NextResponse.json({
       bookings,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     })
   } catch (error) {
     console.error('부모 예약 내역 조회 오류:', error)

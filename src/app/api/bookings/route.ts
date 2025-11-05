@@ -229,20 +229,32 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 예약 생성일로부터 48시간 후를 확인 마감시간으로 설정
-    const confirmationDeadline = new Date()
-    confirmationDeadline.setHours(confirmationDeadline.getHours() + 48)
+    // 트랜잭션으로 Payment 및 Booking 생성
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Payment 생성
+      const payment = await tx.payment.create({
+        data: {
+          parentUserId: userId,
+          childId,
+          therapistId: timeSlots[0].therapistId,
+          sessionType,
+          totalSessions: sessionCount,
+          originalFee,
+          discountRate,
+          finalFee,
+          platformFee,
+          status: 'PENDING_PAYMENT',
+          parentNote
+        }
+      })
 
-    // bookingGroupId 생성 (여러 예약을 묶기 위해)
-    const bookingGroupId = sessionType === 'THERAPY' && sessionCount > 1 ?
-      `group_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` :
-      null
-
-    // 트랜잭션으로 여러 예약 생성 및 타임슬롯 업데이트
-    const bookings = await prisma.$transaction(async (tx) => {
+      // 2. Booking 생성 (Payment에 연결)
       const createdBookings = []
 
-      for (const timeSlot of timeSlots) {
+      for (let index = 0; index < timeSlots.length; index++) {
+        const timeSlot = timeSlots[index]
+        const sessionNumber = index + 1 // 1부터 시작하는 세션 번호
+
         const [hours, minutes] = timeSlot.startTime.split(':').map(Number)
         const scheduledAt = new Date(timeSlot.date)
         scheduledAt.setHours(hours, minutes, 0, 0)
@@ -250,22 +262,17 @@ export async function POST(request: NextRequest) {
         // 예약 생성
         const newBooking = await tx.booking.create({
           data: {
+            paymentId: payment.id,
+            sessionNumber,
             timeSlotId: timeSlot.id,
             parentUserId: userId,
             childId,
             therapistId: timeSlot.therapistId,
             scheduledAt,
-            sessionType,
-            sessionCount,
-            bookingGroupId,
-            originalFee,
-            discountRate,
-            finalFee,
+            status: 'PENDING_CONFIRMATION',
             visitAddress,
             visitAddressDetail,
-            parentNote,
-            confirmationDeadline,
-            status: 'PENDING_CONFIRMATION'
+            parentNote
           },
           include: {
             timeSlot: true,
@@ -297,25 +304,38 @@ export async function POST(request: NextRequest) {
         createdBookings.push(newBooking)
       }
 
-      return createdBookings
+      return { payment, bookings: createdBookings }
     })
 
+    const { payment, bookings } = result
+
     console.log(`✅ ${bookings.length}개 예약 생성 완료`)
+
+    // 계좌 정보 포함 (결제 안내용)
+    const accountInfo = systemSettings ? {
+      bankName: systemSettings.bankName || '',
+      accountNumber: systemSettings.accountNumber || '',
+      accountHolder: systemSettings.accountHolder || '',
+      amount: finalFee
+    } : null
 
     return NextResponse.json(
       {
         message: `${bookings.length}개의 예약이 생성되었습니다. 치료사의 확인을 기다려주세요.`,
+        payment: {
+          id: payment.id,
+          sessionType: payment.sessionType,
+          totalSessions: payment.totalSessions,
+          status: payment.status,
+          originalFee: payment.originalFee,
+          discountRate: payment.discountRate,
+          finalFee: payment.finalFee
+        },
         bookings: bookings.map(booking => ({
           id: booking.id,
           scheduledAt: booking.scheduledAt,
-          sessionType: booking.sessionType,
-          sessionCount: booking.sessionCount,
-          bookingGroupId: booking.bookingGroupId,
+          sessionNumber: booking.sessionNumber,
           status: booking.status,
-          originalFee: booking.originalFee,
-          discountRate: booking.discountRate,
-          finalFee: booking.finalFee,
-          confirmationDeadline: booking.confirmationDeadline,
           therapist: {
             id: booking.therapist.id,
             name: booking.therapist.user.name
@@ -329,13 +349,7 @@ export async function POST(request: NextRequest) {
         booking: {
           id: bookings[0].id,
           scheduledAt: bookings[0].scheduledAt,
-          sessionType: bookings[0].sessionType,
-          sessionCount: bookings[0].sessionCount,
           status: bookings[0].status,
-          originalFee: bookings[0].originalFee,
-          discountRate: bookings[0].discountRate,
-          finalFee: bookings[0].finalFee,
-          confirmationDeadline: bookings[0].confirmationDeadline,
           therapist: {
             id: bookings[0].therapist.id,
             name: bookings[0].therapist.user.name
@@ -344,7 +358,9 @@ export async function POST(request: NextRequest) {
             id: bookings[0].child.id,
             name: bookings[0].child.name
           }
-        }
+        },
+        // 입금 계좌 정보
+        accountInfo
       },
       { status: 201 }
     )
@@ -413,6 +429,18 @@ export async function GET(request: NextRequest) {
                 email: true
               }
             }
+          }
+        },
+        payment: {
+          select: {
+            id: true,
+            sessionType: true,
+            totalSessions: true,
+            status: true,
+            paidAt: true,
+            originalFee: true,
+            discountRate: true,
+            finalFee: true
           }
         }
       },

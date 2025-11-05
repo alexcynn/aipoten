@@ -6,28 +6,31 @@ import Link from 'next/link'
 
 interface Booking {
   id: string
+  sessionNumber: number
   scheduledAt: string
   duration: number
-  sessionType: string
-  sessionCount: number
-  completedSessions: number
   status: string
-  confirmationDeadline: string | null
   confirmedAt: string | null
-  rejectedAt: string | null
-  rejectionReason: string | null
+  completedAt: string | null
   cancelledAt: string | null
   cancellationReason: string | null
-  refundAmount: number | null
   visitAddress: string | null
   visitAddressDetail: string | null
-  originalFee: number
-  discountRate: number
-  finalFee: number
-  paymentStatus: string
-  paidAt: string | null
   parentNote: string | null
   therapistNote: string | null
+  payment: {
+    id: string
+    sessionType: string
+    totalSessions: number
+    originalFee: number
+    discountRate: number
+    finalFee: number
+    platformFee: number | null
+    status: string
+    paidAt: string | null
+    refundedAt: string | null
+    refundAmount: number | null
+  }
   child: {
     id: string
     name: string
@@ -40,30 +43,28 @@ interface Booking {
       name: string
       email: string
     }
-    sessionFee: number
+    sessionFee: number | null
   }
   timeSlot: {
     date: string
     startTime: string
     endTime: string
   }
+  review: {
+    id: string
+    rating: number
+    content: string | null
+  } | null
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
+  PENDING_PAYMENT: { label: '결제대기', color: 'bg-orange-100 text-orange-800' },
   PENDING_CONFIRMATION: { label: '예약대기', color: 'bg-yellow-100 text-yellow-800' },
   CONFIRMED: { label: '예약확정', color: 'bg-blue-100 text-blue-800' },
   PENDING_SETTLEMENT: { label: '완료', color: 'bg-green-100 text-green-800' },
   SETTLEMENT_COMPLETED: { label: '완료', color: 'bg-green-100 text-green-800' },
   REFUNDED: { label: '환불', color: 'bg-red-100 text-red-800' },
   CANCELLED: { label: '취소', color: 'bg-red-100 text-red-800' },
-}
-
-const paymentStatusLabels: Record<string, { label: string; color: string }> = {
-  PENDING: { label: '결제 대기', color: 'bg-orange-100 text-orange-800' },
-  PAID: { label: '결제 완료', color: 'bg-green-100 text-green-800' },
-  PARTIALLY_REFUNDED: { label: '부분 환불', color: 'bg-yellow-100 text-yellow-800' },
-  REFUNDED: { label: '환불 완료', color: 'bg-red-100 text-red-800' },
-  FAILED: { label: '결제 실패', color: 'bg-red-100 text-red-800' },
 }
 
 export default function BookingDetailPage() {
@@ -77,11 +78,6 @@ export default function BookingDetailPage() {
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [cancellationReason, setCancellationReason] = useState('')
   const [isCancelling, setIsCancelling] = useState(false)
-  const [paymentInfo, setPaymentInfo] = useState({
-    bankName: '국민은행',
-    accountNumber: '123-456-78901',
-    accountHolder: '아이포텐',
-  })
 
   useEffect(() => {
     fetchBooking()
@@ -89,29 +85,13 @@ export default function BookingDetailPage() {
 
   const fetchBooking = async () => {
     try {
-      const [bookingRes, settingsRes] = await Promise.all([
-        fetch(`/api/bookings/${bookingId}`),
-        fetch('/api/admin/settings'),
-      ])
+      const response = await fetch(`/api/bookings/${bookingId}`)
+      const bookingData = await response.json()
 
-      const bookingData = await bookingRes.json()
-
-      if (bookingRes.ok) {
+      if (response.ok) {
         setBooking(bookingData.booking)
       } else {
         setError(bookingData.error || '예약 정보를 불러올 수 없습니다.')
-      }
-
-      // 결제 정보 가져오기
-      if (settingsRes.ok) {
-        const settingsData = await settingsRes.json()
-        if (settingsData.bankName) {
-          setPaymentInfo({
-            bankName: settingsData.bankName,
-            accountNumber: settingsData.accountNumber,
-            accountHolder: settingsData.accountHolder,
-          })
-        }
       }
     } catch (err) {
       setError('서버 오류가 발생했습니다.')
@@ -129,12 +109,12 @@ export default function BookingDetailPage() {
 
     if (hoursUntil >= 24) {
       return {
-        amount: booking.finalFee,
+        amount: booking.payment.finalFee,
         description: '100% 환불 (24시간 이전 취소)'
       }
     } else if (hoursUntil >= 12) {
       return {
-        amount: Math.round(booking.finalFee * 0.5),
+        amount: Math.round(booking.payment.finalFee * 0.5),
         description: '50% 환불 (12-24시간 이전 취소)'
       }
     } else {
@@ -193,10 +173,10 @@ export default function BookingDetailPage() {
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <p className="text-red-800">{error || '예약 정보를 찾을 수 없습니다.'}</p>
             <Link
-              href="/parent/bookings"
+              href="/parent/dashboard"
               className="mt-4 inline-block text-red-600 hover:text-red-800"
             >
-              ← 목록으로 돌아가기
+              ← 대시보드로 돌아가기
             </Link>
           </div>
         </div>
@@ -209,12 +189,12 @@ export default function BookingDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <Link
-          href="/parent/bookings"
+        <button
+          onClick={() => router.back()}
           className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
         >
-          ← 목록으로 돌아가기
-        </Link>
+          ← 뒤로 가기
+        </button>
 
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="flex items-start justify-between mb-6">
@@ -222,10 +202,16 @@ export default function BookingDetailPage() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">예약 상세</h1>
               <span
                 className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                  statusLabels[booking.status]?.color || 'bg-gray-100 text-gray-800'
+                  (booking.payment?.status === 'PENDING_PAYMENT'
+                    ? statusLabels.PENDING_PAYMENT
+                    : statusLabels[booking.status]
+                  )?.color || 'bg-gray-100 text-gray-800'
                 }`}
               >
-                {statusLabels[booking.status]?.label || booking.status}
+                {(booking.payment?.status === 'PENDING_PAYMENT'
+                  ? statusLabels.PENDING_PAYMENT
+                  : statusLabels[booking.status]
+                )?.label || booking.status}
               </span>
             </div>
           </div>
@@ -255,13 +241,13 @@ export default function BookingDetailPage() {
                 <div>
                   <span className="text-gray-500">세션 타입:</span>
                   <p className="text-gray-900 font-medium">
-                    {booking.sessionType === 'CONSULTATION' ? '방문 컨설팅' : '치료'}
+                    {booking.payment.sessionType === 'CONSULTATION' ? '방문 컨설팅' : '치료'}
                   </p>
                 </div>
                 <div>
                   <span className="text-gray-500">세션 회수:</span>
                   <p className="text-gray-900 font-medium">
-                    {booking.completedSessions} / {booking.sessionCount}회
+                    {booking.sessionNumber} / {booking.payment.totalSessions}회
                   </p>
                 </div>
               </div>
@@ -306,95 +292,6 @@ export default function BookingDetailPage() {
               </div>
             )}
 
-            {/* 결제 정보 */}
-            <div className="border-b pb-4">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">결제 정보</h2>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">원가:</span>
-                  <span className="text-gray-900">₩{booking.originalFee.toLocaleString()}</span>
-                </div>
-                {booking.discountRate > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>할인 ({booking.discountRate}%):</span>
-                    <span>-₩{(booking.originalFee - booking.finalFee).toLocaleString()}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t">
-                  <span>최종 금액:</span>
-                  <span>₩{booking.finalFee.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 결제 상태 */}
-            <div className="border-b pb-4">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">결제 상태</h2>
-              <div className="mb-3">
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                    paymentStatusLabels[booking.paymentStatus]?.color || 'bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  {paymentStatusLabels[booking.paymentStatus]?.label || booking.paymentStatus}
-                </span>
-              </div>
-
-              {/* 결제 대기 시 계좌 정보 표시 */}
-              {booking.paymentStatus === 'PENDING' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-3">
-                  <h3 className="font-semibold text-blue-900 mb-3">입금 계좌 정보</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-blue-700">은행:</span>
-                      <span className="text-blue-900 font-medium">
-                        {paymentInfo.bankName}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-blue-700">계좌번호:</span>
-                      <span className="text-blue-900 font-medium">
-                        {paymentInfo.accountNumber}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-blue-700">예금주:</span>
-                      <span className="text-blue-900 font-medium">
-                        {paymentInfo.accountHolder}
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-t border-blue-300 pt-2 mt-2">
-                      <span className="text-blue-700">입금 금액:</span>
-                      <span className="text-blue-900 font-bold text-lg">
-                        ₩{booking.finalFee.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-blue-700 mt-3">
-                    * 위 계좌로 입금하시면 관리자 확인 후 결제가 승인됩니다.
-                  </p>
-                </div>
-              )}
-
-              {/* 결제 완료 시 결제 일시 표시 */}
-              {booking.paymentStatus === 'PAID' && booking.paidAt && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-3">
-                  <div className="flex items-center text-sm">
-                    <span className="text-green-700">결제 일시:</span>
-                    <span className="text-green-900 font-medium ml-2">
-                      {new Date(booking.paidAt).toLocaleString('ko-KR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* 거절 정보 */}
             {booking.status === 'REJECTED' && booking.rejectionReason && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -408,15 +305,20 @@ export default function BookingDetailPage() {
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <h3 className="font-semibold text-gray-900 mb-2">취소 정보</h3>
                 {booking.cancellationReason && (
-                  <p className="text-gray-800 text-sm mb-2">
+                  <p className="text-gray-800 text-sm mb-3">
                     사유: {booking.cancellationReason}
                   </p>
                 )}
-                {booking.refundAmount !== null && (
-                  <p className="text-gray-800 text-sm">
-                    환불 금액: ₩{booking.refundAmount.toLocaleString()}
-                  </p>
-                )}
+                <p className="text-gray-600 text-sm">
+                  환불 금액은{' '}
+                  <Link
+                    href={`/parent/payments/${booking.payment.id}`}
+                    className="text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    결제 상세 페이지
+                  </Link>
+                  에서 확인하실 수 있습니다.
+                </p>
               </div>
             )}
           </div>

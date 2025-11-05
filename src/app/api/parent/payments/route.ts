@@ -89,7 +89,9 @@ export async function GET(request: NextRequest) {
     // 완료된 세션 수 계산 추가
     const paymentsWithProgress = payments.map((payment) => ({
       ...payment,
-      completedSessions: payment.bookings.filter((b) => b.status === 'COMPLETED').length,
+      completedSessions: payment.bookings.filter((b) =>
+        b.status === 'PENDING_SETTLEMENT' || b.status === 'SETTLEMENT_COMPLETED'
+      ).length,
     }))
 
     // 시스템 설정에서 계좌 정보 가져오기 (결제 대기 시 필요)
@@ -99,7 +101,6 @@ export async function GET(request: NextRequest) {
         bankName: true,
         accountNumber: true,
         accountHolder: true,
-        consultationBaseFee: true,
       },
     })
 

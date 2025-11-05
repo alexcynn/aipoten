@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-config'
 
-// GET - 부모의 그룹화된 예약 목록 조회
+// GET - 부모의 결제(Payment) 기반 예약 목록 조회
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const filter = searchParams.get('filter') // PENDING, PAID
 
-    // 부모의 예약만 조회
+    // Payment 기반으로 조회
     const where: any = {
       parentUserId: session.user.id,
     }
@@ -27,11 +27,11 @@ export async function GET(request: NextRequest) {
       if (filter === 'PENDING') {
         where.status = 'PENDING_PAYMENT'
       } else if (filter === 'PAID') {
-        where.paidAt = { not: null }
+        where.status = 'PAID'
       }
     }
 
-    const bookings = await prisma.booking.findMany({
+    const payments = await prisma.payment.findMany({
       where,
       include: {
         child: {
@@ -51,7 +51,8 @@ export async function GET(request: NextRequest) {
           },
         },
         therapist: {
-          include: {
+          select: {
+            id: true,
             userId: true,
             gender: true,
             birthYear: true,
@@ -67,6 +68,7 @@ export async function GET(request: NextRequest) {
             introduction: true,
             user: {
               select: {
+                id: true,
                 name: true,
                 email: true,
                 phone: true,
@@ -102,58 +104,48 @@ export async function GET(request: NextRequest) {
             },
           },
         },
-        timeSlot: true,
+        bookings: {
+          include: {
+            timeSlot: true,
+          },
+          orderBy: {
+            scheduledAt: 'asc',
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
       },
     })
 
-    // bookingGroupId로 그룹화
-    const groupedBookings: any[] = []
-    const processedGroups = new Set<string>()
+    // Payment를 그룹화된 형태로 변환
+    const groupedBookings = payments.map((payment) => {
+      const completedSessions = payment.bookings.filter(
+        (b) => b.status === 'PENDING_SETTLEMENT' || b.status === 'SETTLEMENT_COMPLETED'
+      ).length
 
-    for (const booking of bookings) {
-      const groupId = booking.bookingGroupId || booking.id
-
-      // 이미 처리한 그룹이면 스킵
-      if (processedGroups.has(groupId)) {
-        continue
-      }
-
-      processedGroups.add(groupId)
-
-      // 같은 그룹의 모든 예약 찾기
-      const groupBookings = bookings.filter(
-        (b) => (b.bookingGroupId || b.id) === groupId
-      )
-
-      // 그룹 정보 계산
-      const totalFee = groupBookings.reduce((sum, b) => sum + b.finalFee, 0)
-      const totalSessions = groupBookings.reduce((sum, b) => sum + b.sessionCount, 0)
-      const completedSessions = groupBookings.reduce((sum, b) => sum + b.completedSessions, 0)
-
-      // 대표 예약 정보 사용
-      const representative = groupBookings[0]
-
-      groupedBookings.push({
-        groupId,
-        bookingIds: groupBookings.map((b) => b.id),
-        sessionType: representative.sessionType,
-        totalFee,
-        totalSessions,
+      return {
+        groupId: payment.id,
+        paymentId: payment.id,
+        bookingIds: payment.bookings.map((b) => b.id),
+        sessionType: payment.sessionType,
+        totalFee: payment.finalFee,
+        originalFee: payment.originalFee,
+        discountRate: payment.discountRate,
+        totalSessions: payment.totalSessions,
         completedSessions,
-        status: representative.status,
-        paidAt: representative.paidAt,
-        refundAmount: representative.refundAmount,
-        child: representative.child,
-        therapist: representative.therapist,
-        scheduledAt: representative.scheduledAt,
-        createdAt: representative.createdAt,
-        bookingCount: groupBookings.length,
-        timeSlot: representative.timeSlot,
-      })
-    }
+        status: payment.status,
+        paidAt: payment.paidAt,
+        refundAmount: payment.refundAmount,
+        child: payment.child,
+        therapist: payment.therapist,
+        scheduledAt: payment.bookings[0]?.scheduledAt || payment.createdAt,
+        createdAt: payment.createdAt,
+        bookingCount: payment.bookings.length,
+        timeSlot: payment.bookings[0]?.timeSlot || null,
+        bookings: payment.bookings,
+      }
+    })
 
     // 시스템 설정에서 계좌 정보 가져오기
     const settings = await prisma.systemSettings.findUnique({

@@ -9,7 +9,7 @@ import { authOptions } from '@/lib/auth-config'
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 인증 확인
@@ -22,7 +22,7 @@ export async function GET(
     }
 
     const userId = session.user.id
-    const bookingId = params.id
+    const { id: bookingId } = await params
 
     console.log('📥 예약 상세 조회:', { bookingId, userId })
 
@@ -31,12 +31,27 @@ export async function GET(
       where: { id: bookingId },
       include: {
         timeSlot: true,
+        payment: {
+          select: {
+            id: true,
+            sessionType: true,
+            totalSessions: true,
+            originalFee: true,
+            discountRate: true,
+            finalFee: true,
+            platformFee: true,
+            status: true,
+            paidAt: true,
+            refundedAt: true,
+            refundAmount: true
+          }
+        },
         parentUser: {
           select: {
             id: true,
             name: true,
             email: true,
-            phoneNumber: true
+            phone: true
           }
         },
         child: {
@@ -57,7 +72,8 @@ export async function GET(
               }
             }
           }
-        }
+        },
+        review: true
       }
     })
 

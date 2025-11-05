@@ -168,13 +168,34 @@ export default function SessionsCalendar({ sessions }: SessionsCalendarProps) {
                       ? 'bg-blue-100 text-blue-800 border-blue-300'
                       : 'bg-green-100 text-green-800 border-green-300'
 
+                    // 상태 색상 매핑
+                    const getStatusColor = () => {
+                      if (session.status === 'PENDING_PAYMENT') return 'bg-orange-500'
+                      if (session.status === 'PENDING_CONFIRMATION') return 'bg-yellow-500'
+                      if (session.status === 'CONFIRMED') return 'bg-blue-500'
+                      if (session.status === 'PENDING_SETTLEMENT' || session.status === 'SETTLEMENT_COMPLETED') return 'bg-green-500'
+                      if (session.status === 'REFUNDED' || session.status === 'CANCELLED') return 'bg-red-500'
+                      return 'bg-gray-500'
+                    }
+
+                    const getStatusText = () => {
+                      if (session.status === 'PENDING_PAYMENT') return '결제대기'
+                      if (session.status === 'PENDING_CONFIRMATION') return '예약대기'
+                      if (session.status === 'CONFIRMED') return '예약확정'
+                      if (session.status === 'PENDING_SETTLEMENT' || session.status === 'SETTLEMENT_COMPLETED') return '완료'
+                      if (session.status === 'REFUNDED') return '환불'
+                      if (session.status === 'CANCELLED') return '취소'
+                      return session.status
+                    }
+
                     return (
                       <div
                         key={session.id}
-                        className={`text-xs px-1 py-0.5 rounded border ${sessionTypeColor} truncate`}
-                        title={`${session.child.name} - ${session.therapist?.user.name || '치료사'} (${session.sessionType === 'CONSULTATION' ? '언어컨설팅' : '홈티'})`}
+                        className={`text-xs px-1 py-0.5 rounded border ${sessionTypeColor} truncate flex items-center gap-1`}
+                        title={`${session.child.name} - ${session.therapist?.user.name || '치료사'} (${session.sessionType === 'CONSULTATION' ? '언어컨설팅' : '홈티'}) [${getStatusText()}]`}
                       >
-                        {session.child.name}
+                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getStatusColor()}`}></span>
+                        <span className="truncate">{session.child.name}</span>
                       </div>
                     )
                   })}
@@ -191,18 +212,42 @@ export default function SessionsCalendar({ sessions }: SessionsCalendarProps) {
       </div>
 
       {/* 범례 */}
-      <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-600">
-        <div className="flex items-center gap-1">
-          <span className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></span>
-          <span>언어컨설팅</span>
+      <div className="mt-4 space-y-2">
+        <div className="flex items-center justify-center gap-4 text-xs text-gray-600">
+          <div className="flex items-center gap-1">
+            <span className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></span>
+            <span>언어컨설팅</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-4 h-4 bg-green-100 border border-green-300 rounded"></span>
+            <span>홈티</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-4 h-4 border-2 border-green-600 rounded"></span>
+            <span>오늘</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <span className="w-4 h-4 bg-green-100 border border-green-300 rounded"></span>
-          <span>홈티</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="w-4 h-4 border-2 border-green-600 rounded"></span>
-          <span>오늘</span>
+        <div className="flex items-center justify-center gap-3 text-xs text-gray-600 flex-wrap">
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+            <span>결제대기</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+            <span>예약대기</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+            <span>예약확정</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+            <span>완료</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+            <span>환불/취소</span>
+          </div>
         </div>
       </div>
     </div>
