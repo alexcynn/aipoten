@@ -170,7 +170,7 @@ export default function ParentPaymentsPage() {
               {/* 시작일 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  시작일
+                  등록일 (시작)
                 </label>
                 <input
                   type="date"
@@ -186,7 +186,7 @@ export default function ParentPaymentsPage() {
               {/* 종료일 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  종료일
+                  등록일 (종료)
                 </label>
                 <input
                   type="date"
@@ -279,6 +279,9 @@ export default function ParentPaymentsPage() {
                           금액
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          등록일
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           상태
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -318,6 +321,13 @@ export default function ParentPaymentsPage() {
                                   </span>
                                 )}
                               </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                              {new Date(payment.createdAt).toLocaleDateString('ko-KR', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit'
+                              })}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
                               <span
@@ -375,6 +385,13 @@ export default function ParentPaymentsPage() {
                             </p>
                             <p>
                               <span className="font-medium">치료사:</span> {payment.therapist.user.name}
+                            </p>
+                            <p>
+                              <span className="font-medium">등록일:</span> {new Date(payment.createdAt).toLocaleDateString('ko-KR', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit'
+                              })}
                             </p>
                             <p>
                               <span className="font-medium">금액:</span>{' '}

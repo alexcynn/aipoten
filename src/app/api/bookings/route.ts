@@ -400,8 +400,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const childId = searchParams.get('childId')
+    const sessionType = searchParams.get('sessionType')
 
-    console.log('📥 예약 목록 조회:', { userId, status, childId })
+    console.log('📥 예약 목록 조회:', { userId, status, childId, sessionType })
 
     const where: any = {
       parentUserId: userId
@@ -413,6 +414,12 @@ export async function GET(request: NextRequest) {
 
     if (childId) {
       where.childId = childId
+    }
+
+    if (sessionType) {
+      where.payment = {
+        sessionType: sessionType
+      }
     }
 
     const bookings = await prisma.booking.findMany({

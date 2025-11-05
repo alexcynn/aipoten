@@ -24,6 +24,8 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') // ALL, PENDING_PAYMENT, PAID, REFUNDED
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
 
     // 본인의 결제만 조회
     const where: any = {
@@ -40,6 +42,19 @@ export async function GET(request: NextRequest) {
           { status: 'REFUNDED' },
           { status: 'PARTIALLY_REFUNDED' },
         ]
+      }
+    }
+
+    // 날짜 필터 (등록일 기준)
+    if (startDate || endDate) {
+      where.createdAt = {}
+      if (startDate) {
+        where.createdAt.gte = new Date(startDate)
+      }
+      if (endDate) {
+        const endDateTime = new Date(endDate)
+        endDateTime.setHours(23, 59, 59, 999)
+        where.createdAt.lte = endDateTime
       }
     }
 

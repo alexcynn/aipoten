@@ -181,12 +181,12 @@ export default function BookingDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <button
-          onClick={() => router.back()}
+        <Link
+          href="/parent/dashboard"
           className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
         >
-          ← 뒤로 가기
-        </button>
+          ← 대시보드로 돌아가기
+        </Link>
 
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="flex items-start justify-between mb-6">

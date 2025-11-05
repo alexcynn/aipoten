@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
-import ProfilePictureUpload from '@/components/ProfilePictureUpload'
 
 interface TherapistProfile {
   id: string
@@ -146,23 +145,6 @@ export default function TherapistDashboardPage() {
     }
   }
 
-  const handleAvatarUpload = async (imageUrl: string) => {
-    try {
-      const response = await fetch('/api/users/me', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ avatar: imageUrl }),
-      })
-
-      if (response.ok) {
-        setUserAvatar(imageUrl)
-      }
-    } catch (error) {
-      console.error('프로필 사진 업데이트 오류:', error)
-    }
-  }
 
   const getSpecialtyName = (specialty: string) => {
     const specialtyMap: Record<string, string> = {
@@ -232,14 +214,6 @@ export default function TherapistDashboardPage() {
                       프로필을 설정하여 매칭 서비스를 시작해보세요.
                     </p>
                   )}
-                </div>
-                <div className="ml-6">
-                  <ProfilePictureUpload
-                    currentImageUrl={userAvatar}
-                    onImageUpload={handleAvatarUpload}
-                    type="profile"
-                    size="lg"
-                  />
                 </div>
               </div>
             </div>

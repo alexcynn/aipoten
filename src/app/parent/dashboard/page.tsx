@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import ProfilePictureUpload from '@/components/ProfilePictureUpload'
 import Header from '@/components/layout/Header'
 import ChildSelector from '@/components/ChildSelector'
 import ChildEditModal from '@/components/ChildEditModal'
@@ -246,23 +245,6 @@ export default function ParentDashboardPage() {
     return nextCheckDate
   }
 
-  const handleAvatarUpload = async (imageUrl: string) => {
-    try {
-      const response = await fetch('/api/users/me', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ avatar: imageUrl }),
-      })
-
-      if (response.ok) {
-        setUserAvatar(imageUrl)
-      }
-    } catch (error) {
-      console.error('프로필 사진 업데이트 오류:', error)
-    }
-  }
 
   // 예약 필터링 함수
   const filterBookings = (bookings: any[], sessionType: 'CONSULTATION' | 'THERAPY', state: 'pending' | 'in_progress' | 'history') => {
@@ -352,14 +334,6 @@ export default function ParentDashboardPage() {
                       </Link>
                     </div>
                   )}
-                </div>
-                <div className="ml-6">
-                  <ProfilePictureUpload
-                    currentImageUrl={userAvatar}
-                    onImageUpload={handleAvatarUpload}
-                    type="profile"
-                    size="lg"
-                  />
                 </div>
               </div>
             </div>
