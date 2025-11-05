@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header'
 import TherapistInfoModal from '@/components/modals/TherapistInfoModal'
 import ReviewModal from '@/components/modals/ReviewModal'
 import { Star } from 'lucide-react'
+import { getParentViewStatus } from '@/lib/booking-status'
 
 interface Booking {
   id: string
@@ -29,6 +30,7 @@ interface Booking {
   payment: {
     id: string
     totalSessions: number
+    status: string
   }
   review: {
     id: string
@@ -134,23 +136,7 @@ export default function ParentConsultationsPage() {
   }
 
   const getStatusLabel = (booking: Booking) => {
-    const labels: Record<string, { text: string; color: string; bgColor: string }> = {
-      PENDING_PAYMENT: { text: '결제 대기', color: '#F97316', bgColor: '#FED7AA' },
-      PENDING_CONFIRMATION: { text: '예약 대기', color: '#EAB308', bgColor: '#FEF08A' },
-      CONFIRMED: { text: '예약 확정', color: '#3B82F6', bgColor: '#BFDBFE' },
-      PENDING_SETTLEMENT: { text: '완료', color: '#10B981', bgColor: '#A7F3D0' },
-      SETTLEMENT_COMPLETED: { text: '완료', color: '#10B981', bgColor: '#A7F3D0' },
-      REFUNDED: { text: '환불', color: '#EF4444', bgColor: '#FECACA' },
-      CANCELLED: { text: '취소', color: '#6B7280', bgColor: '#E5E7EB' },
-    }
-
-    // Payment 상태 우선 확인
-    if (booking.payment?.status === 'PENDING_PAYMENT') {
-      return labels.PENDING_PAYMENT
-    }
-
-    // Booking 상태로 판단
-    return labels[booking.status] || labels.PENDING_PAYMENT
+    return getParentViewStatus(booking.status, booking.payment?.status)
   }
 
   if (status === 'loading' || isLoading) {
@@ -332,7 +318,7 @@ export default function ParentConsultationsPage() {
                                   color: statusInfo.color
                                 }}
                               >
-                                {statusInfo.text}
+                                {statusInfo.label}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -395,7 +381,7 @@ export default function ParentConsultationsPage() {
                                 color: statusInfo.color
                               }}
                             >
-                              {statusInfo.text}
+                              {statusInfo.label}
                             </span>
                           </div>
 

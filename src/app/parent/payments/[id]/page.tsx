@@ -7,6 +7,7 @@ import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import RefundRequestModal from '@/components/modals/RefundRequestModal'
 import { AlertCircle, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { getPaymentProgressStatus, getParentViewStatus } from '@/lib/booking-status'
 
 interface Payment {
   id: string
@@ -98,42 +99,6 @@ export default function PaymentDetailPage() {
     }
   }
 
-  const getPaymentStatus = (payment: Payment) => {
-    if (payment.status === 'REFUNDED') {
-      return { text: '환불 완료', color: '#EF4444', bgColor: '#FECACA' }
-    }
-    if (payment.status === 'PARTIALLY_REFUNDED') {
-      return { text: '부분 환불', color: '#F97316', bgColor: '#FED7AA' }
-    }
-    if (payment.status === 'PENDING_PAYMENT') {
-      return { text: '결제 대기', color: '#F59E0B', bgColor: '#FEF3C7' }
-    }
-    if (payment.status === 'FAILED') {
-      return { text: '결제 실패', color: '#6B7280', bgColor: '#E5E7EB' }
-    }
-
-    const allCompleted = payment.bookings.every(
-      (b: any) => b.status === 'PENDING_SETTLEMENT' || b.status === 'SETTLEMENT_COMPLETED'
-    )
-    if (allCompleted && payment.bookings.length > 0) {
-      return { text: '완료', color: '#10B981', bgColor: '#A7F3D0' }
-    }
-
-    return { text: '진행 중', color: '#3B82F6', bgColor: '#BFDBFE' }
-  }
-
-  const getBookingStatus = (status: string) => {
-    const labels: Record<string, { text: string; color: string; bgColor: string }> = {
-      PENDING_PAYMENT: { text: '결제 대기', color: '#F97316', bgColor: '#FED7AA' },
-      PENDING_CONFIRMATION: { text: '예약 대기', color: '#EAB308', bgColor: '#FEF08A' },
-      CONFIRMED: { text: '예약 확정', color: '#3B82F6', bgColor: '#BFDBFE' },
-      PENDING_SETTLEMENT: { text: '완료', color: '#10B981', bgColor: '#A7F3D0' },
-      SETTLEMENT_COMPLETED: { text: '완료', color: '#10B981', bgColor: '#A7F3D0' },
-      REFUNDED: { text: '환불', color: '#EF4444', bgColor: '#FECACA' },
-      CANCELLED: { text: '취소', color: '#6B7280', bgColor: '#E5E7EB' },
-    }
-    return labels[status] || labels.PENDING_PAYMENT
-  }
 
   const canRequestRefund = (payment: Payment) => {
     // 이미 환불된 건
@@ -198,7 +163,7 @@ export default function PaymentDetailPage() {
     )
   }
 
-  const statusInfo = getPaymentStatus(payment)
+  const statusInfo = getPaymentProgressStatus(payment)
   const isPendingPayment = payment.status === 'PENDING_PAYMENT'
 
   return (
@@ -232,7 +197,7 @@ export default function PaymentDetailPage() {
                       color: statusInfo.color
                     }}
                   >
-                    {statusInfo.text}
+                    {statusInfo.label}
                   </span>
                   {payment.discountRate > 0 && (
                     <span className="px-2 py-1 text-sm rounded bg-red-100 text-red-700 font-medium">
@@ -328,9 +293,7 @@ export default function PaymentDetailPage() {
               ) : (
                 payment.bookings.map((booking) => {
                   // Payment 상태가 PENDING_PAYMENT이면 결제대기 우선 표시
-                  const bookingStatusInfo = payment.status === 'PENDING_PAYMENT'
-                    ? getBookingStatus('PENDING_PAYMENT')
-                    : getBookingStatus(booking.status)
+                  const bookingStatusInfo = getParentViewStatus(booking.status, payment.status)
                   return (
                     <div key={booking.id} className="px-6 py-4 hover:bg-gray-50">
                       <div className="flex items-center justify-between">
@@ -346,7 +309,7 @@ export default function PaymentDetailPage() {
                                 color: bookingStatusInfo.color
                               }}
                             >
-                              {bookingStatusInfo.text}
+                              {bookingStatusInfo.label}
                             </span>
                           </div>
                           <p className="text-sm text-gray-600">

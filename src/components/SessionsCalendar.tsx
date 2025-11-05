@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { getParentViewStatus, getStatusDotColor } from '@/lib/booking-status'
 
 interface Session {
   id: string
@@ -16,6 +17,9 @@ interface Session {
     user: {
       name: string
     }
+  }
+  payment?: {
+    status: string
   }
 }
 
@@ -168,33 +172,16 @@ export default function SessionsCalendar({ sessions }: SessionsCalendarProps) {
                       ? 'bg-blue-100 text-blue-800 border-blue-300'
                       : 'bg-green-100 text-green-800 border-green-300'
 
-                    // 상태 색상 매핑
-                    const getStatusColor = () => {
-                      if (session.status === 'PENDING_PAYMENT') return 'bg-orange-500'
-                      if (session.status === 'PENDING_CONFIRMATION') return 'bg-yellow-500'
-                      if (session.status === 'CONFIRMED') return 'bg-blue-500'
-                      if (session.status === 'PENDING_SETTLEMENT' || session.status === 'SETTLEMENT_COMPLETED') return 'bg-green-500'
-                      if (session.status === 'REFUNDED' || session.status === 'CANCELLED') return 'bg-red-500'
-                      return 'bg-gray-500'
-                    }
-
-                    const getStatusText = () => {
-                      if (session.status === 'PENDING_PAYMENT') return '결제대기'
-                      if (session.status === 'PENDING_CONFIRMATION') return '예약대기'
-                      if (session.status === 'CONFIRMED') return '예약확정'
-                      if (session.status === 'PENDING_SETTLEMENT' || session.status === 'SETTLEMENT_COMPLETED') return '완료'
-                      if (session.status === 'REFUNDED') return '환불'
-                      if (session.status === 'CANCELLED') return '취소'
-                      return session.status
-                    }
+                    const statusInfo = getParentViewStatus(session.status, session.payment?.status)
+                    const dotColor = getStatusDotColor(session.payment?.status === 'PENDING_PAYMENT' ? 'PENDING_PAYMENT' : session.status)
 
                     return (
                       <div
                         key={session.id}
                         className={`text-xs px-1 py-0.5 rounded border ${sessionTypeColor} truncate flex items-center gap-1`}
-                        title={`${session.child.name} - ${session.therapist?.user.name || '치료사'} (${session.sessionType === 'CONSULTATION' ? '언어컨설팅' : '홈티'}) [${getStatusText()}]`}
+                        title={`${session.child.name} - ${session.therapist?.user.name || '치료사'} (${session.sessionType === 'CONSULTATION' ? '언어컨설팅' : '홈티'}) [${statusInfo.label}]`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getStatusColor()}`}></span>
+                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dotColor}`}></span>
                         <span className="truncate">{session.child.name}</span>
                       </div>
                     )

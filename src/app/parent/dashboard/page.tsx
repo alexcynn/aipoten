@@ -541,7 +541,8 @@ export default function ParentDashboardPage() {
                       sessionType: booking.payment?.sessionType || 'CONSULTATION',
                       status: booking.status,
                       child: booking.child,
-                      therapist: booking.therapist
+                      therapist: booking.therapist,
+                      payment: booking.payment ? { status: booking.payment.status } : undefined
                     }))}
                 />
               </div>

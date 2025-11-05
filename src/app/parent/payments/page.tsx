@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import { CreditCard, Calendar } from 'lucide-react'
+import { getPaymentProgressStatus } from '@/lib/booking-status'
 
 interface Payment {
   id: string
@@ -111,30 +112,6 @@ export default function ParentPaymentsPage() {
     setPagination(prev => ({ ...prev, page: 1 }))
   }
 
-  const getPaymentStatus = (payment: Payment) => {
-    if (payment.status === 'REFUNDED') {
-      return { text: '환불 완료', color: '#EF4444', bgColor: '#FECACA' }
-    }
-    if (payment.status === 'PARTIALLY_REFUNDED') {
-      return { text: '부분 환불', color: '#F97316', bgColor: '#FED7AA' }
-    }
-    if (payment.status === 'PENDING_PAYMENT') {
-      return { text: '결제 대기', color: '#F59E0B', bgColor: '#FEF3C7' }
-    }
-    if (payment.status === 'FAILED') {
-      return { text: '결제 실패', color: '#6B7280', bgColor: '#E5E7EB' }
-    }
-
-    // PAID 상태 - booking 상태로 판단
-    const allCompleted = payment.bookings.every(
-      (b: any) => b.status === 'PENDING_SETTLEMENT' || b.status === 'SETTLEMENT_COMPLETED'
-    )
-    if (allCompleted && payment.bookings.length > 0) {
-      return { text: '완료', color: '#10B981', bgColor: '#A7F3D0' }
-    }
-
-    return { text: '진행 중', color: '#3B82F6', bgColor: '#BFDBFE' }
-  }
 
   const totalPaid = payments
     .filter((p: Payment) => p.status === 'PAID')
@@ -311,7 +288,7 @@ export default function ParentPaymentsPage() {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {payments.map((payment) => {
-                        const statusInfo = getPaymentStatus(payment)
+                        const statusInfo = getPaymentProgressStatus(payment)
                         return (
                           <tr key={payment.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -350,7 +327,7 @@ export default function ParentPaymentsPage() {
                                   color: statusInfo.color
                                 }}
                               >
-                                {statusInfo.text}
+                                {statusInfo.label}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -371,7 +348,7 @@ export default function ParentPaymentsPage() {
                 {/* Mobile Cards */}
                 <div className="md:hidden divide-y divide-gray-200">
                   {payments.map((payment) => {
-                    const statusInfo = getPaymentStatus(payment)
+                    const statusInfo = getPaymentProgressStatus(payment)
                     return (
                       <div key={payment.id} className="px-6 py-4">
                         <div className="space-y-3">
@@ -388,7 +365,7 @@ export default function ParentPaymentsPage() {
                                 color: statusInfo.color
                               }}
                             >
-                              {statusInfo.text}
+                              {statusInfo.label}
                             </span>
                           </div>
 
