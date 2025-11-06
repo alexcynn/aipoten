@@ -62,11 +62,6 @@ const Header: React.FC<HeaderProps> = ({
     { href: '/boards/notification', label: '알림장' },
     { href: '/boards/news', label: '육아정보' },
     { href: '/boards/community', label: '육아소통' },
-    { href: '/therapist/profile', label: '프로필' },
-    { href: '/therapist/matching', label: '매칭 요청' },
-    { href: '/therapist/consultations', label: '상담 관리' },
-    { href: '/therapist/schedule', label: '일정' },
-
   ]
 
   // 관리자 메뉴
