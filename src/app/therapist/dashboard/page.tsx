@@ -253,7 +253,10 @@ export default function TherapistDashboardPage() {
               </div>
             </Link>
 
-            <div className="bg-white p-6 rounded-lg shadow">
+            <Link
+              href="/therapist/earnings"
+              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+            >
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-aipoten-orange rounded flex items-center justify-center">
@@ -261,15 +264,18 @@ export default function TherapistDashboardPage() {
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">예비정산금</h3>
+                  <h3 className="text-lg font-medium text-gray-900">이달 수입금</h3>
                   <p className="text-2xl font-bold text-aipoten-orange">
                     ₩{calculatePendingSettlement().toLocaleString()}
                   </p>
                 </div>
               </div>
-            </div>
+            </Link>
 
-            <div className="bg-white p-6 rounded-lg shadow">
+            <Link
+              href="/therapist/reviews"
+              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+            >
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-aipoten-red rounded flex items-center justify-center">
@@ -281,7 +287,7 @@ export default function TherapistDashboardPage() {
                   <p className="text-2xl font-bold text-aipoten-red">4.8</p>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Quick Actions */}
