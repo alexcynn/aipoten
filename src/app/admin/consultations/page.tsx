@@ -103,13 +103,6 @@ interface Consultation {
   }>
 }
 
-interface AccountInfo {
-  bankName: string | null
-  accountNumber: string | null
-  accountHolder: string | null
-  consultationBaseFee: number | null
-}
-
 const statusLabels: Record<string, { label: string; color: string }> = {
   PENDING_PAYMENT: { label: '결제대기', color: 'bg-gray-100 text-gray-800' },
   PENDING_CONFIRMATION: { label: '예약대기', color: 'bg-yellow-100 text-yellow-800' },
@@ -147,7 +140,6 @@ export default function AdminConsultationsPage() {
   const router = useRouter()
 
   const [consultations, setConsultations] = useState<Consultation[]>([])
-  const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PENDING_CONFIRMATION' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'>('ALL')
 
@@ -180,14 +172,21 @@ export default function AdminConsultationsPage() {
 
   const fetchConsultations = async () => {
     try {
+      console.log('🔍 [관리자] 언어 컨설팅 API 호출, 필터:', filter)
       const response = await fetch(`/api/admin/consultations?status=${filter}`)
+      console.log('🔍 [관리자] API 응답 상태:', response.status, response.ok)
+
       if (response.ok) {
         const data = await response.json()
+        console.log('🔍 [관리자] 응답 데이터:', data)
+        console.log('🔍 [관리자] 컨설팅 수:', data.consultations?.length || 0)
         setConsultations(data.consultations || [])
-        setAccountInfo(data.accountInfo || null)
+      } else {
+        const errorText = await response.text()
+        console.error('❌ [관리자] API 오류 응답:', response.status, errorText)
       }
     } catch (error) {
-      console.error('컨설팅 목록 조회 오류:', error)
+      console.error('❌ [관리자] 컨설팅 목록 조회 오류:', error)
     } finally {
       setIsLoading(false)
     }
@@ -241,19 +240,6 @@ export default function AdminConsultationsPage() {
             }`}
           >
             {message.text}
-          </div>
-        )}
-
-        {/* 계좌 정보 */}
-        {accountInfo && (accountInfo.bankName || accountInfo.accountNumber) && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-blue-900 mb-2">아이포텐 입금 계좌 정보</h3>
-            <p className="text-sm text-blue-800">
-              {accountInfo.bankName} {accountInfo.accountNumber} ({accountInfo.accountHolder})
-            </p>
-            <p className="text-xs text-blue-600 mt-1">
-              기본 요금: ₩{accountInfo.consultationBaseFee?.toLocaleString()}
-            </p>
           </div>
         )}
 

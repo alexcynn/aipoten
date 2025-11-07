@@ -68,6 +68,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const statusFilter = searchParams.get('status') // PENDING_PAYMENT, PENDING_CONFIRMATION, CONFIRMED, COMPLETED, CANCELLED, ALL
 
+    console.log('📥 [관리자 API] 언어 컨설팅 조회 요청, 필터:', statusFilter)
+
     // 언어 컨설팅 결제만 조회 (sessionType = CONSULTATION)
     const where: any = {
       sessionType: 'CONSULTATION',
@@ -181,6 +183,8 @@ export async function GET(request: NextRequest) {
       },
     })
 
+    console.log('✅ [관리자 API] 조회된 컨설팅:', consultations.length, '건')
+
     // 상태 필터 적용 (booking 상태 기반 필터링)
     const filteredConsultations = consultations.filter((payment) => {
       if (!statusFilter || statusFilter === 'ALL') return true
@@ -189,26 +193,16 @@ export async function GET(request: NextRequest) {
       return currentStatus === statusFilter
     })
 
+    console.log('✅ [관리자 API] 필터 후 컨설팅:', filteredConsultations.length, '건')
+
     // 각 payment에 현재 상태 추가
     const consultationsWithStatus = filteredConsultations.map((payment) => ({
       ...payment,
       currentStatus: getConsultationStatus(payment),
     }))
 
-    // 시스템 설정에서 계좌 정보 가져오기
-    const settings = await prisma.systemSettings.findUnique({
-      where: { id: 'system' },
-      select: {
-        bankName: true,
-        accountNumber: true,
-        accountHolder: true,
-        consultationBaseFee: true,
-      },
-    })
-
     return NextResponse.json({
       consultations: consultationsWithStatus,
-      accountInfo: settings,
     })
   } catch (error) {
     console.error('언어 컨설팅 조회 오류:', error)
