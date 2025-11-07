@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
             email: true,
-            phoneNumber: true
+            phone: true
           }
         },
         child: {
@@ -82,6 +82,29 @@ export async function GET(request: NextRequest) {
             name: true,
             birthDate: true,
             gender: true
+          }
+        },
+        payment: {
+          select: {
+            id: true,
+            sessionType: true,
+            totalSessions: true,
+            status: true,
+            paidAt: true,
+            originalFee: true,
+            discountRate: true,
+            finalFee: true
+          }
+        },
+        therapist: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
           }
         }
       },

@@ -64,7 +64,7 @@ export default function TherapistDashboardPage() {
           fetch('/api/therapist/profile'),
           fetch('/api/therapist/matching-requests'),
           fetch('/api/therapist/today-schedule'),
-          fetch('/api/bookings')
+          fetch('/api/therapist/bookings')
         ])
 
         if (userRes.ok) {
@@ -89,11 +89,16 @@ export default function TherapistDashboardPage() {
 
         if (bookingsRes.ok) {
           const bookingsData = await bookingsRes.json()
+          console.log('🔍 [대시보드] 예약 API 응답:', bookingsData)
           const bookingsArray = bookingsData.bookings || []
+          console.log('🔍 [대시보드] 예약 배열 길이:', bookingsArray.length)
           const sortedBookings = bookingsArray.sort((a: any, b: any) =>
             new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()
           )
           setMyBookings(sortedBookings)
+          console.log('🔍 [대시보드] myBookings 설정 완료:', sortedBookings.length, '건')
+        } else {
+          console.error('❌ [대시보드] 예약 API 실패:', bookingsRes.status)
         }
       } catch (error) {
         console.error('치료사 데이터를 가져오는 중 오류 발생:', error)
@@ -136,28 +141,37 @@ export default function TherapistDashboardPage() {
         (booking.status === 'CONFIRMED' || booking.status === 'PENDING_SETTLEMENT')
       )
       .reduce((total: number, booking: any) => {
-        // 치료사 정산 금액 계산 (플랫폼 수수료 10% 제외)
-        const therapistAmount = booking.payment?.amount ? booking.payment.amount * 0.9 : 0
+        // 치료사 정산 금액 계산 (플랫폼 수수료 제외)
+        const finalFee = booking.payment?.finalFee || 0
+        const therapistAmount = finalFee * 0.9 // 플랫폼 수수료 10% 제외
         return total + therapistAmount
       }, 0)
   }
 
   // 언어컨설팅 요청 대기 수 계산
   const getConsultationPendingCount = () => {
-    return myBookings.filter((booking: any) =>
-      booking.payment?.sessionType === 'CONSULTATION' &&
-      (booking.payment?.status === 'PENDING_PAYMENT' ||
-       (booking.payment?.status === 'PAID' && booking.status === 'PENDING_CONFIRMATION'))
-    ).length
+    const count = myBookings.filter((booking: any) => {
+      const match = booking.payment?.sessionType === 'CONSULTATION' &&
+        (booking.payment?.status === 'PENDING_PAYMENT' ||
+         (booking.payment?.status === 'PAID' && booking.status === 'PENDING_CONFIRMATION'))
+      if (match) {
+        console.log('✅ [컨설팅] 매칭된 예약:', booking.id, booking.payment?.sessionType, booking.payment?.status, booking.status)
+      }
+      return match
+    })
+    console.log('🔍 [컨설팅] 총 예약 수:', myBookings.length, '필터링 후:', count.length)
+    return count.length
   }
 
   // 홈티 요청 대기 수 계산
   const getTherapyPendingCount = () => {
-    return myBookings.filter((booking: any) =>
+    const count = myBookings.filter((booking: any) =>
       booking.payment?.sessionType === 'THERAPY' &&
       (booking.payment?.status === 'PENDING_PAYMENT' ||
        (booking.payment?.status === 'PAID' && booking.status === 'PENDING_CONFIRMATION'))
-    ).length
+    )
+    console.log('🔍 [홈티] 총 예약 수:', myBookings.length, '필터링 후:', count.length)
+    return count.length
   }
 
   if (status === 'loading' || isLoading) {

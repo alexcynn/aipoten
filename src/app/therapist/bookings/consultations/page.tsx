@@ -17,16 +17,14 @@ interface Booking {
     id: string
     name: string
   }
-  parent: {
+  parentUser: {
     id: string
-    user: {
-      name: string
-      phone?: string
-    }
+    name: string
+    email: string
   }
   payment: {
     id: string
-    amount: number
+    finalFee: number
     totalSessions: number
     status: string
   }
@@ -94,7 +92,7 @@ export default function TherapistConsultationsPage() {
         }
       }
 
-      const response = await fetch(`/api/bookings?${params}`)
+      const response = await fetch(`/api/therapist/bookings?${params}`)
       if (response.ok) {
         const data = await response.json()
         setBookings(data.bookings || [])
@@ -266,7 +264,7 @@ export default function TherapistConsultationsPage() {
                               {booking.child.name}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                              {booking.parent.user.name}
+                              {booking.parentUser.name}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                               {new Date(booking.scheduledAt).toLocaleString('ko-KR', {
@@ -278,7 +276,7 @@ export default function TherapistConsultationsPage() {
                               })}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              ₩{booking.payment.amount.toLocaleString()}
+                              ₩{booking.payment.finalFee.toLocaleString()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
                               <span
@@ -329,7 +327,7 @@ export default function TherapistConsultationsPage() {
 
                           <div className="space-y-1 text-sm text-gray-600">
                             <p>
-                              <span className="font-medium">부모님:</span> {booking.parent.user.name}
+                              <span className="font-medium">부모님:</span> {booking.parentUser.name}
                             </p>
                             <p>
                               <span className="font-medium">일시:</span>{' '}
@@ -342,7 +340,7 @@ export default function TherapistConsultationsPage() {
                               })}
                             </p>
                             <p>
-                              <span className="font-medium">금액:</span> ₩{booking.payment.amount.toLocaleString()}
+                              <span className="font-medium">금액:</span> ₩{booking.payment.finalFee.toLocaleString()}
                             </p>
                           </div>
 
