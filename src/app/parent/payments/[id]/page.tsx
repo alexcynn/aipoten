@@ -318,12 +318,6 @@ export default function PaymentDetailPage() {
                               : '일정 미정'}
                           </p>
                         </div>
-                        <Link
-                          href={`/parent/bookings/${booking.id}`}
-                          className="text-sm text-blue-600 hover:text-blue-700"
-                        >
-                          상세보기 →
-                        </Link>
                       </div>
                     </div>
                   )

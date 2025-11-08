@@ -36,7 +36,9 @@
       "Bash(cmd /c \"if exist .next rmdir /s /q .next && echo Build cache cleaned\")",
       "Bash(nul)",
       "Bash(set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes)",
-      "Bash(cmd /c \"if exist src\\app\\api\\therapist (dir src\\app\\api\\therapist /b) else (echo Directory not found)\")"
+      "Bash(cmd /c \"if exist src\\app\\api\\therapist (dir src\\app\\api\\therapist /b) else (echo Directory not found)\")",
+      "Bash(cmd /c \"dir src\\app\\parent\\bookings /s /b\")",
+      "Bash(cmd /c \"if exist src\\app\\therapist\\bookings\\[id]\\page.tsx (echo File exists) else (echo File does not exist)\")"
     ],
     "deny": [],
     "ask": []

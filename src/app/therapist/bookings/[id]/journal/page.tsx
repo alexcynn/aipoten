@@ -87,7 +87,7 @@ export default function TherapistJournalPage() {
         setMessage({ type: 'success', text: data.message || '상담일지가 저장되었습니다.' })
         setExistingJournal(journal)
         setTimeout(() => {
-          router.push(`/therapist/bookings/${bookingId}`)
+          router.push('/therapist/dashboard')
         }, 2000)
       } else {
         setMessage({ type: 'error', text: data.error || '상담일지 저장에 실패했습니다.' })

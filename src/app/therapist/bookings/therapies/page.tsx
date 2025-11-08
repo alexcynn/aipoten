@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import { getParentViewStatus } from '@/lib/booking-status'
+import TherapistBookingDetailModal from '@/components/modals/TherapistBookingDetailModal'
 
 interface Booking {
   id: string
@@ -54,6 +54,10 @@ export default function TherapistTherapiesPage() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [activeTab, setActiveTab] = useState<string>('ALL')
+
+  // Modal state
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -296,12 +300,15 @@ export default function TherapistTherapiesPage() {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              <Link
-                                href={`/therapist/bookings/${booking.id}`}
+                              <button
+                                onClick={() => {
+                                  setSelectedBookingId(booking.id)
+                                  setIsBookingModalOpen(true)
+                                }}
                                 className="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
                               >
                                 상세보기
-                              </Link>
+                              </button>
                             </td>
                           </tr>
                         )
@@ -354,12 +361,15 @@ export default function TherapistTherapiesPage() {
                           </div>
 
                           <div className="pt-2">
-                            <Link
-                              href={`/therapist/bookings/${booking.id}`}
+                            <button
+                              onClick={() => {
+                                setSelectedBookingId(booking.id)
+                                setIsBookingModalOpen(true)
+                              }}
                               className="block w-full px-3 py-2 text-sm text-center border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors font-medium"
                             >
                               상세보기
-                            </Link>
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -408,6 +418,20 @@ export default function TherapistTherapiesPage() {
           </div>
         </div>
       </main>
+
+      {/* Booking Detail Modal */}
+      <TherapistBookingDetailModal
+        isOpen={isBookingModalOpen}
+        onClose={() => {
+          setIsBookingModalOpen(false)
+          setSelectedBookingId(null)
+        }}
+        bookingId={selectedBookingId}
+        onUpdate={() => {
+          // 예약 정보 업데이트 시 목록 새로고침
+          fetchBookings()
+        }}
+      />
     </div>
   )
 }

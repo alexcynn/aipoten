@@ -7,6 +7,7 @@ import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import TherapistInfoModal from '@/components/modals/TherapistInfoModal'
 import ReviewModal from '@/components/modals/ReviewModal'
+import ParentBookingDetailModal from '@/components/modals/ParentBookingDetailModal'
 import { Star } from 'lucide-react'
 import { getParentViewStatus } from '@/lib/booking-status'
 
@@ -68,6 +69,8 @@ export default function ParentConsultationsPage() {
   // Modals
   const [selectedTherapistId, setSelectedTherapistId] = useState<string | null>(null)
   const [reviewModalBooking, setReviewModalBooking] = useState<Booking | null>(null)
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -349,12 +352,15 @@ export default function ParentConsultationsPage() {
                               )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              <Link
-                                href={`/parent/bookings/${booking.id}`}
+                              <button
+                                onClick={() => {
+                                  setSelectedBookingId(booking.id)
+                                  setIsBookingModalOpen(true)
+                                }}
                                 className="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
                               >
                                 상세보기
-                              </Link>
+                              </button>
                             </td>
                           </tr>
                         )
@@ -432,14 +438,17 @@ export default function ParentConsultationsPage() {
                                 {booking.review ? '후기 수정' : '후기 작성'}
                               </button>
                             )}
-                            <Link
-                              href={`/parent/bookings/${booking.id}`}
+                            <button
+                              onClick={() => {
+                                setSelectedBookingId(booking.id)
+                                setIsBookingModalOpen(true)
+                              }}
                               className={`px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors font-medium text-center ${
                                 canReview ? 'flex-1' : 'w-full'
                               }`}
                             >
                               상세보기
-                            </Link>
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -488,6 +497,20 @@ export default function ParentConsultationsPage() {
           </div>
         </div>
       </main>
+
+      {/* Booking Detail Modal */}
+      <ParentBookingDetailModal
+        isOpen={isBookingModalOpen}
+        onClose={() => {
+          setIsBookingModalOpen(false)
+          setSelectedBookingId(null)
+        }}
+        bookingId={selectedBookingId}
+        onUpdate={() => {
+          // 예약 정보 업데이트 시 목록 새로고침
+          fetchBookings()
+        }}
+      />
 
       {/* Therapist Info Modal */}
       <TherapistInfoModal

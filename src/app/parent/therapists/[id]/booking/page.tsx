@@ -231,9 +231,8 @@ export default function BookingPage() {
       const data = await response.json()
 
       if (response.ok) {
-        // 첫 번째 예약 ID로 이동
-        const firstBookingId = data.bookings?.[0]?.id || data.booking?.id
-        router.push(`/parent/bookings/${firstBookingId}`)
+        // 예약 생성 완료 - 대시보드로 이동
+        router.push('/parent/dashboard')
       } else {
         setError(data.error || '예약 생성에 실패했습니다.')
       }
