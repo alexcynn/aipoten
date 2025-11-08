@@ -21,7 +21,31 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    const { searchParams } = new URL(request.url)
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
+
+    console.log('📥 [관리자 API] 예약 목록 조회 요청, 날짜:', startDate, '~', endDate)
+
+    // 날짜 필터 조건 구성
+    const where: any = {}
+
+    if (startDate || endDate) {
+      where.scheduledAt = {}
+
+      if (startDate) {
+        const [year, month, day] = startDate.split('-').map(Number)
+        where.scheduledAt.gte = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0))
+      }
+
+      if (endDate) {
+        const [year, month, day] = endDate.split('-').map(Number)
+        where.scheduledAt.lte = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999))
+      }
+    }
+
     const bookings = await prisma.booking.findMany({
+      where,
       select: {
         id: true,
         scheduledAt: true,

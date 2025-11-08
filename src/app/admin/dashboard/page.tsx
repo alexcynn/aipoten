@@ -26,11 +26,40 @@ interface Stats {
   }>
 }
 
+interface Consultation {
+  id: string
+  scheduledAt: string
+  status: string
+  parentUser: { name: string }
+  child: { name: string }
+  therapist: { user: { name: string } }
+  payment: { finalFee: number; status: string }
+}
+
+interface Therapy {
+  id: string
+  scheduledAt: string
+  status: string
+  sessionNumber: number
+  parentUser: { name: string }
+  child: { name: string }
+  therapist: { user: { name: string } }
+  payment: { finalFee: number; totalSessions: number; status: string }
+}
+
 export default function AdminPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [stats, setStats] = useState<Stats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+
+  // Consultations & Therapies
+  const [consultations, setConsultations] = useState<Consultation[]>([])
+  const [therapies, setTherapies] = useState<Therapy[]>([])
+  const [consultationStartDate, setConsultationStartDate] = useState('')
+  const [consultationEndDate, setConsultationEndDate] = useState('')
+  const [therapyStartDate, setTherapyStartDate] = useState('')
+  const [therapyEndDate, setTherapyEndDate] = useState('')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -61,7 +90,63 @@ export default function AdminPage() {
     }
 
     fetchStats()
+    fetchConsultations()
+    fetchTherapies()
   }, [session, status, router])
+
+  // Fetch consultations when date filters change
+  useEffect(() => {
+    if (session?.user?.role === 'ADMIN') {
+      fetchConsultations()
+    }
+  }, [consultationStartDate, consultationEndDate, session])
+
+  // Fetch therapies when date filters change
+  useEffect(() => {
+    if (session?.user?.role === 'ADMIN') {
+      fetchTherapies()
+    }
+  }, [therapyStartDate, therapyEndDate, session])
+
+  const fetchConsultations = async () => {
+    try {
+      let url = '/api/admin/consultations?status=ALL'
+      if (consultationStartDate) {
+        url += `&startDate=${consultationStartDate}`
+      }
+      if (consultationEndDate) {
+        url += `&endDate=${consultationEndDate}`
+      }
+
+      const response = await fetch(url)
+      if (response.ok) {
+        const data = await response.json()
+        setConsultations(data.consultations || [])
+      }
+    } catch (error) {
+      console.error('언어 컨설팅 데이터 가져오기 오류:', error)
+    }
+  }
+
+  const fetchTherapies = async () => {
+    try {
+      let url = '/api/admin/bookings?sessionType=THERAPY'
+      if (therapyStartDate) {
+        url += `&startDate=${therapyStartDate}`
+      }
+      if (therapyEndDate) {
+        url += `&endDate=${therapyEndDate}`
+      }
+
+      const response = await fetch(url)
+      if (response.ok) {
+        const data = await response.json()
+        setTherapies(data.bookings || [])
+      }
+    } catch (error) {
+      console.error('홈티 데이터 가져오기 오류:', error)
+    }
+  }
 
   if (status === 'loading' || isLoading) {
     return (
@@ -299,17 +384,171 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Consultations Section */}
         <div className="mt-8 bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">최근 활동</h3>
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium text-gray-900">언어 컨설팅</h3>
+              <Link href="/admin/consultations" className="text-sm text-blue-600 hover:text-blue-800">
+                전체 보기 →
+              </Link>
+            </div>
           </div>
           <div className="p-6">
-            <div className="text-center py-8 text-gray-500">
-              <span className="text-4xl mb-4 block">📊</span>
-              <p>최근 활동 데이터를 불러오는 중입니다...</p>
-              <p className="text-sm mt-2">실제 운영 시 사용자 활동, 새 가입, 발달체크 등의 실시간 데이터가 표시됩니다.</p>
+            {/* Date Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">시작일</label>
+                <input
+                  type="date"
+                  value={consultationStartDate}
+                  onChange={(e) => setConsultationStartDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">종료일</label>
+                <input
+                  type="date"
+                  value={consultationEndDate}
+                  onChange={(e) => setConsultationEndDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
+
+            {/* Consultations Table */}
+            {consultations.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <span className="text-4xl mb-4 block">📅</span>
+                <p>언어 컨설팅 예약이 없습니다.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">예약일시</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">아동</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">부모</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">치료사</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">금액</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {consultations.slice(0, 5).map((consultation) => (
+                      <tr key={consultation.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {new Date(consultation.scheduledAt).toLocaleDateString('ko-KR')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {consultation.child.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {consultation.parentUser.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {consultation.therapist.user.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ₩{consultation.payment.finalFee.toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {consultation.payment.status}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Therapies Section */}
+        <div className="mt-8 bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium text-gray-900">홈티</h3>
+              <Link href="/admin/therapies" className="text-sm text-blue-600 hover:text-blue-800">
+                전체 보기 →
+              </Link>
+            </div>
+          </div>
+          <div className="p-6">
+            {/* Date Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">시작일</label>
+                <input
+                  type="date"
+                  value={therapyStartDate}
+                  onChange={(e) => setTherapyStartDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">종료일</label>
+                <input
+                  type="date"
+                  value={therapyEndDate}
+                  onChange={(e) => setTherapyEndDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Therapies Table */}
+            {therapies.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <span className="text-4xl mb-4 block">📅</span>
+                <p>홈티 예약이 없습니다.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">예약일시</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">아동</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">부모</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">치료사</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">회차</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">금액</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {therapies.slice(0, 5).map((therapy) => (
+                      <tr key={therapy.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {new Date(therapy.scheduledAt).toLocaleDateString('ko-KR')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {therapy.child.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {therapy.parentUser.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {therapy.therapist.user.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {therapy.sessionNumber} / {therapy.payment.totalSessions}회
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ₩{therapy.payment.finalFee.toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {therapy.payment.status}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </div>

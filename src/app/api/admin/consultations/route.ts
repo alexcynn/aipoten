@@ -67,8 +67,10 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const statusFilter = searchParams.get('status') // PENDING_PAYMENT, PENDING_CONFIRMATION, CONFIRMED, COMPLETED, CANCELLED, ALL
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
 
-    console.log('📥 [관리자 API] 언어 컨설팅 조회 요청, 필터:', statusFilter)
+    console.log('📥 [관리자 API] 언어 컨설팅 조회 요청, 필터:', statusFilter, '날짜:', startDate, '~', endDate)
 
     // 언어 컨설팅 결제만 조회 (sessionType = CONSULTATION)
     const where: any = {
@@ -86,6 +88,27 @@ export async function GET(request: NextRequest) {
     } else if (statusFilter && statusFilter !== 'ALL') {
       // PENDING_CONFIRMATION, CONFIRMED, COMPLETED는 PAID 상태에서만 가능
       where.status = 'PAID'
+    }
+
+    // 날짜 필터 (bookings 테이블의 scheduledAt 기준)
+    if (startDate || endDate) {
+      where.bookings = {
+        some: {}
+      }
+
+      if (startDate || endDate) {
+        where.bookings.some.scheduledAt = {}
+
+        if (startDate) {
+          const [year, month, day] = startDate.split('-').map(Number)
+          where.bookings.some.scheduledAt.gte = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0))
+        }
+
+        if (endDate) {
+          const [year, month, day] = endDate.split('-').map(Number)
+          where.bookings.some.scheduledAt.lte = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999))
+        }
+      }
     }
 
     const consultations = await prisma.payment.findMany({
