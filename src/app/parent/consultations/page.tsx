@@ -8,7 +8,8 @@ import Header from '@/components/layout/Header'
 import TherapistInfoModal from '@/components/modals/TherapistInfoModal'
 import ReviewModal from '@/components/modals/ReviewModal'
 import ParentBookingDetailModal from '@/components/modals/ParentBookingDetailModal'
-import { Star } from 'lucide-react'
+import JournalViewModal from '@/components/modals/JournalViewModal'
+import { Star, FileText } from 'lucide-react'
 import { getParentViewStatus } from '@/lib/booking-status'
 
 interface Booking {
@@ -17,6 +18,7 @@ interface Booking {
   scheduledAt: string
   status: string
   completedAt: string | null
+  therapistNote: string | null
   child: {
     id: string
     name: string
@@ -71,6 +73,8 @@ export default function ParentConsultationsPage() {
   const [reviewModalBooking, setReviewModalBooking] = useState<Booking | null>(null)
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+  const [journalBookingId, setJournalBookingId] = useState<string | null>(null)
+  const [isJournalModalOpen, setIsJournalModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -352,15 +356,29 @@ export default function ParentConsultationsPage() {
                               )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              <button
-                                onClick={() => {
-                                  setSelectedBookingId(booking.id)
-                                  setIsBookingModalOpen(true)
-                                }}
-                                className="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-                              >
-                                상세보기
-                              </button>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setSelectedBookingId(booking.id)
+                                    setIsBookingModalOpen(true)
+                                  }}
+                                  className="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                  상세보기
+                                </button>
+                                {booking.therapistNote && (
+                                  <button
+                                    onClick={() => {
+                                      setJournalBookingId(booking.id)
+                                      setIsJournalModalOpen(true)
+                                    }}
+                                    className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center gap-1"
+                                  >
+                                    <FileText size={14} />
+                                    상담일지
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         )
@@ -425,7 +443,7 @@ export default function ParentConsultationsPage() {
                           )}
 
                           {/* Actions */}
-                          <div className="flex gap-2 pt-2">
+                          <div className="flex gap-2 pt-2 flex-wrap">
                             {canReview && (
                               <button
                                 onClick={() => setReviewModalBooking(booking)}
@@ -449,6 +467,18 @@ export default function ParentConsultationsPage() {
                             >
                               상세보기
                             </button>
+                            {booking.therapistNote && (
+                              <button
+                                onClick={() => {
+                                  setJournalBookingId(booking.id)
+                                  setIsJournalModalOpen(true)
+                                }}
+                                className="w-full px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-1"
+                              >
+                                <FileText size={16} />
+                                상담일지 보기
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -509,6 +539,16 @@ export default function ParentConsultationsPage() {
         onUpdate={() => {
           // 예약 정보 업데이트 시 목록 새로고침
           fetchBookings()
+        }}
+      />
+
+      {/* Journal View Modal */}
+      <JournalViewModal
+        bookingId={journalBookingId}
+        isOpen={isJournalModalOpen}
+        onClose={() => {
+          setIsJournalModalOpen(false)
+          setJournalBookingId(null)
         }}
       />
 

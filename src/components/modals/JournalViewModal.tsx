@@ -4,25 +4,14 @@ import { useEffect, useState } from 'react'
 import { X, FileText } from 'lucide-react'
 
 interface JournalData {
-  journal: string | null
-  booking: {
-    id: string
-    sessionNumber: number
-    status: string
-    scheduledAt: string
-    therapist: {
-      name: string
-      email: string
-    }
-    parent: {
-      name: string
-      email: string
-    }
-    child: {
-      name: string
-    }
-    sessionType: string
-  }
+  journal: string
+  bookingId: string
+  sessionNumber: number
+  totalSessions: number
+  scheduledAt: string
+  completedAt: string | null
+  therapistName: string
+  childName: string
 }
 
 interface JournalViewModalProps {
@@ -31,22 +20,14 @@ interface JournalViewModalProps {
   onClose: () => void
 }
 
-export default function JournalViewModal({ bookingId, isOpen, onClose }: JournalViewModalProps) {
-  const [data, setData] = useState<JournalData | null>(null)
+export default function JournalViewModal({
+  bookingId,
+  isOpen,
+  onClose,
+}: JournalViewModalProps) {
+  const [journalData, setJournalData] = useState<JournalData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
 
   useEffect(() => {
     if (isOpen && bookingId) {
@@ -54,24 +35,33 @@ export default function JournalViewModal({ bookingId, isOpen, onClose }: Journal
     }
   }, [isOpen, bookingId])
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
+
   const fetchJournal = async () => {
     if (!bookingId) return
 
     setIsLoading(true)
     setError(null)
-
     try {
-      const response = await fetch(`/api/admin/bookings/${bookingId}/journal`)
+      const response = await fetch(`/api/parent/bookings/${bookingId}/journal`)
+      const data = await response.json()
+
       if (response.ok) {
-        const journalData = await response.json()
-        setData(journalData)
+        setJournalData(data)
       } else {
-        const errorData = await response.json()
-        setError(errorData.error || '상담일지를 불러오는데 실패했습니다.')
+        setError(data.error || '상담일지를 불러올 수 없습니다.')
       }
-    } catch (error) {
-      console.error('상담일지 조회 오류:', error)
-      setError('상담일지를 불러오는데 실패했습니다.')
+    } catch (err) {
+      setError('서버 오류가 발생했습니다.')
     } finally {
       setIsLoading(false)
     }
@@ -79,108 +69,255 @@ export default function JournalViewModal({ bookingId, isOpen, onClose }: Journal
 
   if (!isOpen) return null
 
-  const sessionTypeLabel = data?.booking.sessionType === 'CONSULTATION' ? '언어 컨설팅' : '홈티'
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 60,
+        }}
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <FileText className="text-aipoten-green" size={24} />
-              <h2 className="text-xl font-bold text-gray-900">상담일지</h2>
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 60,
+          overflow: 'auto',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px',
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            maxWidth: '800px',
+            width: '100%',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div
+            style={{
+              padding: '24px',
+              borderBottom: '1px solid #E5E7EB',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <FileText style={{ width: '24px', height: '24px', color: '#10B981' }} />
+              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
+                상담일지
+              </h2>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              style={{
+                padding: '8px',
+                color: '#6B7280',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#F3F4F6'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
             >
-              <X size={24} />
+              <X style={{ width: '24px', height: '24px' }} />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div
+            style={{
+              padding: '24px',
+              overflowY: 'auto',
+              flex: 1,
+            }}
+          >
+            {isLoading && (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <div
+                  style={{
+                    display: 'inline-block',
+                    width: '48px',
+                    height: '48px',
+                    border: '4px solid #E5E7EB',
+                    borderTopColor: '#10B981',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }}
+                />
+                <p style={{ marginTop: '16px', color: '#6B7280' }}>로딩 중...</p>
+              </div>
+            )}
+
+            {error && (
+              <div
+                style={{
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  borderRadius: '6px',
+                  padding: '16px',
+                  color: '#991B1B',
+                  textAlign: 'center',
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            {journalData && !isLoading && !error && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {/* 세션 정보 */}
+                <div
+                  style={{
+                    backgroundColor: '#F0FDF4',
+                    border: '1px solid #BBF7D0',
+                    borderRadius: '8px',
+                    padding: '16px',
+                  }}
+                >
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '14px' }}>
+                    <div>
+                      <span style={{ color: '#065F46', fontWeight: '600' }}>아동:</span>
+                      <p style={{ color: '#166534', marginTop: '4px' }}>{journalData.childName}</p>
+                    </div>
+                    <div>
+                      <span style={{ color: '#065F46', fontWeight: '600' }}>치료사:</span>
+                      <p style={{ color: '#166534', marginTop: '4px' }}>{journalData.therapistName}</p>
+                    </div>
+                    <div>
+                      <span style={{ color: '#065F46', fontWeight: '600' }}>세션:</span>
+                      <p style={{ color: '#166534', marginTop: '4px' }}>
+                        {journalData.sessionNumber} / {journalData.totalSessions}회
+                      </p>
+                    </div>
+                    <div>
+                      <span style={{ color: '#065F46', fontWeight: '600' }}>일시:</span>
+                      <p style={{ color: '#166534', marginTop: '4px' }}>
+                        {new Date(journalData.scheduledAt).toLocaleDateString('ko-KR')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 상담일지 내용 */}
+                <div>
+                  <h3
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#111827',
+                      marginBottom: '12px',
+                    }}
+                  >
+                    상담일지 내용
+                  </h3>
+                  <div
+                    style={{
+                      backgroundColor: '#F9FAFB',
+                      border: '1px solid #E5E7EB',
+                      borderRadius: '8px',
+                      padding: '20px',
+                      minHeight: '300px',
+                      fontSize: '15px',
+                      lineHeight: '1.8',
+                      color: '#111827',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {journalData.journal}
+                  </div>
+                  <div style={{ marginTop: '8px', fontSize: '14px', color: '#6B7280', textAlign: 'right' }}>
+                    {journalData.journal.length}자
+                  </div>
+                </div>
+
+                {/* 작성 일시 */}
+                {journalData.completedAt && (
+                  <div
+                    style={{
+                      fontSize: '13px',
+                      color: '#6B7280',
+                      textAlign: 'right',
+                      paddingTop: '12px',
+                      borderTop: '1px solid #E5E7EB',
+                    }}
+                  >
+                    작성일: {new Date(journalData.completedAt).toLocaleString('ko-KR')}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div
+            style={{
+              padding: '24px',
+              borderTop: '1px solid #E5E7EB',
+              display: 'flex',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <button
+              onClick={onClose}
+              style={{
+                padding: '10px 24px',
+                backgroundColor: '#10B981',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '16px',
+                fontWeight: '500',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#059669'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#10B981'
+              }}
+            >
+              닫기
             </button>
           </div>
         </div>
-
-        {/* Content */}
-        <div className="px-6 py-6">
-          {isLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-              <p className="mt-4 text-gray-600">로딩 중...</p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-red-600">{error}</p>
-            </div>
-          ) : !data?.journal ? (
-            <div className="text-center py-12">
-              <FileText className="mx-auto text-gray-400 mb-4" size={48} />
-              <p className="text-gray-500">작성된 상담일지가 없습니다.</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {/* 세션 정보 */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">세션 정보</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <span className="text-gray-500">세션 유형:</span>
-                    <span className="ml-2 font-medium text-gray-900">{sessionTypeLabel}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">세션 번호:</span>
-                    <span className="ml-2 font-medium text-gray-900">{data.booking.sessionNumber}회차</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">치료사:</span>
-                    <span className="ml-2 font-medium text-gray-900">{data.booking.therapist.name}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">아이:</span>
-                    <span className="ml-2 font-medium text-gray-900">{data.booking.child.name}</span>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-gray-500">세션 일시:</span>
-                    <span className="ml-2 font-medium text-gray-900">
-                      {new Date(data.booking.scheduledAt).toLocaleDateString('ko-KR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 상담일지 내용 */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">상담일지 내용</h3>
-                <div className="bg-white border border-gray-200 rounded-lg p-5">
-                  <p className="text-gray-900 whitespace-pre-wrap leading-relaxed">
-                    {data.journal}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-50 px-6 py-4 border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-          >
-            닫기
-          </button>
-        </div>
       </div>
-    </div>
+
+      <style jsx>{`
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
+    </>
   )
 }

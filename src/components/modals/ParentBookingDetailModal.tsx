@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X } from 'lucide-react'
+import { X, FileText, Star } from 'lucide-react'
 import { getParentViewStatus, getStatusClasses } from '@/lib/booking-status'
 import { maskEmail, maskAddress, shouldShowContactInfo } from '@/lib/privacy-utils'
+import ReviewModal from './ReviewModal'
+import JournalViewModal from './JournalViewModal'
 
 interface Booking {
   id: string
@@ -78,6 +80,8 @@ export default function ParentBookingDetailModal({
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [cancellationReason, setCancellationReason] = useState('')
   const [isCancelling, setIsCancelling] = useState(false)
+  const [showReviewModal, setShowReviewModal] = useState(false)
+  const [showJournalModal, setShowJournalModal] = useState(false)
 
   useEffect(() => {
     if (isOpen && bookingId) {
@@ -467,21 +471,89 @@ export default function ParentBookingDetailModal({
           </div>
 
           {/* Footer - Action Buttons */}
-          {booking &&
-            !isLoading &&
-            (booking.status === 'PENDING_CONFIRMATION' || booking.status === 'CONFIRMED') && (
-              <div
-                style={{
-                  padding: '24px',
-                  borderTop: '1px solid #E5E7EB',
-                  display: 'flex',
-                  gap: '12px',
-                }}
-              >
+          {booking && !isLoading && (
+            <div
+              style={{
+                padding: '24px',
+                borderTop: '1px solid #E5E7EB',
+                display: 'flex',
+                gap: '12px',
+                flexWrap: 'wrap',
+              }}
+            >
+              {/* 상담일지 보기 버튼 */}
+              {booking.therapistNote && (
+                <button
+                  onClick={() => setShowJournalModal(true)}
+                  style={{
+                    flex: 1,
+                    minWidth: '150px',
+                    padding: '12px 24px',
+                    backgroundColor: '#10B981',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#059669'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#10B981'
+                  }}
+                >
+                  <FileText style={{ width: '20px', height: '20px' }} />
+                  상담일지 보기
+                </button>
+              )}
+
+              {/* 후기 작성 버튼 - 완료된 예약이고 리뷰가 없는 경우 */}
+              {(booking.status === 'PENDING_SETTLEMENT' ||
+                booking.status === 'SETTLEMENT_COMPLETED') &&
+                !booking.review && (
+                <button
+                  onClick={() => setShowReviewModal(true)}
+                  style={{
+                    flex: 1,
+                    minWidth: '150px',
+                    padding: '12px 24px',
+                    backgroundColor: '#F59E0B',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#D97706'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#F59E0B'
+                  }}
+                >
+                  <Star style={{ width: '20px', height: '20px' }} />
+                  후기 작성하기
+                </button>
+              )}
+
+              {/* 예약 취소 버튼 */}
+              {(booking.status === 'PENDING_CONFIRMATION' || booking.status === 'CONFIRMED') && (
                 <button
                   onClick={() => setShowCancelModal(true)}
                   style={{
                     flex: 1,
+                    minWidth: '150px',
                     padding: '12px 24px',
                     backgroundColor: '#DC2626',
                     color: 'white',
@@ -500,8 +572,9 @@ export default function ParentBookingDetailModal({
                 >
                   예약 취소하기
                 </button>
-              </div>
-            )}
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -628,6 +701,25 @@ export default function ParentBookingDetailModal({
           </div>
         </div>
       )}
+
+      {/* Review Modal */}
+      <ReviewModal
+        bookingId={booking?.id || null}
+        existingReview={booking?.review || null}
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        onSuccess={() => {
+          fetchBooking()
+          onUpdate?.()
+        }}
+      />
+
+      {/* Journal View Modal */}
+      <JournalViewModal
+        bookingId={booking?.id || null}
+        isOpen={showJournalModal}
+        onClose={() => setShowJournalModal(false)}
+      />
 
       <style jsx>{`
         @keyframes spin {
