@@ -25,9 +25,10 @@ interface Session {
 
 interface SessionsCalendarProps {
   sessions: Session[]
+  onEventClick?: (sessionId: string) => void
 }
 
-export default function SessionsCalendar({ sessions }: SessionsCalendarProps) {
+export default function SessionsCalendar({ sessions, onEventClick }: SessionsCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
 
   // 달력에 표시할 날짜들 생성
@@ -178,8 +179,11 @@ export default function SessionsCalendar({ sessions }: SessionsCalendarProps) {
                     return (
                       <div
                         key={session.id}
-                        className={`text-xs px-1 py-0.5 rounded border ${sessionTypeColor} truncate flex items-center gap-1`}
+                        className={`text-xs px-1 py-0.5 rounded border ${sessionTypeColor} truncate flex items-center gap-1 ${
+                          onEventClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+                        }`}
                         title={`${session.child.name} - ${session.therapist?.user.name || '치료사'} (${session.sessionType === 'CONSULTATION' ? '언어컨설팅' : '홈티'}) [${statusInfo.label}]`}
+                        onClick={() => onEventClick?.(session.id)}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dotColor}`}></span>
                         <span className="truncate">{session.child.name}</span>

@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header'
 import ChildSelector from '@/components/ChildSelector'
 import ChildEditModal from '@/components/ChildEditModal'
 import SessionsCalendar from '@/components/SessionsCalendar'
+import ParentBookingDetailModal from '@/components/modals/ParentBookingDetailModal'
 
 interface Child {
   id: string
@@ -79,6 +80,8 @@ export default function ParentDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -518,6 +521,10 @@ export default function ParentDashboardPage() {
                       therapist: booking.therapist,
                       payment: booking.payment ? { status: booking.payment.status } : undefined
                     }))}
+                  onEventClick={(bookingId) => {
+                    setSelectedBookingId(bookingId)
+                    setIsBookingModalOpen(true)
+                  }}
                 />
               </div>
             </div>
@@ -644,6 +651,20 @@ export default function ParentDashboardPage() {
           onSave={handleChildUpdate}
         />
       )}
+
+      {/* Booking Detail Modal */}
+      <ParentBookingDetailModal
+        isOpen={isBookingModalOpen}
+        onClose={() => {
+          setIsBookingModalOpen(false)
+          setSelectedBookingId(null)
+        }}
+        bookingId={selectedBookingId}
+        onUpdate={() => {
+          // 예약 정보 업데이트 시 새로고침
+          fetchMyBookings()
+        }}
+      />
     </div>
   )
 }

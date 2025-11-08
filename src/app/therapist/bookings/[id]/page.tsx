@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter, useParams } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import { ArrowLeft } from 'lucide-react'
+import { maskEmail, maskPhone, maskAddress, shouldShowContactInfo } from '@/lib/privacy-utils'
 
 interface Booking {
   id: string
@@ -326,14 +327,36 @@ export default function TherapistBookingDetailPage() {
                     <span className="text-gray-600">이름:</span>
                     <span className="font-medium">{booking.parentUser.name}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">이메일:</span>
-                    <span className="font-medium">{booking.parentUser.email}</span>
+                  <div className="flex flex-col items-end">
+                    <div className="flex justify-between w-full">
+                      <span className="text-gray-600">이메일:</span>
+                      <span className="font-medium">
+                        {shouldShowContactInfo(booking.status)
+                          ? booking.parentUser.email
+                          : maskEmail(booking.parentUser.email)}
+                      </span>
+                    </div>
+                    {!shouldShowContactInfo(booking.status) && (
+                      <p className="text-xs text-gray-500 mt-1 italic">
+                        * 예약 확정 후 공개
+                      </p>
+                    )}
                   </div>
                   {booking.parentUser.phone && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">연락처:</span>
-                      <span className="font-medium">{booking.parentUser.phone}</span>
+                    <div className="flex flex-col items-end">
+                      <div className="flex justify-between w-full">
+                        <span className="text-gray-600">연락처:</span>
+                        <span className="font-medium">
+                          {shouldShowContactInfo(booking.status)
+                            ? booking.parentUser.phone
+                            : maskPhone(booking.parentUser.phone)}
+                        </span>
+                      </div>
+                      {!shouldShowContactInfo(booking.status) && (
+                        <p className="text-xs text-gray-500 mt-1 italic">
+                          * 예약 확정 후 공개
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -343,9 +366,18 @@ export default function TherapistBookingDetailPage() {
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">방문 주소</h2>
                 <div className="space-y-2">
-                  <p className="text-gray-900">{booking.visitAddress}</p>
-                  {booking.visitAddressDetail && (
+                  <p className="text-gray-900">
+                    {shouldShowContactInfo(booking.status)
+                      ? booking.visitAddress
+                      : maskAddress(booking.visitAddress, booking.visitAddressDetail)}
+                  </p>
+                  {shouldShowContactInfo(booking.status) && booking.visitAddressDetail && (
                     <p className="text-gray-600">{booking.visitAddressDetail}</p>
+                  )}
+                  {!shouldShowContactInfo(booking.status) && (
+                    <p className="text-xs text-gray-500 mt-1 italic">
+                      * 예약 확정 후 공개됩니다
+                    </p>
                   )}
                 </div>
               </div>

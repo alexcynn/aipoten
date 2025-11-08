@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getParentViewStatus, getStatusClasses } from '@/lib/booking-status'
+import { maskEmail, maskAddress, shouldShowContactInfo } from '@/lib/privacy-utils'
 
 interface Booking {
   id: string
@@ -246,7 +247,16 @@ export default function BookingDetailPage() {
                 <p className="text-gray-900 font-medium text-lg mb-1">
                   {booking.therapist.user.name} 치료사
                 </p>
-                <p className="text-gray-600">{booking.therapist.user.email}</p>
+                <p className="text-gray-600">
+                  {shouldShowContactInfo(booking.status)
+                    ? booking.therapist.user.email
+                    : maskEmail(booking.therapist.user.email)}
+                </p>
+                {!shouldShowContactInfo(booking.status) && (
+                  <p className="text-xs text-gray-500 mt-1 italic">
+                    * 예약 확정 후 공개됩니다
+                  </p>
+                )}
               </div>
             </div>
 
@@ -265,8 +275,15 @@ export default function BookingDetailPage() {
               <div className="border-b pb-4">
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">방문 주소</h2>
                 <p className="text-gray-900 text-sm">
-                  {booking.visitAddress} {booking.visitAddressDetail}
+                  {shouldShowContactInfo(booking.status)
+                    ? `${booking.visitAddress} ${booking.visitAddressDetail || ''}`
+                    : maskAddress(booking.visitAddress, booking.visitAddressDetail)}
                 </p>
+                {!shouldShowContactInfo(booking.status) && (
+                  <p className="text-xs text-gray-500 mt-1 italic">
+                    * 예약 확정 후 공개됩니다
+                  </p>
+                )}
               </div>
             )}
 

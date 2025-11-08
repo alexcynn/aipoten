@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import SessionsCalendar from '@/components/SessionsCalendar'
+import TherapistBookingDetailModal from '@/components/modals/TherapistBookingDetailModal'
 
 interface TherapistProfile {
   id: string
@@ -42,6 +43,8 @@ export default function TherapistDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [myBookings, setMyBookings] = useState<any[]>([])
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -391,11 +394,37 @@ export default function TherapistDashboardPage() {
                     therapist: booking.therapist,
                     payment: booking.payment ? { status: booking.payment.status } : undefined
                   }))}
+                onEventClick={(bookingId) => {
+                  setSelectedBookingId(bookingId)
+                  setIsBookingModalOpen(true)
+                }}
               />
             </div>
           </div>
         </div>
       </main>
+
+      {/* Booking Detail Modal */}
+      <TherapistBookingDetailModal
+        isOpen={isBookingModalOpen}
+        onClose={() => {
+          setIsBookingModalOpen(false)
+          setSelectedBookingId(null)
+        }}
+        bookingId={selectedBookingId}
+        onUpdate={async () => {
+          // 예약 정보 업데이트 시 새로고침
+          const bookingsRes = await fetch('/api/therapist/bookings')
+          if (bookingsRes.ok) {
+            const bookingsData = await bookingsRes.json()
+            const bookingsArray = bookingsData.bookings || []
+            const sortedBookings = bookingsArray.sort((a: any, b: any) =>
+              new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()
+            )
+            setMyBookings(sortedBookings)
+          }
+        }}
+      />
     </div>
   )
 }
