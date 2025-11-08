@@ -2,52 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-config'
-
-// Booking 상태 계산 함수
-function getBookingStatus(booking: any, payment: any) {
-  // 1. 결제대기 (PENDING_PAYMENT)
-  if (payment.status === 'PENDING_PAYMENT') {
-    return 'PENDING_PAYMENT'
-  }
-
-  // 5. 취소 (CANCELLED/REFUNDED/REJECTED)
-  if (
-    payment.status === 'REFUNDED' ||
-    payment.status === 'PARTIALLY_REFUNDED' ||
-    booking.status === 'CANCELLED' ||
-    booking.status === 'REJECTED'
-  ) {
-    return 'CANCELLED'
-  }
-
-  // 정산 완료
-  if (booking.status === 'SETTLEMENT_COMPLETED') {
-    return 'SETTLEMENT_COMPLETED'
-  }
-
-  // 정산 대기
-  if (booking.status === 'PENDING_SETTLEMENT') {
-    return 'PENDING_SETTLEMENT'
-  }
-
-  // 완료 (레거시)
-  if (booking.status === 'COMPLETED') {
-    return 'COMPLETED'
-  }
-
-  // 진행 예정
-  if (booking.status === 'CONFIRMED') {
-    return 'CONFIRMED'
-  }
-
-  // 예약 대기
-  if (booking.status === 'PENDING_CONFIRMATION') {
-    return 'PENDING_CONFIRMATION'
-  }
-
-  // 기본값
-  return 'PENDING_CONFIRMATION'
-}
+import { getBookingStatus } from '@/lib/booking-status'
 
 // GET - 홈티 내역 조회 (Payment 기반, 5단계 상태)
 export async function GET(request: NextRequest) {

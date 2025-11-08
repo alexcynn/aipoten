@@ -2,49 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-config'
-
-// 5단계 상태 계산 함수
-function getConsultationStatus(payment: any) {
-  // 1. 결제대기 (PENDING_PAYMENT)
-  if (payment.status === 'PENDING_PAYMENT') {
-    return 'PENDING_PAYMENT'
-  }
-
-  // 5. 취소 (CANCELLED/REFUNDED)
-  if (payment.status === 'REFUNDED' || payment.status === 'PARTIALLY_REFUNDED') {
-    return 'CANCELLED'
-  }
-
-  // booking 상태 확인 (1회 세션이므로 첫 번째 booking 사용)
-  const booking = payment.bookings?.[0]
-
-  if (!booking) {
-    return 'PENDING_PAYMENT' // booking이 없으면 결제대기
-  }
-
-  // 5. 취소 (CANCELLED/REJECTED)
-  if (booking.status === 'CANCELLED' || booking.status === 'REJECTED') {
-    return 'CANCELLED'
-  }
-
-  // 4. 완료 (COMPLETED)
-  if (booking.status === 'COMPLETED') {
-    return 'COMPLETED'
-  }
-
-  // 3. 진행예정 (CONFIRMED)
-  if (booking.status === 'CONFIRMED') {
-    return 'CONFIRMED'
-  }
-
-  // 2. 예약대기 (PENDING_CONFIRMATION)
-  if (booking.status === 'PENDING_CONFIRMATION') {
-    return 'PENDING_CONFIRMATION'
-  }
-
-  // 기본값
-  return 'PENDING_CONFIRMATION'
-}
+import { getConsultationStatus } from '@/lib/booking-status'
 
 // GET - 언어 컨설팅 내역 조회 (Payment 기반, 5단계 상태)
 export async function GET(request: NextRequest) {

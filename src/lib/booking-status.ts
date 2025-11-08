@@ -220,3 +220,80 @@ export function getStatusDotColor(status: string): string {
 export function getStatusClasses(status: string): string {
   return BOOKING_STATUS_CLASSES[status as BookingStatus] || 'bg-gray-100 text-gray-800'
 }
+
+/**
+ * 예약(Booking)의 실제 상태 계산
+ * Payment와 Booking 상태를 종합하여 현재 표시해야 할 상태 반환
+ */
+export function getBookingStatus(booking: any, payment: any): BookingStatus {
+  // 1. 결제대기 (PENDING_PAYMENT)
+  if (payment.status === 'PENDING_PAYMENT') {
+    return 'PENDING_PAYMENT'
+  }
+
+  // 2. 환불/취소 (Payment level)
+  if (payment.status === 'REFUNDED' || payment.status === 'PARTIALLY_REFUNDED') {
+    return 'CANCELLED'
+  }
+
+  // 3. 취소/거절 (Booking level)
+  if (booking.status === 'CANCELLED' || booking.status === 'REJECTED') {
+    return 'CANCELLED'
+  }
+
+  // 4. 정산완료
+  if (booking.status === 'SETTLEMENT_COMPLETED' || payment.settledAt) {
+    return 'SETTLEMENT_COMPLETED'
+  }
+
+  // 5. 정산대기 (완료 후 정산 전)
+  if (booking.status === 'PENDING_SETTLEMENT') {
+    return 'PENDING_SETTLEMENT'
+  }
+
+  // 6. 완료 (레거시)
+  if (booking.status === 'COMPLETED') {
+    return 'PENDING_SETTLEMENT' // COMPLETED는 정산대기로 간주
+  }
+
+  // 7. 진행예정
+  if (booking.status === 'CONFIRMED') {
+    return 'CONFIRMED'
+  }
+
+  // 8. 예약대기
+  if (booking.status === 'PENDING_CONFIRMATION') {
+    return 'PENDING_CONFIRMATION'
+  }
+
+  // 9. 노쇼
+  if (booking.status === 'NO_SHOW') {
+    return 'NO_SHOW'
+  }
+
+  // 기본값: 예약대기
+  return 'PENDING_CONFIRMATION'
+}
+
+/**
+ * 언어 컨설팅(1회성)의 상태 계산
+ * Payment에서 첫 번째 booking을 추출하여 상태 계산
+ */
+export function getConsultationStatus(payment: any): BookingStatus {
+  // 1. 결제대기
+  if (payment.status === 'PENDING_PAYMENT') {
+    return 'PENDING_PAYMENT'
+  }
+
+  // 2. 환불
+  if (payment.status === 'REFUNDED' || payment.status === 'PARTIALLY_REFUNDED') {
+    return 'CANCELLED'
+  }
+
+  const booking = payment.bookings?.[0]
+  if (!booking) {
+    return 'PENDING_PAYMENT'
+  }
+
+  return getBookingStatus(booking, payment)
+}
