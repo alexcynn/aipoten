@@ -4,25 +4,20 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import AdminLayout from '@/components/layout/AdminLayout'
+import AdminBookingDetailModal from '@/components/modals/AdminBookingDetailModal'
 import ParentInfoModal from '@/components/modals/ParentInfoModal'
 import TherapistInfoModal from '@/components/modals/TherapistInfoModal'
 import ReviewViewModal from '@/components/modals/ReviewViewModal'
 import JournalViewModal from '@/components/modals/JournalViewModal'
-import { Star } from 'lucide-react'
+import { Star, FileText, Eye, CreditCard } from 'lucide-react'
 
 interface Therapy {
   id: string
   scheduledAt: string
-  duration: number
-  sessionType: string
+  sessionNumber: number
   status: string
-  paidAt: string | null
-  finalFee: number
-  sessionCount: number
-  completedSessions: number
-  createdAt: string
-  totalSessions: number
-  currentStatus: string // 5단계 상태
+  therapistNote: string | null
+  currentStatus: string
   parentUser: {
     id: string
     name: string
@@ -34,75 +29,48 @@ interface Therapy {
     name: string
     birthDate: string
     gender: string
-    gestationalWeeks: number | null
-    birthWeight: number | null
-    currentHeight: number | null
-    currentWeight: number | null
-    medicalHistory: string | null
-    familyHistory: string | null
-    treatmentHistory: string | null
-    notes: string | null
   }
   therapist: {
     id: string
     userId: string
-    gender: string | null
-    birthYear: number | null
-    address: string | null
-    addressDetail: string | null
     specialties: string | null
-    childAgeRanges: string | null
-    serviceAreas: string | null
     sessionFee: number | null
-    isPreTherapist: boolean
-    canDoConsultation: boolean
-    education: string | null
-    introduction: string | null
+    bank: string | null
+    accountNumber: string | null
+    accountHolder: string | null
     user: {
       name: string
       email: string
       phone: string | null
     }
-    certifications?: Array<{
-      id: string
-      name: string
-      issuingOrganization: string
-      issueDate: string
-    }>
-    experiences?: Array<{
-      id: string
-      employmentType: string
-      institutionName: string | null
-      specialty: string
-      startDate: string
-      endDate: string | null
-      description: string | null
-    }>
-    educations?: Array<{
-      id: string
-      degree: string
-      school: string
-      major: string
-      graduationYear: string
-    }>
   }
-  bookings?: Array<{
+  review: {
     id: string
-    sessionNumber: number
+    rating: number
+    content: string | null
+  } | null
+  payment: {
+    id: string
+    finalFee: number
     status: string
-    timeSlot?: {
-      id: string
-      date: string
-      startTime: string
-      endTime: string
-    }
-  }>
+    sessionType: string
+    totalSessions: number
+    settlementAmount: number | null
+    settledAt: string | null
+  }
+  timeSlot: {
+    date: string
+    startTime: string
+    endTime: string
+  }
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   PENDING_PAYMENT: { label: '결제대기', color: 'bg-gray-100 text-gray-800' },
   PENDING_CONFIRMATION: { label: '예약대기', color: 'bg-yellow-100 text-yellow-800' },
   CONFIRMED: { label: '진행예정', color: 'bg-blue-100 text-blue-800' },
+  PENDING_SETTLEMENT: { label: '정산대기', color: 'bg-purple-100 text-purple-800' },
+  SETTLEMENT_COMPLETED: { label: '정산완료', color: 'bg-green-100 text-green-800' },
   COMPLETED: { label: '완료', color: 'bg-green-100 text-green-800' },
   CANCELLED: { label: '취소', color: 'bg-red-100 text-red-800' },
 }
@@ -131,13 +99,36 @@ const formatSpecialties = (specialties: string | null) => {
   }
 }
 
+// 날짜 기본값 계산 함수
+const getDefaultDates = () => {
+  const today = new Date()
+  const oneMonthAgo = new Date(today)
+  oneMonthAgo.setMonth(today.getMonth() - 1)
+
+  return {
+    startDate: oneMonthAgo.toISOString().split('T')[0],
+    endDate: today.toISOString().split('T')[0]
+  }
+}
+
 export default function AdminTherapiesPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
   const [therapies, setTherapies] = useState<Therapy[]>([])
+  const [allTherapies, setAllTherapies] = useState<Therapy[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [filter, setFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PENDING_CONFIRMATION' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'>('ALL')
+  const [filter, setFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PENDING_CONFIRMATION' | 'CONFIRMED' | 'PENDING_SETTLEMENT' | 'SETTLEMENT_COMPLETED' | 'CANCELLED'>('ALL')
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  // 날짜 검색
+  const defaultDates = getDefaultDates()
+  const [startDate, setStartDate] = useState(defaultDates.startDate)
+  const [endDate, setEndDate] = useState(defaultDates.endDate)
+
+  // 페이지네이션
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 15
 
   // Modal states
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null)
@@ -147,6 +138,7 @@ export default function AdminTherapiesPage() {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
   const [isJournalModalOpen, setIsJournalModalOpen] = useState(false)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -162,14 +154,26 @@ export default function AdminTherapiesPage() {
     }
 
     fetchTherapies()
-  }, [session, status, router, filter])
+  }, [session, status, router, filter, startDate, endDate])
+
+  // 페이지 변경시 페이지네이션 적용
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    setTherapies(allTherapies.slice(startIndex, endIndex))
+  }, [currentPage, allTherapies])
 
   const fetchTherapies = async () => {
     try {
-      const response = await fetch(`/api/admin/therapies?status=${filter}`)
+      let url = `/api/admin/therapies?status=${filter}`
+      if (startDate) url += `&startDate=${startDate}`
+      if (endDate) url += `&endDate=${endDate}`
+
+      const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
-        setTherapies(data.therapies || [])
+        setAllTherapies(data.therapies || [])
+        setCurrentPage(1) // 검색 시 첫 페이지로
       }
     } catch (error) {
       console.error('홈티 목록 조회 오류:', error)
@@ -198,6 +202,33 @@ export default function AdminTherapiesPage() {
     setIsJournalModalOpen(true)
   }
 
+  const handleOpenDetailModal = (bookingId: string) => {
+    setSelectedBookingId(bookingId)
+    setIsDetailModalOpen(true)
+  }
+
+  const handleSettlement = async (bookingId: string) => {
+    if (!confirm('정산을 진행하시겠습니까?')) return
+
+    try {
+      const response = await fetch(`/api/admin/bookings/${bookingId}/settlement`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: '정산이 완료되었습니다.' })
+        fetchTherapies()
+      } else {
+        const data = await response.json()
+        setMessage({ type: 'error', text: data.error || '정산에 실패했습니다.' })
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: '서버 오류가 발생했습니다.' })
+    }
+  }
+
   if (status === 'loading' || isLoading) {
     return (
       <div className="min-h-screen bg-neutral-light flex items-center justify-center">
@@ -216,6 +247,19 @@ export default function AdminTherapiesPage() {
   return (
     <AdminLayout title="홈티 관리">
       <div className="space-y-6">
+        {/* 메시지 */}
+        {message && (
+          <div
+            className={`p-4 rounded-md ${
+              message.type === 'success'
+                ? 'bg-green-50 text-green-800 border border-green-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
+
         {/* 필터 */}
         <div className="bg-white shadow rounded-lg p-4">
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -232,7 +276,7 @@ export default function AdminTherapiesPage() {
                 color: filter === 'ALL' ? '#FFFFFF' : '#374151',
               }}
             >
-              전체 ({therapies.length})
+              전체 ({allTherapies.length})
             </button>
             <button
               onClick={() => setFilter('PENDING_PAYMENT')}
@@ -280,7 +324,7 @@ export default function AdminTherapiesPage() {
               진행예정
             </button>
             <button
-              onClick={() => setFilter('COMPLETED')}
+              onClick={() => setFilter('PENDING_SETTLEMENT')}
               style={{
                 padding: '8px 16px',
                 borderRadius: '6px',
@@ -288,11 +332,26 @@ export default function AdminTherapiesPage() {
                 fontWeight: '500',
                 border: 'none',
                 cursor: 'pointer',
-                backgroundColor: filter === 'COMPLETED' ? '#386646' : '#F3F4F6',
-                color: filter === 'COMPLETED' ? '#FFFFFF' : '#374151',
+                backgroundColor: filter === 'PENDING_SETTLEMENT' ? '#386646' : '#F3F4F6',
+                color: filter === 'PENDING_SETTLEMENT' ? '#FFFFFF' : '#374151',
               }}
             >
-              완료
+              정산대기
+            </button>
+            <button
+              onClick={() => setFilter('SETTLEMENT_COMPLETED')}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: filter === 'SETTLEMENT_COMPLETED' ? '#386646' : '#F3F4F6',
+                color: filter === 'SETTLEMENT_COMPLETED' ? '#FFFFFF' : '#374151',
+              }}
+            >
+              정산완료
             </button>
             <button
               onClick={() => setFilter('CANCELLED')}
@@ -309,6 +368,38 @@ export default function AdminTherapiesPage() {
             >
               취소
             </button>
+          </div>
+        </div>
+
+        {/* 날짜 검색 */}
+        <div className="bg-white shadow rounded-lg p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">시작일</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">종료일</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={fetchTherapies}
+                className="w-full px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+              >
+                검색
+              </button>
+            </div>
           </div>
         </div>
 
@@ -330,19 +421,22 @@ export default function AdminTherapiesPage() {
                       치료사
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      치료 유형
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      주소
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       일정
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      1회 비용
+                      회차
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      평점
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      금액
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      상담일지
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      후기
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      정산
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       상태
@@ -354,7 +448,8 @@ export default function AdminTherapiesPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {therapies.map((therapy) => (
-                    <tr key={therapy.id}>
+                    <tr key={therapy.id} className="hover:bg-gray-50">
+                      {/* 부모/아이 */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => handleOpenParentModal(therapy.parentUser.id)}
@@ -363,19 +458,13 @@ export default function AdminTherapiesPage() {
                           <div className="text-sm font-medium text-aipoten-green hover:text-aipoten-navy cursor-pointer">
                             {therapy.parentUser.name}
                           </div>
-                        </button>
-                        <button
-                          onClick={() => handleOpenParentModal(therapy.parentUser.id)}
-                          className="text-left"
-                        >
                           <div className="text-sm text-gray-600 hover:text-aipoten-navy cursor-pointer">
                             {therapy.child.name} ({therapy.child.gender === 'MALE' ? '남' : '여'})
                           </div>
                         </button>
-                        <div className="text-xs text-gray-400">
-                          {therapy.parentUser.phone || therapy.parentUser.email}
-                        </div>
                       </td>
+
+                      {/* 치료사 */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => handleOpenTherapistModal(therapy.therapist)}
@@ -385,50 +474,87 @@ export default function AdminTherapiesPage() {
                             {therapy.therapist.user.name}
                           </div>
                         </button>
+                      </td>
+
+                      {/* 일정 */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {new Date(therapy.timeSlot.date).toLocaleDateString('ko-KR')}
+                        </div>
                         <div className="text-xs text-gray-500">
-                          {therapy.therapist.user.phone}
+                          {therapy.timeSlot.startTime} - {therapy.timeSlot.endTime}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">
-                          {formatSpecialties(therapy.therapist.specialties)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">
-                          {therapy.therapist.address}
-                          {therapy.therapist.addressDetail && `, ${therapy.therapist.addressDetail}`}
-                        </div>
-                      </td>
+
+                      {/* 회차 */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {therapy.bookings?.[0]?.timeSlot?.date
-                            ? new Date(therapy.bookings[0].timeSlot.date).toLocaleDateString('ko-KR')
-                            : new Date(therapy.scheduledAt).toLocaleDateString('ko-KR')}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {therapy.bookings?.[0]?.timeSlot?.startTime && therapy.bookings?.[0]?.timeSlot?.endTime
-                            ? `${therapy.bookings[0].timeSlot.startTime} - ${therapy.bookings[0].timeSlot.endTime}`
-                            : '시간 미정'}
+                          {therapy.sessionNumber} / {therapy.payment.totalSessions}회
                         </div>
                       </td>
+
+                      {/* 금액 */}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          ₩{therapy.therapist.sessionFee?.toLocaleString() || '-'}
+                        <div className="text-sm font-medium text-gray-900">
+                          ₩{therapy.payment.finalFee.toLocaleString()}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {therapy.bookings?.[0]?.review ? (
-                          <div className="flex items-center justify-center space-x-1">
-                            <Star className="fill-yellow-400 text-yellow-400" size={16} />
-                            <span className="text-sm font-semibold text-gray-900">
-                              {therapy.bookings[0].review.rating}.0
-                            </span>
+                        {therapy.payment.settlementAmount && (
+                          <div className="text-xs text-green-600">
+                            정산: ₩{therapy.payment.settlementAmount.toLocaleString()}
                           </div>
-                        ) : (
-                          <div className="text-center text-sm text-gray-400">-</div>
                         )}
                       </td>
+
+                      {/* 상담일지 */}
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        {therapy.therapistNote ? (
+                          <button
+                            onClick={() => handleOpenJournalModal(therapy.id)}
+                            className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded hover:bg-green-200 transition-colors"
+                          >
+                            <FileText size={14} className="mr-1" />
+                            보기
+                          </button>
+                        ) : (
+                          <span className="text-gray-400 text-xs">-</span>
+                        )}
+                      </td>
+
+                      {/* 후기 */}
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        {therapy.review ? (
+                          <button
+                            onClick={() => handleOpenReviewModal(therapy.id)}
+                            className="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded hover:bg-yellow-200 transition-colors"
+                          >
+                            <Star size={14} className="mr-1 fill-yellow-400 text-yellow-400" />
+                            {therapy.review.rating}.0
+                          </button>
+                        ) : (
+                          <span className="text-gray-400 text-xs">-</span>
+                        )}
+                      </td>
+
+                      {/* 정산 */}
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        {therapy.payment.settledAt ? (
+                          <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
+                            완료
+                          </span>
+                        ) : therapy.currentStatus === 'PENDING_SETTLEMENT' ? (
+                          <button
+                            onClick={() => handleSettlement(therapy.id)}
+                            className="inline-flex items-center px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
+                          >
+                            <CreditCard size={14} className="mr-1" />
+                            정산
+                          </button>
+                        ) : (
+                          <span className="text-gray-400 text-xs">-</span>
+                        )}
+                      </td>
+
+                      {/* 상태 */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -438,25 +564,16 @@ export default function AdminTherapiesPage() {
                           {statusLabels[therapy.currentStatus]?.label || therapy.currentStatus}
                         </span>
                       </td>
+
+                      {/* 작업 */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
-                          {therapy.bookings?.[0]?.review && (
-                            <button
-                              onClick={() => handleOpenReviewModal(therapy.bookings[0].id)}
-                              className="px-3 py-1 bg-yellow-500 text-white text-xs font-medium rounded hover:bg-yellow-600 transition-colors"
-                            >
-                              리뷰보기
-                            </button>
-                          )}
-                          {therapy.bookings?.[0]?.therapistNote && (
-                            <button
-                              onClick={() => handleOpenJournalModal(therapy.bookings[0].id)}
-                              className="px-3 py-1 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition-colors"
-                            >
-                              상담일지
-                            </button>
-                          )}
-                        </div>
+                        <button
+                          onClick={() => handleOpenDetailModal(therapy.id)}
+                          className="inline-flex items-center px-3 py-1 bg-gray-600 text-white text-xs font-medium rounded hover:bg-gray-700 transition-colors"
+                        >
+                          <Eye size={14} className="mr-1" />
+                          상세
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -465,9 +582,57 @@ export default function AdminTherapiesPage() {
             </div>
           )}
         </div>
+
+        {/* 페이지네이션 */}
+        {allTherapies.length > itemsPerPage && (
+          <div className="bg-white shadow rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                전체 {allTherapies.length}건 중 {Math.min((currentPage - 1) * itemsPerPage + 1, allTherapies.length)}-{Math.min(currentPage * itemsPerPage, allTherapies.length)}건 표시
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  이전
+                </button>
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.ceil(allTherapies.length / itemsPerPage) }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 border rounded-md text-sm font-medium ${
+                        currentPage === page
+                          ? 'bg-aipoten-green text-white border-aipoten-green'
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(Math.ceil(allTherapies.length / itemsPerPage), prev + 1))}
+                  disabled={currentPage === Math.ceil(allTherapies.length / itemsPerPage)}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  다음
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modals */}
+      <AdminBookingDetailModal
+        bookingId={selectedBookingId}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        onUpdate={fetchTherapies}
+      />
       <ParentInfoModal
         parentId={selectedParentId}
         isOpen={isParentModalOpen}

@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       prisma.therapistProfile.count({
         where: { status: 'PENDING' }
       }),
-      prisma.booking.aggregate({
+      prisma.payment.aggregate({
         where: {
           paidAt: {
             not: null

@@ -5,6 +5,8 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AdminLayout from '@/components/layout/AdminLayout'
+import AdminBookingDetailModal from '@/components/modals/AdminBookingDetailModal'
+import { Eye, FileText, Star } from 'lucide-react'
 
 interface Stats {
   users: number
@@ -30,10 +32,39 @@ interface Consultation {
   id: string
   scheduledAt: string
   status: string
-  parentUser: { name: string }
-  child: { name: string }
-  therapist: { user: { name: string } }
-  payment: { finalFee: number; status: string }
+  therapistNote: string | null
+  currentStatus: string
+  parentUser: {
+    id: string
+    name: string
+    email: string
+    phone: string
+  }
+  child: {
+    id: string
+    name: string
+    birthDate: string
+    gender: string
+  }
+  therapist: {
+    id: string
+    user: { name: string; email: string; phone: string }
+  }
+  review: {
+    id: string
+    rating: number
+    content: string
+    createdAt: string
+  } | null
+  payment: {
+    id: string
+    finalFee: number
+    status: string
+    sessionType: string
+    totalSessions: number
+    settlementAmount: number | null
+    settledAt: string | null
+  }
 }
 
 interface Therapy {
@@ -41,10 +72,44 @@ interface Therapy {
   scheduledAt: string
   status: string
   sessionNumber: number
-  parentUser: { name: string }
-  child: { name: string }
-  therapist: { user: { name: string } }
-  payment: { finalFee: number; totalSessions: number; status: string }
+  therapistNote: string | null
+  currentStatus: string
+  parentUser: {
+    id: string
+    name: string
+    email: string
+    phone: string
+  }
+  child: {
+    id: string
+    name: string
+    birthDate: string
+    gender: string
+  }
+  therapist: {
+    id: string
+    user: { name: string; email: string; phone: string }
+  }
+  review: {
+    id: string
+    rating: number
+    content: string
+    createdAt: string
+  } | null
+  payment: {
+    id: string
+    finalFee: number
+    totalSessions: number
+    status: string
+    sessionType: string
+    settlementAmount: number | null
+    settledAt: string | null
+  }
+  timeSlot: {
+    date: string
+    startTime: string
+    endTime: string
+  }
 }
 
 export default function AdminPage() {
@@ -60,6 +125,21 @@ export default function AdminPage() {
   const [consultationEndDate, setConsultationEndDate] = useState('')
   const [therapyStartDate, setTherapyStartDate] = useState('')
   const [therapyEndDate, setTherapyEndDate] = useState('')
+
+  // Detail modal state
+  const [selectedBooking, setSelectedBooking] = useState<Consultation | Therapy | null>(null)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+
+  // Status labels
+  const statusLabels: Record<string, { label: string; color: string }> = {
+    PENDING_PAYMENT: { label: '결제대기', color: 'bg-gray-100 text-gray-800' },
+    PENDING_CONFIRMATION: { label: '예약대기', color: 'bg-yellow-100 text-yellow-800' },
+    CONFIRMED: { label: '진행예정', color: 'bg-blue-100 text-blue-800' },
+    COMPLETED: { label: '완료', color: 'bg-green-100 text-green-800' },
+    PENDING_SETTLEMENT: { label: '정산대기', color: 'bg-purple-100 text-purple-800' },
+    SETTLEMENT_COMPLETED: { label: '정산완료', color: 'bg-green-100 text-green-800' },
+    CANCELLED: { label: '취소', color: 'bg-red-100 text-red-800' },
+  }
 
   useEffect(() => {
     if (status === 'loading') return
@@ -130,7 +210,7 @@ export default function AdminPage() {
 
   const fetchTherapies = async () => {
     try {
-      let url = '/api/admin/bookings?sessionType=THERAPY'
+      let url = '/api/admin/therapies?status=ALL'
       if (therapyStartDate) {
         url += `&startDate=${therapyStartDate}`
       }
@@ -141,11 +221,24 @@ export default function AdminPage() {
       const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
-        setTherapies(data.bookings || [])
+        setTherapies(data.therapies || [])
       }
     } catch (error) {
       console.error('홈티 데이터 가져오기 오류:', error)
     }
+  }
+
+  const handleOpenDetail = (booking: Consultation | Therapy) => {
+    setSelectedBooking(booking)
+    setIsDetailModalOpen(true)
+  }
+
+  const handleCloseDetail = () => {
+    setIsDetailModalOpen(false)
+    setSelectedBooking(null)
+    // Refresh data
+    fetchConsultations()
+    fetchTherapies()
   }
 
   if (status === 'loading' || isLoading) {
@@ -433,7 +526,10 @@ export default function AdminPage() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">부모</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">치료사</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">금액</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">일지</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">후기</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">작업</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -454,8 +550,40 @@ export default function AdminPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           ₩{consultation.payment.finalFee.toLocaleString()}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {consultation.payment.status}
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          {consultation.therapistNote ? (
+                            <FileText size={18} className="inline text-green-600" />
+                          ) : (
+                            <span className="text-gray-300">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          {consultation.review ? (
+                            <div className="inline-flex items-center gap-1">
+                              <Star size={18} className="text-yellow-500 fill-yellow-500" />
+                              <span className="text-sm text-gray-700">{consultation.review.rating}</span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-300">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              statusLabels[consultation.currentStatus]?.color || 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
+                            {statusLabels[consultation.currentStatus]?.label || consultation.currentStatus}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <button
+                            onClick={() => handleOpenDetail(consultation)}
+                            className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
+                          >
+                            <Eye size={14} className="mr-1" />
+                            상세
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -516,7 +644,10 @@ export default function AdminPage() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">치료사</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">회차</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">금액</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">일지</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">후기</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">작업</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -540,8 +671,40 @@ export default function AdminPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           ₩{therapy.payment.finalFee.toLocaleString()}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {therapy.payment.status}
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          {therapy.therapistNote ? (
+                            <FileText size={18} className="inline text-green-600" />
+                          ) : (
+                            <span className="text-gray-300">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          {therapy.review ? (
+                            <div className="inline-flex items-center gap-1">
+                              <Star size={18} className="text-yellow-500 fill-yellow-500" />
+                              <span className="text-sm text-gray-700">{therapy.review.rating}</span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-300">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              statusLabels[therapy.currentStatus]?.color || 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
+                            {statusLabels[therapy.currentStatus]?.label || therapy.currentStatus}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <button
+                            onClick={() => handleOpenDetail(therapy)}
+                            className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
+                          >
+                            <Eye size={14} className="mr-1" />
+                            상세
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -551,6 +714,15 @@ export default function AdminPage() {
             )}
           </div>
         </div>
+
+        {/* Detail Modal */}
+        {selectedBooking && (
+          <AdminBookingDetailModal
+            booking={selectedBooking}
+            isOpen={isDetailModalOpen}
+            onClose={handleCloseDetail}
+          />
+        )}
       </div>
     </AdminLayout>
   )

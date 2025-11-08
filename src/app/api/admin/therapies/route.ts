@@ -3,41 +3,44 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-config'
 
-// 5단계 상태 계산 함수
-function getTherapyStatus(payment: any) {
+// Booking 상태 계산 함수
+function getBookingStatus(booking: any, payment: any) {
   // 1. 결제대기 (PENDING_PAYMENT)
   if (payment.status === 'PENDING_PAYMENT') {
     return 'PENDING_PAYMENT'
   }
 
-  // 5. 취소 (CANCELLED/REFUNDED)
-  if (payment.status === 'REFUNDED' || payment.status === 'PARTIALLY_REFUNDED') {
+  // 5. 취소 (CANCELLED/REFUNDED/REJECTED)
+  if (
+    payment.status === 'REFUNDED' ||
+    payment.status === 'PARTIALLY_REFUNDED' ||
+    booking.status === 'CANCELLED' ||
+    booking.status === 'REJECTED'
+  ) {
     return 'CANCELLED'
   }
 
-  // booking 상태 확인 (1회 세션이므로 첫 번째 booking 사용)
-  const booking = payment.bookings?.[0]
-
-  if (!booking) {
-    return 'PENDING_PAYMENT' // booking이 없으면 결제대기
+  // 정산 완료
+  if (booking.status === 'SETTLEMENT_COMPLETED') {
+    return 'SETTLEMENT_COMPLETED'
   }
 
-  // 5. 취소 (CANCELLED/REJECTED)
-  if (booking.status === 'CANCELLED' || booking.status === 'REJECTED') {
-    return 'CANCELLED'
+  // 정산 대기
+  if (booking.status === 'PENDING_SETTLEMENT') {
+    return 'PENDING_SETTLEMENT'
   }
 
-  // 4. 완료 (COMPLETED)
+  // 완료 (레거시)
   if (booking.status === 'COMPLETED') {
     return 'COMPLETED'
   }
 
-  // 3. 진행예정 (CONFIRMED)
+  // 진행 예정
   if (booking.status === 'CONFIRMED') {
     return 'CONFIRMED'
   }
 
-  // 2. 예약대기 (PENDING_CONFIRMATION)
+  // 예약 대기
   if (booking.status === 'PENDING_CONFIRMATION') {
     return 'PENDING_CONFIRMATION'
   }
@@ -129,6 +132,9 @@ export async function GET(request: NextRequest) {
             canDoConsultation: true,
             education: true,
             introduction: true,
+            bank: true,
+            accountNumber: true,
+            accountHolder: true,
             user: {
               select: {
                 name: true,
@@ -181,22 +187,44 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    // 상태 필터 적용 (booking 상태 기반 필터링)
-    const filteredTherapies = therapies.filter((payment) => {
-      if (!statusFilter || statusFilter === 'ALL') return true
+    // 각 payment를 booking 리스트로 확장
+    const allBookings = therapies.flatMap((payment) =>
+      payment.bookings.map((booking) => ({
+        id: booking.id,
+        sessionNumber: booking.sessionNumber,
+        scheduledAt: booking.scheduledAt?.toISOString() || payment.createdAt.toISOString(),
+        status: booking.status,
+        therapistNote: booking.therapistNote,
+        parentUser: payment.parentUser,
+        child: payment.child,
+        therapist: payment.therapist,
+        review: booking.review,
+        timeSlot: booking.timeSlot,
+        payment: {
+          id: payment.id,
+          sessionType: payment.sessionType,
+          totalSessions: payment.totalSessions,
+          finalFee: payment.finalFee,
+          status: payment.status,
+          originalFee: payment.originalFee,
+          discountRate: payment.discountRate,
+          paidAt: payment.paidAt?.toISOString() || null,
+          settlementAmount: payment.settlementAmount,
+          settledAt: payment.settledAt?.toISOString() || null,
+          settlementNote: payment.settlementNote,
+        },
+        currentStatus: getBookingStatus(booking, payment),
+      }))
+    )
 
-      const currentStatus = getTherapyStatus(payment)
-      return currentStatus === statusFilter
+    // 상태 필터 적용
+    const filteredTherapies = allBookings.filter((booking) => {
+      if (!statusFilter || statusFilter === 'ALL') return true
+      return booking.currentStatus === statusFilter
     })
 
-    // 각 payment에 현재 상태 추가
-    const therapiesWithStatus = filteredTherapies.map((payment) => ({
-      ...payment,
-      currentStatus: getTherapyStatus(payment),
-    }))
-
     return NextResponse.json({
-      therapies: therapiesWithStatus,
+      therapies: filteredTherapies,
     })
   } catch (error) {
     console.error('홈티 내역 조회 오류:', error)

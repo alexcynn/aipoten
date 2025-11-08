@@ -154,6 +154,9 @@ export async function GET(request: NextRequest) {
             canDoConsultation: true,
             education: true,
             introduction: true,
+            bank: true,
+            accountNumber: true,
+            accountHolder: true,
             user: {
               select: {
                 name: true,
@@ -218,11 +221,34 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ [관리자 API] 필터 후 컨설팅:', filteredConsultations.length, '건')
 
-    // 각 payment에 현재 상태 추가
-    const consultationsWithStatus = filteredConsultations.map((payment) => ({
-      ...payment,
-      currentStatus: getConsultationStatus(payment),
-    }))
+    // 각 payment에 현재 상태 추가하고 booking 형식으로 변환
+    const consultationsWithStatus = filteredConsultations.map((payment) => {
+      const booking = payment.bookings[0] // 컨설팅은 1회 세션
+      return {
+        id: booking?.id || payment.id,
+        scheduledAt: booking?.scheduledAt?.toISOString() || payment.createdAt.toISOString(),
+        status: booking?.status || 'PENDING_CONFIRMATION',
+        therapistNote: booking?.therapistNote || null,
+        parentUser: payment.parentUser,
+        child: payment.child,
+        therapist: payment.therapist,
+        review: booking?.review || null,
+        payment: {
+          id: payment.id,
+          finalFee: payment.finalFee,
+          status: payment.status,
+          sessionType: payment.sessionType,
+          totalSessions: payment.totalSessions,
+          originalFee: payment.originalFee,
+          discountRate: payment.discountRate,
+          paidAt: payment.paidAt?.toISOString() || null,
+          settlementAmount: payment.settlementAmount,
+          settledAt: payment.settledAt?.toISOString() || null,
+          settlementNote: payment.settlementNote,
+        },
+        currentStatus: getConsultationStatus(payment),
+      }
+    })
 
     return NextResponse.json({
       consultations: consultationsWithStatus,

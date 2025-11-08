@@ -328,21 +328,36 @@ export default function ParentConsultationsPage() {
                                 {statusInfo.label}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <td className="px-6 py-4 text-sm">
                               {booking.review ? (
-                                <div className="flex items-center gap-1">
-                                  <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                                  <span className="font-medium text-gray-700">
-                                    {booking.review.rating}.0
-                                  </span>
-                                  {canReview && (
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-1">
+                                    <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                                    <span className="font-medium text-gray-700">
+                                      {booking.review.rating}.0
+                                    </span>
+                                  </div>
+                                  {booking.review.content && (
+                                    <p className="text-gray-600 text-xs line-clamp-2 max-w-xs">
+                                      {booking.review.content}
+                                    </p>
+                                  )}
+                                  <div className="flex gap-2">
                                     <button
                                       onClick={() => setReviewModalBooking(booking)}
-                                      className="ml-2 text-gray-600 hover:text-gray-700 hover:underline text-xs"
+                                      className="text-blue-600 hover:text-blue-700 hover:underline text-xs"
                                     >
-                                      수정
+                                      {booking.review.content ? '전체보기' : '보기'}
                                     </button>
-                                  )}
+                                    {canReview && (
+                                      <button
+                                        onClick={() => setReviewModalBooking(booking)}
+                                        className="text-gray-600 hover:text-gray-700 hover:underline text-xs"
+                                      >
+                                        수정
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
                               ) : canReview ? (
                                 <button
@@ -433,27 +448,36 @@ export default function ParentConsultationsPage() {
 
                           {/* Review */}
                           {booking.review && (
-                            <div className="flex items-center gap-1 text-sm">
-                              <span className="font-medium text-gray-700">후기:</span>
-                              <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                              <span className="font-medium text-gray-700">
-                                {booking.review.rating}.0
-                              </span>
+                            <div className="space-y-2 bg-yellow-50 p-3 rounded-md border border-yellow-200">
+                              <div className="flex items-center gap-1 text-sm">
+                                <span className="font-medium text-gray-700">내 후기:</span>
+                                <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                                <span className="font-medium text-gray-700">
+                                  {booking.review.rating}.0
+                                </span>
+                              </div>
+                              {booking.review.content && (
+                                <p className="text-gray-700 text-sm line-clamp-3">
+                                  {booking.review.content}
+                                </p>
+                              )}
+                              <button
+                                onClick={() => setReviewModalBooking(booking)}
+                                className="text-blue-600 hover:text-blue-700 hover:underline text-xs font-medium"
+                              >
+                                {booking.review.content ? '전체보기 / 수정' : '보기 / 수정'}
+                              </button>
                             </div>
                           )}
 
                           {/* Actions */}
                           <div className="flex gap-2 pt-2 flex-wrap">
-                            {canReview && (
+                            {canReview && !booking.review && (
                               <button
                                 onClick={() => setReviewModalBooking(booking)}
-                                className={`flex-1 px-3 py-2 text-sm rounded-md transition-colors font-medium ${
-                                  booking.review
-                                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                                }`}
+                                className="flex-1 px-3 py-2 text-sm rounded-md transition-colors font-medium bg-blue-600 text-white hover:bg-blue-700"
                               >
-                                {booking.review ? '후기 수정' : '후기 작성'}
+                                후기 작성
                               </button>
                             )}
                             <button
@@ -462,7 +486,7 @@ export default function ParentConsultationsPage() {
                                 setIsBookingModalOpen(true)
                               }}
                               className={`px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors font-medium text-center ${
-                                canReview ? 'flex-1' : 'w-full'
+                                canReview && !booking.review ? 'flex-1' : 'w-full'
                               }`}
                             >
                               상세보기

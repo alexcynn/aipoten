@@ -44,19 +44,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // sessionType 필터 추가
+    const sessionType = searchParams.get('sessionType')
+    if (sessionType) {
+      where.payment = {
+        sessionType: sessionType
+      }
+    }
+
     const bookings = await prisma.booking.findMany({
       where,
       select: {
         id: true,
         scheduledAt: true,
         duration: true,
-        sessionType: true,
-        sessionCount: true,
+        sessionNumber: true,
         status: true,
-        paymentStatus: true,
-        paidAt: true,
-        finalFee: true,
         createdAt: true,
+        completedAt: true,
         parentUser: {
           select: {
             id: true,
@@ -87,11 +92,20 @@ export async function GET(request: NextRequest) {
             endTime: true,
           },
         },
+        payment: {
+          select: {
+            id: true,
+            sessionType: true,
+            totalSessions: true,
+            status: true,
+            paidAt: true,
+            finalFee: true,
+            originalFee: true,
+            discountRate: true,
+          },
+        },
       },
       orderBy: [
-        {
-          paymentStatus: 'asc', // PENDING first
-        },
         {
           createdAt: 'desc',
         },
@@ -102,13 +116,10 @@ export async function GET(request: NextRequest) {
       id: booking.id,
       scheduledAt: booking.scheduledAt.toISOString(),
       duration: booking.duration,
-      sessionType: booking.sessionType,
-      sessionCount: booking.sessionCount,
+      sessionNumber: booking.sessionNumber,
       status: booking.status,
-      paymentStatus: booking.paymentStatus,
-      paidAt: booking.paidAt?.toISOString() || null,
-      finalFee: booking.finalFee,
       createdAt: booking.createdAt.toISOString(),
+      completedAt: booking.completedAt?.toISOString() || null,
       parentUser: booking.parentUser,
       child: booking.child,
       therapist: booking.therapist,
@@ -116,6 +127,16 @@ export async function GET(request: NextRequest) {
         date: booking.timeSlot.date.toISOString(),
         startTime: booking.timeSlot.startTime,
         endTime: booking.timeSlot.endTime,
+      },
+      payment: {
+        id: booking.payment.id,
+        sessionType: booking.payment.sessionType,
+        totalSessions: booking.payment.totalSessions,
+        status: booking.payment.status,
+        paidAt: booking.payment.paidAt?.toISOString() || null,
+        finalFee: booking.payment.finalFee,
+        originalFee: booking.payment.originalFee,
+        discountRate: booking.payment.discountRate,
       },
     }))
 

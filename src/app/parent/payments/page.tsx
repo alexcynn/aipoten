@@ -117,10 +117,6 @@ export default function ParentPaymentsPage() {
     .filter((p: Payment) => p.status === 'PAID')
     .reduce((sum: number, p: Payment) => sum + (p.finalFee || 0), 0)
 
-  const totalRefunded = payments
-    .filter((p: Payment) => p.status === 'REFUNDED' || p.status === 'PARTIALLY_REFUNDED')
-    .reduce((sum: number, p: Payment) => sum + (p.refundAmount || 0), 0)
-
   if (status === 'loading' || isLoading) {
     return (
       <div className="min-h-screen bg-neutral-light flex items-center justify-center">
@@ -147,20 +143,13 @@ export default function ParentPaymentsPage() {
           </div>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 gap-6 mb-6">
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center gap-3 mb-2">
                 <CreditCard className="text-green-600" size={24} />
                 <h3 className="text-sm font-medium text-gray-500">총 결제 금액</h3>
               </div>
               <p className="text-3xl font-bold text-gray-900">{totalPaid.toLocaleString()}원</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center gap-3 mb-2">
-                <CreditCard className="text-red-600" size={24} />
-                <h3 className="text-sm font-medium text-gray-500">환불 금액</h3>
-              </div>
-              <p className="text-3xl font-bold text-red-600">{totalRefunded.toLocaleString()}원</p>
             </div>
           </div>
 

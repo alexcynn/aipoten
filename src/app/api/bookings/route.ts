@@ -449,6 +449,14 @@ export async function GET(request: NextRequest) {
             discountRate: true,
             finalFee: true
           }
+        },
+        review: {
+          select: {
+            id: true,
+            rating: true,
+            content: true,
+            createdAt: true
+          }
         }
       },
       orderBy: {

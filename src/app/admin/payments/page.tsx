@@ -46,14 +46,36 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   FAILED: { label: '결제 실패', color: 'bg-gray-100 text-gray-800' },
 }
 
+// 날짜 기본값 계산 함수
+const getDefaultDates = () => {
+  const today = new Date()
+  const oneMonthAgo = new Date(today)
+  oneMonthAgo.setMonth(today.getMonth() - 1)
+
+  return {
+    startDate: oneMonthAgo.toISOString().split('T')[0],
+    endDate: today.toISOString().split('T')[0]
+  }
+}
+
 export default function AdminPaymentsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
   const [payments, setPayments] = useState<Payment[]>([])
+  const [allPayments, setAllPayments] = useState<Payment[]>([])
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PAID' | 'REFUNDED'>('ALL')
+
+  // 날짜 검색
+  const defaultDates = getDefaultDates()
+  const [startDate, setStartDate] = useState(defaultDates.startDate)
+  const [endDate, setEndDate] = useState(defaultDates.endDate)
+
+  // 페이지네이션
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 15
 
   // 모달 상태
   const [selectedChild, setSelectedChild] = useState<any>(null)
@@ -83,14 +105,26 @@ export default function AdminPaymentsPage() {
 
     console.log('Current filter:', filter)
     fetchPayments()
-  }, [session, status, router, filter])
+  }, [session, status, router, filter, startDate, endDate])
+
+  // 페이지 변경시 페이지네이션 적용
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    setPayments(allPayments.slice(startIndex, endIndex))
+  }, [currentPage, allPayments])
 
   const fetchPayments = async () => {
     try {
-      const response = await fetch(`/api/admin/payments?filter=${filter}`)
+      let url = `/api/admin/payments?filter=${filter}`
+      if (startDate) url += `&startDate=${startDate}`
+      if (endDate) url += `&endDate=${endDate}`
+
+      const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
-        setPayments(data.payments || [])
+        setAllPayments(data.payments || [])
+        setCurrentPage(1) // 검색 시 첫 페이지로
         setAccountInfo(data.accountInfo || null)
       }
     } catch (error) {
@@ -207,9 +241,9 @@ export default function AdminPaymentsPage() {
     return null
   }
 
-  const pendingCount = payments.filter((p) => p.status === 'PENDING_PAYMENT').length
-  const paidCount = payments.filter((p) => p.status === 'PAID').length
-  const refundedCount = payments.filter((p) => p.status === 'REFUNDED' || p.status === 'PARTIALLY_REFUNDED').length
+  const pendingCount = allPayments.filter((p) => p.status === 'PENDING_PAYMENT').length
+  const paidCount = allPayments.filter((p) => p.status === 'PAID').length
+  const refundedCount = allPayments.filter((p) => p.status === 'REFUNDED' || p.status === 'PARTIALLY_REFUNDED').length
 
   return (
     <AdminLayout title="결제 관리">
@@ -256,7 +290,7 @@ export default function AdminPaymentsPage() {
                 color: filter === 'ALL' ? '#FFFFFF' : '#374151',
               }}
             >
-              전체 ({payments.length})
+              전체 ({allPayments.length})
             </button>
             <button
               onClick={() => {
@@ -312,6 +346,38 @@ export default function AdminPaymentsPage() {
             >
               환불 ({refundedCount})
             </button>
+          </div>
+        </div>
+
+        {/* 날짜 검색 */}
+        <div className="bg-white shadow rounded-lg p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">시작일</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">종료일</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={fetchPayments}
+                className="w-full px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+              >
+                검색
+              </button>
+            </div>
           </div>
         </div>
 
@@ -497,6 +563,48 @@ export default function AdminPaymentsPage() {
             </div>
           )}
         </div>
+
+        {/* 페이지네이션 */}
+        {allPayments.length > itemsPerPage && (
+          <div className="bg-white shadow rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                전체 {allPayments.length}건 중 {Math.min((currentPage - 1) * itemsPerPage + 1, allPayments.length)}-{Math.min(currentPage * itemsPerPage, allPayments.length)}건 표시
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  이전
+                </button>
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.ceil(allPayments.length / itemsPerPage) }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 border rounded-md text-sm font-medium ${
+                        currentPage === page
+                          ? 'bg-aipoten-green text-white border-aipoten-green'
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(Math.ceil(allPayments.length / itemsPerPage), prev + 1))}
+                  disabled={currentPage === Math.ceil(allPayments.length / itemsPerPage)}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  다음
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 모달 */}
