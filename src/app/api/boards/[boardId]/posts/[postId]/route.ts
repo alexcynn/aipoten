@@ -6,10 +6,10 @@ import { prisma } from '@/lib/prisma'
 // GET: 게시글 상세 조회
 export async function GET(
   request: NextRequest,
-  { params }: { params: { boardId: string; postId: string } }
+  { params }: { params: Promise<{ boardId: string; postId: string }> }
 ) {
   try {
-    const { boardId, postId } = params
+    const { boardId, postId } = await params
 
     // 게시글 조회 및 조회수 증가
     const post = await prisma.post.update({
@@ -75,10 +75,10 @@ export async function GET(
 // PUT: 게시글 수정
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { boardId: string; postId: string } }
+  { params }: { params: Promise<{ boardId: string; postId: string }> }
 ) {
   try {
-    const { boardId, postId } = params
+    const { boardId, postId } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
@@ -165,10 +165,10 @@ export async function PUT(
 // DELETE: 게시글 삭제
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { boardId: string; postId: string } }
+  { params }: { params: Promise<{ boardId: string; postId: string }> }
 ) {
   try {
-    const { boardId, postId } = params
+    const { boardId, postId } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {

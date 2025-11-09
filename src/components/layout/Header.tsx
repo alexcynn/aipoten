@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
@@ -20,6 +20,8 @@ const Header: React.FC<HeaderProps> = ({
   const { data: session, status } = useSession()
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isGuideMenuOpen, setIsGuideMenuOpen] = useState(false)
+  const guideMenuTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const headerStyles = {
     default: 'bg-neutral-white text-brand-navy border-neutral-light',
@@ -36,13 +38,19 @@ const Header: React.FC<HeaderProps> = ({
     brand: 'text-white hover:bg-brand-green/80',
   }
 
+  // 이용안내 서브메뉴
+  const guideSubItems = [
+    { href: '/boards/notice', label: '공지사항' },
+    { href: '/boards/parent-guide', label: '부모 이용안내' },
+    { href: '/boards/therapist-guide', label: '전문가 이용안내' },
+    { href: '/boards/faq', label: '자주하는 질문' },
+  ]
+
   // 로그인하지 않은 경우의 메뉴
   const guestNavItems = [
     { href: '/', label: '홈' },
     { href: '/assessments', label: '발달체크' },
     { href: '/videos', label: '놀이영상' },
-    { href: '/boards/notification', label: '알림장' },
-    { href: '/boards/news', label: '육아정보' },
     { href: '/boards/community', label: '육아소통' },
   ]
 
@@ -50,8 +58,6 @@ const Header: React.FC<HeaderProps> = ({
   const parentNavItems = [
     { href: '/parent/dashboard', label: '대시보드' },
     { href: '/videos', label: '놀이영상' },
-    { href: '/boards/notification', label: '알림장' },
-    { href: '/boards/news', label: '육아정보' },
     { href: '/boards/community', label: '육아소통' },
   ]
 
@@ -59,8 +65,6 @@ const Header: React.FC<HeaderProps> = ({
   const therapistNavItems = [
     { href: '/therapist/dashboard', label: '대시보드' },
     { href: '/videos', label: '놀이영상' },
-    { href: '/boards/notification', label: '알림장' },
-    { href: '/boards/news', label: '육아정보' },
     { href: '/boards/community', label: '육아소통' },
   ]
 
@@ -68,10 +72,7 @@ const Header: React.FC<HeaderProps> = ({
   const adminNavItems = [
     { href: '/admin/dashboard', label: '대시보드' },
     { href: '/videos', label: '놀이영상' },
-    { href: '/boards/notification', label: '알림장' },
-    { href: '/boards/news', label: '육아정보' },
-    { href: '/boards/community', label: '육아소통' },    
-
+    { href: '/boards/community', label: '육아소통' },
   ]
 
   // 역할에 따른 메뉴 선택
@@ -99,6 +100,20 @@ const Header: React.FC<HeaderProps> = ({
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/' })
+  }
+
+  // 드롭다운 메뉴 핸들러
+  const handleGuideMenuEnter = () => {
+    if (guideMenuTimerRef.current) {
+      clearTimeout(guideMenuTimerRef.current)
+    }
+    setIsGuideMenuOpen(true)
+  }
+
+  const handleGuideMenuLeave = () => {
+    guideMenuTimerRef.current = setTimeout(() => {
+      setIsGuideMenuOpen(false)
+    }, 200)
   }
 
   // 로고 링크 URL
@@ -157,6 +172,36 @@ const Header: React.FC<HeaderProps> = ({
                 {item.label}
               </Link>
             ))}
+
+            {/* 이용안내 드롭다운 */}
+            <div
+              className="relative"
+              onMouseEnter={handleGuideMenuEnter}
+              onMouseLeave={handleGuideMenuLeave}
+            >
+              <button
+                className={`
+                  font-medium transition-colors duration-200 px-3 py-2 rounded-md
+                  ${linkStyles[variant]}
+                `}
+              >
+                이용안내
+              </button>
+
+              {isGuideMenuOpen && (
+                <div className="absolute top-full left-0 mt-0 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+                  {guideSubItems.map((subItem) => (
+                    <Link
+                      key={subItem.href}
+                      href={subItem.href}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      {subItem.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </nav>
 
           {/* 사용자 액션 버튼 (데스크탑) */}
@@ -231,6 +276,32 @@ const Header: React.FC<HeaderProps> = ({
                 {item.label}
               </Link>
             ))}
+
+            {/* 모바일 이용안내 */}
+            <div className="mt-2">
+              <div className={`px-3 py-2 text-base font-medium ${linkStyles[variant]}`}>
+                이용안내
+              </div>
+              <div className="pl-4 space-y-1">
+                {guideSubItems.map((subItem) => (
+                  <Link
+                    key={subItem.href}
+                    href={subItem.href}
+                    className={`
+                      block px-3 py-2 rounded-md text-sm transition-colors duration-200
+                      ${isActive(subItem.href)
+                        ? 'text-aipoten-green bg-aipoten-accent bg-opacity-10'
+                        : 'text-gray-600 hover:text-brand-navy hover:bg-neutral-light'
+                      }
+                    `}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {subItem.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
             <div className="border-t border-neutral-light pt-3 mt-3 space-y-2">
               {session?.user ? (
                 <>

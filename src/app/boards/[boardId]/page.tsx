@@ -33,17 +33,29 @@ const BOARD_CONFIG = {
     canWrite: (role?: string) => ['PARENT', 'THERAPIST', 'ADMIN'].includes(role || ''),
     categories: ['질문', '정보공유', '후기', '잡담'],
   },
-  news: {
-    title: '소식',
-    description: '아이포텐의 공지사항, 이벤트, 업데이트 소식을 확인하세요.',
+  notice: {
+    title: '공지사항',
+    description: '아이포텐의 중요 공지사항을 확인하세요.',
     canWrite: (role?: string) => role === 'ADMIN',
-    categories: ['공지사항', '이벤트', '업데이트'],
+    categories: ['공지', '업데이트', '중요'],
   },
-  notification: {
-    title: '알림장',
-    description: '치료사와 부모 간 소통하는 알림장입니다.',
-    canWrite: (role?: string) => ['THERAPIST', 'ADMIN'].includes(role || ''),
-    categories: ['세션 피드백', '과제', '진행상황'],
+  'parent-guide': {
+    title: '부모 이용안내',
+    description: '부모님들을 위한 서비스 이용 가이드입니다.',
+    canWrite: (role?: string) => role === 'ADMIN',
+    categories: ['서비스 이용', '결제', '예약', '기타'],
+  },
+  'therapist-guide': {
+    title: '전문가 이용안내',
+    description: '전문가 선생님들을 위한 서비스 이용 가이드입니다.',
+    canWrite: (role?: string) => role === 'ADMIN',
+    categories: ['서비스 이용', '정산', '스케줄', '기타'],
+  },
+  faq: {
+    title: '자주하는 질문',
+    description: '자주 묻는 질문과 답변을 확인하세요.',
+    canWrite: (role?: string) => role === 'ADMIN',
+    categories: ['일반', '결제', '예약', '서비스'],
   },
 }
 
@@ -133,29 +145,57 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
         </div>
 
         {/* Board Controls */}
-        <div className="flex justify-between items-center mb-4">
-          <div className="text-sm text-gray-600">
-            전체 글 <span className="font-semibold">{posts.length}</span>개
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div style={{ fontSize: '14px', color: '#4B5563' }}>
+            전체 글 <span style={{ fontWeight: 600 }}>{posts.length}</span>개
           </div>
-          <button
-            onClick={handleWriteClick}
-            className="px-4 py-2 bg-aipoten-green text-white text-sm font-medium rounded hover:bg-aipoten-navy transition-colors"
-          >
-            글쓰기
-          </button>
+          {session && config.canWrite(session.user?.role) && (
+            <button
+              onClick={handleWriteClick}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#386646',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 500,
+                borderRadius: '4px',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2D5238'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
+            >
+              글쓰기
+            </button>
+          )}
         </div>
 
         {/* BBS Table */}
         <div className="bg-white border border-gray-300 rounded">
           {posts.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-gray-500 mb-4">등록된 게시글이 없습니다.</p>
-              <button
-                onClick={handleWriteClick}
-                className="px-4 py-2 bg-aipoten-green text-white text-sm font-medium rounded hover:bg-aipoten-navy transition-colors"
-              >
-                첫 게시글 작성하기
-              </button>
+            <div style={{ textAlign: 'center', padding: '80px 0' }}>
+              <p style={{ color: '#6B7280', marginBottom: '16px' }}>등록된 게시글이 없습니다.</p>
+              {session && config.canWrite(session.user?.role) && (
+                <button
+                  onClick={handleWriteClick}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#386646',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2D5238'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
+                >
+                  첫 게시글 작성하기
+                </button>
+              )}
             </div>
           ) : (
             <>

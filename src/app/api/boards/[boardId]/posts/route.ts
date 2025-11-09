@@ -10,25 +10,35 @@ const BOARD_CONFIG = {
     canWrite: (role: string | undefined) => ['PARENT', 'THERAPIST', 'ADMIN'].includes(role || ''),
     canRead: () => true, // 전체 공개
   },
-  news: {
-    name: '소식',
+  notice: {
+    name: '공지사항',
     canWrite: (role: string | undefined) => role === 'ADMIN',
     canRead: () => true, // 전체 공개
   },
-  notification: {
-    name: '알림장',
-    canWrite: (role: string | undefined) => ['THERAPIST', 'ADMIN'].includes(role || ''),
-    canRead: () => true, // 전체 공개 (모든 사용자가 읽기 가능)
+  'parent-guide': {
+    name: '부모 이용안내',
+    canWrite: (role: string | undefined) => role === 'ADMIN',
+    canRead: () => true, // 전체 공개
+  },
+  'therapist-guide': {
+    name: '전문가 이용안내',
+    canWrite: (role: string | undefined) => role === 'ADMIN',
+    canRead: () => true, // 전체 공개
+  },
+  faq: {
+    name: '자주하는 질문',
+    canWrite: (role: string | undefined) => role === 'ADMIN',
+    canRead: () => true, // 전체 공개
   },
 }
 
 // GET: 게시글 목록 조회
 export async function GET(
   request: NextRequest,
-  { params }: { params: { boardId: string } }
+  { params }: { params: Promise<{ boardId: string }> }
 ) {
   try {
-    const { boardId } = params
+    const { boardId } = await params
     const session = await getServerSession(authOptions)
 
     // 게시판 존재 여부 확인
@@ -105,10 +115,10 @@ export async function GET(
 // POST: 게시글 작성
 export async function POST(
   request: NextRequest,
-  { params }: { params: { boardId: string } }
+  { params }: { params: Promise<{ boardId: string }> }
 ) {
   try {
-    const { boardId } = params
+    const { boardId } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
