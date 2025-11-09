@@ -35,7 +35,7 @@ export default function TherapistEarningsPage() {
 
   const fetchBookings = async () => {
     try {
-      const response = await fetch('/api/bookings')
+      const response = await fetch('/api/therapist/bookings')
       if (response.ok) {
         const data = await response.json()
         const bookingsArray = data.bookings || []
@@ -48,20 +48,27 @@ export default function TherapistEarningsPage() {
     }
   }
 
-  // 예비정산금 계산 (결제 완료되었지만 아직 정산되지 않은 세션)
+  // 예비정산금 계산 (결제 완료되었지만 아직 세션이 진행되지 않은 금액)
   const calculatePendingSettlement = () => {
     return myBookings
       .filter((booking: any) =>
         booking.payment?.status === 'PAID' &&
-        (booking.status === 'CONFIRMED' || booking.status === 'PENDING_SETTLEMENT')
+        booking.status === 'CONFIRMED'
       )
       .reduce((total: number, booking: any) => {
-        const therapistAmount = booking.payment?.amount ? booking.payment.amount * 0.9 : 0
+        // finalFee를 세션 수로 나눈 후 플랫폼 수수료 제외
+        const finalFee = booking.payment?.finalFee || 0
+        const totalSessions = booking.payment?.totalSessions || 1
+        const perSessionFee = finalFee / totalSessions
+        // 플랫폼 수수료는 payment에 이미 포함되어 있으므로, settlementAmount가 있으면 사용
+        const therapistAmount = booking.payment?.settlementAmount
+          ? booking.payment.settlementAmount / totalSessions
+          : perSessionFee * 0.95 // 플랫폼 수수료 5% 제외
         return total + therapistAmount
       }, 0)
   }
 
-  // 미정산금 계산 (완료되었지만 정산되지 않은 금액)
+  // 미정산금 계산 (세션 완료되었지만 정산되지 않은 금액)
   const calculateUnsettled = () => {
     return myBookings
       .filter((booking: any) =>
@@ -69,7 +76,10 @@ export default function TherapistEarningsPage() {
         booking.status === 'PENDING_SETTLEMENT'
       )
       .reduce((total: number, booking: any) => {
-        const therapistAmount = booking.payment?.amount ? booking.payment.amount * 0.9 : 0
+        const finalFee = booking.payment?.finalFee || 0
+        const totalSessions = booking.payment?.totalSessions || 1
+        const perSessionFee = finalFee / totalSessions
+        const therapistAmount = perSessionFee * 0.95 // 플랫폼 수수료 5% 제외
         return total + therapistAmount
       }, 0)
   }
@@ -77,19 +87,26 @@ export default function TherapistEarningsPage() {
   // 이달 수입금 계산 (이번 달에 정산된 금액)
   const calculateThisMonthEarnings = () => {
     const now = new Date()
-    const thisMonth = now.getMonth()
-    const thisYear = now.getFullYear()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
 
     return myBookings
       .filter((booking: any) => {
-        if (booking.status !== 'SETTLEMENT_COMPLETED') return false
+        // 정산 완료된 건만
+        if (booking.status !== 'SETTLEMENT_COMPLETED' && !booking.payment?.settledAt) {
+          return false
+        }
 
-        const completedDate = new Date(booking.completedAt || booking.scheduledAt)
-        return completedDate.getMonth() === thisMonth && completedDate.getFullYear() === thisYear
+        // 이번 달에 정산된 건만
+        const settledDate = booking.payment?.settledAt ? new Date(booking.payment.settledAt) : null
+        if (!settledDate) return false
+
+        return settledDate >= startOfMonth && settledDate <= endOfMonth
       })
       .reduce((total: number, booking: any) => {
-        const therapistAmount = booking.payment?.amount ? booking.payment.amount * 0.9 : 0
-        return total + therapistAmount
+        // payment.settlementAmount 사용 (실제 정산 금액)
+        const settlementAmount = booking.payment?.settlementAmount || 0
+        return total + settlementAmount
       }, 0)
   }
 
@@ -107,13 +124,20 @@ export default function TherapistEarningsPage() {
 
     // 정산 완료된 예약으로 월별 수입 계산
     myBookings
-      .filter((booking: any) => booking.status === 'SETTLEMENT_COMPLETED')
+      .filter((booking: any) => {
+        // 정산 완료된 건만 (status 또는 settledAt 확인)
+        return booking.status === 'SETTLEMENT_COMPLETED' || booking.payment?.settledAt
+      })
       .forEach((booking: any) => {
-        const completedDate = new Date(booking.completedAt || booking.scheduledAt)
-        const monthKey = `${completedDate.getFullYear()}-${String(completedDate.getMonth() + 1).padStart(2, '0')}`
+        // 정산 날짜 기준으로 월별 분류
+        const settledDate = booking.payment?.settledAt
+          ? new Date(booking.payment.settledAt)
+          : new Date(booking.scheduledAt)
+        const monthKey = `${settledDate.getFullYear()}-${String(settledDate.getMonth() + 1).padStart(2, '0')}`
 
         if (monthlyData[monthKey] !== undefined) {
-          const therapistAmount = booking.payment?.amount ? booking.payment.amount * 0.9 : 0
+          // 실제 정산 금액 사용
+          const therapistAmount = booking.payment?.settlementAmount || 0
           monthlyData[monthKey] += therapistAmount
         }
       })

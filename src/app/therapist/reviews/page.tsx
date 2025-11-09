@@ -38,7 +38,7 @@ export default function TherapistReviewsPage() {
 
   const fetchBookings = async () => {
     try {
-      const response = await fetch('/api/bookings')
+      const response = await fetch('/api/therapist/bookings')
       if (response.ok) {
         const data = await response.json()
         const bookingsArray = data.bookings || []
@@ -51,9 +51,11 @@ export default function TherapistReviewsPage() {
     }
   }
 
-  // 완료된 세션 필터
+  // 완료된 세션 필터 (세션이 실제로 진행 완료된 건만)
   const completedBookings = myBookings.filter((booking: any) =>
-    booking.status === 'PENDING_SETTLEMENT' || booking.status === 'SETTLEMENT_COMPLETED'
+    booking.status === 'PENDING_SETTLEMENT' ||
+    booking.status === 'SETTLEMENT_COMPLETED' ||
+    booking.payment?.settledAt // 정산 완료된 건은 무조건 포함
   )
 
   // 총 언어컨설팅 진행 수
@@ -111,7 +113,10 @@ export default function TherapistReviewsPage() {
 
     // 완료된 예약으로 월별 통계 계산
     completedBookings.forEach((booking: any) => {
-      const completedDate = new Date(booking.completedAt || booking.scheduledAt)
+      // 세션 완료 날짜: 정산 완료된 경우 settledAt, 그 외는 scheduledAt 사용
+      const completedDate = booking.payment?.settledAt
+        ? new Date(booking.payment.settledAt)
+        : new Date(booking.scheduledAt)
       const monthKey = `${completedDate.getFullYear()}-${String(completedDate.getMonth() + 1).padStart(2, '0')}`
 
       if (monthlyData[monthKey]) {

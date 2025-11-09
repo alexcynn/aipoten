@@ -93,7 +93,10 @@ export async function GET(request: NextRequest) {
             paidAt: true,
             originalFee: true,
             discountRate: true,
-            finalFee: true
+            finalFee: true,
+            settlementAmount: true,
+            settledAt: true,
+            settlementNote: true
           }
         },
         therapist: {
@@ -105,6 +108,14 @@ export async function GET(request: NextRequest) {
                 email: true
               }
             }
+          }
+        },
+        review: {
+          select: {
+            id: true,
+            rating: true,
+            content: true,
+            createdAt: true
           }
         }
       },

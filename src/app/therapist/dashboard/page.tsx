@@ -136,19 +136,45 @@ export default function TherapistDashboardPage() {
     return statusMap[status] || status
   }
 
-  // 예비정산금 계산 (결제 완료되었지만 아직 정산되지 않은 세션)
-  const calculatePendingSettlement = () => {
+  // 이달 수입금 계산 (이번 달에 정산 완료된 금액)
+  const calculateMonthlyEarnings = () => {
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+
     return myBookings
-      .filter((booking: any) =>
-        booking.payment?.status === 'PAID' &&
-        (booking.status === 'CONFIRMED' || booking.status === 'PENDING_SETTLEMENT')
-      )
+      .filter((booking: any) => {
+        // 정산 완료된 건만
+        if (booking.status !== 'SETTLEMENT_COMPLETED' && !booking.payment?.settledAt) {
+          return false
+        }
+
+        // 이번 달에 정산된 건만
+        const settledDate = booking.payment?.settledAt ? new Date(booking.payment.settledAt) : null
+        if (!settledDate) return false
+
+        return settledDate >= startOfMonth && settledDate <= endOfMonth
+      })
       .reduce((total: number, booking: any) => {
-        // 치료사 정산 금액 계산 (플랫폼 수수료 제외)
-        const finalFee = booking.payment?.finalFee || 0
-        const therapistAmount = finalFee * 0.9 // 플랫폼 수수료 10% 제외
-        return total + therapistAmount
+        // payment.settlementAmount가 있으면 그것을 사용, 없으면 계산
+        const settlementAmount = booking.payment?.settlementAmount || 0
+        return total + settlementAmount
       }, 0)
+  }
+
+  // 평균 평점 계산
+  const calculateAverageRating = () => {
+    const reviewedBookings = myBookings.filter((booking: any) => booking.review?.rating)
+
+    if (reviewedBookings.length === 0) {
+      return 0
+    }
+
+    const totalRating = reviewedBookings.reduce((sum: number, booking: any) => {
+      return sum + (booking.review?.rating || 0)
+    }, 0)
+
+    return (totalRating / reviewedBookings.length).toFixed(1)
   }
 
   // 언어컨설팅 요청 대기 수 계산
@@ -282,8 +308,9 @@ export default function TherapistDashboardPage() {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-gray-900">이달 수입금</h3>
+                  <p className="text-sm text-gray-500">정산 완료</p>
                   <p className="text-2xl font-bold text-aipoten-orange">
-                    ₩{calculatePendingSettlement().toLocaleString()}
+                    ₩{calculateMonthlyEarnings().toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -301,7 +328,12 @@ export default function TherapistDashboardPage() {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-gray-900">평점</h3>
-                  <p className="text-2xl font-bold text-aipoten-red">4.8</p>
+                  <p className="text-sm text-gray-500">
+                    {myBookings.filter(b => b.review?.rating).length}개 리뷰
+                  </p>
+                  <p className="text-2xl font-bold text-aipoten-red">
+                    {calculateAverageRating() === '0.0' ? '-' : calculateAverageRating()}
+                  </p>
                 </div>
               </div>
             </Link>
