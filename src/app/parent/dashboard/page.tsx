@@ -330,6 +330,12 @@ export default function ParentDashboardPage() {
                         />
                       </div>
                       <Link
+                        href="/parent/profile"
+                        className="px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-md hover:bg-gray-200 transition-colors whitespace-nowrap shadow-md"
+                      >
+                        프로필 관리
+                      </Link>
+                      <Link
                         href="/parent/children/new"
                         className="px-4 py-2 bg-brand-accent text-brand-navy font-semibold rounded-md hover:bg-brand-green hover:text-white transition-colors whitespace-nowrap shadow-md"
                       >

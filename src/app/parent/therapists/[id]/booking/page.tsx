@@ -5,6 +5,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Calendar from '@/components/booking/Calendar'
+import AddressSearchInput from '@/components/common/AddressSearchInput'
 
 interface TimeSlot {
   id: string
@@ -501,34 +502,16 @@ export default function BookingPage() {
 
                 {/* 방문 주소 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    방문 주소 *
-                  </label>
                   {!userInfo?.address && (
                     <p className="text-sm text-amber-600 mb-2">
                       ℹ️ 회원 정보에 주소가 등록되지 않았습니다. 주소를 입력해주세요.
                     </p>
                   )}
-                  <input
-                    type="text"
-                    value={visitAddress}
-                    onChange={(e) => setVisitAddress(e.target.value)}
-                    placeholder="예: 서울시 강남구 테헤란로 123"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    상세 주소
-                  </label>
-                  <input
-                    type="text"
-                    value={visitAddressDetail}
-                    onChange={(e) => setVisitAddressDetail(e.target.value)}
-                    placeholder="예: 101동 1234호"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  <AddressSearchInput
+                    address={visitAddress}
+                    addressDetail={visitAddressDetail}
+                    onAddressChange={setVisitAddress}
+                    onAddressDetailChange={setVisitAddressDetail}
                   />
                 </div>
 
