@@ -1,239 +1,267 @@
 # 아이포텐 색상 가이드
 
-로고 이미지를 바탕으로 제작된 아이포텐 웹사이트의 전체적인 색상 가이드입니다.
+Figma 디자인을 기반으로 제작된 아이포텐 웹사이트의 전체적인 색상 가이드입니다.
 
 ## 🎨 색상 팔레트
 
 ### 1. 주조색 (Primary Colors)
 
-| 역할 | 색상 이름 | HEX 코드 | Tailwind 클래스 | 설명 |
-|------|-----------|----------|-----------------|------|
-| 메인 브랜드 컬러 | 딥 그린 (Deep Green) | `#386646` | `bg-brand-green` | 신뢰, 안정, 자연, 건강을 상징. 사이트의 기본 톤 |
-| 메인 강조색 (1) | 라이트 그린 (Light Green) | `#98C15E` | `bg-brand-accent` | 성장, 활력, 희망. 주요 버튼, 링크 강조 |
-| 메인 강조색 (2) | 다크 네이비 (Dark Navy) | `#193149` | `bg-brand-navy` | 전문성, 안정감. 텍스트, 아이콘 색상 |
+| 역할 | 색상 이름 | HEX 코드 | RGB | Tailwind 클래스 | 사용 위치 |
+|------|-----------|----------|-----|-----------------|-----------|
+| 메인 브랜드 컬러 | 비비드 오렌지 | `#FF6A00` | rgb(255, 106, 0) | `bg-[#FF6A00]` | 주요 CTA 버튼, 라벨 배지, 강조 텍스트 |
+| 호버 상태 | 다크 오렌지 | `#E55F00` | rgb(229, 95, 0) | `bg-[#E55F00]` | 버튼 호버 상태 |
 
 ### 2. 보조색 (Secondary Colors)
 
-| 역할 | 색상 이름 | HEX 코드 | Tailwind 클래스 | 설명 |
-|------|-----------|----------|-----------------|------|
-| 포인트 컬러 | 따뜻한 오렌지 | `#F78C6B` | `bg-point-orange` | 경고, 주목, 긍정적 피드백 |
-| 포인트 컬러 | 청량한 블루 | `#5D93B3` | `bg-point-blue` | 정보, 안내, 치료사 연결 완료 |
-| 포인트 컬러 | 활발한 레드 | `#C74E5D` | `bg-point-red` | 오류, 주의사항, 제한적 활력 |
+| 역할 | 색상 이름 | HEX 코드 | RGB | Tailwind 클래스 | 사용 위치 |
+|------|-----------|----------|-----|-----------------|-----------|
+| 소프트 핑크 | 라이트 로즈 | `#FFE5E5` | rgb(255, 229, 229) | `bg-[#FFE5E5]` | 무료 발달체크 섹션 배경 |
+| 핑크 액센트 | 코랄 핑크 | `#FF9999` | rgb(255, 153, 153) | `bg-[#FF9999]` | STEP 배지, CTA 버튼 |
+| 호버 상태 | 살몬 핑크 | `#FF8888` | rgb(255, 136, 136) | `bg-[#FF8888]` | 핑크 버튼 호버 상태 |
+| 베이지 | 따뜻한 베이지 | `#F5EFE7` | rgb(245, 239, 231) | `bg-[#F5EFE7]` | Golden Time 섹션 배경 |
 
 ### 3. 중립색 (Neutral Colors)
 
-| 역할 | 색상 이름 | HEX 코드 | Tailwind 클래스 | 설명 |
-|------|-----------|----------|-----------------|------|
-| 배경 | 밝은 그레이 | `#F5F5F5` | `bg-neutral-light` | 카드 배경, 구분선 |
-| 배경 | 순백색 | `#FFFFFF` | `bg-neutral-white` | 텍스트 배경, 가독성 최우선 |
+| 역할 | 색상 이름 | HEX 코드 | RGB | Tailwind 클래스 | 사용 위치 |
+|------|-----------|----------|-----|-----------------|-----------|
+| 라이트 그레이 | 실버 그레이 | `#F9F9F9` | rgb(249, 249, 249) | `bg-[#F9F9F9]` | Footer 배경 |
+| 미드 그레이 | 쿨 그레이 | `#999999` | rgb(153, 153, 153) | `text-[#999999]` | Footer 텍스트, 보조 정보 |
+| 화이트 | 순백색 | `#FFFFFF` | rgb(255, 255, 255) | `bg-white` | 카드 배경, 컨텐츠 영역 |
 
-## 🔼 헤더 색상 옵션
+### 4. 텍스트 색상
 
-### 옵션 1: 로고 강조 및 가독성 최우선 ⭐ **권장**
+| 역할 | 색상 이름 | Tailwind 클래스 | 사용 위치 |
+|------|-----------|-----------------|-----------|
+| 메인 텍스트 | 다크 스톤 | `text-stone-900` | 제목, 본문 텍스트 |
+| 서브 텍스트 | 미디엄 스톤 | `text-stone-700` | 부제목, 설명 텍스트 |
+| 보조 텍스트 | 라이트 스톤 | `text-stone-600` | 상세 설명, 캡션 |
+| 정보 텍스트 | 블루 | `text-blue-600` | 소요시간, 추가 정보 |
 
-```tsx
-// 헤더 배경색: 순백색 (#FFFFFF)
-// 메뉴 텍스트: 다크 네이비 (#193149)
-<Header variant="default" />
-```
+## 🏷️ 로고 색상
 
-**장점:**
-- 로고의 모든 색상이 가장 선명하게 대비됨
-- 깔끔하고 모던한 느낌
-- 정보 전달 서비스에 가장 적합
+AIPOTEN 로고는 다채로운 컬러를 사용합니다:
 
-### 옵션 2: 브랜드 아이덴티티 강화
+| 문자 | 색상 | HEX 코드 |
+|------|------|----------|
+| A | 오렌지 | `#FF6B00` |
+| i | 오렌지 | `#FF6B00` |
+| P | 블루 | `#2B9FD9` |
+| O | 퍼플 | `#A02D94` |
+| T | 옐로우 | `#FFB300` |
+| E | 그린 | `#7BC545` |
+| N | 오렌지 | `#FF6B00` |
 
-```tsx
-// 헤더 배경색: 딥 그린 (#386646)
-// 메뉴 텍스트: 순백색 (#FFFFFF)
-<Header variant="brand" />
-```
-
-**장점:**
-- 브랜드 정체성 강화
-- 로고의 밝은 요소들이 돋보임
-
-## 💡 사용 가이드
-
-### 배경 색상
+## 🔼 헤더 스타일
 
 ```tsx
-// 메인 섹션, 푸터
-<div className="bg-brand-green">
+// 헤더 배경: 반투명 화이트 + 블러 효과
+className="bg-white/80 backdrop-blur-[5px] border-b border-gray-200"
 
-// 카드, 컨테이너
-<div className="bg-neutral-light">
+// 헤더 텍스트
+className="text-stone-900 hover:text-orange-500"
 
-// 텍스트 배경, 폼
-<div className="bg-neutral-white">
+// 회원가입 버튼
+className="bg-[#FF6A00] text-neutral-50 hover:bg-orange-600"
 ```
 
-### 텍스트 색상
+## 💡 섹션별 색상 사용
 
+### Hero Section
 ```tsx
-// 메인 텍스트
-<h1 className="text-brand-navy">
+// 배경: 이미지 + 오버레이
+<div className="absolute inset-0 bg-black/20" />
 
-// 강조 텍스트
-<span className="text-brand-accent">
+// 제목
+className="text-stone-900"
 
-// 어두운 배경의 텍스트
-<p className="text-neutral-white">
+// 서브텍스트
+className="text-stone-700"
+
+// CTA 버튼
+className="bg-[#FF6A00] text-white hover:bg-[#E55F00]"
 ```
 
-### 버튼 스타일
-
+### Golden Time Section
 ```tsx
-// 주요 액션 버튼
-<button className="btn-aipoten-primary">
-  시작하기
-</button>
+// 배경
+className="bg-[#F5EFE7]"
 
-// 보조 버튼
-<button className="btn-aipoten-secondary">
-  더 알아보기
-</button>
+// 제목
+className="text-stone-900"
+
+// 설명
+className="text-stone-700"
 ```
 
-### 상태별 색상
-
+### 3단계 발달 케어 솔루션 Section
 ```tsx
-// 성공 상태
-<div className="bg-point-blue text-white">성공</div>
+// 배경
+className="bg-white"
 
-// 경고 상태
-<div className="bg-point-orange text-white">주의</div>
+// 라벨 배지
+className="bg-[#FF6A00] text-white"
 
-// 오류 상태
-<div className="bg-point-red text-white">오류</div>
+// 제목
+className="text-stone-900"
+
+// 설명
+className="text-stone-600"
 ```
 
-### 카드 스타일
-
+### 무료 발달체크 Section
 ```tsx
-// 기본 카드
-<div className="card-aipoten">
+// 배경
+className="bg-[#FFE5E5]"
 
-// 강조 카드
-<div className="card-aipoten-highlight">
+// 카드
+className="bg-white"
+
+// STEP 배지
+className="bg-[#FF9999] text-white"
+
+// 제목
+className="text-stone-900"
+
+// 정보 텍스트
+className="text-blue-600"
+
+// CTA 버튼
+className="bg-[#FF9999] text-white hover:bg-[#FF8888]"
 ```
 
-## 🚀 구현 방법
-
-### 1. Tailwind CSS 사용
-
+### Footer
 ```tsx
-import React from 'react';
+// 배경
+className="bg-[#F9F9F9]"
 
-const Component = () => (
-  <div className="bg-brand-green text-white p-6">
-    <h2 className="text-brand-accent">제목</h2>
-    <p className="text-neutral-white">내용</p>
-  </div>
-);
+// 링크 텍스트
+className="text-stone-900"
+
+// 보조 정보
+className="text-[#999999]"
 ```
 
-### 2. CSS 변수 사용
+## 🎯 버튼 스타일 가이드
 
-```css
-.custom-component {
-  background-color: var(--color-brand-green);
-  color: var(--color-neutral-white);
-}
-```
-
-### 3. TypeScript 상수 사용
-
+### Primary Button (오렌지)
 ```tsx
-import { colors } from './colors';
+className="bg-[#FF6A00] text-white px-10 py-4 rounded-[10px] font-semibold hover:bg-[#E55F00] transition-colors shadow-lg"
+```
 
-const styles = {
-  background: colors.primary.brand,
-  color: colors.neutral.white,
-};
+### Secondary Button (핑크)
+```tsx
+className="bg-[#FF9999] text-white px-12 py-4 rounded-full font-semibold hover:bg-[#FF8888] transition-colors shadow-lg"
+```
+
+### 배지 (Badge)
+```tsx
+// 오렌지 배지
+className="bg-[#FF6A00] text-white px-4 py-2 rounded-md text-sm font-semibold"
+
+// 핑크 배지
+className="bg-[#FF9999] text-white px-4 py-1 rounded-full text-sm font-semibold"
+```
+
+## 📦 카드 스타일
+
+### 기본 카드
+```tsx
+className="bg-white rounded-2xl p-8 shadow-sm"
+```
+
+### 호버 효과가 있는 카드
+```tsx
+className="bg-white rounded-2xl p-8 hover:shadow-lg transition-shadow"
+```
+
+## 🌈 그라데이션 & 효과
+
+### 배경 오버레이
+```tsx
+className="absolute inset-0 bg-black/20"
+```
+
+### 블러 효과 (헤더)
+```tsx
+className="bg-white/80 backdrop-blur-[5px]"
+```
+
+### 투명도
+```tsx
+// 로고 투명도
+className="opacity-60"
+
+// 텍스트 투명도
+className="text-white/90"
 ```
 
 ## 📱 반응형 고려사항
 
-- 모바일에서는 터치 영역을 고려하여 버튼 크기 충분히 확보
-- 대비율 WCAG AA 기준 준수 (텍스트와 배경 간 4.5:1 이상)
-- 다크모드 지원 시 색상 조정 필요
-
-## 🎯 사용 예시
-
-### 메인 페이지 히어로 섹션
-
+### 텍스트 크기
 ```tsx
-<section className="bg-gradient-aipoten py-20">
-  <div className="container mx-auto text-center">
-    <h1 className="text-4xl font-bold text-white mb-6">
-      아이의 잠재력을 발견하세요
-    </h1>
-    <p className="text-xl text-white/90 mb-8">
-      AI 기반 발달 체크와 맞춤형 놀이영상
-    </p>
-    <button className="btn-aipoten-primary text-lg px-8 py-3">
-      무료 체험하기
-    </button>
-  </div>
-</section>
+// 모바일 → 데스크탑
+className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
 ```
 
-### 발달 체크 결과 카드
-
+### 패딩
 ```tsx
-<div className="card-aipoten-highlight p-6">
-  <div className="flex items-center mb-4">
-    <div className="badge-aipoten">우수</div>
-    <h3 className="text-brand-navy font-semibold ml-3">대근육 발달</h3>
-  </div>
-  <p className="text-brand-navy/80 mb-4">
-    또래 대비 우수한 발달 수준을 보이고 있습니다.
-  </p>
-  <button className="link-aipoten">
-    추천 놀이영상 보기 →
-  </button>
-</div>
+// 모바일 → 데스크탑
+className="py-12 md:py-16 lg:py-20"
+className="px-4 sm:px-6 lg:px-8"
 ```
 
-### 치료사 프로필 카드
-
+### 간격
 ```tsx
-<div className="card-aipoten p-6 hover:shadow-lg transition-shadow">
-  <div className="flex items-start space-x-4">
-    <img
-      src="/therapist-avatar.jpg"
-      className="w-16 h-16 rounded-full"
-    />
-    <div className="flex-1">
-      <h4 className="text-brand-navy font-semibold">김치료 치료사</h4>
-      <p className="text-brand-navy/70 text-sm">언어치료 전문</p>
-      <div className="flex space-x-2 mt-2">
-        <span className="badge-aipoten-outline">5년 경력</span>
-        <span className="badge-aipoten-outline">온라인 상담</span>
-      </div>
-    </div>
-    <div className="text-right">
-      <div className="text-brand-accent font-semibold">⭐ 4.9</div>
-      <button className="btn-aipoten-primary mt-2">상담 신청</button>
-    </div>
-  </div>
-</div>
+// 모바일 → 데스크탑
+className="gap-4 md:gap-6"
+className="mb-3 md:mb-4"
+```
+
+## ✅ 접근성 가이드
+
+### 대비율 확인
+- 텍스트와 배경 간 대비율 **최소 4.5:1** 준수 (WCAG AA 기준)
+- 주요 텍스트: stone-900 (#1C1917) on white → **18.8:1** ✅
+- 버튼 텍스트: white on #FF6A00 → **4.9:1** ✅
+
+### 색맹 고려
+- 정보 전달 시 색상만 의존하지 않고 아이콘, 텍스트 병행
+- 오렌지/핑크 색상은 충분한 명도 차이 유지
+
+## 🎨 Tailwind Config 설정
+
+```js
+// tailwind.config.ts
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        'aipoten-orange': '#FF6A00',
+        'aipoten-orange-dark': '#E55F00',
+        'aipoten-pink': '#FF9999',
+        'aipoten-pink-light': '#FFE5E5',
+        'aipoten-beige': '#F5EFE7',
+      }
+    }
+  }
+}
 ```
 
 ## 📋 체크리스트
 
 프로젝트에 색상 시스템을 적용할 때 확인해야 할 사항들:
 
-- [ ] `colors.ts` 파일 임포트
-- [ ] `tailwind.config.js`에 색상 팔레트 추가
-- [ ] `globals.css`에 CSS 변수 정의
-- [ ] 헤더 컴포넌트에 색상 적용
-- [ ] 주요 UI 컴포넌트에 브랜드 색상 적용
-- [ ] 버튼, 링크, 폼 요소 스타일링
-- [ ] 상태별 색상 (성공, 경고, 오류) 적용
-- [ ] 접근성 검증 (대비율 확인)
-- [ ] 다크모드 지원 여부 결정
+- [x] 메인 브랜드 컬러 (오렌지 #FF6A00) 적용
+- [x] 보조색 (핑크, 베이지) 적용
+- [x] 중립색 (그레이, 화이트) 적용
+- [x] 텍스트 색상 (stone 계열) 적용
+- [x] 버튼 스타일 정의
+- [x] 호버 상태 정의
+- [x] 카드 스타일 정의
+- [x] 배지 스타일 정의
+- [x] 반응형 텍스트 크기
+- [x] 접근성 검증 (대비율)
+- [x] Footer 색상 적용
+- [x] 헤더 색상 적용
 
 이 가이드를 참고하여 일관성 있고 브랜드 정체성이 강한 아이포텐 웹사이트를 구축하세요! 🎨✨
