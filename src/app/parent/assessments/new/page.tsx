@@ -159,9 +159,10 @@ function AssessmentContent() {
     }
   }
 
-  const getQuestionsPath = (): AssessmentQuestion[] => {
+  const getQuestionsPath = (currentResponses?: QuestionResponse[]): AssessmentQuestion[] => {
     const path: AssessmentQuestion[] = []
     const regularQuestions = allQuestions.filter(q => !q.isWarning)
+    const responsesToUse = currentResponses || responses
 
     // 문항 번호로 그룹화
     const questionGroups: Record<string, AssessmentQuestion[]> = {}
@@ -190,7 +191,7 @@ function AssessmentContent() {
       path.push(q1)
 
       // 이미 응답한 Q1 확인
-      const q1Response = responses.find(r => r.questionId === q1.id)
+      const q1Response = responsesToUse.find(r => r.questionId === q1.id)
       if (q1Response) {
         // Q1에서 "대체로 못함" 또는 "전혀 못함" 선택 시 Q2로 이동
         if (q1Response.answer === '대체로 못함' || q1Response.answer === '전혀 못함') {
@@ -199,7 +200,7 @@ function AssessmentContent() {
             path.push(q2)
 
             // Q2 응답 확인
-            const q2Response = responses.find(r => r.questionId === q2.id)
+            const q2Response = responsesToUse.find(r => r.questionId === q2.id)
             if (q2Response && q2Response.answer === '못함') {
               const q3 = group.find(q => q.level === 'Q3')
               if (q3) {
@@ -320,21 +321,25 @@ function AssessmentContent() {
 
     // 다음 질문으로 이동 로직
     setTimeout(() => {
-      const path = getQuestionsPath()
+      const path = getQuestionsPath(updatedResponses)
       const nextIndex = currentQuestionIndex + 1
       let shouldMoveToNext = false
       let targetIndex = nextIndex
+
+      let checkCategoryTransition = false
 
       if (currentQuestion.level === 'Q1') {
         // Q1에서 "대체로 못함" 또는 "전혀 못함" 선택 시 Q2로
         if (answer === '대체로 못함' || answer === '전혀 못함') {
           shouldMoveToNext = true
+          // Q2로 이동하는 경우 카테고리 전환 체크 하지 않음
         } else {
           // 다음 Q1 그룹으로
           const nextQ1Index = findNextQ1Index()
           if (nextQ1Index !== -1) {
             shouldMoveToNext = true
             targetIndex = nextQ1Index
+            checkCategoryTransition = true  // Q1 → Q1 이동 시에만 카테고리 체크
           } else {
             handleComplete()
             return
@@ -344,12 +349,14 @@ function AssessmentContent() {
         // Q2에서 "못함" 선택 시 Q3로
         if (answer === '못함') {
           shouldMoveToNext = true
+          // Q3로 이동하는 경우 카테고리 전환 체크 하지 않음
         } else {
           // 다음 Q1 그룹으로
           const nextQ1Index = findNextQ1Index()
           if (nextQ1Index !== -1) {
             shouldMoveToNext = true
             targetIndex = nextQ1Index
+            checkCategoryTransition = true  // Q2 → Q1 이동 시에만 카테고리 체크
           } else {
             handleComplete()
             return
@@ -361,6 +368,7 @@ function AssessmentContent() {
         if (nextQ1Index !== -1) {
           shouldMoveToNext = true
           targetIndex = nextQ1Index
+          checkCategoryTransition = true  // Q3 → Q1 이동 시에만 카테고리 체크
         } else {
           handleComplete()
           return
@@ -368,22 +376,29 @@ function AssessmentContent() {
       }
 
       if (shouldMoveToNext) {
-        // 다음 질문의 카테고리 확인
-        const updatedPath = getQuestionsPath()
-        const nextQuestion = updatedPath[targetIndex]
+        // 카테고리 전환 체크는 다음 Q1으로 이동할 때만 수행
+        if (checkCategoryTransition) {
+          const updatedPath = getQuestionsPath(updatedResponses)
+          const nextQuestion = updatedPath[targetIndex]
 
-        // 카테고리가 변경되는지 확인
-        if (nextQuestion && nextQuestion.category !== prevCategory) {
-          // 현재 카테고리가 완료되었는지 확인 - 최신 응답 배열 전달
-          const progress = getCategoryProgress(updatedResponses)
-          const categoryProgress = progress[prevCategory]
+          // 카테고리가 변경되는지 확인
+          if (nextQuestion && nextQuestion.category !== prevCategory) {
+            // 현재 카테고리에 아직 남은 질문이 있는지 확인
+            const hasMoreInPrevCategory = updatedPath.slice(targetIndex).some(q => q.category === prevCategory)
 
-          if (categoryProgress && categoryProgress.completed === categoryProgress.total) {
-            // 카테고리 완료 - 전환 화면 표시
-            setCategoryCompleted(prevCategory)
-            setShowCategoryTransition(true)
-            setCurrentQuestionIndex(targetIndex)
-            return
+            // 현재 카테고리의 질문이 모두 완료되었을 때만 전환 화면 표시
+            if (!hasMoreInPrevCategory) {
+              const progress = getCategoryProgress(updatedResponses)
+              const categoryProgress = progress[prevCategory]
+
+              if (categoryProgress && categoryProgress.completed === categoryProgress.total) {
+                // 카테고리 완료 - 전환 화면 표시
+                setCategoryCompleted(prevCategory)
+                setShowCategoryTransition(true)
+                setCurrentQuestionIndex(targetIndex)
+                return
+              }
+            }
           }
         }
 

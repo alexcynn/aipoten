@@ -63,7 +63,9 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
   }
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/' })
+    // 현재 도메인을 기반으로 리디렉션 URL 생성
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+    await signOut({ callbackUrl: `${baseUrl}/` })
   }
 
   return (
