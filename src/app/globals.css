@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Pretendard 폰트 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
 /* 커스텀 그라데이션 */
 .bg-gradient-aipoten {
   background: linear-gradient(135deg, #386646 0%, #98C15E 100%);

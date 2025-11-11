@@ -2,11 +2,11 @@
 
 import React, { useState, useRef } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
+import Logo from './Logo'
 
 interface HeaderProps {
   variant?: 'default' | 'brand'
@@ -23,20 +23,6 @@ const Header: React.FC<HeaderProps> = ({
   const [isGuideMenuOpen, setIsGuideMenuOpen] = useState(false)
   const guideMenuTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  const headerStyles = {
-    default: 'bg-neutral-white text-brand-navy border-neutral-light',
-    brand: 'bg-brand-green text-white border-brand-green',
-  }
-
-  const linkStyles = {
-    default: 'text-brand-navy hover:text-brand-accent',
-    brand: 'text-white hover:text-brand-accent',
-  }
-
-  const mobileButtonStyles = {
-    default: 'text-brand-navy hover:bg-neutral-light',
-    brand: 'text-white hover:bg-brand-green/80',
-  }
 
   // 이용안내 서브메뉴
   const guideSubItems = [
@@ -136,40 +122,26 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header
       className={`
-        ${headerStyles[variant]}
-        sticky top-0 z-50 w-full border-b shadow-sm
+        sticky top-0 z-50 w-full h-16 px-4 sm:px-6 lg:px-80
+        bg-white/80 border-b border-gray-200 backdrop-blur-[5px]
         ${className}
       `}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* 로고 섹션 */}
-          <div className="flex items-center space-x-4">
-            <Link href={getLogoHref()} className="flex items-center">
-              <Image
-                src="/images/logo-text.png"
-                alt="AI Poten"
-                width={160}
-                height={40}
-                className="h-10 w-auto"
-                priority
-              />
-            </Link>
-          </div>
+      <div className="flex items-center justify-between h-full">
+        {/* 로고 섹션 */}
+        <Link href={getLogoHref()} className="flex items-center">
+          <Logo />
+        </Link>
 
+        {/* 우측 섹션: 네비게이션 + 버튼 */}
+        <div className="hidden lg:flex items-center gap-20">
           {/* 데스크탑 네비게이션 */}
-          <nav className="hidden lg:flex items-center space-x-6">
+          <nav className="flex items-center gap-[30px]">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`
-                  font-medium transition-colors duration-200 px-3 py-2 rounded-md
-                  ${isActive(item.href)
-                    ? 'text-aipoten-green bg-aipoten-accent bg-opacity-10'
-                    : linkStyles[variant]
-                  }
-                `}
+                className="text-stone-900 text-base font-medium font-pretendard hover:text-orange-500 transition-colors"
               >
                 {item.label}
               </Link>
@@ -181,22 +153,17 @@ const Header: React.FC<HeaderProps> = ({
               onMouseEnter={handleGuideMenuEnter}
               onMouseLeave={handleGuideMenuLeave}
             >
-              <button
-                className={`
-                  font-medium transition-colors duration-200 px-3 py-2 rounded-md
-                  ${linkStyles[variant]}
-                `}
-              >
+              <button className="text-stone-900 text-base font-medium font-pretendard hover:text-orange-500 transition-colors">
                 이용안내
               </button>
 
               {isGuideMenuOpen && (
-                <div className="absolute top-full left-0 mt-0 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
                   {guideSubItems.map((subItem) => (
                     <Link
                       key={subItem.href}
                       href={subItem.href}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors font-pretendard"
                     >
                       {subItem.label}
                     </Link>
@@ -206,73 +173,66 @@ const Header: React.FC<HeaderProps> = ({
             </div>
           </nav>
 
-          {/* 사용자 액션 버튼 (데스크탑) */}
-          <div className="hidden lg:flex items-center space-x-4">
+          {/* 사용자 액션 버튼 */}
+          <div className="flex items-center gap-7">
             {status === 'loading' ? (
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
             ) : session?.user ? (
               <>
-                <span className="text-sm text-gray-700">
+                <span className="text-stone-900 text-base font-medium font-pretendard">
                   {session.user.name}님
                 </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={handleSignOut}
+                  className="text-stone-900 text-base font-medium font-pretendard hover:text-orange-500 transition-colors"
                 >
                   로그아웃
-                </Button>
+                </button>
               </>
             ) : (
               <>
-                <Link href="/login">
-                  <Button variant="ghost" size="sm">
-                    로그인
-                  </Button>
+                <Link
+                  href="/login"
+                  className="text-stone-900 text-base font-medium font-pretendard hover:text-orange-500 transition-colors"
+                >
+                  로그인
                 </Link>
                 <Link href="/signup">
-                  <Button variant="default" size="sm">
-                    회원가입
-                  </Button>
+                  <div className="flex w-[90px] h-9 justify-center items-center gap-[10px] rounded-[10px] bg-[#FF6A00] hover:bg-orange-600 transition-colors">
+                    <span className="text-neutral-50 text-base font-medium font-pretendard">
+                      회원가입
+                    </span>
+                  </div>
                 </Link>
               </>
             )}
           </div>
+        </div>
 
-          {/* 모바일 메뉴 버튼 */}
-          <div className="lg:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={mobileButtonStyles[variant]}
-            >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </Button>
-          </div>
+        {/* 모바일 메뉴 버튼 */}
+        <div className="lg:hidden">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 text-stone-900 hover:text-orange-500 transition-colors"
+          >
+            {isMobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </button>
         </div>
       </div>
 
       {/* 모바일 메뉴 */}
       {isMobileMenuOpen && (
-        <div className={`lg:hidden border-t ${headerStyles[variant]}`}>
-          <div className="px-2 pt-2 pb-3 space-y-1">
+        <div className="lg:hidden border-t border-gray-200 bg-white">
+          <div className="px-4 pt-2 pb-3 space-y-1">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`
-                  block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200
-                  ${isActive(item.href)
-                    ? 'text-aipoten-green bg-aipoten-accent bg-opacity-10'
-                    : linkStyles[variant]
-                  }
-                  ${variant === 'default' ? 'hover:bg-neutral-light' : 'hover:bg-brand-green/80'}
-                `}
+                className="block px-3 py-2 rounded-md text-base font-medium font-pretendard text-stone-900 hover:text-orange-500 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.label}
@@ -281,7 +241,7 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* 모바일 이용안내 */}
             <div className="mt-2">
-              <div className={`px-3 py-2 text-base font-medium ${linkStyles[variant]}`}>
+              <div className="px-3 py-2 text-base font-medium font-pretendard text-stone-900">
                 이용안내
               </div>
               <div className="pl-4 space-y-1">
@@ -289,13 +249,7 @@ const Header: React.FC<HeaderProps> = ({
                   <Link
                     key={subItem.href}
                     href={subItem.href}
-                    className={`
-                      block px-3 py-2 rounded-md text-sm transition-colors duration-200
-                      ${isActive(subItem.href)
-                        ? 'text-aipoten-green bg-aipoten-accent bg-opacity-10'
-                        : 'text-gray-600 hover:text-brand-navy hover:bg-neutral-light'
-                      }
-                    `}
+                    className="block px-3 py-2 rounded-md text-sm font-pretendard text-gray-600 hover:text-orange-500 transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {subItem.label}
@@ -304,32 +258,38 @@ const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            <div className="border-t border-neutral-light pt-3 mt-3 space-y-2">
+            <div className="border-t border-gray-200 pt-3 mt-3 space-y-2">
               {session?.user ? (
                 <>
-                  <div className="px-3 py-2 text-sm text-gray-700">
+                  <div className="px-3 py-2 text-sm font-pretendard text-stone-900">
                     {session.user.name}님
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start"
+                  <button
+                    className="w-full text-left px-3 py-2 font-pretendard text-stone-900 hover:text-orange-500 transition-colors"
                     onClick={handleSignOut}
                   >
                     로그아웃
-                  </Button>
+                  </button>
                 </>
               ) : (
                 <>
-                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="ghost" size="sm" className="w-full justify-start">
-                      로그인
-                    </Button>
+                  <Link
+                    href="/login"
+                    className="block px-3 py-2 font-pretendard text-stone-900 hover:text-orange-500 transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    로그인
                   </Link>
-                  <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="default" size="sm" className="w-full">
-                      회원가입
-                    </Button>
+                  <Link
+                    href="/signup"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-3"
+                  >
+                    <div className="flex h-9 justify-center items-center gap-[10px] rounded-[10px] bg-[#FF6A00] hover:bg-orange-600 transition-colors">
+                      <span className="text-neutral-50 text-base font-medium font-pretendard">
+                        회원가입
+                      </span>
+                    </div>
                   </Link>
                 </>
               )}

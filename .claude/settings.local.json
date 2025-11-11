@@ -1,48 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx prisma generate:*)",
-      "Bash(mkdir:*)",
-      "Bash(npx prisma:*)",
-      "Bash(set DATABASE_URL=file:./dev.db)",
-      "Bash(set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=C:workaipotenprismadev.db 이 DB 파일을 써줘)",
-      "Bash(dir:*)",
-      "Bash(copy srcappchildrennewpage.tsx srcappparentchildrennewpage.tsx)",
-      "Bash(copy srcappchildren[id]page.tsx srcappparentchildren[id]page.tsx)",
-      "Bash(npx tsx:*)",
-      "WebSearch",
-      "Bash(npm run build:*)",
-      "Bash(copy src/app/signup/page.tsx src/app/signup/parent/page.tsx)",
-      "Bash(npm run:*)",
-      "Bash(set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=다시 해줘)",
-      "Bash(copy srcappadminconsultationspage.tsx srcappadmintherapiespage.tsx)",
-      "Bash(del scriptscheck-assessment.ts)",
-      "Bash(set \"PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=계속해\")",
-      "Bash(cmd /c \"set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=계속해&& npx prisma migrate reset --force\")",
-      "Bash($env:PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"계속해\")",
-      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"계속해\" npx prisma migrate reset:*)",
-      "Bash(sqlite3:*)",
-      "Bash(if exist .next rmdir /s /q .next)",
-      "Bash(taskkill:*)",
-      "mcp__ide__getDiagnostics",
-      "Bash(cmd /c \"if exist .next rmdir /s /q .next\")",
-      "Bash(cmd /c \"set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes&& npx prisma db push --force-reset --skip-generate\")",
-      "Bash(npx tsc:*)",
-      "Bash(cmd /c \"rmdir /s /q src\\app\\api\\admin\\payments\\[groupId]\")",
-      "Bash(cmd /c \"dir src\\app\\api\\admin\\payments /b\")",
-      "Bash(cmd /c \"if exist .next rmdir /s /q .next && echo .next deleted\")",
-      "Bash(cmd /c \"set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes&& npx prisma migrate reset --force\")",
-      "Bash($env:PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"yes\")",
-      "Bash(cmd /c \"if exist .next rmdir /s /q .next && echo Build cache cleaned\")",
-      "Bash(nul)",
-      "Bash(set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes)",
-      "Bash(cmd /c \"if exist src\\app\\api\\therapist (dir src\\app\\api\\therapist /b) else (echo Directory not found)\")",
-      "Bash(cmd /c \"dir src\\app\\parent\\bookings /s /b\")",
-      "Bash(cmd /c \"if exist src\\app\\therapist\\bookings\\[id]\\page.tsx (echo File exists) else (echo File does not exist)\")",
-      "Bash(\"src\\components\\modals\\JournalViewModal.tsx\")",
-      "Bash(\"src/components/modals/JournalViewModal.tsx\")"
+      "mcp__figma-desktop__get_design_context",
+      "mcp__figma-desktop__get_screenshot",
+      "mcp__figma-desktop__get_metadata",
+      "Bash(if not exist \"C:\\work\\aipoten\\public\\images\" mkdir \"C:\\work\\aipoten\\public\\images\")"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "figma"
+  ]
 }
