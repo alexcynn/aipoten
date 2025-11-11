@@ -13,163 +13,313 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-gradient-aipoten text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            우리 아이의 건강한 성장을 위한
+      <section className="relative h-[600px] flex items-center justify-center">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/hero-background.png"
+            alt="Hero Background"
+            fill
+            className="object-cover"
+            priority
+          />
+          {/* Overlay for better text readability */}
+          <div className="absolute inset-0 bg-black/20" />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-stone-900">
+            아이포텐이 우리 아이를 위한
             <br />
-            <span className="text-aipoten-accent">아이포텐</span>
+            최적의 전문가를 찾아드립니다
           </h1>
-          <p className="text-xl md:text-2xl mb-8 text-white/90">
-            영유아 발달 체크부터 놀이 영성, 맞춤형 콘텐츠까지
-            <br />
-            아이의 잠재력을 키우는 모든 것
+          <p className="text-lg md:text-xl mb-8 text-stone-700">
+            세계적인 분석과 검증된 전문가로 아이의 건강한 성장을 지원합니다
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {session ? (
-              <>
-                <Link href="/assessments" className="bg-white text-aipoten-green px-8 py-3 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors text-center">
-                  발달체크 시작하기
-                </Link>
-                <Link href="/dashboard" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-white hover:text-aipoten-green transition-colors text-center">
-                  대시보드로 이동
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/signup" className="bg-aipoten-accent text-aipoten-navy px-8 py-3 rounded-lg font-semibold text-lg hover:bg-aipoten-orange hover:text-white transition-colors text-center shadow-lg">
-                  회원가입하고 시작하기
-                </Link>
-                <Link href="/login" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-white hover:text-aipoten-green transition-colors text-center">
-                  로그인하기
-                </Link>
-              </>
-            )}
+          <Link
+            href="/parent/therapists"
+            className="inline-block bg-[#FF6A00] text-white px-10 py-4 rounded-[10px] font-semibold text-lg hover:bg-[#E55F00] transition-colors shadow-lg"
+          >
+            전문가 추천받기
+          </Link>
+        </div>
+      </section>
+
+      {/* Golden Time Section */}
+      <section className="py-16 bg-[#F5EFE7]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-stone-900 mb-4">
+            아이의 발달, 골든타임을 놓치지 마세요
+          </h2>
+          <p className="text-lg text-stone-700">
+            아이포텐은 우리아이의 발달을 빠르고 정확하게 이해하도록 돕습니다
+          </p>
+        </div>
+      </section>
+
+      {/* 3단계 발달 케어 솔루션 Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Title */}
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-stone-900 mb-2">
+              아이포텐과 함께하는
+            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-stone-900">
+              3단계 발달 케어 솔루션
+            </h2>
+          </div>
+
+          {/* Step 1 - 발달 체크 */}
+          <div className="flex flex-col md:flex-row items-center gap-12 mb-24">
+            <div className="flex-1">
+              <div className="inline-block bg-[#FF6A00] text-white px-4 py-2 rounded-md text-sm font-semibold mb-6">
+                01. 발달 체크
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-stone-900 mb-4">
+                3단계 문진으로,
+                <br />
+                아이의 발달 상태를 한눈에.
+              </h3>
+              <p className="text-lg text-stone-600">
+                1분개월~6세 아이들의 대근육·소근육·언어·인지·정서
+                <br />
+                발달을 분석하고 분석 리포트를 즉시 제공합니다.
+              </p>
+            </div>
+            <div className="flex-1 relative">
+              <Image
+                src="/images/step1-phone.png"
+                alt="발달 체크 화면"
+                width={500}
+                height={500}
+                className="w-full max-w-md mx-auto"
+              />
+            </div>
+          </div>
+
+          {/* Step 2 - 전문가 매칭 */}
+          <div className="flex flex-col md:flex-row-reverse items-center gap-12 mb-24">
+            <div className="flex-1">
+              <div className="inline-block bg-[#FF6A00] text-white px-4 py-2 rounded-md text-sm font-semibold mb-6">
+                02. 전문가 매칭
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-stone-900 mb-4">
+                발달 평가 데이터 기반
+                <br />
+                맞춤 전문가 연결
+              </h3>
+              <p className="text-lg text-stone-600">
+                분석 결과를 기반으로 분야별 전문가를 찾아드립니다.
+                <br />
+                주기와 일정 범위내에서 상담 예약하세요.
+              </p>
+            </div>
+            <div className="flex-1 relative">
+              <Image
+                src="/images/step2-phone.png"
+                alt="전문가 매칭 화면"
+                width={500}
+                height={500}
+                className="w-full max-w-md mx-auto"
+              />
+            </div>
+          </div>
+
+          {/* Step 3 - 안심서비스 */}
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1">
+              <div className="inline-block bg-[#FF6A00] text-white px-4 py-2 rounded-md text-sm font-semibold mb-6">
+                03. 안심서비스
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-stone-900 mb-4">
+                전문 언어치료사와 함께
+                <br />
+                60분 심층 평가 진행
+              </h3>
+              <p className="text-lg text-stone-600">
+                수출 표준 언어 능력을 전반적으로 점검하고
+                <br />
+                가정에서도 실천 가능한 코칭 플랜을 제공합니다.
+              </p>
+            </div>
+            <div className="flex-1 relative">
+              <Image
+                src="/images/step3-image.png"
+                alt="안심서비스"
+                width={500}
+                height={500}
+                className="w-full max-w-md mx-auto"
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 bg-neutral-white">
+      {/* 무료 발달체크 Section */}
+      <section className="py-20 bg-[#FFE5E5]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Title */}
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-aipoten-navy mb-4">
-              아이포텐의 핵심 서비스
+            <h2 className="text-3xl md:text-4xl font-bold text-stone-900 mb-4">
+              지금, 무료 언어 발달체크로 시작하세요.
             </h2>
-            <p className="text-lg text-aipoten-green font-medium">
-              전문적이고 체계적인 발달 지원 서비스를 제공합니다
+            <p className="text-lg text-stone-700">
+              간단한 문진만으로 우리 아이의 발달 상태를 빠르게 확인할 수 있습니다.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="card-aipoten p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-aipoten-blue rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl text-white">📊</span>
+          {/* Steps */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {/* Step 1 */}
+            <div className="bg-white rounded-2xl p-8 text-center relative">
+              <div className="inline-block bg-[#FF9999] text-white px-4 py-1 rounded-full text-sm font-semibold mb-6">
+                STEP 01
               </div>
-              <h3 className="text-xl font-semibold text-aipoten-navy mb-3">발달체크</h3>
-              <p className="text-gray-600">
-                월령별 발달 단계를 체크하고 맞춤형 가이드를 받아보세요
-              </p>
+              {/* Arrow */}
+              <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-[12px] -translate-y-1/2 z-10">
+                <Image
+                  src="/images/Arrow.svg"
+                  alt="arrow"
+                  width={48}
+                  height={48}
+                />
+              </div>
+              <div className="mb-4 flex justify-center">
+                <Image
+                  src="/images/ic_step_01.svg"
+                  alt="아이정보 입력"
+                  width={64}
+                  height={64}
+                />
+              </div>
+              <h3 className="text-xl font-bold text-stone-900 mb-3">
+                아이정보 입력
+              </h3>
+              <p className="text-sm text-blue-600">⏱ 30초 소요</p>
             </div>
 
-            <div className="card-aipoten p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-aipoten-orange rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl text-white">📹</span>
+            {/* Step 2 */}
+            <div className="bg-white rounded-2xl p-8 text-center relative">
+              <div className="inline-block bg-[#FF9999] text-white px-4 py-1 rounded-full text-sm font-semibold mb-6">
+                STEP 02
               </div>
-              <h3 className="text-xl font-semibold text-aipoten-navy mb-3">놀이영상</h3>
-              <p className="text-gray-600">
-                아이의 발달 단계에 맞는 다양한 놀이 영상을 제공합니다
-              </p>
+              {/* Arrow */}
+              <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-[12px] -translate-y-1/2 z-10">
+                <Image
+                  src="/images/Arrow.svg"
+                  alt="arrow"
+                  width={48}
+                  height={48}
+                />
+              </div>
+              <div className="mb-4 flex justify-center">
+                <Image
+                  src="/images/ic_step_02.svg"
+                  alt="3단계 문진 체크"
+                  width={64}
+                  height={64}
+                />
+              </div>
+              <h3 className="text-xl font-bold text-stone-900 mb-3">
+                3단계 문진 체크
+              </h3>
+              <p className="text-sm text-blue-600">⏱ 2-3분 소요</p>
             </div>
 
-            <div className="card-aipoten p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-aipoten-green rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl text-white">👥</span>
+            {/* Step 3 */}
+            <div className="bg-white rounded-2xl p-8 text-center relative">
+              <div className="inline-block bg-[#FF9999] text-white px-4 py-1 rounded-full text-sm font-semibold mb-6">
+                STEP 03
               </div>
-              <h3 className="text-xl font-semibold text-aipoten-navy mb-3">육아소통</h3>
-              <p className="text-gray-600">
-                다른 부모님들과 육아 경험과 팁을 나누며 소통하는 공간입니다
-              </p>
+              {/* Arrow */}
+              <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-[12px] -translate-y-1/2 z-10">
+                <Image
+                  src="/images/Arrow.svg"
+                  alt="arrow"
+                  width={48}
+                  height={48}
+                />
+              </div>
+              <div className="mb-4 flex justify-center">
+                <Image
+                  src="/images/ic_step_03.svg"
+                  alt="AI 분석 리포트"
+                  width={64}
+                  height={64}
+                />
+              </div>
+              <h3 className="text-xl font-bold text-stone-900 mb-3">
+                AI 분석 리포트
+              </h3>
+              <p className="text-sm text-blue-600">📧 추가 발송 확인</p>
             </div>
 
-            <div className="card-aipoten p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-aipoten-red rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl text-white">📰</span>
+            {/* Step 4 */}
+            <div className="bg-white rounded-2xl p-8 text-center">
+              <div className="inline-block bg-[#FF9999] text-white px-4 py-1 rounded-full text-sm font-semibold mb-6">
+                STEP 04
               </div>
-              <h3 className="text-xl font-semibold text-aipoten-navy mb-3">육아정보</h3>
-              <p className="text-gray-600">
-                전문가가 제공하는 다양한 육아 정보와 발달 가이드를 확인하세요
-              </p>
+              <div className="mb-4 flex justify-center">
+                <Image
+                  src="/images/ic_step_04.svg"
+                  alt="맞춤 솔루션 추천"
+                  width={64}
+                  height={64}
+                />
+              </div>
+              <h3 className="text-xl font-bold text-stone-900 mb-3">
+                맞춤 솔루션 추천
+              </h3>
+              <p className="text-sm text-blue-600">📋 실용적인 안내</p>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="py-16" style={{backgroundColor: '#386646'}}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            지금 시작해보세요
-          </h2>
-          <p className="text-xl text-aipoten-accent mb-8">
-            우리 아이만을 위한 맞춤형 발달 지원 서비스
-          </p>
-          {session ? (
-            <Link href="/dashboard" className="bg-aipoten-accent text-aipoten-navy px-8 py-4 rounded-lg font-semibold text-lg hover:bg-aipoten-orange hover:text-white transition-colors shadow-lg inline-block">
-              대시보드로 이동하기
+          {/* CTA Button */}
+          <div className="text-center">
+            <Link
+              href="/assessments/trial"
+              className="inline-block bg-[#FF9999] text-white px-12 py-4 rounded-full font-semibold text-lg hover:bg-[#FF8888] transition-colors shadow-lg"
+            >
+              3분 안에 무료 발달체크 시작하기
             </Link>
-          ) : (
-            <Link href="/signup" className="bg-aipoten-accent text-aipoten-navy px-8 py-4 rounded-lg font-semibold text-lg hover:bg-aipoten-orange hover:text-white transition-colors shadow-lg inline-block">
-              회원가입하고 시작하기
-            </Link>
-          )}
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="text-white py-12" style={{backgroundColor: '#193149'}}>
+      <footer className="bg-[#F9F9F9] py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <Image
-                src="/images/logo-full.png"
-                alt="AI Poten"
-                width={180}
-                height={140}
-                className="mb-4 brightness-0 invert"
-              />
-              <p className="text-gray-300">
-                영유아의 건강한 성장을 지원하는 통합 플랫폼
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-aipoten-accent">서비스</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><Link href="/assessments" className="hover:text-aipoten-accent">발달체크</Link></li>
-                <li><Link href="/videos" className="hover:text-aipoten-accent">놀이영상</Link></li>
-                <li><Link href="/boards" className="hover:text-aipoten-accent">게시판</Link></li>
-                <li><Link href="/boards/news" className="hover:text-aipoten-accent">뉴스</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-aipoten-accent">지원</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="#" className="hover:text-aipoten-accent">도움말</a></li>
-                <li><a href="#" className="hover:text-aipoten-accent">고객지원</a></li>
-                <li><a href="#" className="hover:text-aipoten-accent">FAQ</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-aipoten-accent">연락처</h4>
-              <p className="text-gray-300">
-                이메일: support@aipoten.com
-                <br />
-                전화: 1588-0000
-              </p>
+          {/* Logo */}
+          <div className="mb-6">
+            <Image
+              src="/images/footer-logo.png"
+              alt="AIPOTEN 아이포텐"
+              width={200}
+              height={32}
+              className="opacity-60"
+            />
+          </div>
+
+          {/* Links */}
+          <div className="mb-6">
+            <div className="flex gap-4 text-sm text-stone-900">
+              <Link href="/terms" className="hover:underline">이용약관</Link>
+              <span className="text-gray-400">·</span>
+              <Link href="/privacy" className="font-semibold hover:underline">개인정보 처리방침</Link>
             </div>
           </div>
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 아이포텐. All rights reserved.</p>
+
+          {/* Company Info */}
+          <div className="text-xs text-[#999999] space-y-1 mb-6">
+            <p>주식: UNAI 주식회사 대표이사: 김OO 사업자: 사업자 등록번호: 000-00-00000</p>
+            <p>사업자주소: 00시 00구 · 대표: 대표번호 · 사업자번호: 262-08-00275 · 통신판매업 번호: 11-1111</p>
+          </div>
+
+          {/* Copyright */}
+          <div className="text-xs text-[#999999]">
+            <p>© AIPOTEN. All rights reserved</p>
           </div>
         </div>
       </footer>
