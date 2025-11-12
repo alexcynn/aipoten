@@ -34,10 +34,10 @@ export default function JournalTestPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5EFE7] font-pretendard flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600">로딩 중...</p>
         </div>
       </div>
     )
@@ -208,24 +208,24 @@ export default function JournalTestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light py-8">
+    <div className="min-h-screen bg-[#F5EFE7] font-pretendard py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2 flex items-center">
-            <Sparkles className="mr-2 text-aipoten-green" />
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <h1 className="text-2xl font-bold text-stone-900 mb-2 flex items-center">
+            <Sparkles className="mr-2 text-[#FF6A00]" />
             상담일지 작성
           </h1>
-          <p className="text-sm text-gray-600 mb-6">AI를 활용한 테스트 페이지</p>
+          <p className="text-sm text-stone-600 mb-6">AI를 활용한 테스트 페이지</p>
 
           {/* 아동 선택 */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               아동 선택
             </label>
             <select
               value={childName}
               onChange={(e) => setChildName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
             >
               <option>김아이 (30개월)</option>
             </select>
@@ -233,13 +233,13 @@ export default function JournalTestPage() {
 
           {/* 세션 유형 */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               세션 유형
             </label>
             <select
               value={sessionType}
               onChange={(e) => setSessionType(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
             >
               <option>언어</option>
               <option>놀이</option>
@@ -250,33 +250,33 @@ export default function JournalTestPage() {
 
           {/* 세션 목표 */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               세션 목표
             </label>
             <textarea
               value={sessionGoal}
               onChange={(e) => setSessionGoal(e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
             />
           </div>
 
           {/* 아동 상태/관찰 */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               아동 상태/관찰
             </label>
             <textarea
               value={childObservation}
               onChange={(e) => setChildObservation(e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
             />
           </div>
 
           {/* 오늘 활동 */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               오늘 활동
             </label>
             <textarea
@@ -284,14 +284,14 @@ export default function JournalTestPage() {
               onChange={(e) => setTodayActivities(e.target.value)}
               rows={4}
               placeholder="예: 그림책 명칭 말하기, 소리모방 놀이, 역할놀이"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
             />
           </div>
 
           {/* 사용 교구/자료 & 강점 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 사용 교구/자료
               </label>
               <input
@@ -299,11 +299,11 @@ export default function JournalTestPage() {
                 value={materials}
                 onChange={(e) => setMaterials(e.target.value)}
                 placeholder="예: 동물 피규어, 의성이 카드, 스티커"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 강점
               </label>
               <input
@@ -311,14 +311,14 @@ export default function JournalTestPage() {
                 value={strengths}
                 onChange={(e) => setStrengths(e.target.value)}
                 placeholder="예: 모방 의지, 관심 집중, 반응성"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
               />
             </div>
           </div>
 
           {/* 아이듬 (우려사항) */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               아이듬
             </label>
             <input
@@ -326,13 +326,13 @@ export default function JournalTestPage() {
               value={concerns}
               onChange={(e) => setConcerns(e.target.value)}
               placeholder="예: 전환 어려움, 산만함, 낯가림"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
             />
           </div>
 
           {/* 가정 공식 */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               가정 공식
             </label>
             <textarea
@@ -340,13 +340,13 @@ export default function JournalTestPage() {
               onChange={(e) => setHomework(e.target.value)}
               rows={4}
               placeholder="예: 하루 10분 그림책 읽기, 선택지 제시로 말 이끌어내기"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
             />
           </div>
 
           {/* 다음 세션 계획 */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               다음 세션 계획
             </label>
             <textarea
@@ -354,7 +354,7 @@ export default function JournalTestPage() {
               onChange={(e) => setNextPlan(e.target.value)}
               rows={4}
               placeholder="예: 2어 조합 산출 확대, 상징놀이 확장"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+              className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
             />
           </div>
 
@@ -389,7 +389,7 @@ export default function JournalTestPage() {
             {showPrompt && (
               <div className="mt-4 space-y-4">
                 {/* 프롬프트 작성 가이드 */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl">
                   <button
                     type="button"
                     onClick={() => setShowGuide(!showGuide)}
@@ -446,7 +446,7 @@ export default function JournalTestPage() {
                 {/* 프롬프트 편집기 */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-stone-700">
                       프롬프트 편집
                     </label>
                     <button
@@ -473,10 +473,10 @@ export default function JournalTestPage() {
                       setIsPromptEdited(true)
                     }}
                     rows={15}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green font-mono text-xs"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-mono text-xs"
                     style={{ backgroundColor: '#FAFAFA' }}
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-stone-500">
                     {isPromptEdited
                       ? '⚠️ 프롬프트가 수정되었습니다. 생성 시 {{변수}}가 실제 입력값으로 치환되어 전송됩니다.'
                       : '기본 프롬프트를 사용합니다. {{변수}}는 자동으로 입력값으로 치환됩니다.'}
@@ -492,7 +492,7 @@ export default function JournalTestPage() {
             disabled={isGenerating}
             style={{
               width: '100%',
-              backgroundColor: isGenerating ? '#9CA3AF' : '#386646',
+              backgroundColor: isGenerating ? '#9CA3AF' : '#FF6A00',
               color: 'white',
               padding: '12px',
               borderRadius: '6px',
@@ -505,10 +505,10 @@ export default function JournalTestPage() {
               transition: 'background-color 0.3s',
             }}
             onMouseEnter={(e) => {
-              if (!isGenerating) e.currentTarget.style.backgroundColor = '#193149'
+              if (!isGenerating) e.currentTarget.style.backgroundColor = '#E55F00'
             }}
             onMouseLeave={(e) => {
-              if (!isGenerating) e.currentTarget.style.backgroundColor = '#386646'
+              if (!isGenerating) e.currentTarget.style.backgroundColor = '#FF6A00'
             }}
           >
             <Sparkles style={{ marginRight: '8px' }} size={20} />
@@ -517,14 +517,14 @@ export default function JournalTestPage() {
 
           {/* 생성된 결과 */}
           {showResult && (
-            <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="mt-6 bg-green-50 border border-green-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-gray-900">
+                <h3 className="font-semibold text-stone-900">
                   부모용 상담일지(자동 생성 미리보기)
                 </h3>
                 <button
                   onClick={handleCopy}
-                  className="flex items-center text-sm text-aipoten-green hover:text-aipoten-navy"
+                  className="flex items-center text-sm text-[#FF6A00] hover:text-stone-900"
                 >
                   <Copy size={16} className="mr-1" />
                   복사
@@ -533,7 +533,7 @@ export default function JournalTestPage() {
               <div className="bg-white rounded p-4 whitespace-pre-wrap text-sm leading-relaxed">
                 {generatedJournal}
               </div>
-              <p className="text-xs text-gray-600 mt-3">
+              <p className="text-xs text-stone-600 mt-3">
                 * 실제 서비스에서는 LLM API를 호출하여 연령별문장체로만 자동생성됩니다.
                 개별 첨부 시 정보가 반영하지 않습니다.
               </p>

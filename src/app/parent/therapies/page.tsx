@@ -148,17 +148,17 @@ export default function ParentTherapiesPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5EFE7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600">로딩 중...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-[#F5EFE7]">
       <Header />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -167,14 +167,14 @@ export default function ParentTherapiesPage() {
           <div className="mb-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">홈티 (정기 치료)</h1>
-                <p className="mt-2 text-gray-600">
+                <h1 className="text-3xl font-bold text-stone-900">홈티 (정기 치료)</h1>
+                <p className="mt-2 text-stone-600">
                   정기 언어치료 세션 내역입니다.
                 </p>
               </div>
               <Link
                 href="/parent/therapists?type=therapy"
-                className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+                className="px-6 py-3 bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors font-medium"
               >
                 신규 예약하기
               </Link>
@@ -182,7 +182,7 @@ export default function ParentTherapiesPage() {
           </div>
 
           {/* Tabs */}
-          <div className="bg-white rounded-lg shadow mb-6">
+          <div className="bg-white rounded-xl shadow-sm mb-6">
             <div className="border-b border-gray-200">
               <nav className="flex -mb-px overflow-x-auto">
                 {[
@@ -200,10 +200,10 @@ export default function ParentTherapiesPage() {
                       handleFilterChange()
                     }}
                     className={`
-                      whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors
+                      whitespace-nowrap py-4 px-6 border-b-2 font-semibold text-sm transition-colors
                       ${activeTab === tab.key
                         ? 'border-green-600 text-green-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-gray-300'
                       }
                     `}
                   >
@@ -218,7 +218,7 @@ export default function ParentTherapiesPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* 시작일 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-stone-700 mb-2">
                     시작일
                   </label>
                   <input
@@ -228,13 +228,13 @@ export default function ParentTherapiesPage() {
                       setStartDate(e.target.value)
                       handleFilterChange()
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                 </div>
 
                 {/* 종료일 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-stone-700 mb-2">
                     종료일
                   </label>
                   <input
@@ -244,7 +244,7 @@ export default function ParentTherapiesPage() {
                       setEndDate(e.target.value)
                       handleFilterChange()
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                 </div>
               </div>
@@ -252,43 +252,43 @@ export default function ParentTherapiesPage() {
           </div>
 
           {/* Bookings Table */}
-          <div className="bg-white shadow rounded-lg overflow-hidden">
+          <div className="bg-white shadow-sm rounded-xl overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-stone-900">
                 세션 목록 ({pagination.total}건)
               </h2>
             </div>
 
             {bookings.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500">세션 내역이 없습니다.</p>
+                <p className="text-stone-500">세션 내역이 없습니다.</p>
               </div>
             ) : (
               <>
                 {/* Desktop Table */}
                 <div className="hidden md:block overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-[#F5EFE7]">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider">
                           아이명
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider">
                           회차
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider">
                           일시
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider">
                           치료사
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider">
                           상태
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider">
                           후기
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider">
                           액션
                         </th>
                       </tr>
@@ -299,16 +299,16 @@ export default function ParentTherapiesPage() {
                         const canReview = canWriteReview(booking)
 
                         return (
-                          <tr key={booking.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <tr key={booking.id} className="hover:bg-[#FFE5E5]">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-stone-900">
                               {booking.child.name}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                              <span className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 font-medium">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-600">
+                              <span className="px-2 py-1 text-xs rounded bg-gray-100 text-stone-700 font-medium">
                                 {booking.sessionNumber}/{booking.payment.totalSessions}회차
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-600">
                               {new Date(booking.scheduledAt).toLocaleString('ko-KR', {
                                 year: 'numeric',
                                 month: 'long',
@@ -341,26 +341,26 @@ export default function ParentTherapiesPage() {
                                 <div className="space-y-1">
                                   <div className="flex items-center gap-1">
                                     <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                                    <span className="font-medium text-gray-700">
+                                    <span className="font-semibold text-stone-700">
                                       {booking.review.rating}.0
                                     </span>
                                   </div>
                                   {booking.review.content && (
-                                    <p className="text-gray-600 text-xs line-clamp-2 max-w-xs">
+                                    <p className="text-stone-600 text-xs line-clamp-2 max-w-xs">
                                       {booking.review.content}
                                     </p>
                                   )}
                                   <div className="flex gap-2">
                                     <button
                                       onClick={() => setReviewModalBooking(booking)}
-                                      className="text-blue-600 hover:text-blue-700 hover:underline text-xs"
+                                      className="text-[#FF6A00] hover:text-[#E55F00] hover:underline text-xs"
                                     >
                                       {booking.review.content ? '전체보기' : '보기'}
                                     </button>
                                     {canReview && (
                                       <button
                                         onClick={() => setReviewModalBooking(booking)}
-                                        className="text-gray-600 hover:text-gray-700 hover:underline text-xs"
+                                        className="text-stone-600 hover:text-stone-700 hover:underline text-xs"
                                       >
                                         수정
                                       </button>
@@ -370,7 +370,7 @@ export default function ParentTherapiesPage() {
                               ) : canReview ? (
                                 <button
                                   onClick={() => setReviewModalBooking(booking)}
-                                  className="px-3 py-1 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                                  className="px-3 py-1 text-xs bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors"
                                 >
                                   후기 작성
                                 </button>
@@ -385,7 +385,7 @@ export default function ParentTherapiesPage() {
                                     setSelectedBookingId(booking.id)
                                     setIsBookingModalOpen(true)
                                   }}
-                                  className="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                                  className="px-3 py-1 border border-gray-300 rounded-[10px] text-stone-700 hover:bg-[#FFE5E5] transition-colors"
                                 >
                                   상세보기
                                 </button>
@@ -395,7 +395,7 @@ export default function ParentTherapiesPage() {
                                       setJournalBookingId(booking.id)
                                       setIsJournalModalOpen(true)
                                     }}
-                                    className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center gap-1"
+                                    className="px-3 py-1 bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors flex items-center gap-1"
                                   >
                                     <FileText size={14} />
                                     상담일지
@@ -421,8 +421,8 @@ export default function ParentTherapiesPage() {
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-gray-900">{booking.child.name}</h3>
-                              <span className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 font-medium">
+                              <h3 className="font-semibold text-stone-900">{booking.child.name}</h3>
+                              <span className="px-2 py-1 text-xs rounded bg-gray-100 text-stone-700 font-medium">
                                 {booking.sessionNumber}/{booking.payment.totalSessions}회차
                               </span>
                             </div>
@@ -437,7 +437,7 @@ export default function ParentTherapiesPage() {
                             </span>
                           </div>
 
-                          <div className="space-y-1 text-sm text-gray-600">
+                          <div className="space-y-1 text-sm text-stone-600">
                             <p>
                               <span className="font-medium">일시:</span>{' '}
                               {new Date(booking.scheduledAt).toLocaleString('ko-KR', {
@@ -461,22 +461,22 @@ export default function ParentTherapiesPage() {
 
                           {/* Review */}
                           {booking.review && (
-                            <div className="space-y-2 bg-yellow-50 p-3 rounded-md border border-yellow-200">
+                            <div className="space-y-2 bg-yellow-50 p-3 rounded-[10px] border border-yellow-200">
                               <div className="flex items-center gap-1 text-sm">
-                                <span className="font-medium text-gray-700">내 후기:</span>
+                                <span className="font-semibold text-stone-700">내 후기:</span>
                                 <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                                <span className="font-medium text-gray-700">
+                                <span className="font-semibold text-stone-700">
                                   {booking.review.rating}.0
                                 </span>
                               </div>
                               {booking.review.content && (
-                                <p className="text-gray-700 text-sm line-clamp-3">
+                                <p className="text-stone-700 text-sm line-clamp-3">
                                   {booking.review.content}
                                 </p>
                               )}
                               <button
                                 onClick={() => setReviewModalBooking(booking)}
-                                className="text-blue-600 hover:text-blue-700 hover:underline text-xs font-medium"
+                                className="text-[#FF6A00] hover:text-[#E55F00] hover:underline text-xs font-medium"
                               >
                                 {booking.review.content ? '전체보기 / 수정' : '보기 / 수정'}
                               </button>
@@ -488,7 +488,7 @@ export default function ParentTherapiesPage() {
                             {canReview && !booking.review && (
                               <button
                                 onClick={() => setReviewModalBooking(booking)}
-                                className="flex-1 px-3 py-2 text-sm rounded-md transition-colors font-medium bg-green-600 text-white hover:bg-green-700"
+                                className="flex-1 px-3 py-2 text-sm rounded-[10px] transition-colors font-semibold bg-[#FF6A00] text-white hover:bg-[#E55F00]"
                               >
                                 후기 작성
                               </button>
@@ -498,7 +498,7 @@ export default function ParentTherapiesPage() {
                                 setSelectedBookingId(booking.id)
                                 setIsBookingModalOpen(true)
                               }}
-                              className={`px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors font-medium text-center ${
+                              className={`px-3 py-2 text-sm border border-gray-300 rounded-[10px] text-stone-700 hover:bg-[#FFE5E5] transition-colors font-semibold text-center ${
                                 canReview && !booking.review ? 'flex-1' : 'w-full'
                               }`}
                             >
@@ -510,7 +510,7 @@ export default function ParentTherapiesPage() {
                                   setJournalBookingId(booking.id)
                                   setIsJournalModalOpen(true)
                                 }}
-                                className="w-full px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-1"
+                                className="w-full px-3 py-2 text-sm bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors font-semibold flex items-center justify-center gap-1"
                               >
                                 <FileText size={16} />
                                 상담일지 보기
@@ -532,7 +532,7 @@ export default function ParentTherapiesPage() {
                   <button
                     onClick={() => handlePageChange(pagination.page - 1)}
                     disabled={pagination.page === 1}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    className="px-3 py-1 border border-gray-300 rounded-[10px] text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#FFE5E5]"
                   >
                     이전
                   </button>
@@ -541,10 +541,10 @@ export default function ParentTherapiesPage() {
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`px-3 py-1 border rounded-md text-sm ${
+                      className={`px-3 py-1 border rounded-[10px] text-sm ${
                         page === pagination.page
-                          ? 'bg-green-600 text-white border-green-600'
-                          : 'border-gray-300 hover:bg-gray-50'
+                          ? 'bg-[#FF6A00] text-white border-green-600'
+                          : 'border-gray-300 hover:bg-[#FFE5E5]'
                       }`}
                     >
                       {page}
@@ -554,7 +554,7 @@ export default function ParentTherapiesPage() {
                   <button
                     onClick={() => handlePageChange(pagination.page + 1)}
                     disabled={pagination.page === pagination.totalPages}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    className="px-3 py-1 border border-gray-300 rounded-[10px] text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#FFE5E5]"
                   >
                     다음
                   </button>

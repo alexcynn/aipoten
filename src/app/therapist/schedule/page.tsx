@@ -518,10 +518,10 @@ export default function TherapistSchedulePage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5EFE7] font-pretendard flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600">로딩 중...</p>
         </div>
       </div>
     )
@@ -530,12 +530,12 @@ export default function TherapistSchedulePage() {
   if (!session) return null
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-[#F5EFE7] font-pretendard">
       <Header />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">스케줄 관리</h1>
+          <h1 className="text-3xl font-bold text-stone-900 mb-6">스케줄 관리</h1>
 
           {message && (
             <div
@@ -577,20 +577,11 @@ export default function TherapistSchedulePage() {
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key as any)}
-                  style={{
-                    whiteSpace: 'nowrap',
-                    paddingTop: '1rem',
-                    paddingBottom: '1rem',
-                    paddingLeft: '0.25rem',
-                    paddingRight: '0.25rem',
-                    borderBottom: '2px solid',
-                    borderColor: activeTab === tab.key ? '#10b981' : 'transparent',
-                    fontWeight: 500,
-                    fontSize: '0.875rem',
-                    color: activeTab === tab.key ? '#10b981' : '#6b7280',
-                    cursor: 'pointer',
-                    background: 'none'
-                  }}
+                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === tab.key
+                      ? 'border-[#FF6A00] text-[#FF6A00]'
+                      : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-gray-300'
+                  }`}
                 >
                   {tab.label}
                 </button>
@@ -600,27 +591,27 @@ export default function TherapistSchedulePage() {
 
           {/* Calendar Tab */}
           {activeTab === 'calendar' && (
-            <div className="bg-white shadow rounded-lg p-6">
+            <div className="bg-white shadow rounded-xl p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold text-stone-900">
                   {currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월
                 </h2>
                 <div className="flex space-x-2">
                   <button
                     onClick={prevMonth}
-                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="px-4 py-2 border border-gray-300 rounded-[10px] hover:bg-gray-50"
                   >
                     이전
                   </button>
                   <button
                     onClick={() => setCurrentDate(new Date())}
-                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="px-4 py-2 border border-gray-300 rounded-[10px] hover:bg-gray-50"
                   >
                     오늘
                   </button>
                   <button
                     onClick={nextMonth}
-                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="px-4 py-2 border border-gray-300 rounded-[10px] hover:bg-gray-50"
                   >
                     다음
                   </button>
@@ -775,14 +766,14 @@ export default function TherapistSchedulePage() {
 
           {/* Bulk Create Tab */}
           {activeTab === 'bulk-create' && (
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">스케줄 일괄 생성</h2>
+            <div className="bg-white shadow rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-stone-900 mb-6">스케줄 일괄 생성</h2>
 
               <div className="space-y-6">
                 {/* Date Range */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">
                       시작일
                     </label>
                     <input
@@ -790,12 +781,12 @@ export default function TherapistSchedulePage() {
                       value={bulkCreateForm.startDate}
                       onChange={(e) => setBulkCreateForm({...bulkCreateForm, startDate: e.target.value})}
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      className="w-full border border-gray-300 rounded-[10px] px-3 py-2"
                       style={{ fontSize: '1rem' }}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">
                       종료일 (최대 3개월)
                     </label>
                     <input
@@ -803,7 +794,7 @@ export default function TherapistSchedulePage() {
                       value={bulkCreateForm.endDate}
                       onChange={(e) => setBulkCreateForm({...bulkCreateForm, endDate: e.target.value})}
                       min={bulkCreateForm.startDate || new Date().toISOString().split('T')[0]}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      className="w-full border border-gray-300 rounded-[10px] px-3 py-2"
                       style={{ fontSize: '1rem' }}
                     />
                   </div>
@@ -817,15 +808,15 @@ export default function TherapistSchedulePage() {
                       checked={bulkCreateForm.excludeHolidays}
                       onChange={(e) => setBulkCreateForm({...bulkCreateForm, excludeHolidays: e.target.checked})}
                       className="w-4 h-4"
-                      style={{ accentColor: '#10b981' }}
+                      style={{ accentColor: '#FF6A00' }}
                     />
-                    <span className="ml-2 text-sm text-gray-700">공휴일 제외</span>
+                    <span className="ml-2 text-sm text-stone-700">공휴일 제외</span>
                   </label>
                 </div>
 
                 {/* Day Selection */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">요일 선택</h3>
+                  <h3 className="text-lg font-medium text-stone-900 mb-3">요일 선택</h3>
                   <div className="flex flex-wrap gap-2">
                     {DAYS_OF_WEEK_EN.map((day, index) => (
                       <label key={day} className="flex items-center cursor-pointer">
@@ -834,9 +825,9 @@ export default function TherapistSchedulePage() {
                           checked={selectedDays.includes(day)}
                           onChange={() => toggleDay(day)}
                           className="w-4 h-4"
-                          style={{ accentColor: '#10b981' }}
+                          style={{ accentColor: '#FF6A00' }}
                         />
-                        <span className="ml-2 text-sm text-gray-700">{DAYS_OF_WEEK_KR[index]}</span>
+                        <span className="ml-2 text-sm text-stone-700">{DAYS_OF_WEEK_KR[index]}</span>
                       </label>
                     ))}
                   </div>
@@ -844,7 +835,7 @@ export default function TherapistSchedulePage() {
 
                 {/* Weekly Pattern */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">요일별 시간 설정</h3>
+                  <h3 className="text-lg font-medium text-stone-900 mb-4">요일별 시간 설정</h3>
                   <div className="space-y-4">
                     {DAYS_OF_WEEK_EN.filter(day => selectedDays.includes(day)).map((day, index) => (
                       <WeeklyPatternInput
@@ -869,8 +860,8 @@ export default function TherapistSchedulePage() {
                       padding: '1rem'
                     }}
                   >
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">📊 생성 요약</h4>
-                    <ul className="text-sm text-gray-700 space-y-1">
+                    <h4 className="text-sm font-medium text-stone-900 mb-2">📊 생성 요약</h4>
+                    <ul className="text-sm text-stone-700 space-y-1">
                       <li>• 선택된 요일: {selectedDays.length}개</li>
                       <li>
                         • 총 시간대: {Object.values(bulkCreateForm.weeklyPattern).reduce((sum, ranges) => sum + ranges.length, 0)}개
@@ -896,7 +887,7 @@ export default function TherapistSchedulePage() {
                   disabled={isSaving}
                   style={{
                     width: '100%',
-                    backgroundColor: isSaving ? '#9ca3af' : '#10b981',
+                    backgroundColor: isSaving ? '#9ca3af' : '#FF6A00',
                     color: 'white',
                     padding: '0.75rem 1rem',
                     borderRadius: '0.375rem',
@@ -909,13 +900,13 @@ export default function TherapistSchedulePage() {
                   }}
                   onMouseEnter={(e) => {
                     if (!isSaving) {
-                      e.currentTarget.style.backgroundColor = '#059669'
+                      e.currentTarget.style.backgroundColor = '#E55F00'
                       e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.15)'
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isSaving) {
-                      e.currentTarget.style.backgroundColor = '#10b981'
+                      e.currentTarget.style.backgroundColor = '#FF6A00'
                       e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'
                     }
                   }}
@@ -928,8 +919,8 @@ export default function TherapistSchedulePage() {
 
           {/* Bulk Delete Tab */}
           {activeTab === 'bulk-delete' && (
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">스케줄 일괄 삭제</h2>
+            <div className="bg-white shadow rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-stone-900 mb-6">스케줄 일괄 삭제</h2>
 
               <div className="space-y-6">
                 <div
@@ -947,19 +938,19 @@ export default function TherapistSchedulePage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">
                       시작일
                     </label>
                     <input
                       type="date"
                       value={bulkDeleteForm.startDate}
                       onChange={(e) => setBulkDeleteForm({...bulkDeleteForm, startDate: e.target.value})}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      className="w-full border border-gray-300 rounded-[10px] px-3 py-2"
                       style={{ fontSize: '1rem' }}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">
                       종료일
                     </label>
                     <input
@@ -967,7 +958,7 @@ export default function TherapistSchedulePage() {
                       value={bulkDeleteForm.endDate}
                       onChange={(e) => setBulkDeleteForm({...bulkDeleteForm, endDate: e.target.value})}
                       min={bulkDeleteForm.startDate}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      className="w-full border border-gray-300 rounded-[10px] px-3 py-2"
                       style={{ fontSize: '1rem' }}
                     />
                   </div>
@@ -980,9 +971,9 @@ export default function TherapistSchedulePage() {
                       checked={bulkDeleteForm.onlyEmpty}
                       onChange={(e) => setBulkDeleteForm({...bulkDeleteForm, onlyEmpty: e.target.checked})}
                       className="w-4 h-4"
-                      style={{ accentColor: '#10b981' }}
+                      style={{ accentColor: '#FF6A00' }}
                     />
-                    <span className="ml-2 text-sm font-medium text-gray-700">
+                    <span className="ml-2 text-sm font-medium text-stone-700">
                       예약 없는 슬롯만 삭제 (권장)
                     </span>
                   </label>
@@ -1024,12 +1015,12 @@ export default function TherapistSchedulePage() {
           {activeTab === 'holidays' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Add Holiday Form */}
-              <div className="bg-white shadow rounded-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">휴일 추가</h2>
+              <div className="bg-white shadow rounded-xl p-6">
+                <h2 className="text-2xl font-bold text-stone-900 mb-6">휴일 추가</h2>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">
                       날짜
                     </label>
                     <input
@@ -1037,13 +1028,13 @@ export default function TherapistSchedulePage() {
                       value={newHoliday.date}
                       onChange={(e) => setNewHoliday({...newHoliday, date: e.target.value})}
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      className="w-full border border-gray-300 rounded-[10px] px-3 py-2"
                       style={{ fontSize: '1rem' }}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-stone-700 mb-1">
                       사유
                     </label>
                     <input
@@ -1051,7 +1042,7 @@ export default function TherapistSchedulePage() {
                       value={newHoliday.reason}
                       onChange={(e) => setNewHoliday({...newHoliday, reason: e.target.value})}
                       placeholder="예: 개인 일정"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      className="w-full border border-gray-300 rounded-[10px] px-3 py-2"
                       style={{ fontSize: '1rem' }}
                     />
                   </div>
@@ -1061,7 +1052,7 @@ export default function TherapistSchedulePage() {
                     disabled={isSaving}
                     style={{
                       width: '100%',
-                      backgroundColor: isSaving ? '#9ca3af' : '#10b981',
+                      backgroundColor: isSaving ? '#9ca3af' : '#FF6A00',
                       color: 'white',
                       padding: '0.75rem 1rem',
                       borderRadius: '0.375rem',
@@ -1077,11 +1068,11 @@ export default function TherapistSchedulePage() {
               </div>
 
               {/* Holidays List */}
-              <div className="bg-white shadow rounded-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">등록된 휴일</h2>
+              <div className="bg-white shadow rounded-xl p-6">
+                <h2 className="text-2xl font-bold text-stone-900 mb-6">등록된 휴일</h2>
 
                 {holidays.length === 0 ? (
-                  <p className="text-sm text-gray-500">등록된 휴일이 없습니다.</p>
+                  <p className="text-sm text-stone-500">등록된 휴일이 없습니다.</p>
                 ) : (
                   <div className="space-y-3" style={{ maxHeight: '500px', overflowY: 'auto' }}>
                     {holidays
@@ -1089,10 +1080,10 @@ export default function TherapistSchedulePage() {
                       .map(holiday => (
                         <div
                           key={holiday.id}
-                          className="flex items-center justify-between bg-gray-50 p-3 rounded-md border border-gray-200"
+                          className="flex items-center justify-between bg-gray-50 p-3 rounded-[10px] border border-gray-200"
                         >
                           <div>
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-medium text-stone-900">
                               {new Date(holiday.date).toLocaleDateString('ko-KR', {
                                 year: 'numeric',
                                 month: 'long',
@@ -1100,7 +1091,7 @@ export default function TherapistSchedulePage() {
                                 weekday: 'short'
                               })}
                             </p>
-                            <p className="text-xs text-gray-600">{holiday.reason || '-'}</p>
+                            <p className="text-xs text-stone-600">{holiday.reason || '-'}</p>
                             {holiday.isRecurring && (
                               <span
                                 style={{
@@ -1169,16 +1160,16 @@ function WeeklyPatternInput({
 
   return (
     <div
-      className="border border-gray-200 rounded-md p-4"
+      className="border border-gray-200 rounded-[10px] p-4"
       style={{ backgroundColor: timeRanges.length > 0 ? '#f0fdf4' : 'white' }}
     >
-      <h4 className="font-medium text-gray-900 mb-3">
+      <h4 className="font-medium text-stone-900 mb-3">
         {dayKr} {timeRanges.length > 0 && <span className="text-xs text-green-600">({timeRanges.length}개 시간대)</span>}
       </h4>
 
       <div className="flex items-end space-x-2 mb-3">
         <div className="flex-1">
-          <label className="block text-xs text-gray-600 mb-1">시작</label>
+          <label className="block text-xs text-stone-600 mb-1">시작</label>
           <input
             type="time"
             value={startTime}
@@ -1188,7 +1179,7 @@ function WeeklyPatternInput({
           />
         </div>
         <div className="flex-1">
-          <label className="block text-xs text-gray-600 mb-1">종료</label>
+          <label className="block text-xs text-stone-600 mb-1">종료</label>
           <input
             type="time"
             value={endTime}
@@ -1201,7 +1192,7 @@ function WeeklyPatternInput({
           onClick={handleAdd}
           style={{
             padding: '0.375rem 0.875rem',
-            backgroundColor: '#10b981',
+            backgroundColor: '#FF6A00',
             color: 'white',
             fontSize: '0.875rem',
             fontWeight: 500,
@@ -1212,11 +1203,11 @@ function WeeklyPatternInput({
             boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#059669'
+            e.currentTarget.style.backgroundColor = '#E55F00'
             e.currentTarget.style.transform = 'scale(1.05)'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#10b981'
+            e.currentTarget.style.backgroundColor = '#FF6A00'
             e.currentTarget.style.transform = 'scale(1)'
           }}
         >
@@ -1226,7 +1217,7 @@ function WeeklyPatternInput({
 
       {timeRanges.length > 0 ? (
         <div className="space-y-2">
-          <div className="text-xs text-gray-600 mb-2 font-medium">추가된 시간대:</div>
+          <div className="text-xs text-stone-600 mb-2 font-medium">추가된 시간대:</div>
           {timeRanges.map((range, index) => (
             <div
               key={index}

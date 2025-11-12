@@ -125,17 +125,17 @@ export default function TherapistConsultationsPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5EFE7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600">로딩 중...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-[#F5EFE7]">
       <Header />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -144,8 +144,8 @@ export default function TherapistConsultationsPage() {
           <div className="mb-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">언어 컨설팅 요청</h1>
-                <p className="mt-2 text-gray-600">
+                <h1 className="text-3xl font-bold text-stone-900">언어 컨설팅 요청</h1>
+                <p className="mt-2 text-stone-600">
                   받은 언어 컨설팅 예약 요청 목록입니다.
                 </p>
               </div>
@@ -153,7 +153,7 @@ export default function TherapistConsultationsPage() {
           </div>
 
           {/* Tabs */}
-          <div className="bg-white rounded-lg shadow mb-6">
+          <div className="bg-white rounded-xl shadow-sm mb-6">
             <div className="border-b border-gray-200">
               <nav className="flex -mb-px overflow-x-auto">
                 {[
@@ -172,8 +172,8 @@ export default function TherapistConsultationsPage() {
                     className={`
                       whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors
                       ${activeTab === tab.key
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        ? 'border-[#FF6A00] text-[#FF6A00]'
+                        : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-gray-300'
                       }
                     `}
                   >
@@ -187,7 +187,7 @@ export default function TherapistConsultationsPage() {
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
                     시작일
                   </label>
                   <input
@@ -197,12 +197,12 @@ export default function TherapistConsultationsPage() {
                       setStartDate(e.target.value)
                       handleFilterChange()
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
                     종료일
                   </label>
                   <input
@@ -212,7 +212,7 @@ export default function TherapistConsultationsPage() {
                       setEndDate(e.target.value)
                       handleFilterChange()
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -220,40 +220,40 @@ export default function TherapistConsultationsPage() {
           </div>
 
           {/* Bookings Table */}
-          <div className="bg-white shadow rounded-lg overflow-hidden">
+          <div className="bg-white shadow-sm rounded-xl overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-stone-900">
                 예약 목록 ({pagination.total}건)
               </h2>
             </div>
 
             {bookings.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500">예약 요청이 없습니다.</p>
+                <p className="text-stone-500">예약 요청이 없습니다.</p>
               </div>
             ) : (
               <>
                 {/* Desktop Table */}
                 <div className="hidden md:block overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-[#F5EFE7]">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                           아이명
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                           부모님
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                           일시
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                           금액
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                           상태
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
                           액션
                         </th>
                       </tr>
@@ -263,14 +263,14 @@ export default function TherapistConsultationsPage() {
                         const statusInfo = getStatusLabel(booking)
 
                         return (
-                          <tr key={booking.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <tr key={booking.id} className="hover:bg-[#FFE5E5]">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">
                               {booking.child.name}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-600">
                               {booking.parentUser.name}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-600">
                               {new Date(booking.scheduledAt).toLocaleString('ko-KR', {
                                 year: 'numeric',
                                 month: 'long',
@@ -279,7 +279,7 @@ export default function TherapistConsultationsPage() {
                                 minute: '2-digit'
                               })}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-900">
                               ₩{booking.payment.finalFee.toLocaleString()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -299,7 +299,7 @@ export default function TherapistConsultationsPage() {
                                   setSelectedBookingId(booking.id)
                                   setIsBookingModalOpen(true)
                                 }}
-                                className="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                                className="px-3 py-1 border border-gray-300 rounded-[10px] text-stone-700 hover:bg-[#FFE5E5] transition-colors"
                               >
                                 상세보기
                               </button>
@@ -320,7 +320,7 @@ export default function TherapistConsultationsPage() {
                       <div key={booking.id} className="px-6 py-4">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <h3 className="font-medium text-gray-900">{booking.child.name}</h3>
+                            <h3 className="font-medium text-stone-900">{booking.child.name}</h3>
                             <span
                               className="px-2 py-1 text-xs rounded-full font-medium"
                               style={{
@@ -332,7 +332,7 @@ export default function TherapistConsultationsPage() {
                             </span>
                           </div>
 
-                          <div className="space-y-1 text-sm text-gray-600">
+                          <div className="space-y-1 text-sm text-stone-600">
                             <p>
                               <span className="font-medium">부모님:</span> {booking.parentUser.name}
                             </p>
@@ -357,7 +357,7 @@ export default function TherapistConsultationsPage() {
                                 setSelectedBookingId(booking.id)
                                 setIsBookingModalOpen(true)
                               }}
-                              className="block w-full px-3 py-2 text-sm text-center border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors font-medium"
+                              className="block w-full px-3 py-2 text-sm text-center border border-gray-300 rounded-[10px] text-stone-700 hover:bg-[#FFE5E5] transition-colors font-medium"
                             >
                               상세보기
                             </button>
@@ -377,7 +377,7 @@ export default function TherapistConsultationsPage() {
                   <button
                     onClick={() => handlePageChange(pagination.page - 1)}
                     disabled={pagination.page === 1}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    className="px-3 py-1 border border-gray-300 rounded-[10px] text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#FFE5E5]"
                   >
                     이전
                   </button>
@@ -386,10 +386,10 @@ export default function TherapistConsultationsPage() {
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`px-3 py-1 border rounded-md text-sm ${
+                      className={`px-3 py-1 border rounded-[10px] text-sm ${
                         page === pagination.page
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'border-gray-300 hover:bg-gray-50'
+                          ? 'bg-[#FF6A00] text-white border-[#FF6A00]'
+                          : 'border-gray-300 hover:bg-[#FFE5E5]'
                       }`}
                     >
                       {page}
@@ -399,7 +399,7 @@ export default function TherapistConsultationsPage() {
                   <button
                     onClick={() => handlePageChange(pagination.page + 1)}
                     disabled={pagination.page === pagination.totalPages}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    className="px-3 py-1 border border-gray-300 rounded-[10px] text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#FFE5E5]"
                   >
                     다음
                   </button>

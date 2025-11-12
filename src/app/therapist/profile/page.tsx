@@ -377,10 +377,10 @@ export default function TherapistProfilePage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5EFE7] font-pretendard flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600">로딩 중...</p>
         </div>
       </div>
     )
@@ -391,13 +391,13 @@ export default function TherapistProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-[#F5EFE7] font-pretendard">
       <Header />
 
       <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         {/* Pending Update Warning */}
         {hasPendingUpdate && (
-          <div className="mb-6 bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <div className="mb-6 bg-orange-50 border border-orange-200 rounded-xl p-4">
             <div className="flex">
               <div className="flex-shrink-0">
                 <span className="text-orange-400">⚠️</span>
@@ -416,8 +416,8 @@ export default function TherapistProfilePage() {
 
         {/* View Mode - Profile Display */}
         {!isEditMode && !profile && (
-          <div className="bg-white shadow-lg rounded-lg p-6">
-            <p className="text-gray-600">프로필 정보를 불러오는 중입니다...</p>
+          <div className="bg-white shadow-lg rounded-xl p-6">
+            <p className="text-stone-600">프로필 정보를 불러오는 중입니다...</p>
           </div>
         )}
 
@@ -425,10 +425,10 @@ export default function TherapistProfilePage() {
           <div className="space-y-6">
             {console.log('보기 모드 렌더링, profile:', profile)}
             {/* Header with Edit Button */}
-            <div className="bg-white shadow-lg rounded-lg p-6">
+            <div className="bg-white shadow-lg rounded-xl p-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">내 프로필</h1>
+                  <h1 className="text-3xl font-bold text-stone-900">내 프로필</h1>
                   {profile.isPreTherapist && (
                     <span className="inline-block mt-2 px-4 py-1.5 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
                       예비 치료사
@@ -445,7 +445,7 @@ export default function TherapistProfilePage() {
                     setCurrentStep(1)
                   }}
                   disabled={hasPendingUpdate}
-                  className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-3 bg-[#FF6A00] text-white rounded-xl font-medium hover:bg-[#E55F00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   프로필 수정
                 </button>
@@ -453,15 +453,15 @@ export default function TherapistProfilePage() {
             </div>
 
             {/* Tabs */}
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="bg-white shadow-lg rounded-xl overflow-hidden">
               <div className="border-b border-gray-200">
                 <nav className="-mb-px flex">
                   <button
                     onClick={() => setActiveTab('info')}
                     className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
                       activeTab === 'info'
-                        ? 'border-green-500 text-green-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        ? 'border-[#FF6A00] text-[#FF6A00]'
+                        : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-gray-300'
                     }`}
                   >
                     기본 정보
@@ -470,8 +470,8 @@ export default function TherapistProfilePage() {
                     onClick={() => setActiveTab('education')}
                     className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
                       activeTab === 'education'
-                        ? 'border-green-500 text-green-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        ? 'border-[#FF6A00] text-[#FF6A00]'
+                        : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-gray-300'
                     }`}
                   >
                     학력
@@ -482,8 +482,8 @@ export default function TherapistProfilePage() {
                         onClick={() => setActiveTab('certifications')}
                         className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
                           activeTab === 'certifications'
-                            ? 'border-green-500 text-green-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ? 'border-[#FF6A00] text-[#FF6A00]'
+                            : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-gray-300'
                         }`}
                       >
                         자격증
@@ -492,8 +492,8 @@ export default function TherapistProfilePage() {
                         onClick={() => setActiveTab('experience')}
                         className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
                           activeTab === 'experience'
-                            ? 'border-green-500 text-green-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ? 'border-[#FF6A00] text-[#FF6A00]'
+                            : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-gray-300'
                         }`}
                       >
                         경력
@@ -509,56 +509,56 @@ export default function TherapistProfilePage() {
                   <div className="space-y-6">
                     {/* Basic Info Section */}
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">기본 정보</h2>
+                      <h2 className="text-xl font-bold text-stone-900 mb-4 pb-2 border-b">기본 정보</h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-gray-500 mb-1">이름</label>
-                          <p className="text-lg text-gray-900">{profile.user.name}</p>
+                          <label className="block text-sm font-medium text-stone-500 mb-1">이름</label>
+                          <p className="text-lg text-stone-900">{profile.user.name}</p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-500 mb-1">이메일</label>
-                          <p className="text-lg text-gray-900">{profile.user.email}</p>
+                          <label className="block text-sm font-medium text-stone-500 mb-1">이메일</label>
+                          <p className="text-lg text-stone-900">{profile.user.email}</p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-500 mb-1">성별</label>
-                          <p className="text-lg text-gray-900">{profile.gender === 'MALE' ? '남성' : profile.gender === 'FEMALE' ? '여성' : '미입력'}</p>
+                          <label className="block text-sm font-medium text-stone-500 mb-1">성별</label>
+                          <p className="text-lg text-stone-900">{profile.gender === 'MALE' ? '남성' : profile.gender === 'FEMALE' ? '여성' : '미입력'}</p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-500 mb-1">생년</label>
-                          <p className="text-lg text-gray-900">{profile.birthYear ? `${profile.birthYear}년생` : '미입력'}</p>
+                          <label className="block text-sm font-medium text-stone-500 mb-1">생년</label>
+                          <p className="text-lg text-stone-900">{profile.birthYear ? `${profile.birthYear}년생` : '미입력'}</p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-500 mb-1">전화번호</label>
-                          <p className="text-lg text-gray-900">{profile.user.phone || '미입력'}</p>
+                          <label className="block text-sm font-medium text-stone-500 mb-1">전화번호</label>
+                          <p className="text-lg text-stone-900">{profile.user.phone || '미입력'}</p>
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-500 mb-1">주소</label>
-                          <p className="text-lg text-gray-900">{profile.address || '미입력'}</p>
-                          {profile.addressDetail && <p className="text-sm text-gray-600 mt-1">{profile.addressDetail}</p>}
+                          <label className="block text-sm font-medium text-stone-500 mb-1">주소</label>
+                          <p className="text-lg text-stone-900">{profile.address || '미입력'}</p>
+                          {profile.addressDetail && <p className="text-sm text-stone-600 mt-1">{profile.addressDetail}</p>}
                         </div>
                       </div>
                     </div>
 
                     {/* Professional Info Section */}
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">전문 정보</h2>
+                      <h2 className="text-xl font-bold text-stone-900 mb-4 pb-2 border-b">전문 정보</h2>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-500 mb-2">치료 전문 분야</label>
+                          <label className="block text-sm font-medium text-stone-500 mb-2">치료 전문 분야</label>
                           <div className="flex flex-wrap gap-2">
                             {profile.specialties && profile.specialties.length > 0 ? (
                               profile.specialties.map((specialty) => (
-                                <span key={specialty} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                                <span key={specialty} className="px-3 py-1 bg-[#FFE5E5] text-[#FF6A00] rounded-full text-sm">
                                   {THERAPY_TYPES.find(t => t.value === specialty)?.label || specialty}
                                 </span>
                               ))
                             ) : (
-                              <p className="text-gray-400 text-sm">미등록</p>
+                              <p className="text-stone-400 text-sm">미등록</p>
                             )}
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-500 mb-2">아이 나이 범위</label>
+                          <label className="block text-sm font-medium text-stone-500 mb-2">아이 나이 범위</label>
                           <div className="flex flex-wrap gap-2">
                             {profile.childAgeRanges && profile.childAgeRanges.length > 0 ? (
                               profile.childAgeRanges.map((range) => (
@@ -567,12 +567,12 @@ export default function TherapistProfilePage() {
                                 </span>
                               ))
                             ) : (
-                              <p className="text-gray-400 text-sm">미등록</p>
+                              <p className="text-stone-400 text-sm">미등록</p>
                             )}
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-500 mb-2">서비스 가능 지역</label>
+                          <label className="block text-sm font-medium text-stone-500 mb-2">서비스 가능 지역</label>
                           <div className="flex flex-wrap gap-2">
                             {profile.serviceAreas && profile.serviceAreas.length > 0 ? (
                               profile.serviceAreas.map((area) => (
@@ -581,32 +581,32 @@ export default function TherapistProfilePage() {
                                 </span>
                               ))
                             ) : (
-                              <p className="text-gray-400 text-sm">미등록</p>
+                              <p className="text-stone-400 text-sm">미등록</p>
                             )}
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-500 mb-1">세션 비용 (50분 기준)</label>
-                          <p className="text-lg text-gray-900">{profile.sessionFee?.toLocaleString()}원</p>
+                          <label className="block text-sm font-medium text-stone-500 mb-1">세션 비용 (50분 기준)</label>
+                          <p className="text-lg text-stone-900">{profile.sessionFee?.toLocaleString()}원</p>
                         </div>
                       </div>
                     </div>
 
                     {/* 계좌 정보 */}
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">계좌 정보</h2>
+                      <h2 className="text-xl font-bold text-stone-900 mb-4 pb-2 border-b">계좌 정보</h2>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-500 mb-1">은행</label>
-                          <p className="text-lg text-gray-900">{profile.bank || '미등록'}</p>
+                          <label className="block text-sm font-medium text-stone-500 mb-1">은행</label>
+                          <p className="text-lg text-stone-900">{profile.bank || '미등록'}</p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-500 mb-1">계좌번호</label>
-                          <p className="text-lg text-gray-900">{profile.accountNumber || '미등록'}</p>
+                          <label className="block text-sm font-medium text-stone-500 mb-1">계좌번호</label>
+                          <p className="text-lg text-stone-900">{profile.accountNumber || '미등록'}</p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-500 mb-1">예금주</label>
-                          <p className="text-lg text-gray-900">{profile.accountHolder || '미등록'}</p>
+                          <label className="block text-sm font-medium text-stone-500 mb-1">예금주</label>
+                          <p className="text-lg text-stone-900">{profile.accountHolder || '미등록'}</p>
                         </div>
                       </div>
                     </div>
@@ -616,21 +616,21 @@ export default function TherapistProfilePage() {
                 {/* 학력 탭 */}
                 {activeTab === 'education' && (
                   <div className="space-y-4">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">학력</h2>
+                    <h2 className="text-xl font-bold text-stone-900 mb-4 pb-2 border-b">학력</h2>
                     {profile.educations && profile.educations.length > 0 ? (
                       <div className="space-y-4">
                         {profile.educations.map((edu, index) => (
-                          <div key={index} className="border-l-4 border-green-500 pl-4 py-3 bg-gray-50 rounded-r">
-                            <h3 className="font-bold text-lg text-gray-900">
+                          <div key={index} className="border-l-4 border-[#FF6A00] pl-4 py-3 bg-gray-50 rounded-r">
+                            <h3 className="font-bold text-lg text-stone-900">
                               {DEGREE_TYPES.find(d => d.value === edu.degree)?.label || edu.degree}
                             </h3>
-                            <p className="text-gray-700 mt-1">{edu.school} - {edu.major}</p>
-                            <p className="text-sm text-gray-500 mt-1">{edu.graduationYear} 졸업</p>
+                            <p className="text-stone-700 mt-1">{edu.school} - {edu.major}</p>
+                            <p className="text-sm text-stone-500 mt-1">{edu.graduationYear} 졸업</p>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500 text-center py-8">등록된 학력 정보가 없습니다.</p>
+                      <p className="text-stone-500 text-center py-8">등록된 학력 정보가 없습니다.</p>
                     )}
                   </div>
                 )}
@@ -638,19 +638,19 @@ export default function TherapistProfilePage() {
                 {/* 자격증 탭 */}
                 {activeTab === 'certifications' && !profile.isPreTherapist && (
                   <div className="space-y-4">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">자격증</h2>
+                    <h2 className="text-xl font-bold text-stone-900 mb-4 pb-2 border-b">자격증</h2>
                     {profile.certifications && profile.certifications.length > 0 ? (
                       <div className="space-y-4">
                         {profile.certifications.map((cert, index) => (
                           <div key={index} className="border-l-4 border-blue-500 pl-4 py-3 bg-gray-50 rounded-r">
-                            <h3 className="font-bold text-lg text-gray-900">{cert.name}</h3>
-                            <p className="text-gray-700 mt-1">{cert.issuingOrganization}</p>
-                            <p className="text-sm text-gray-500 mt-1">{new Date(cert.issueDate).toLocaleDateString('ko-KR')}</p>
+                            <h3 className="font-bold text-lg text-stone-900">{cert.name}</h3>
+                            <p className="text-stone-700 mt-1">{cert.issuingOrganization}</p>
+                            <p className="text-sm text-stone-500 mt-1">{new Date(cert.issueDate).toLocaleDateString('ko-KR')}</p>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500 text-center py-8">등록된 자격증 정보가 없습니다.</p>
+                      <p className="text-stone-500 text-center py-8">등록된 자격증 정보가 없습니다.</p>
                     )}
                   </div>
                 )}
@@ -658,24 +658,24 @@ export default function TherapistProfilePage() {
                 {/* 경력 탭 */}
                 {activeTab === 'experience' && !profile.isPreTherapist && (
                   <div className="space-y-4">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b">경력</h2>
+                    <h2 className="text-xl font-bold text-stone-900 mb-4 pb-2 border-b">경력</h2>
                     {profile.experiences && profile.experiences.length > 0 ? (
                       <div className="space-y-4">
                         {profile.experiences.map((exp, index) => (
                           <div key={index} className="border-l-4 border-purple-500 pl-4 py-3 bg-gray-50 rounded-r">
-                            <h3 className="font-bold text-lg text-gray-900">
+                            <h3 className="font-bold text-lg text-stone-900">
                               {exp.employmentType === 'INSTITUTION' ? '기관' : '프리랜서'} - {THERAPY_TYPES.find(t => t.value === exp.specialty)?.label}
                             </h3>
-                            {exp.institutionName && <p className="text-gray-700 mt-1">{exp.institutionName}</p>}
-                            <p className="text-sm text-gray-500 mt-1">
+                            {exp.institutionName && <p className="text-stone-700 mt-1">{exp.institutionName}</p>}
+                            <p className="text-sm text-stone-500 mt-1">
                               {new Date(exp.startDate).toLocaleDateString('ko-KR')} - {exp.endDate ? new Date(exp.endDate).toLocaleDateString('ko-KR') : '현재'}
                             </p>
-                            {exp.description && <p className="text-gray-600 mt-2">{exp.description}</p>}
+                            {exp.description && <p className="text-stone-600 mt-2">{exp.description}</p>}
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500 text-center py-8">등록된 경력 정보가 없습니다.</p>
+                      <p className="text-stone-500 text-center py-8">등록된 경력 정보가 없습니다.</p>
                     )}
                   </div>
                 )}
@@ -686,7 +686,7 @@ export default function TherapistProfilePage() {
 
         {/* Edit Mode - Form */}
         {isEditMode && (
-          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="bg-white shadow-lg rounded-xl overflow-hidden">
           {/* Progress Bar */}
           <div className="bg-slate-800 p-6">
             <div className="flex justify-between items-center mb-4">
@@ -698,7 +698,7 @@ export default function TherapistProfilePage() {
                     setCurrentStep(1)
                   }
                 }}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                className="px-4 py-2 bg-gray-600 text-white rounded-xl font-medium hover:bg-gray-700 transition-colors"
               >
                 취소
               </button>
@@ -709,7 +709,7 @@ export default function TherapistProfilePage() {
 
               {/* 진행된 연결선 */}
               {currentStep > 1 && (
-                <div className="absolute top-1/2 h-1 bg-green-500 -translate-y-1/2 transition-all" style={{
+                <div className="absolute top-1/2 h-1 bg-[#FF6A00] -translate-y-1/2 transition-all" style={{
                   left: 'calc(2rem + 28px)',
                   width: currentStep === 2 ? 'calc(50% - 2rem - 28px)' : 'calc(100% - 4rem - 56px)'
                 }}></div>
@@ -721,7 +721,7 @@ export default function TherapistProfilePage() {
                   key={step}
                   className={`relative w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all leading-none z-10 ${
                     currentStep >= step
-                      ? 'bg-green-500 text-white border-green-500 shadow-lg'
+                      ? 'bg-[#FF6A00] text-white border-[#FF6A00] shadow-lg'
                       : 'bg-slate-800 text-white border-white/40'
                   }`}
                 >
@@ -740,35 +740,35 @@ export default function TherapistProfilePage() {
             {/* Step 1: Basic Info */}
             {currentStep === 1 && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">기본 정보</h2>
+                <h2 className="text-xl font-bold text-stone-900 mb-4">기본 정보</h2>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
                     이메일 (변경 불가)
                   </label>
                   <input
                     type="email"
                     value={email}
                     disabled
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-[10px] bg-gray-100 text-stone-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
                     이름 <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">성별</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">성별</label>
                   <div className="flex gap-4">
                     <label className="flex items-center">
                       <input
@@ -796,18 +796,18 @@ export default function TherapistProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">생년</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-2">생년</label>
                   <input
                     type="number"
                     value={birthYear}
                     onChange={(e) => setBirthYear(e.target.value)}
                     placeholder="1990"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
                     전화번호 <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -815,7 +815,7 @@ export default function TherapistProfilePage() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="010-0000-0000"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
                     required
                   />
                 </div>
@@ -832,19 +832,19 @@ export default function TherapistProfilePage() {
             {/* Step 2: Professional Info */}
             {currentStep === 2 && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">전문 정보</h2>
+                <h2 className="text-xl font-bold text-stone-900 mb-4">전문 정보</h2>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
                     치료 분야 (중복 선택 가능) <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {THERAPY_TYPES.map(type => (
                       <label
                         key={type.value}
-                        className={`flex items-center p-3 border-2 rounded-md cursor-pointer transition-colors ${
+                        className={`flex items-center p-3 border-2 rounded-[10px] cursor-pointer transition-colors ${
                           specialties.includes(type.value)
-                            ? 'border-green-500 bg-green-50'
+                            ? 'border-[#FF6A00] bg-[#FFE5E5]'
                             : 'border-gray-300 hover:border-gray-400'
                         }`}
                       >
@@ -861,16 +861,16 @@ export default function TherapistProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
                     치료 가능 아이 나이 (중복 가능) <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {CHILD_AGE_RANGES.map(range => (
                       <label
                         key={range.value}
-                        className={`flex items-center p-3 border-2 rounded-md cursor-pointer transition-colors ${
+                        className={`flex items-center p-3 border-2 rounded-[10px] cursor-pointer transition-colors ${
                           childAgeRanges.includes(range.value)
-                            ? 'border-green-500 bg-green-50'
+                            ? 'border-[#FF6A00] bg-[#FFE5E5]'
                             : 'border-gray-300 hover:border-gray-400'
                         }`}
                       >
@@ -893,7 +893,7 @@ export default function TherapistProfilePage() {
                 />
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
                     세션 비용 (50분 기준) <span className="text-red-500">*</span>
                   </label>
                   <div className="flex items-center">
@@ -902,26 +902,26 @@ export default function TherapistProfilePage() {
                       value={sessionFee}
                       onChange={(e) => setSessionFee(e.target.value)}
                       placeholder="80000"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
                       required
                     />
-                    <span className="ml-2 text-gray-600">원</span>
+                    <span className="ml-2 text-stone-600">원</span>
                   </div>
                 </div>
 
                 {/* 은행 정보 */}
                 <div className="pt-4 border-t border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">계좌 정보</h3>
+                  <h3 className="text-lg font-medium text-stone-900 mb-4">계좌 정보</h3>
 
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-stone-700 mb-2">
                         은행 <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={bank}
                         onChange={(e) => setBank(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
                         required
                       >
                         <option value="">은행을 선택하세요</option>
@@ -934,7 +934,7 @@ export default function TherapistProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-stone-700 mb-2">
                         계좌번호 <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -942,13 +942,13 @@ export default function TherapistProfilePage() {
                         value={accountNumber}
                         onChange={(e) => setAccountNumber(e.target.value.replace(/[^0-9-]/g, ''))}
                         placeholder="123-456-789012"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-stone-700 mb-2">
                         예금주 <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -956,7 +956,7 @@ export default function TherapistProfilePage() {
                         value={accountHolder}
                         onChange={(e) => setAccountHolder(e.target.value)}
                         placeholder="홍길동"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
                         required
                       />
                     </div>
@@ -965,20 +965,20 @@ export default function TherapistProfilePage() {
 
                 <div>
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">학력</h3>
+                    <h3 className="text-lg font-medium text-stone-900">학력</h3>
                     <button
                       type="button"
                       onClick={addEducation}
-                      className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                      className="px-4 py-2 text-sm bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors"
                     >
                       + 학력 추가
                     </button>
                   </div>
 
                   {educations.map((edu, index) => (
-                    <div key={index} className="mb-6 p-4 border border-gray-300 rounded-md bg-gray-50">
+                    <div key={index} className="mb-6 p-4 border border-gray-300 rounded-[10px] bg-gray-50">
                       <div className="flex justify-between items-center mb-3">
-                        <h4 className="font-medium text-gray-900">학력 {index + 1}</h4>
+                        <h4 className="font-medium text-stone-900">학력 {index + 1}</h4>
                         {educations.length > 1 && (
                           <button
                             type="button"
@@ -992,13 +992,13 @@ export default function TherapistProfilePage() {
 
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-stone-700 mb-1">
                             학위 <span className="text-red-500">*</span>
                           </label>
                           <select
                             value={edu.degree}
                             onChange={(e) => updateEducation(index, 'degree', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-[10px]"
                             required
                           >
                             {DEGREE_TYPES.map(type => (
@@ -1010,7 +1010,7 @@ export default function TherapistProfilePage() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-stone-700 mb-1">
                             학교명 <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -1018,13 +1018,13 @@ export default function TherapistProfilePage() {
                             value={edu.school}
                             onChange={(e) => updateEducation(index, 'school', e.target.value)}
                             placeholder="서울대학교"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-[10px]"
                             required
                           />
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-stone-700 mb-1">
                             전공 <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -1032,13 +1032,13 @@ export default function TherapistProfilePage() {
                             value={edu.major}
                             onChange={(e) => updateEducation(index, 'major', e.target.value)}
                             placeholder="특수교육학"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-[10px]"
                             required
                           />
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-stone-700 mb-1">
                             졸업년도 <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -1046,7 +1046,7 @@ export default function TherapistProfilePage() {
                             value={edu.graduationYear}
                             onChange={(e) => updateEducation(index, 'graduationYear', e.target.value)}
                             placeholder="2020"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-[10px]"
                             required
                           />
                         </div>
@@ -1060,22 +1060,22 @@ export default function TherapistProfilePage() {
             {/* Step 3: Certifications & Experience */}
             {currentStep === 3 && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">자격증 및 경력</h2>
+                <h2 className="text-xl font-bold text-stone-900 mb-4">자격증 및 경력</h2>
 
                 {/* 예비 치료사 체크박스 */}
-                <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
+                <div className="bg-blue-50 p-4 rounded-[10px] border border-blue-200">
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
                       checked={isPreTherapist}
                       onChange={(e) => setIsPreTherapist(e.target.checked)}
-                      className="w-4 h-4 text-green-500 border-gray-300 rounded focus:ring-green-500 mr-3"
+                      className="w-4 h-4 text-[#FF6A00] border-gray-300 rounded focus:ring-[#FF6A00] mr-3"
                     />
                     <div>
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-stone-900">
                         저는 예비 치료사입니다 (졸업 전)
                       </span>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-sm text-stone-600 mt-1">
                         예비 치료사의 경우 자격증 및 경력 입력 없이도 신청이 가능합니다.
                       </p>
                     </div>
@@ -1087,20 +1087,20 @@ export default function TherapistProfilePage() {
                   <>
                     <div>
                       <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-medium text-gray-900">자격증</h3>
+                        <h3 className="text-lg font-medium text-stone-900">자격증</h3>
                         <button
                           type="button"
                           onClick={addCertification}
-                          className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                          className="px-4 py-2 text-sm bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors"
                         >
                           + 자격증 추가
                         </button>
                       </div>
 
                       {certifications.map((cert, index) => (
-                        <div key={index} className="mb-6 p-4 border border-gray-300 rounded-md bg-gray-50">
+                        <div key={index} className="mb-6 p-4 border border-gray-300 rounded-[10px] bg-gray-50">
                           <div className="flex justify-between items-center mb-3">
-                            <h4 className="font-medium text-gray-900">자격증 {index + 1}</h4>
+                            <h4 className="font-medium text-stone-900">자격증 {index + 1}</h4>
                             {certifications.length > 1 && (
                               <button
                                 type="button"
@@ -1114,7 +1114,7 @@ export default function TherapistProfilePage() {
 
                           <div className="space-y-3">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label className="block text-sm font-medium text-stone-700 mb-1">
                                 자격증명 <span className="text-red-500">*</span>
                               </label>
                               <input
@@ -1122,13 +1122,13 @@ export default function TherapistProfilePage() {
                                 value={cert.name}
                                 onChange={(e) => updateCertification(index, 'name', e.target.value)}
                                 placeholder="언어치료사 1급"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-[10px]"
                                 required
                               />
                             </div>
 
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label className="block text-sm font-medium text-stone-700 mb-1">
                                 발급기관 <span className="text-red-500">*</span>
                               </label>
                               <input
@@ -1136,20 +1136,20 @@ export default function TherapistProfilePage() {
                                 value={cert.issuingOrganization}
                                 onChange={(e) => updateCertification(index, 'issuingOrganization', e.target.value)}
                                 placeholder="한국언어치료사협회"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-[10px]"
                                 required
                               />
                             </div>
 
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label className="block text-sm font-medium text-stone-700 mb-1">
                                 취득일 <span className="text-red-500">*</span>
                               </label>
                               <input
                                 type="date"
                                 value={cert.issueDate}
                                 onChange={(e) => updateCertification(index, 'issueDate', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-[10px]"
                                 required
                               />
                             </div>
@@ -1160,26 +1160,26 @@ export default function TherapistProfilePage() {
 
                     <div>
                       <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-medium text-gray-900">경력</h3>
+                        <h3 className="text-lg font-medium text-stone-900">경력</h3>
                         <button
                           type="button"
                           onClick={addExperience}
-                          className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                          className="px-4 py-2 text-sm bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors"
                         >
                           + 경력 추가
                         </button>
                       </div>
 
                       {experiences.length === 0 && (
-                        <p className="text-sm text-gray-500 mb-4">
+                        <p className="text-sm text-stone-500 mb-4">
                           등록된 경력이 없습니다. 필요한 경우 "+ 경력 추가" 버튼을 클릭해주세요.
                         </p>
                       )}
 
                       {experiences.map((exp, index) => (
-                        <div key={index} className="mb-6 p-4 border border-gray-300 rounded-md bg-gray-50">
+                        <div key={index} className="mb-6 p-4 border border-gray-300 rounded-[10px] bg-gray-50">
                           <div className="flex justify-between items-center mb-3">
-                            <h4 className="font-medium text-gray-900">경력 {index + 1}</h4>
+                            <h4 className="font-medium text-stone-900">경력 {index + 1}</h4>
                             <button
                               type="button"
                               onClick={() => removeExperience(index)}
@@ -1191,7 +1191,7 @@ export default function TherapistProfilePage() {
 
                           <div className="space-y-3">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label className="block text-sm font-medium text-stone-700 mb-1">
                                 근무형태 <span className="text-red-500">*</span>
                               </label>
                               <div className="flex gap-4">
@@ -1222,7 +1222,7 @@ export default function TherapistProfilePage() {
 
                             {exp.employmentType === 'INSTITUTION' && (
                               <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-stone-700 mb-1">
                                   기관명
                                 </label>
                                 <input
@@ -1230,19 +1230,19 @@ export default function TherapistProfilePage() {
                                   value={exp.institutionName || ''}
                                   onChange={(e) => updateExperience(index, 'institutionName', e.target.value)}
                                   placeholder="OO발달센터"
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-[10px]"
                                 />
                               </div>
                             )}
 
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label className="block text-sm font-medium text-stone-700 mb-1">
                                 치료분야 <span className="text-red-500">*</span>
                               </label>
                               <select
                                 value={exp.specialty}
                                 onChange={(e) => updateExperience(index, 'specialty', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-[10px]"
                                 required
                               >
                                 {THERAPY_TYPES.map(type => (
@@ -1255,33 +1255,33 @@ export default function TherapistProfilePage() {
 
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-stone-700 mb-1">
                                   시작일 <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                   type="date"
                                   value={exp.startDate}
                                   onChange={(e) => updateExperience(index, 'startDate', e.target.value)}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-[10px]"
                                   required
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-stone-700 mb-1">
                                   종료일 (재직 중이면 비워두세요)
                                 </label>
                                 <input
                                   type="date"
                                   value={exp.endDate || ''}
                                   onChange={(e) => updateExperience(index, 'endDate', e.target.value)}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-[10px]"
                                 />
                               </div>
                             </div>
 
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label className="block text-sm font-medium text-stone-700 mb-1">
                                 설명
                               </label>
                               <textarea
@@ -1289,7 +1289,7 @@ export default function TherapistProfilePage() {
                                 onChange={(e) => updateExperience(index, 'description', e.target.value)}
                                 placeholder="영유아 언어발달 전담..."
                                 rows={3}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-[10px]"
                               />
                             </div>
                           </div>
@@ -1301,8 +1301,8 @@ export default function TherapistProfilePage() {
 
                 {/* 예비 치료사인 경우 안내 메시지 */}
                 {isPreTherapist && (
-                  <div className="bg-green-50 p-4 rounded-md border border-green-200">
-                    <p className="text-sm text-gray-700">
+                  <div className="bg-[#FFE5E5] p-4 rounded-[10px] border border-green-200">
+                    <p className="text-sm text-stone-700">
                       예비 치료사로 등록되었습니다. 졸업 후 자격증 및 경력 정보를 추가하실 수 있습니다.
                     </p>
                   </div>
@@ -1310,7 +1310,7 @@ export default function TherapistProfilePage() {
 
                 {/* Memo field */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
                     수정 요청 메모 (선택 사항)
                   </label>
                   <textarea
@@ -1318,7 +1318,7 @@ export default function TherapistProfilePage() {
                     onChange={(e) => setMemo(e.target.value)}
                     placeholder="프로필 수정 사유나 특이사항을 작성해주세요."
                     rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
                   />
                 </div>
               </div>
@@ -1330,7 +1330,7 @@ export default function TherapistProfilePage() {
                 type="button"
                 onClick={() => setCurrentStep(currentStep - 1)}
                 disabled={currentStep === 1}
-                className="px-6 py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-3 border-2 border-gray-300 rounded-xl text-stone-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 이전
               </button>
@@ -1339,7 +1339,7 @@ export default function TherapistProfilePage() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors shadow-md"
+                  className="px-6 py-3 bg-[#FF6A00] text-white rounded-xl font-medium hover:bg-[#E55F00] transition-colors shadow-md"
                 >
                   다음
                 </button>
@@ -1348,7 +1348,7 @@ export default function TherapistProfilePage() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={isSubmitting}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                  className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                 >
                   {isSubmitting ? '요청 중...' : '저장 및 승인 요청'}
                 </button>
