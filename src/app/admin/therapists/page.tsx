@@ -522,14 +522,14 @@ export default function AdminTherapistsPage() {
 
   const getStatusBadge = (status: string) => {
     const badges: { [key: string]: { bg: string; text: string; label: string } } = {
-      PENDING: { bg: 'bg-blue-100', text: 'text-blue-800', label: '신청' },
+      PENDING: { bg: 'bg-[#FFE5E5]', text: 'text-[#FF6A00]', label: '신청' },
       WAITING: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: '대기' },
-      APPROVED: { bg: 'bg-green-100', text: 'text-green-800', label: '승인됨' },
+      APPROVED: { bg: 'bg-[#FFE5E5]', text: 'text-[#FF6A00]', label: '승인됨' },
       REJECTED: { bg: 'bg-red-100', text: 'text-red-800', label: '거부됨' }
     }
     const badge = badges[status] || badges.WAITING
     return (
-      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${badge.bg} ${badge.text}`}>
+      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full font-pretendard ${badge.bg} ${badge.text}`}>
         {badge.label}
       </span>
     )
@@ -537,10 +537,10 @@ export default function AdminTherapistsPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600 font-pretendard">로딩 중...</p>
         </div>
       </div>
     )
@@ -554,20 +554,20 @@ export default function AdminTherapistsPage() {
     <AdminLayout title="치료사 관리">
       <div className="space-y-6">
         {/* 통계 */}
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow rounded-xl p-6">
           <div className="flex justify-between items-center">
-            <p className="text-gray-600">
+            <p className="text-stone-600 font-pretendard">
               치료사 가입 승인 및 프로필 관리를 할 수 있습니다.
             </p>
-            <div className="flex items-center space-x-4 text-sm">
+            <div className="flex items-center space-x-4 text-sm font-pretendard">
               <div>
-                전체 <span className="font-semibold text-gray-900">{stats.total}</span>명
+                전체 <span className="font-semibold text-stone-900">{stats.total}</span>명
                 <span className="mx-2">|</span>
-                신청 <span className="font-semibold text-blue-600">{stats.pending}</span>명
+                신청 <span className="font-semibold text-[#FF6A00]">{stats.pending}</span>명
                 <span className="mx-2">|</span>
                 대기 <span className="font-semibold text-yellow-600">{stats.waiting}</span>명
                 <span className="mx-2">|</span>
-                수정 요청 <span className="font-semibold text-orange-600">{stats.updateRequests}</span>명
+                수정 요청 <span className="font-semibold text-[#FF6A00]">{stats.updateRequests}</span>명
               </div>
             </div>
           </div>
@@ -584,10 +584,10 @@ export default function AdminTherapistsPage() {
                 setSpecialtyFilter('')
                 setCurrentPage(1)
               }}
-              className={`py-3 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 px-1 border-b-2 font-medium text-sm font-pretendard ${
                 activeTab === 'list'
-                  ? 'border-green-500 text-green-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-[#FF6A00] text-[#FF6A00]'
+                  : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-300'
               }`}
             >
               치료사 목록
@@ -599,10 +599,10 @@ export default function AdminTherapistsPage() {
                 setSpecialtyFilter('')
                 setCurrentPage(1)
               }}
-              className={`py-3 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 px-1 border-b-2 font-medium text-sm font-pretendard ${
                 activeTab === 'updateRequests'
-                  ? 'border-green-500 text-green-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-[#FF6A00] text-[#FF6A00]'
+                  : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-300'
               }`}
             >
               프로필 수정 요청
@@ -617,7 +617,7 @@ export default function AdminTherapistsPage() {
 
         {/* Filter Tabs (치료사 목록 탭에서만 표시) */}
         {activeTab === 'list' && (
-          <div className="bg-white shadow rounded-lg p-4">
+          <div className="bg-white shadow rounded-xl p-4">
             <div className="border-b border-gray-200 mb-4">
               <nav className="-mb-px flex space-x-8">
                 {['ALL', 'PENDING', 'WAITING', 'APPROVED', 'REJECTED'].map((statusFilter) => (
@@ -629,10 +629,10 @@ export default function AdminTherapistsPage() {
                       setSpecialtyFilter('')
                       setCurrentPage(1)
                     }}
-                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    className={`py-2 px-1 border-b-2 font-medium text-sm font-pretendard ${
                       filter === statusFilter
-                        ? 'border-green-500 text-green-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        ? 'border-[#FF6A00] text-[#FF6A00]'
+                        : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-300'
                     }`}
                   >
                     {statusFilter === 'ALL' && '전체'}
@@ -640,7 +640,7 @@ export default function AdminTherapistsPage() {
                     {statusFilter === 'WAITING' && '대기'}
                     {statusFilter === 'APPROVED' && '승인됨'}
                     {statusFilter === 'REJECTED' && '거부됨'}
-                    <span className="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2 rounded-full text-xs">
+                    <span className="ml-2 bg-stone-100 text-stone-900 py-0.5 px-2 rounded-full text-xs">
                       {getFilterCount(statusFilter)}
                     </span>
                   </button>
@@ -654,12 +654,12 @@ export default function AdminTherapistsPage() {
                 placeholder="이름, 이메일, 전화번호로 검색..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                className="px-4 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-pretendard"
               />
               <select
                 value={specialtyFilter}
                 onChange={(e) => setSpecialtyFilter(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                className="px-4 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-pretendard"
               >
                 <option value="">전문분야: 전체</option>
                 <option value="SPEECH_THERAPY">언어치료</option>
@@ -676,7 +676,7 @@ export default function AdminTherapistsPage() {
                   setSearchTerm('')
                   setSpecialtyFilter('')
                 }}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                className="px-4 py-2 bg-stone-200 text-stone-700 rounded-[10px] hover:bg-stone-300 transition-colors font-pretendard"
               >
                 초기화
               </button>
@@ -686,73 +686,73 @@ export default function AdminTherapistsPage() {
 
         {/* 치료사 목록 */}
         {filteredTherapists.length === 0 ? (
-          <div className="bg-white shadow rounded-lg">
+          <div className="bg-white shadow rounded-xl">
             <div className="text-center py-12">
-              <div className="text-gray-400 text-6xl mb-4">👨‍⚕️</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <div className="text-stone-400 text-6xl mb-4">👨‍⚕️</div>
+              <h3 className="text-lg font-medium text-stone-900 font-pretendard mb-2">
                 {searchTerm || specialtyFilter ? '검색 결과가 없습니다' :
                  filter === 'ALL' ? '등록된 치료사가 없습니다' :
                  `${filter === 'PENDING' ? '승인 대기 중인' : filter === 'APPROVED' ? '승인된' : '거부된'} 치료사가 없습니다`}
               </h3>
-              <p className="text-gray-500">
+              <p className="text-stone-500 font-pretendard">
                 {searchTerm || specialtyFilter ? '다른 검색어를 시도해보세요.' : '새로운 치료사 가입을 기다리고 있습니다.'}
               </p>
             </div>
           </div>
         ) : (
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="bg-white shadow overflow-hidden sm:rounded-xl">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-[#F9F9F9]">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       이름
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       연락처
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       전문분야
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       경력
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       상담료
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       상태
                     </th>
-                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       언어 컨설팅
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       가입일
                     </th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       관리
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {paginatedTherapists.map((therapist) => (
-                    <tr key={therapist.id} className="hover:bg-gray-50">
+                    <tr key={therapist.id} className="hover:bg-[#FFF5F0]">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
-                            <div className="h-10 w-10 bg-aipoten-blue rounded-full flex items-center justify-center">
-                              <span className="text-white font-semibold">
+                            <div className="h-10 w-10 bg-[#FFE5E5] rounded-full flex items-center justify-center">
+                              <span className="text-[#FF6A00] font-semibold font-pretendard">
                                 {therapist.user.name.charAt(0)}
                               </span>
                             </div>
                           </div>
                           <div className="ml-4">
                             <div className="flex items-center space-x-2">
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-stone-900 font-pretendard">
                                 {therapist.user.name}
                               </div>
                               {therapist.profileUpdateRequested && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 font-pretendard">
                                   수정 요청
                                 </span>
                               )}
@@ -761,41 +761,41 @@ export default function AdminTherapistsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{therapist.user.email}</div>
-                        <div className="text-sm text-gray-500">{therapist.user.phone}</div>
+                        <div className="text-sm text-stone-900 font-pretendard">{therapist.user.email}</div>
+                        <div className="text-sm text-stone-500 font-pretendard">{therapist.user.phone}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-stone-900 font-pretendard">
                           {therapist.specialties.slice(0, 2).map(s => getSpecialtyLabel(s)).join(', ')}
                           {therapist.specialties.length > 2 && ` 외 ${therapist.specialties.length - 2}`}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500 font-pretendard">
                         {therapist.experiences.length}건
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-900 font-pretendard">
                         {therapist.sessionFee ? `₩${therapist.sessionFee.toLocaleString()}` : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(therapist.approvalStatus)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full font-pretendard ${
                           therapist.canDoConsultation
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
+                            ? 'bg-[#FFE5E5] text-[#FF6A00]'
+                            : 'bg-stone-100 text-stone-800'
                         }`}>
                           {therapist.canDoConsultation ? '가능' : '불가'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500 font-pretendard">
                         {new Date(therapist.createdAt).toLocaleDateString('ko-KR')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => openModal(therapist)}
-                            className="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
+                            className="px-3 py-1 bg-[#FF6A00] text-white text-xs font-medium rounded-[10px] hover:bg-[#E55F00] transition-colors font-pretendard"
                           >
                             상세
                           </button>
@@ -803,13 +803,13 @@ export default function AdminTherapistsPage() {
                             <>
                               <button
                                 onClick={() => handleApprove(therapist.id)}
-                                className="px-3 py-1 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition-colors"
+                                className="px-3 py-1 bg-[#FF6A00] text-white text-xs font-medium rounded-[10px] hover:bg-[#E55F00] transition-colors font-pretendard"
                               >
                                 승인
                               </button>
                               <button
                                 onClick={() => handleReject(therapist.id)}
-                                className="px-3 py-1 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 transition-colors"
+                                className="px-3 py-1 bg-red-600 text-white text-xs font-medium rounded-[10px] hover:bg-red-700 transition-colors font-pretendard"
                               >
                                 거부
                               </button>

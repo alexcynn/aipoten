@@ -69,28 +69,28 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <Header />
 
       {/* Desktop Sidebar */}
       <aside
-        className={`fixed top-16 left-0 z-40 transition-all duration-300 hidden lg:block ${
+        className={`fixed top-16 left-0 z-40 transition-all duration-300 hidden lg:block bg-stone-900 ${
           isSidebarOpen ? 'w-64' : 'w-20'
         }`}
-        style={{ backgroundColor: '#2d4a3a', height: 'calc(100vh - 4rem)' }}
+        style={{ height: 'calc(100vh - 4rem)' }}
       >
         <div className="h-full flex flex-col">
           {/* Logo & Toggle */}
-          <div className="p-4 flex items-center justify-between border-b border-white border-opacity-10">
+          <div className="p-4 flex items-center justify-between border-b border-stone-700">
             {isSidebarOpen ? (
               <>
                 <Link href="/admin/dashboard" className="flex items-center">
-                  <span className="text-white text-xl font-bold">AI Poten</span>
+                  <span className="text-white text-xl font-bold font-pretendard">AI Poten</span>
                 </Link>
                 <button
                   onClick={() => setIsSidebarOpen(false)}
-                  className="text-white hover:bg-white hover:bg-opacity-10 p-2 rounded-lg transition-colors"
+                  className="text-white hover:bg-stone-800 p-2 rounded-[10px] transition-colors"
                 >
                   <ChevronLeft size={20} />
                 </button>
@@ -98,7 +98,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
             ) : (
               <button
                 onClick={() => setIsSidebarOpen(true)}
-                className="text-white hover:bg-white hover:bg-opacity-10 p-2 rounded-lg transition-colors w-full"
+                className="text-white hover:bg-stone-800 p-2 rounded-[10px] transition-colors w-full"
               >
                 <Menu size={20} className="mx-auto" />
               </button>
@@ -114,17 +114,10 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                 onMouseEnter={() => setHoveredMenu(item.href)}
                 onMouseLeave={() => setHoveredMenu(null)}
                 className={`
-                  flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 text-white
-                  ${isActive(item.href) ? 'font-medium' : ''}
+                  flex items-center gap-3 px-3 py-3 rounded-[10px] transition-all duration-200 text-white font-pretendard
+                  ${isActive(item.href) ? 'bg-[#FF6A00] font-medium shadow-md' : hoveredMenu === item.href ? 'bg-stone-800' : ''}
                   ${!isSidebarOpen && 'justify-center'}
                 `}
-                style={{
-                  backgroundColor: isActive(item.href)
-                    ? 'rgba(255, 255, 255, 0.2)'
-                    : hoveredMenu === item.href
-                    ? 'rgba(255, 255, 255, 0.1)'
-                    : 'transparent'
-                }}
                 title={!isSidebarOpen ? item.label : undefined}
               >
                 {item.icon}
@@ -134,16 +127,16 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
           </nav>
 
           {/* User Info */}
-          <div className="p-4 border-t border-white border-opacity-10">
+          <div className="p-4 border-t border-stone-700">
             {isSidebarOpen ? (
               <div className="space-y-3">
-                <div className="text-white text-sm">
+                <div className="text-white text-sm font-pretendard">
                   <p className="font-medium">{session?.user?.name}</p>
-                  <p className="text-white text-opacity-60 text-xs">{session?.user?.email}</p>
+                  <p className="text-stone-400 text-xs">{session?.user?.email}</p>
                 </div>
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-2 text-white text-opacity-80 hover:text-white text-sm w-full"
+                  className="flex items-center gap-2 text-stone-300 hover:text-white text-sm w-full font-pretendard transition-colors"
                 >
                   <LogOut size={16} />
                   <span>로그아웃</span>
@@ -152,7 +145,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
             ) : (
               <button
                 onClick={handleSignOut}
-                className="text-white hover:bg-white hover:bg-opacity-10 p-2 rounded-lg transition-colors w-full"
+                className="text-white hover:bg-stone-800 p-2 rounded-[10px] transition-colors w-full"
                 title="로그아웃"
               >
                 <LogOut size={20} className="mx-auto" />
@@ -173,19 +166,16 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
         />
 
         {/* Sidebar */}
-        <aside
-          className="fixed top-0 left-0 w-64 h-screen"
-          style={{ backgroundColor: '#2d4a3a' }}
-        >
+        <aside className="fixed top-0 left-0 w-64 h-screen bg-stone-900">
           <div className="h-full flex flex-col">
             {/* Logo & Close */}
-            <div className="p-4 flex items-center justify-between border-b border-white border-opacity-10">
+            <div className="p-4 flex items-center justify-between border-b border-stone-700">
               <Link href="/admin/dashboard" className="flex items-center">
-                <span className="text-white text-xl font-bold">AI Poten</span>
+                <span className="text-white text-xl font-bold font-pretendard">AI Poten</span>
               </Link>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-white hover:bg-white hover:bg-opacity-10 p-2 rounded-lg"
+                className="text-white hover:bg-stone-800 p-2 rounded-[10px] transition-colors"
               >
                 <X size={20} />
               </button>
@@ -201,16 +191,9 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                   onMouseEnter={() => setHoveredMenu(item.href)}
                   onMouseLeave={() => setHoveredMenu(null)}
                   className={`
-                    flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-white
-                    ${isActive(item.href) ? 'font-medium' : ''}
+                    flex items-center gap-3 px-3 py-3 rounded-[10px] transition-colors text-white font-pretendard
+                    ${isActive(item.href) ? 'bg-[#FF6A00] font-medium shadow-md' : hoveredMenu === item.href ? 'bg-stone-800' : ''}
                   `}
-                  style={{
-                    backgroundColor: isActive(item.href)
-                      ? 'rgba(255, 255, 255, 0.2)'
-                      : hoveredMenu === item.href
-                      ? 'rgba(255, 255, 255, 0.1)'
-                      : 'transparent'
-                  }}
                 >
                   {item.icon}
                   <span>{item.label}</span>
@@ -219,15 +202,15 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
             </nav>
 
             {/* User Info */}
-            <div className="p-4 border-t border-white border-opacity-10">
+            <div className="p-4 border-t border-stone-700">
               <div className="space-y-3">
-                <div className="text-white text-sm">
+                <div className="text-white text-sm font-pretendard">
                   <p className="font-medium">{session?.user?.name}</p>
-                  <p className="text-white text-opacity-60 text-xs">{session?.user?.email}</p>
+                  <p className="text-stone-400 text-xs">{session?.user?.email}</p>
                 </div>
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-2 text-white text-opacity-80 hover:text-white text-sm w-full"
+                  className="flex items-center gap-2 text-stone-300 hover:text-white text-sm w-full font-pretendard transition-colors"
                 >
                   <LogOut size={16} />
                   <span>로그아웃</span>
@@ -251,11 +234,11 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="lg:hidden text-gray-600 hover:text-gray-900"
+                className="lg:hidden text-stone-600 hover:text-stone-900 transition-colors"
               >
                 <Menu size={24} />
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+              <h1 className="text-2xl font-bold text-stone-900 font-pretendard">{title}</h1>
             </div>
           </div>
         )}
