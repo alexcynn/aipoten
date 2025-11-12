@@ -98,12 +98,12 @@ export default function PostDetailPage({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light">
+      <div className="min-h-screen bg-white">
         <Header />
         <div className="flex items-center justify-center pt-20">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-            <p className="mt-4 text-gray-600">로딩 중...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+            <p className="mt-4 text-stone-600 font-pretendard">로딩 중...</p>
           </div>
         </div>
       </div>
@@ -112,16 +112,16 @@ export default function PostDetailPage({
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-neutral-light">
+      <div className="min-h-screen bg-white">
         <Header />
         <div className="max-w-4xl mx-auto py-12 px-4">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-2xl font-bold text-stone-900 font-pretendard">
               게시글을 찾을 수 없습니다
             </h2>
             <Link
               href={`/boards/${boardId}`}
-              className="mt-4 inline-block text-aipoten-green hover:text-aipoten-navy"
+              className="mt-4 inline-block text-[#FF6A00] hover:text-[#E55F00] font-pretendard"
             >
               목록으로 돌아가기
             </Link>
@@ -132,7 +132,7 @@ export default function PostDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-white">
       <Header />
 
       <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -141,34 +141,34 @@ export default function PostDetailPage({
           <div className="mb-4">
             <Link
               href={`/boards/${boardId}`}
-              className="text-sm text-gray-600 hover:text-gray-900"
+              className="text-sm text-stone-600 hover:text-stone-900 font-pretendard"
             >
               ← 목록으로 돌아가기
             </Link>
           </div>
 
           {/* Post Content */}
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="bg-white shadow-md overflow-hidden rounded-xl">
             {/* Header */}
             <div className="px-4 py-5 sm:p-6 border-b border-gray-200">
               <div className="flex items-center space-x-2 mb-2">
                 {post.isSticky && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#FFE5E5] text-[#FF6A00] font-pretendard">
                     공지
                   </span>
                 )}
                 {post.category && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 font-pretendard">
                     {post.category}
                   </span>
                 )}
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">
+              <h1 className="text-2xl font-bold text-stone-900 mb-4 font-pretendard">
                 {post.title}
               </h1>
-              <div className="flex items-center justify-between text-sm text-gray-500">
-                <div className="flex items-center space-x-4">
-                  <span className="font-medium text-gray-900">
+              <div className="flex items-center justify-between text-sm text-stone-500">
+                <div className="flex items-center space-x-4 font-pretendard">
+                  <span className="font-medium text-stone-900">
                     {post.author.name}
                   </span>
                   <span>{new Date(post.createdAt).toLocaleString('ko-KR')}</span>
@@ -178,13 +178,13 @@ export default function PostDetailPage({
                   <div className="flex space-x-2">
                     <Link
                       href={`/boards/${boardId}/${postId}/edit`}
-                      className="text-aipoten-green hover:text-aipoten-navy"
+                      className="text-[#FF6A00] hover:text-[#E55F00] font-pretendard"
                     >
                       수정
                     </Link>
                     <button
                       onClick={handleDelete}
-                      className="text-red-600 hover:text-red-800"
+                      className="text-red-600 hover:text-red-800 font-pretendard"
                     >
                       삭제
                     </button>
@@ -206,29 +206,29 @@ export default function PostDetailPage({
 
             {/* Summary */}
             {post.summary && (
-              <div className="px-4 py-5 sm:p-6 bg-gray-50 border-b border-gray-200">
-                <p className="text-gray-700 font-medium">{post.summary}</p>
+              <div className="px-4 py-5 sm:p-6 bg-[#F9F9F9] border-b border-gray-200">
+                <p className="text-stone-700 font-medium font-pretendard">{post.summary}</p>
               </div>
             )}
 
             {/* Content */}
             <div className="px-4 py-5 sm:p-6">
               <div
-                className="prose max-w-none text-gray-900"
+                className="prose max-w-none text-stone-900 font-pretendard"
                 dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br>') }}
               />
             </div>
           </div>
 
           {/* Comments Section */}
-          <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="mt-8 bg-white shadow-md overflow-hidden rounded-xl">
             <div className="px-4 py-5 sm:p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-semibold text-stone-900 mb-4 font-pretendard">
                 댓글 {post.comments.length}개
               </h2>
 
               {post.comments.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
+                <p className="text-stone-500 text-center py-8 font-pretendard">
                   첫 번째 댓글을 남겨보세요.
                 </p>
               ) : (
@@ -238,14 +238,14 @@ export default function PostDetailPage({
                       <div className="flex items-start space-x-3">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
-                            <span className="font-medium text-gray-900">
+                            <span className="font-medium text-stone-900 font-pretendard">
                               {comment.author.name}
                             </span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-stone-500 font-pretendard">
                               {new Date(comment.createdAt).toLocaleString('ko-KR')}
                             </span>
                           </div>
-                          <p className="text-gray-700 whitespace-pre-wrap">
+                          <p className="text-stone-700 whitespace-pre-wrap font-pretendard">
                             {comment.content}
                           </p>
 
@@ -259,16 +259,16 @@ export default function PostDetailPage({
                                 >
                                   <div className="flex-1">
                                     <div className="flex items-center space-x-2 mb-1">
-                                      <span className="text-sm font-medium text-gray-900">
+                                      <span className="text-sm font-medium text-stone-900 font-pretendard">
                                         {reply.author.name}
                                       </span>
-                                      <span className="text-xs text-gray-500">
+                                      <span className="text-xs text-stone-500 font-pretendard">
                                         {new Date(reply.createdAt).toLocaleString(
                                           'ko-KR'
                                         )}
                                       </span>
                                     </div>
-                                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                                    <p className="text-sm text-stone-700 whitespace-pre-wrap font-pretendard">
                                       {reply.content}
                                     </p>
                                   </div>
@@ -288,11 +288,11 @@ export default function PostDetailPage({
                 <div className="mt-6">
                   <textarea
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
                     placeholder="댓글을 입력하세요..."
                   />
                   <div className="mt-2 flex justify-end">
-                    <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy">
+                    <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-[10px] shadow-md text-white bg-[#FF6A00] hover:bg-[#E55F00] transition-colors font-pretendard">
                       댓글 작성
                     </button>
                   </div>

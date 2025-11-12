@@ -143,10 +143,10 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full text-center">
-          <div className="rounded-md bg-green-50 p-4">
-            <div className="text-sm text-green-800">
+          <div className="rounded-[10px] bg-[#FFE5E5] border border-[#FF9999] p-4">
+            <div className="text-sm text-[#FF6A00] font-pretendard">
               회원가입이 완료되었습니다! 로그인 페이지로 이동합니다...
             </div>
           </div>
@@ -156,20 +156,25 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <Link href="/" className="text-2xl font-bold text-aipoten-navy">
-            아이포텐
+          <Link href="/" className="inline-block mb-6">
+            <img
+              src="/images/logo.png"
+              alt="AIPOTEN 아이포텐"
+              className="mx-auto"
+              style={{ width: '200px', height: '28px' }}
+            />
           </Link>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            회원가입
+          <h2 className="mt-6 text-3xl font-bold text-stone-900 font-pretendard">
+            부모 회원가입
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-stone-600 font-pretendard">
             이미 계정이 있으신가요?{' '}
             <Link
               href="/login"
-              className="font-medium text-aipoten-green hover:text-aipoten-navy"
+              className="font-medium text-[#FF6A00] hover:text-[#E55F00]"
             >
               로그인하기
             </Link>
@@ -179,7 +184,7 @@ export default function SignupPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                 이름
               </label>
               <input
@@ -187,7 +192,7 @@ export default function SignupPage() {
                 name="name"
                 type="text"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green focus:z-10 sm:text-sm"
+                className="appearance-none block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-stone-900 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent sm:text-sm font-pretendard"
                 placeholder="이름"
                 value={formData.name}
                 onChange={handleChange}
@@ -195,7 +200,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                 이메일 (아이디로 사용됩니다)
               </label>
               <input
@@ -204,25 +209,25 @@ export default function SignupPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green focus:z-10 sm:text-sm"
+                className="appearance-none block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-stone-900 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent sm:text-sm font-pretendard"
                 placeholder="example@email.com"
                 value={formData.email}
                 onChange={handleChange}
               />
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-stone-500 font-pretendard">
                 로그인 시 아이디로 사용됩니다
               </p>
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="phone" className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                 전화번호
               </label>
               <input
                 id="phone"
                 name="phone"
                 type="tel"
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green focus:z-10 sm:text-sm"
+                className="appearance-none block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-stone-900 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent sm:text-sm font-pretendard"
                 placeholder="전화번호 (선택사항)"
                 value={formData.phone}
                 onChange={handleChange}
@@ -237,7 +242,7 @@ export default function SignupPage() {
             />
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                 비밀번호
               </label>
               <input
@@ -246,7 +251,7 @@ export default function SignupPage() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green focus:z-10 sm:text-sm"
+                className="appearance-none block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-stone-900 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent sm:text-sm font-pretendard"
                 placeholder="비밀번호 (최소 6자)"
                 value={formData.password}
                 onChange={handleChange}
@@ -254,7 +259,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                 비밀번호 확인
               </label>
               <input
@@ -263,7 +268,7 @@ export default function SignupPage() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green focus:z-10 sm:text-sm"
+                className="appearance-none block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-stone-900 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent sm:text-sm font-pretendard"
                 placeholder="비밀번호 확인"
                 value={formData.confirmPassword}
                 onChange={handleChange}
@@ -273,31 +278,25 @@ export default function SignupPage() {
             {/* 아이 정보 섹션 */}
             <div className="pt-4 border-t border-gray-200">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">아이 정보 <span className="text-red-500">*</span></h3>
+                <h3 className="text-lg font-medium text-stone-900 font-pretendard">아이 정보 <span className="text-red-500">*</span></h3>
                 <button
                   type="button"
                   onClick={addChild}
-                  className="px-3 py-1 text-sm rounded-md transition-colors"
-                  style={{
-                    backgroundColor: '#386646',
-                    color: '#FFFFFF'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#193149'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
+                  className="px-3 py-1 text-sm rounded-[10px] bg-[#FF6A00] text-white hover:bg-[#E55F00] transition-colors font-pretendard"
                 >
                   + 아이 추가
                 </button>
               </div>
 
               {children.map((child, index) => (
-                <div key={index} className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <div key={index} className="mb-4 p-4 border border-gray-200 rounded-xl bg-[#F9F9F9]">
                   <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-gray-700">아이 {index + 1}</h4>
+                    <h4 className="font-medium text-stone-700 font-pretendard">아이 {index + 1}</h4>
                     {children.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeChild(index)}
-                        className="text-red-600 text-sm hover:underline"
+                        className="text-red-600 text-sm hover:underline font-pretendard"
                       >
                         삭제
                       </button>
@@ -306,7 +305,7 @@ export default function SignupPage() {
 
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                         이름 <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -315,12 +314,12 @@ export default function SignupPage() {
                         onChange={(e) => updateChild(index, 'name', e.target.value)}
                         placeholder="아이 이름"
                         required
-                        className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green sm:text-sm"
+                        className="appearance-none block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-stone-900 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent sm:text-sm font-pretendard bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                         생년월일 <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -328,16 +327,16 @@ export default function SignupPage() {
                         value={child.birthDate}
                         onChange={(e) => updateChild(index, 'birthDate', e.target.value)}
                         required
-                        className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green sm:text-sm"
+                        className="appearance-none block w-full px-3 py-2 border border-gray-300 text-stone-900 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent sm:text-sm font-pretendard bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                         성별 <span className="text-red-500">*</span>
                       </label>
                       <div className="flex gap-4">
-                        <label className="flex items-center">
+                        <label className="flex items-center font-pretendard">
                           <input
                             type="radio"
                             name={`gender-${index}`}
@@ -345,11 +344,11 @@ export default function SignupPage() {
                             checked={child.gender === 'MALE'}
                             onChange={(e) => updateChild(index, 'gender', e.target.value)}
                             required
-                            className="mr-2"
+                            className="mr-2 text-[#FF6A00] focus:ring-[#FF6A00]"
                           />
                           남자
                         </label>
-                        <label className="flex items-center">
+                        <label className="flex items-center font-pretendard">
                           <input
                             type="radio"
                             name={`gender-${index}`}
@@ -357,7 +356,7 @@ export default function SignupPage() {
                             checked={child.gender === 'FEMALE'}
                             onChange={(e) => updateChild(index, 'gender', e.target.value)}
                             required
-                            className="mr-2"
+                            className="mr-2 text-[#FF6A00] focus:ring-[#FF6A00]"
                           />
                           여자
                         </label>
@@ -370,8 +369,8 @@ export default function SignupPage() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="text-sm text-red-800">{error}</div>
+            <div className="rounded-[10px] bg-red-50 border border-red-200 p-4">
+              <div className="text-sm text-red-800 font-pretendard">{error}</div>
             </div>
           )}
 
@@ -379,30 +378,23 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                backgroundColor: isLoading ? '#386646' : '#386646',
-                color: '#FFFFFF',
-                opacity: isLoading ? 0.5 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoading) e.currentTarget.style.backgroundColor = '#193149'
-              }}
-              onMouseLeave={(e) => {
-                if (!isLoading) e.currentTarget.style.backgroundColor = '#386646'
-              }}
+              className={`w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-[10px] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF6A00] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md font-pretendard ${
+                isLoading
+                  ? 'bg-gray-400'
+                  : 'bg-[#FF6A00] hover:bg-[#E55F00]'
+              } text-white`}
             >
               {isLoading ? '가입 중...' : '회원가입'}
             </button>
           </div>
 
-          <div className="text-xs text-gray-500 text-center">
+          <div className="text-xs text-stone-500 text-center font-pretendard">
             회원가입 시{' '}
-            <a href="#" className="text-aipoten-green hover:text-aipoten-navy">
+            <a href="#" className="text-[#FF6A00] hover:text-[#E55F00]">
               이용약관
             </a>
             {' '}및{' '}
-            <a href="#" className="text-aipoten-green hover:text-aipoten-navy">
+            <a href="#" className="text-[#FF6A00] hover:text-[#E55F00]">
               개인정보처리방침
             </a>
             에 동의한 것으로 간주됩니다.

@@ -119,12 +119,12 @@ export default function NewPostPage({ params }: { params: Promise<{ boardId: str
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-neutral-light">
+      <div className="min-h-screen bg-white">
         <Header />
         <div className="flex items-center justify-center pt-20">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-            <p className="mt-4 text-gray-600">로딩 중...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+            <p className="mt-4 text-stone-600 font-pretendard">로딩 중...</p>
           </div>
         </div>
       </div>
@@ -136,21 +136,21 @@ export default function NewPostPage({ params }: { params: Promise<{ boardId: str
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-white">
       <Header />
 
       <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">새 게시글 작성</h1>
-            <p className="mt-1 text-sm text-gray-600">{config.title}</p>
+            <h1 className="text-2xl font-bold text-stone-900 font-pretendard">새 게시글 작성</h1>
+            <p className="mt-1 text-sm text-stone-600 font-pretendard">{config.title}</p>
           </div>
 
-          <div className="bg-white shadow rounded-lg">
+          <div className="bg-white shadow-md rounded-xl">
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {/* 카테고리 */}
               <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="category" className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                   카테고리
                 </label>
                 <select
@@ -158,7 +158,7 @@ export default function NewPostPage({ params }: { params: Promise<{ boardId: str
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
                 >
                   <option value="">선택하세요</option>
                   {config.categories.map((cat) => (
@@ -171,7 +171,7 @@ export default function NewPostPage({ params }: { params: Promise<{ boardId: str
 
               {/* 제목 */}
               <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="title" className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                   제목 *
                 </label>
                 <input
@@ -182,13 +182,13 @@ export default function NewPostPage({ params }: { params: Promise<{ boardId: str
                   onChange={handleChange}
                   placeholder="제목을 입력하세요"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
                 />
               </div>
 
               {/* 내용 */}
               <div>
-                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="content" className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                   내용 *
                 </label>
                 <textarea
@@ -199,7 +199,7 @@ export default function NewPostPage({ params }: { params: Promise<{ boardId: str
                   placeholder="내용을 입력하세요"
                   rows={15}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
                 />
               </div>
 
@@ -212,55 +212,31 @@ export default function NewPostPage({ params }: { params: Promise<{ boardId: str
                     name="isSticky"
                     checked={formData.isSticky}
                     onChange={handleChange}
-                    className="h-4 w-4 text-aipoten-green focus:ring-aipoten-green border-gray-300 rounded"
+                    className="h-4 w-4 text-[#FF6A00] focus:ring-[#FF6A00] border-gray-300 rounded"
                   />
-                  <label htmlFor="isSticky" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="isSticky" className="ml-2 block text-sm text-stone-700 font-pretendard">
                     공지사항으로 고정
                   </label>
                 </div>
               )}
 
               {/* 버튼 */}
-              <div style={{ display: 'flex', gap: '12px', paddingTop: '16px' }}>
+              <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => router.back()}
-                  style={{
-                    flex: 1,
-                    padding: '8px 16px',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '6px',
-                    color: '#374151',
-                    backgroundColor: 'white',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-[10px] text-stone-700 bg-white hover:bg-gray-50 text-sm font-medium transition-colors font-pretendard"
                 >
                   취소
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  style={{
-                    flex: 1,
-                    padding: '8px 16px',
-                    border: 'none',
-                    borderRadius: '6px',
-                    color: 'white',
-                    backgroundColor: isSubmitting ? '#D1D5DB' : '#386646',
-                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSubmitting) e.currentTarget.style.backgroundColor = '#2D5238'
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSubmitting) e.currentTarget.style.backgroundColor = '#386646'
-                  }}
+                  className={`flex-1 px-4 py-2 rounded-[10px] text-white text-sm font-medium transition-colors shadow-md font-pretendard ${
+                    isSubmitting
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-[#FF6A00] hover:bg-[#E55F00]'
+                  }`}
                 >
                   {isSubmitting ? '작성 중...' : '작성 완료'}
                 </button>

@@ -121,12 +121,12 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light">
+      <div className="min-h-screen bg-white">
         <Header />
         <div className="flex items-center justify-center pt-20">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-            <p className="mt-4 text-gray-600">로딩 중...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+            <p className="mt-4 text-stone-600 font-pretendard">로딩 중...</p>
           </div>
         </div>
       </div>
@@ -134,37 +134,25 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Header />
 
       <main className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Board Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">{config.title}</h1>
-          <p className="mt-1 text-sm text-gray-600">{config.description}</p>
+          <h1 className="text-2xl font-bold text-stone-900 font-pretendard">{config.title}</h1>
+          <p className="mt-1 text-sm text-stone-600 font-pretendard">{config.description}</p>
         </div>
 
         {/* Board Controls */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <div style={{ fontSize: '14px', color: '#4B5563' }}>
-            전체 글 <span style={{ fontWeight: 600 }}>{posts.length}</span>개
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-sm text-stone-600 font-pretendard">
+            전체 글 <span className="font-semibold text-stone-900">{posts.length}</span>개
           </div>
           {session && config.canWrite(session.user?.role) && (
             <button
               onClick={handleWriteClick}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#386646',
-                color: 'white',
-                fontSize: '14px',
-                fontWeight: 500,
-                borderRadius: '4px',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s',
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2D5238'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
+              className="px-4 py-2 bg-[#FF6A00] text-white text-sm font-medium rounded-[10px] hover:bg-[#E55F00] transition-colors shadow-md font-pretendard"
             >
               글쓰기
             </button>
@@ -172,26 +160,14 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
         </div>
 
         {/* BBS Table */}
-        <div className="bg-white border border-gray-300 rounded">
+        <div className="bg-white border border-gray-200 rounded-xl">
           {posts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '80px 0' }}>
-              <p style={{ color: '#6B7280', marginBottom: '16px' }}>등록된 게시글이 없습니다.</p>
+            <div className="text-center py-20">
+              <p className="text-stone-500 mb-4 font-pretendard">등록된 게시글이 없습니다.</p>
               {session && config.canWrite(session.user?.role) && (
                 <button
                   onClick={handleWriteClick}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#386646',
-                    color: 'white',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    borderRadius: '4px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2D5238'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
+                  className="px-4 py-2 bg-[#FF6A00] text-white text-sm font-medium rounded-[10px] hover:bg-[#E55F00] transition-colors shadow-md font-pretendard"
                 >
                   첫 게시글 작성하기
                 </button>
@@ -200,12 +176,12 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
           ) : (
             <>
               {/* Table Header */}
-              <div className="hidden md:grid md:grid-cols-12 border-b border-gray-300 bg-gray-50 text-sm font-medium text-gray-700">
-                <div className="col-span-1 py-3 px-4 text-center">번호</div>
-                <div className="col-span-6 py-3 px-4">제목</div>
-                <div className="col-span-2 py-3 px-4 text-center">작성자</div>
-                <div className="col-span-2 py-3 px-4 text-center">작성일</div>
-                <div className="col-span-1 py-3 px-4 text-center">조회</div>
+              <div className="hidden md:grid md:grid-cols-12 border-b border-gray-200 bg-[#F9F9F9] text-sm font-medium text-stone-700">
+                <div className="col-span-1 py-3 px-4 text-center font-pretendard">번호</div>
+                <div className="col-span-6 py-3 px-4 font-pretendard">제목</div>
+                <div className="col-span-2 py-3 px-4 text-center font-pretendard">작성자</div>
+                <div className="col-span-2 py-3 px-4 text-center font-pretendard">작성일</div>
+                <div className="col-span-1 py-3 px-4 text-center font-pretendard">조회</div>
               </div>
 
               {/* Table Body */}
@@ -214,31 +190,31 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
                   <Link
                     key={post.id}
                     href={`/boards/${boardId}/${post.id}`}
-                    className="grid grid-cols-1 md:grid-cols-12 py-3 px-4 hover:bg-gray-50 transition-colors"
+                    className="grid grid-cols-1 md:grid-cols-12 py-3 px-4 hover:bg-[#FFF5F0] transition-colors"
                   >
                     {/* 모바일: 전체 레이아웃 */}
                     <div className="md:hidden space-y-2">
                       <div className="flex items-center space-x-2">
                         {post.isSticky && (
-                          <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded">
+                          <span className="px-2 py-0.5 text-xs font-medium bg-[#FFE5E5] text-[#FF6A00] rounded font-pretendard">
                             공지
                           </span>
                         )}
                         {post.category && (
-                          <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">
+                          <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded font-pretendard">
                             {post.category}
                           </span>
                         )}
-                        <h3 className="text-sm font-medium text-gray-900 flex-1">
+                        <h3 className="text-sm font-medium text-stone-900 flex-1 font-pretendard">
                           {post.title}
                           {post._count.comments > 0 && (
-                            <span className="ml-1 text-aipoten-green">
+                            <span className="ml-1 text-[#FF6A00] font-pretendard">
                               [{post._count.comments}]
                             </span>
                           )}
                         </h3>
                       </div>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center justify-between text-xs text-stone-500 font-pretendard">
                         <span>{post.author.name}</span>
                         <div className="flex items-center space-x-3">
                           <span>{new Date(post.createdAt).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}</span>
@@ -248,9 +224,9 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
                     </div>
 
                     {/* 데스크탑: 테이블 레이아웃 */}
-                    <div className="hidden md:block md:col-span-1 text-center text-sm text-gray-600">
+                    <div className="hidden md:block md:col-span-1 text-center text-sm text-stone-600 font-pretendard">
                       {post.isSticky ? (
-                        <span className="font-medium text-red-600">공지</span>
+                        <span className="font-medium text-[#FF6A00]">공지</span>
                       ) : (
                         posts.length - index
                       )}
@@ -258,27 +234,27 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
                     <div className="hidden md:block md:col-span-6">
                       <div className="flex items-center space-x-2">
                         {post.category && (
-                          <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">
+                          <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded font-pretendard">
                             {post.category}
                           </span>
                         )}
-                        <span className="text-sm text-gray-900 font-medium">
+                        <span className="text-sm text-stone-900 font-medium font-pretendard">
                           {post.title}
                         </span>
                         {post._count.comments > 0 && (
-                          <span className="text-sm text-aipoten-green">
+                          <span className="text-sm text-[#FF6A00] font-pretendard">
                             [{post._count.comments}]
                           </span>
                         )}
                       </div>
                     </div>
-                    <div className="hidden md:block md:col-span-2 text-center text-sm text-gray-600">
+                    <div className="hidden md:block md:col-span-2 text-center text-sm text-stone-600 font-pretendard">
                       {post.author.name}
                     </div>
-                    <div className="hidden md:block md:col-span-2 text-center text-sm text-gray-500">
+                    <div className="hidden md:block md:col-span-2 text-center text-sm text-stone-500 font-pretendard">
                       {new Date(post.createdAt).toLocaleDateString('ko-KR')}
                     </div>
-                    <div className="hidden md:block md:col-span-1 text-center text-sm text-gray-500">
+                    <div className="hidden md:block md:col-span-1 text-center text-sm text-stone-500 font-pretendard">
                       {post.views}
                     </div>
                   </Link>
@@ -295,7 +271,7 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 border border-gray-300 rounded-md text-sm text-stone-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-pretendard"
               >
                 ‹
               </button>
@@ -303,10 +279,10 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1 border text-sm rounded ${
+                  className={`px-3 py-1 border text-sm rounded-md font-pretendard ${
                     currentPage === page
-                      ? 'bg-aipoten-green text-white border-aipoten-green'
-                      : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      ? 'bg-[#FF6A00] text-white border-[#FF6A00]'
+                      : 'border-gray-300 text-stone-700 hover:bg-gray-50'
                   }`}
                 >
                   {page}
@@ -315,7 +291,7 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 border border-gray-300 rounded-md text-sm text-stone-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-pretendard"
               >
                 ›
               </button>
