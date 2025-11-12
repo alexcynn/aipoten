@@ -67,8 +67,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     let settlementAmount: number
 
     if (booking.sessionType === 'CONSULTATION') {
-      // 언어컨설팅: 미리 설정된 정산금 사용
-      settlementAmount = booking.payment.therapist.consultationSettlementAmount || 100000
+      // 언어컨설팅: 미리 설정된 정산금 사용 (필수)
+      if (!booking.payment.therapist.consultationSettlementAmount) {
+        return NextResponse.json(
+          { error: '이 치료사는 언어 컨설팅 정산금이 설정되지 않았습니다.' },
+          { status: 400 }
+        )
+      }
+      settlementAmount = booking.payment.therapist.consultationSettlementAmount
     } else {
       // 홈티: 결제 금액 - 플랫폼 수수료
       if (booking.payment.platformFee) {

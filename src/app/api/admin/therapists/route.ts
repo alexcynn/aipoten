@@ -68,6 +68,9 @@ export async function GET(request: NextRequest) {
         memo: therapist.profileUpdateRequests[0].memo,
         requestedAt: therapist.profileUpdateRequests[0].requestedAt.toISOString()
       } : null,
+      canDoConsultation: therapist.canDoConsultation,
+      consultationFee: therapist.consultationFee,
+      consultationSettlementAmount: therapist.consultationSettlementAmount,
       createdAt: therapist.createdAt.toISOString()
     }))
 

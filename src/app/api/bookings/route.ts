@@ -193,9 +193,16 @@ export async function POST(request: NextRequest) {
     let platformFee: number
 
     if (sessionType === 'CONSULTATION') {
-      // 언어컨설팅: 치료사별 개별 설정 또는 시스템 기본값 사용
-      sessionFee = therapist.consultationFee || systemSettings?.consultationDefaultFee || 150000
-      const settlementAmount = therapist.consultationSettlementAmount || systemSettings?.consultationDefaultSettlement || 100000
+      // 언어컨설팅: 치료사별 설정 값만 사용 (필수)
+      if (!therapist.consultationFee || !therapist.consultationSettlementAmount) {
+        return NextResponse.json(
+          { error: '이 치료사는 언어 컨설팅 비용이 설정되지 않았습니다. 관리자에게 문의해주세요.' },
+          { status: 400 }
+        )
+      }
+
+      sessionFee = therapist.consultationFee
+      const settlementAmount = therapist.consultationSettlementAmount
 
       discountRate = 0 // 언어컨설팅은 할인 없음
       originalFee = sessionFee

@@ -57,8 +57,6 @@ export default function AdminSettingsPage() {
   const [accountNumber, setAccountNumber] = useState('')
   const [accountHolder, setAccountHolder] = useState('')
   const [settlementRate, setSettlementRate] = useState<number>(5)
-  const [consultationDefaultFee, setConsultationDefaultFee] = useState<number>(150000)
-  const [consultationDefaultSettlement, setConsultationDefaultSettlement] = useState<number>(100000)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -90,8 +88,6 @@ export default function AdminSettingsPage() {
         setAccountNumber(settingsData.accountNumber || '')
         setAccountHolder(settingsData.accountHolder || '')
         setSettlementRate(settingsData.settlementRate ?? 5)
-        setConsultationDefaultFee(settingsData.consultationDefaultFee ?? 150000)
-        setConsultationDefaultSettlement(settingsData.consultationDefaultSettlement ?? 100000)
       }
 
       if (mappingsRes.ok) {
@@ -116,12 +112,6 @@ export default function AdminSettingsPage() {
       return
     }
 
-    if (consultationDefaultSettlement > consultationDefaultFee) {
-      setMessage({ type: 'error', text: '언어컨설팅 정산금이 비용보다 클 수 없습니다.' })
-      setIsSaving(false)
-      return
-    }
-
     try {
       const response = await fetch('/api/admin/settings', {
         method: 'PUT',
@@ -133,8 +123,6 @@ export default function AdminSettingsPage() {
           accountNumber,
           accountHolder,
           settlementRate,
-          consultationDefaultFee,
-          consultationDefaultSettlement,
         }),
       })
 
@@ -318,60 +306,6 @@ export default function AdminSettingsPage() {
             </div>
           </div>
 
-          {/* 언어컨설팅 기본값 설정 */}
-          <div className="mb-6 p-4 bg-[#F5EFE7] border border-[#F5EFE7] rounded-xl">
-            <h3 className="text-md font-semibold text-stone-900 mb-3 font-pretendard">언어컨설팅 기본값 설정</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
-                  부모 결제 금액 (원)
-                </label>
-                <input
-                  type="number"
-                  value={consultationDefaultFee}
-                  onChange={(e) => setConsultationDefaultFee(parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-pretendard"
-                  step="1000"
-                  min="0"
-                />
-                <p className="text-sm text-stone-600 mt-1 font-pretendard">
-                  새 치료사 등록 시 기본값으로 적용됩니다.
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
-                  치료사 정산금 (원)
-                </label>
-                <input
-                  type="number"
-                  value={consultationDefaultSettlement}
-                  onChange={(e) => setConsultationDefaultSettlement(parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-pretendard"
-                  step="1000"
-                  min="0"
-                />
-                <p className="text-sm text-stone-600 mt-1 font-pretendard">
-                  새 치료사 등록 시 기본값으로 적용됩니다.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 text-sm text-stone-700 bg-white p-3 rounded-xl border border-gray-200 font-pretendard">
-              <p className="font-medium mb-1">💰 현재 설정 기준 플랫폼 수익</p>
-              <p>
-                • 플랫폼 수익: <strong className="text-[#FF6A00] text-base">
-                  {(consultationDefaultFee - consultationDefaultSettlement).toLocaleString()}원
-                </strong>
-                {consultationDefaultSettlement > consultationDefaultFee && (
-                  <span className="text-red-600 font-medium ml-2">⚠️ 정산금이 비용보다 큽니다!</span>
-                )}
-              </p>
-              <p className="text-xs text-stone-500 mt-1">
-                (부모 결제 금액 - 치료사 정산금)
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* 치료사 매핑 설정 */}

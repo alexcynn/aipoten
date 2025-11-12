@@ -73,6 +73,10 @@ export async function GET(
       consultationFee: therapist.consultationFee,
       licenseNumber: therapist.licenseNumber,
 
+      // 언어 컨설팅 관련 필드
+      canDoConsultation: therapist.canDoConsultation,
+      consultationSettlementAmount: therapist.consultationSettlementAmount,
+
       education: therapist.education,
       introduction: therapist.introduction,
       description: therapist.introduction, // 별칭

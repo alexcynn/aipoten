@@ -70,8 +70,6 @@ export async function PUT(request: NextRequest) {
       accountNumber,
       accountHolder,
       settlementRate,
-      consultationDefaultFee,
-      consultationDefaultSettlement
     } = body
 
     // 검증
@@ -79,15 +77,6 @@ export async function PUT(request: NextRequest) {
       if (typeof settlementRate !== 'number' || settlementRate < 0 || settlementRate > 100) {
         return NextResponse.json(
           { error: '정산율은 0~100 사이의 값이어야 합니다.' },
-          { status: 400 }
-        )
-      }
-    }
-
-    if (consultationDefaultFee !== undefined && consultationDefaultSettlement !== undefined) {
-      if (consultationDefaultSettlement > consultationDefaultFee) {
-        return NextResponse.json(
-          { error: '기본 정산금이 기본 비용보다 클 수 없습니다.' },
           { status: 400 }
         )
       }
@@ -102,8 +91,6 @@ export async function PUT(request: NextRequest) {
     if (accountNumber !== undefined) updateData.accountNumber = accountNumber
     if (accountHolder !== undefined) updateData.accountHolder = accountHolder
     if (settlementRate !== undefined) updateData.settlementRate = settlementRate
-    if (consultationDefaultFee !== undefined) updateData.consultationDefaultFee = consultationDefaultFee
-    if (consultationDefaultSettlement !== undefined) updateData.consultationDefaultSettlement = consultationDefaultSettlement
 
     const settings = await prisma.systemSettings.upsert({
       where: { id: 'system' },

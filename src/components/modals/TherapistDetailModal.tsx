@@ -274,29 +274,44 @@ export default function TherapistDetailModal({
 
   const handleToggleConsultation = async (
     therapistId: string,
-    currentValue: boolean,
+    canDoConsultation: boolean,
     consultationFee?: number,
     consultationSettlementAmount?: number
   ) => {
-    const newValue = !currentValue
+    // 권한 부여하는 경우 - 필수 입력 검증
+    if (canDoConsultation) {
+      // 비용 필수 검증
+      if (!consultationFee || consultationFee <= 0) {
+        alert('언어컨설팅 비용(부모 결제 금액)을 입력해주세요.')
+        return
+      }
+
+      // 정산금 필수 검증
+      if (!consultationSettlementAmount || consultationSettlementAmount <= 0) {
+        alert('언어컨설팅 정산금(치료사 정산금)을 입력해주세요.')
+        return
+      }
+
+      // 정산금 > 비용 검증
+      if (consultationSettlementAmount > consultationFee) {
+        alert('정산금이 비용보다 클 수 없습니다.')
+        return
+      }
+    }
 
     // 권한 제거하는 경우
-    if (!newValue) {
+    if (!canDoConsultation) {
       const message = '이 치료사의 언어 컨설팅 권한을 제거하시겠습니까?'
       if (!confirm(message)) return
     }
 
     try {
-      const body: any = { canDoConsultation: newValue }
+      const body: any = { canDoConsultation }
 
-      // 권한을 부여하는 경우 비용과 정산금도 함께 전송
-      if (newValue) {
-        if (consultationFee !== undefined) {
-          body.consultationFee = consultationFee
-        }
-        if (consultationSettlementAmount !== undefined) {
-          body.consultationSettlementAmount = consultationSettlementAmount
-        }
+      // 권한을 부여하는 경우 비용과 정산금 전송 (필수 검증 통과 후)
+      if (canDoConsultation) {
+        body.consultationFee = consultationFee
+        body.consultationSettlementAmount = consultationSettlementAmount
       }
 
       const response = await fetch(`/api/admin/therapists/${therapistId}/update-consultation-permission`, {
@@ -315,7 +330,7 @@ export default function TherapistDetailModal({
         if (selectedTherapist && selectedTherapist.id === therapistId) {
           setSelectedTherapist({
             ...selectedTherapist,
-            canDoConsultation: newValue,
+            canDoConsultation: data.therapistProfile.canDoConsultation,
             consultationFee: data.therapistProfile.consultationFee,
             consultationSettlementAmount: data.therapistProfile.consultationSettlementAmount
           })
@@ -597,32 +612,34 @@ export default function TherapistDetailModal({
                       <div className="ml-6 mt-4 space-y-3 p-4 bg-[#FFF5F0] border border-orange-200 rounded-xl">
                         <div>
                           <label className="block text-sm font-medium text-stone-700 mb-1 font-pretendard">
-                            부모 결제 금액 (원)
+                            부모 결제 금액 (원) <span className="text-red-600">*</span>
                           </label>
                           <input
                             type="number"
-                            value={selectedTherapist.consultationFee || 150000}
+                            value={selectedTherapist.consultationFee || ''}
                             onChange={(e) => setSelectedTherapist({
                               ...selectedTherapist,
                               consultationFee: parseInt(e.target.value) || 0
                             })}
-                            placeholder="150000"
+                            placeholder="필수 입력 (예: 150000)"
                             className="w-full px-3 py-2 border border-gray-300 rounded-[10px] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
+                            required
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-stone-700 mb-1 font-pretendard">
-                            치료사 정산금 (원)
+                            치료사 정산금 (원) <span className="text-red-600">*</span>
                           </label>
                           <input
                             type="number"
-                            value={selectedTherapist.consultationSettlementAmount || 100000}
+                            value={selectedTherapist.consultationSettlementAmount || ''}
                             onChange={(e) => setSelectedTherapist({
                               ...selectedTherapist,
                               consultationSettlementAmount: parseInt(e.target.value) || 0
                             })}
-                            placeholder="100000"
+                            placeholder="필수 입력 (예: 100000)"
                             className="w-full px-3 py-2 border border-gray-300 rounded-[10px] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
+                            required
                           />
                         </div>
                         <div className="text-sm text-stone-600 bg-white p-3 rounded-[10px] font-pretendard">
@@ -638,7 +655,7 @@ export default function TherapistDetailModal({
                     <button
                       onClick={() => handleToggleConsultation(
                         selectedTherapist.id,
-                        !selectedTherapist.canDoConsultation, // 반대값을 전달 (토글 효과)
+                        selectedTherapist.canDoConsultation, // 현재 상태를 그대로 전달
                         selectedTherapist.consultationFee,
                         selectedTherapist.consultationSettlementAmount
                       )}
