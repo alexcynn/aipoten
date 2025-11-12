@@ -39,8 +39,8 @@ interface AccountInfo {
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  PENDING_PAYMENT: { label: '입금 대기', color: 'bg-orange-100 text-orange-800' },
-  PAID: { label: '결제 완료', color: 'bg-green-100 text-green-800' },
+  PENDING_PAYMENT: { label: '입금 대기', color: 'bg-stone-100 text-stone-800' },
+  PAID: { label: '결제 완료', color: 'bg-[#FFE5E5] text-[#FF6A00]' },
   REFUNDED: { label: '전액 환불', color: 'bg-red-100 text-red-800' },
   PARTIALLY_REFUNDED: { label: '부분 환불', color: 'bg-yellow-100 text-yellow-800' },
   FAILED: { label: '결제 실패', color: 'bg-gray-100 text-gray-800' },
@@ -228,10 +228,10 @@ export default function AdminPaymentsPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600 font-pretendard">로딩 중...</p>
         </div>
       </div>
     )
@@ -251,7 +251,7 @@ export default function AdminPaymentsPage() {
         {/* 메시지 */}
         {message && (
           <div
-            className={`p-4 rounded-md ${
+            className={`p-4 rounded-xl font-pretendard ${
               message.type === 'success'
                 ? 'bg-green-50 text-green-800 border border-green-200'
                 : 'bg-red-50 text-red-800 border border-red-200'
@@ -263,32 +263,27 @@ export default function AdminPaymentsPage() {
 
         {/* 계좌 정보 */}
         {accountInfo && (accountInfo.bankName || accountInfo.accountNumber) && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-blue-900 mb-2">아이포텐 입금 계좌 정보</h3>
-            <p className="text-sm text-blue-800">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-blue-900 mb-2 font-pretendard">아이포텐 입금 계좌 정보</h3>
+            <p className="text-sm text-blue-800 font-pretendard">
               {accountInfo.bankName} {accountInfo.accountNumber} ({accountInfo.accountHolder})
             </p>
           </div>
         )}
 
         {/* 필터 */}
-        <div className="bg-white shadow rounded-lg p-4">
-          <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="bg-white shadow rounded-xl p-4">
+          <div className="flex gap-2">
             <button
               onClick={() => {
                 console.log('Filter clicked: ALL')
                 setFilter('ALL')
               }}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: filter === 'ALL' ? '#386646' : '#F3F4F6',
-                color: filter === 'ALL' ? '#FFFFFF' : '#374151',
-              }}
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
+                filter === 'ALL'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
             >
               전체 ({allPayments.length})
             </button>
@@ -297,16 +292,11 @@ export default function AdminPaymentsPage() {
                 console.log('Filter clicked: PENDING_PAYMENT')
                 setFilter('PENDING_PAYMENT')
               }}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: filter === 'PENDING_PAYMENT' ? '#386646' : '#F3F4F6',
-                color: filter === 'PENDING_PAYMENT' ? '#FFFFFF' : '#374151',
-              }}
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
+                filter === 'PENDING_PAYMENT'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
             >
               입금 대기 ({pendingCount})
             </button>
@@ -315,16 +305,11 @@ export default function AdminPaymentsPage() {
                 console.log('Filter clicked: PAID')
                 setFilter('PAID')
               }}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: filter === 'PAID' ? '#386646' : '#F3F4F6',
-                color: filter === 'PAID' ? '#FFFFFF' : '#374151',
-              }}
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
+                filter === 'PAID'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
             >
               결제 완료 ({paidCount})
             </button>
@@ -333,16 +318,11 @@ export default function AdminPaymentsPage() {
                 console.log('Filter clicked: REFUNDED')
                 setFilter('REFUNDED')
               }}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: filter === 'REFUNDED' ? '#386646' : '#F3F4F6',
-                color: filter === 'REFUNDED' ? '#FFFFFF' : '#374151',
-              }}
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
+                filter === 'REFUNDED'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
             >
               환불 ({refundedCount})
             </button>
@@ -350,30 +330,30 @@ export default function AdminPaymentsPage() {
         </div>
 
         {/* 날짜 검색 */}
-        <div className="bg-white shadow rounded-lg p-4">
+        <div className="bg-white shadow rounded-xl p-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">시작일</label>
+              <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">시작일</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-pretendard"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">종료일</label>
+              <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">종료일</label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-pretendard"
               />
             </div>
             <div className="flex items-end">
               <button
                 onClick={fetchPayments}
-                className="w-full px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                className="w-full px-4 py-2 bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors font-pretendard"
               >
                 검색
               </button>
@@ -382,54 +362,54 @@ export default function AdminPaymentsPage() {
         </div>
 
         {/* 결제 목록 */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="bg-white shadow rounded-xl overflow-hidden">
           {payments.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">결제 내역이 없습니다.</p>
+              <p className="text-stone-500 font-pretendard">결제 내역이 없습니다.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-[#F9F9F9]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       부모/아이
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       치료사
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       유형/세션
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       진행 상황
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       금액
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       상태
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       작업
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {payments.map((payment) => (
-                    <tr key={payment.id}>
+                    <tr key={payment.id} className="hover:bg-[#FFF5F0]">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => handleOpenChildModal(payment.child)}
-                          className="text-left hover:bg-gray-50 p-1 rounded"
+                          className="text-left hover:bg-stone-50 p-1 rounded transition-colors"
                         >
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-stone-900 font-pretendard">
                             {payment.parentUser.name}
                           </div>
-                          <div className="text-sm text-aipoten-green hover:text-aipoten-navy cursor-pointer">
+                          <div className="text-sm text-[#FF6A00] hover:text-[#E55F00] cursor-pointer font-pretendard transition-colors">
                             {payment.child.name} ({payment.child.gender === 'MALE' ? '남' : '여'})
                           </div>
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-stone-400 font-pretendard">
                             {payment.parentUser.phone || payment.parentUser.email}
                           </div>
                         </button>
@@ -437,32 +417,32 @@ export default function AdminPaymentsPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => handleOpenTherapistModal(payment.therapist)}
-                          className="text-left hover:bg-gray-50 p-1 rounded"
+                          className="text-left hover:bg-stone-50 p-1 rounded transition-colors"
                         >
-                          <div className="text-sm text-aipoten-green hover:text-aipoten-navy cursor-pointer">
+                          <div className="text-sm text-[#FF6A00] hover:text-[#E55F00] cursor-pointer font-pretendard transition-colors">
                             {payment.therapist.user.name}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-stone-500 font-pretendard">
                             {payment.therapist.user.phone}
                           </div>
                         </button>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-stone-900 font-pretendard">
                           {payment.sessionType === 'CONSULTATION' ? '언어 컨설팅' : '홈티'}
                         </div>
-                        <div className="text-sm text-gray-500">{payment.totalSessions}회</div>
+                        <div className="text-sm text-stone-500 font-pretendard">{payment.totalSessions}회</div>
                         {payment.discountRate > 0 && (
-                          <div className="text-xs text-red-600">{payment.discountRate}% 할인</div>
+                          <div className="text-xs text-red-600 font-pretendard">{payment.discountRate}% 할인</div>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-stone-900 font-pretendard">
                           {payment.completedSessions} / {payment.totalSessions} 회
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                           <div
-                            className="bg-aipoten-green h-2 rounded-full"
+                            className="bg-[#FF6A00] h-2 rounded-full"
                             style={{
                               width: `${(payment.completedSessions / payment.totalSessions) * 100}%`,
                             }}
@@ -470,28 +450,28 @@ export default function AdminPaymentsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-semibold text-gray-900">
+                        <div className="text-sm font-semibold text-stone-900 font-pretendard">
                           ₩{payment.finalFee.toLocaleString()}
                         </div>
                         {payment.discountRate > 0 && (
-                          <div className="text-xs text-gray-500 line-through">
+                          <div className="text-xs text-stone-500 line-through font-pretendard">
                             ₩{payment.originalFee.toLocaleString()}
                           </div>
                         )}
                         {payment.refundAmount && (
-                          <div className="text-xs text-red-600">
+                          <div className="text-xs text-red-600 font-pretendard">
                             환불: ₩{payment.refundAmount.toLocaleString()}
                           </div>
                         )}
                         {payment.paidAt && (
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-stone-500 font-pretendard">
                             결제: {new Date(payment.paidAt).toLocaleDateString('ko-KR')}
                           </div>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full font-pretendard ${
                             statusLabels[payment.status]?.color || 'bg-gray-100 text-gray-800'
                           }`}
                         >
@@ -505,7 +485,7 @@ export default function AdminPaymentsPage() {
                               type="number"
                               value={refundAmount}
                               onChange={(e) => setRefundAmount(parseInt(e.target.value) || 0)}
-                              className="w-32 px-2 py-1 border border-gray-300 rounded-md text-sm"
+                              className="w-32 px-2 py-1 border border-gray-300 rounded-[10px] text-sm font-pretendard focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
                               placeholder="환불 금액"
                               step="1000"
                             />
@@ -513,13 +493,13 @@ export default function AdminPaymentsPage() {
                               type="text"
                               value={refundReason}
                               onChange={(e) => setRefundReason(e.target.value)}
-                              className="w-48 px-2 py-1 border border-gray-300 rounded-md text-sm"
+                              className="w-48 px-2 py-1 border border-gray-300 rounded-[10px] text-sm font-pretendard focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
                               placeholder="환불 사유"
                             />
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleProcessRefund(payment.id)}
-                                className="text-red-600 hover:text-red-900"
+                                className="text-red-600 hover:text-red-900 font-pretendard transition-colors"
                               >
                                 확인
                               </button>
@@ -529,7 +509,7 @@ export default function AdminPaymentsPage() {
                                   setRefundAmount(0)
                                   setRefundReason('')
                                 }}
-                                className="text-gray-600 hover:text-gray-900"
+                                className="text-stone-600 hover:text-stone-900 font-pretendard transition-colors"
                               >
                                 취소
                               </button>
@@ -540,7 +520,7 @@ export default function AdminPaymentsPage() {
                             {payment.status === 'PENDING_PAYMENT' && (
                               <button
                                 onClick={() => handleConfirmPayment(payment.id)}
-                                className="text-green-600 hover:text-green-900"
+                                className="text-[#FF6A00] hover:text-[#E55F00] font-pretendard transition-colors"
                               >
                                 입금 확인
                               </button>
@@ -548,7 +528,7 @@ export default function AdminPaymentsPage() {
                             {(payment.status === 'PAID' || payment.status === 'PARTIALLY_REFUNDED') && (
                               <button
                                 onClick={() => handleStartRefund(payment)}
-                                className="text-red-600 hover:text-red-900"
+                                className="text-red-600 hover:text-red-900 font-pretendard transition-colors"
                               >
                                 {payment.status === 'PARTIALLY_REFUNDED' ? '추가 환불' : '환불 처리'}
                               </button>
@@ -566,16 +546,16 @@ export default function AdminPaymentsPage() {
 
         {/* 페이지네이션 */}
         {allPayments.length > itemsPerPage && (
-          <div className="bg-white shadow rounded-lg p-4">
+          <div className="bg-white shadow rounded-xl p-4">
             <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-700">
+              <div className="text-sm text-stone-700 font-pretendard">
                 전체 {allPayments.length}건 중 {Math.min((currentPage - 1) * itemsPerPage + 1, allPayments.length)}-{Math.min(currentPage * itemsPerPage, allPayments.length)}건 표시
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 border border-gray-300 rounded-[10px] text-sm font-medium text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-pretendard"
                 >
                   이전
                 </button>
@@ -584,10 +564,10 @@ export default function AdminPaymentsPage() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-1 border rounded-md text-sm font-medium ${
+                      className={`px-3 py-1 border rounded-[10px] text-sm font-medium transition-colors font-pretendard ${
                         currentPage === page
-                          ? 'bg-aipoten-green text-white border-aipoten-green'
-                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                          ? 'bg-[#FF6A00] text-white border-[#FF6A00]'
+                          : 'border-gray-300 text-stone-700 hover:bg-stone-50'
                       }`}
                     >
                       {page}
@@ -597,7 +577,7 @@ export default function AdminPaymentsPage() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(Math.ceil(allPayments.length / itemsPerPage), prev + 1))}
                   disabled={currentPage === Math.ceil(allPayments.length / itemsPerPage)}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 border border-gray-300 rounded-[10px] text-sm font-medium text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-pretendard"
                 >
                   다음
                 </button>

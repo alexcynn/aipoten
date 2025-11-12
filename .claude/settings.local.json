@@ -5,7 +5,9 @@
       "mcp__figma-desktop__get_screenshot",
       "mcp__figma-desktop__get_metadata",
       "Bash(if not exist \"C:\\work\\aipoten\\public\\images\" mkdir \"C:\\work\\aipoten\\public\\images\")",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)"
     ],
     "deny": [],
     "ask": []

@@ -183,9 +183,9 @@ export default function AdminInquiriesPage() {
 
   const getStatusBadge = (status: string) => {
     const styles = {
-      PENDING: 'bg-yellow-100 text-yellow-800',
-      IN_PROGRESS: 'bg-blue-100 text-blue-800',
-      RESOLVED: 'bg-green-100 text-green-800',
+      PENDING: 'bg-stone-100 text-stone-800',
+      IN_PROGRESS: 'bg-yellow-100 text-yellow-800',
+      RESOLVED: 'bg-[#FFE5E5] text-[#FF6A00]',
       CLOSED: 'bg-gray-100 text-gray-800',
     }
     const labels = {
@@ -195,7 +195,7 @@ export default function AdminInquiriesPage() {
       CLOSED: '종료됨',
     }
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${styles[status as keyof typeof styles]}`}>
+      <span className={`px-2 py-1 text-xs font-medium rounded-full font-pretendard ${styles[status as keyof typeof styles]}`}>
         {labels[status as keyof typeof labels]}
       </span>
     )
@@ -220,7 +220,10 @@ export default function AdminInquiriesPage() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-96">
-          <div className="text-gray-500">로딩 중...</div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+            <p className="mt-4 text-stone-600 font-pretendard">로딩 중...</p>
+          </div>
         </div>
       </AdminLayout>
     )
@@ -231,16 +234,16 @@ export default function AdminInquiriesPage() {
       <div className="space-y-6">
         {/* 헤더 */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">1:1 문의 관리</h1>
+          <h1 className="text-2xl font-bold text-stone-900 font-pretendard">1:1 문의 관리</h1>
           <div className="flex gap-2">
             {(['ALL', 'PENDING', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-[10px] text-sm font-medium transition-colors font-pretendard ${
                   filter === f
-                    ? 'bg-green-600 text-white'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    ? 'bg-[#FF6A00] text-white'
+                    : 'bg-white text-stone-700 border border-gray-300 hover:bg-stone-50'
                 }`}
               >
                 {f === 'ALL' ? '전체' : f === 'PENDING' ? '대기' : f === 'IN_PROGRESS' ? '처리중' : f === 'RESOLVED' ? '해결됨' : '종료됨'}
@@ -252,14 +255,14 @@ export default function AdminInquiriesPage() {
         {/* 메인 컨텐츠 */}
         <div className="grid grid-cols-3 gap-6 h-[calc(100vh-250px)]">
           {/* 문의 목록 */}
-          <div className="col-span-1 bg-white rounded-lg shadow overflow-hidden">
-            <div className="p-4 bg-gray-50 border-b">
-              <h2 className="font-semibold text-gray-900">문의 목록</h2>
-              <p className="text-sm text-gray-600 mt-1">총 {filteredInquiries.length}건</p>
+          <div className="col-span-1 bg-white rounded-xl shadow overflow-hidden">
+            <div className="p-4 bg-[#F9F9F9] border-b">
+              <h2 className="font-semibold text-stone-900 font-pretendard">문의 목록</h2>
+              <p className="text-sm text-stone-600 mt-1 font-pretendard">총 {filteredInquiries.length}건</p>
             </div>
             <div className="overflow-y-auto h-[calc(100%-80px)]">
               {filteredInquiries.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
+                <div className="p-8 text-center text-stone-500 font-pretendard">
                   문의가 없습니다
                 </div>
               ) : (
@@ -267,16 +270,16 @@ export default function AdminInquiriesPage() {
                   <div
                     key={inquiry.id}
                     onClick={() => handleSelectInquiry(inquiry)}
-                    className={`p-4 border-b cursor-pointer transition-colors hover:bg-gray-50 ${
-                      selectedInquiry?.id === inquiry.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
+                    className={`p-4 border-b cursor-pointer transition-colors hover:bg-[#FFF5F0] ${
+                      selectedInquiry?.id === inquiry.id ? 'bg-[#FFE5E5] border-l-4 border-l-[#FF6A00]' : ''
                     }`}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900 text-sm line-clamp-1">
+                        <h3 className="font-medium text-stone-900 text-sm line-clamp-1 font-pretendard">
                           {inquiry.title}
                         </h3>
-                        <p className="text-xs text-gray-600 mt-1">
+                        <p className="text-xs text-stone-600 mt-1 font-pretendard">
                           {inquiry.user.name} ({inquiry.user.role === 'PARENT' ? '부모' : '치료사'})
                         </p>
                       </div>
@@ -285,10 +288,10 @@ export default function AdminInquiriesPage() {
                       </div>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-stone-500 font-pretendard">
                         {getCategoryLabel(inquiry.category)}
                       </span>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-stone-400 font-pretendard">
                         {new Date(inquiry.createdAt).toLocaleDateString('ko-KR')}
                       </span>
                     </div>
@@ -299,33 +302,33 @@ export default function AdminInquiriesPage() {
           </div>
 
           {/* 메시지 영역 */}
-          <div className="col-span-2 bg-white rounded-lg shadow flex flex-col">
+          <div className="col-span-2 bg-white rounded-xl shadow flex flex-col">
             {selectedInquiry ? (
               <>
                 {/* 채팅 헤더 */}
-                <div className="p-4 border-b bg-gray-50">
+                <div className="p-4 border-b bg-[#F9F9F9]">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h2 className="font-semibold text-gray-900">{selectedInquiry.title}</h2>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <h2 className="font-semibold text-stone-900 font-pretendard">{selectedInquiry.title}</h2>
+                      <p className="text-sm text-stone-600 mt-1 font-pretendard">
                         {selectedInquiry.user.name} ({selectedInquiry.user.role === 'PARENT' ? '부모' : '치료사'})
                         {selectedInquiry.user.email && ` • ${selectedInquiry.user.email}`}
                       </p>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-stone-500 mt-2 font-pretendard">
                         <strong>최초 문의:</strong> {selectedInquiry.content}
                       </p>
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setShowUserModal(true)}
-                        className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                        className="px-3 py-1.5 bg-[#FF6A00] text-white text-sm rounded-[10px] hover:bg-[#E55F00] transition-colors font-pretendard"
                       >
                         사용자 정보
                       </button>
                       <select
                         value={selectedInquiry.status}
                         onChange={(e) => handleStatusChange(e.target.value)}
-                        className="px-3 py-1.5 border border-gray-300 rounded text-sm"
+                        className="px-3 py-1.5 border border-gray-300 rounded-[10px] text-sm font-pretendard focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
                       >
                         <option value="PENDING">대기</option>
                         <option value="IN_PROGRESS">처리중</option>
@@ -339,7 +342,7 @@ export default function AdminInquiriesPage() {
                 {/* 메시지 목록 */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                   {messages.length === 0 ? (
-                    <div className="text-center text-gray-500 py-8">
+                    <div className="text-center text-stone-500 py-8 font-pretendard">
                       아직 메시지가 없습니다. 첫 메시지를 보내보세요!
                     </div>
                   ) : (
@@ -349,15 +352,15 @@ export default function AdminInquiriesPage() {
                         className={`flex ${message.senderType === 'ADMIN' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                          className={`max-w-[70%] rounded-xl px-4 py-2 ${
                             message.senderType === 'ADMIN'
-                              ? 'bg-green-600 text-white'
-                              : 'bg-gray-100 text-gray-900'
+                              ? 'bg-[#FF6A00] text-white'
+                              : 'bg-stone-100 text-stone-900'
                           }`}
                         >
-                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                          <p className={`text-xs mt-1 ${
-                            message.senderType === 'ADMIN' ? 'text-green-100' : 'text-gray-500'
+                          <p className="text-sm whitespace-pre-wrap font-pretendard">{message.content}</p>
+                          <p className={`text-xs mt-1 font-pretendard ${
+                            message.senderType === 'ADMIN' ? 'text-orange-100' : 'text-stone-500'
                           }`}>
                             {new Date(message.createdAt).toLocaleString('ko-KR')}
                           </p>
@@ -369,20 +372,20 @@ export default function AdminInquiriesPage() {
                 </div>
 
                 {/* 메시지 입력 */}
-                <form onSubmit={handleSendMessage} className="p-4 border-t bg-gray-50">
+                <form onSubmit={handleSendMessage} className="p-4 border-t bg-[#F9F9F9]">
                   <div className="flex gap-2">
                     <textarea
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder="메시지를 입력하세요..."
                       rows={3}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] resize-none font-pretendard"
                       disabled={isSendingMessage}
                     />
                     <button
                       type="submit"
                       disabled={isSendingMessage || !newMessage.trim()}
-                      className="px-6 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-pretendard"
                     >
                       {isSendingMessage ? '전송중...' : '전송'}
                     </button>
@@ -390,7 +393,7 @@ export default function AdminInquiriesPage() {
                 </form>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-gray-500">
+              <div className="flex-1 flex items-center justify-center text-stone-500 font-pretendard">
                 왼쪽에서 문의를 선택하세요
               </div>
             )}
@@ -401,18 +404,18 @@ export default function AdminInquiriesPage() {
       {/* 사용자 정보 모달 */}
       {showUserModal && selectedInquiry && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="p-6 border-b">
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">사용자 정보</h2>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <h2 className="text-xl font-bold text-stone-900 font-pretendard">사용자 정보</h2>
+                  <p className="text-sm text-stone-600 mt-1 font-pretendard">
                     {selectedInquiry.user.role === 'PARENT' ? '부모' : '치료사'} 정보
                   </p>
                 </div>
                 <button
                   onClick={() => setShowUserModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-stone-400 hover:text-stone-600 transition-colors"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -423,32 +426,32 @@ export default function AdminInquiriesPage() {
 
             <div className="p-6 space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">기본 정보</h3>
-                <div className="bg-gray-50 p-4 rounded-md space-y-2">
+                <h3 className="text-sm font-medium text-stone-500 mb-2 font-pretendard">기본 정보</h3>
+                <div className="bg-[#F9F9F9] p-4 rounded-xl space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">이름</span>
-                    <span className="text-sm font-medium text-gray-900">{selectedInquiry.user.name}</span>
+                    <span className="text-sm text-stone-600 font-pretendard">이름</span>
+                    <span className="text-sm font-medium text-stone-900 font-pretendard">{selectedInquiry.user.name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">이메일</span>
-                    <span className="text-sm font-medium text-gray-900">{selectedInquiry.user.email}</span>
+                    <span className="text-sm text-stone-600 font-pretendard">이메일</span>
+                    <span className="text-sm font-medium text-stone-900 font-pretendard">{selectedInquiry.user.email}</span>
                   </div>
                   {selectedInquiry.user.phone && (
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">전화번호</span>
-                      <span className="text-sm font-medium text-gray-900">{selectedInquiry.user.phone}</span>
+                      <span className="text-sm text-stone-600 font-pretendard">전화번호</span>
+                      <span className="text-sm font-medium text-stone-900 font-pretendard">{selectedInquiry.user.phone}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">사용자 유형</span>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm text-stone-600 font-pretendard">사용자 유형</span>
+                    <span className="text-sm font-medium text-stone-900 font-pretendard">
                       {selectedInquiry.user.role === 'PARENT' ? '부모' : '치료사'}
                     </span>
                   </div>
                   {selectedInquiry.user.address && (
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">주소</span>
-                      <span className="text-sm font-medium text-gray-900 text-right">
+                      <span className="text-sm text-stone-600 font-pretendard">주소</span>
+                      <span className="text-sm font-medium text-stone-900 text-right font-pretendard">
                         {selectedInquiry.user.address}
                         {selectedInquiry.user.addressDetail && `, ${selectedInquiry.user.addressDetail}`}
                       </span>
@@ -460,11 +463,11 @@ export default function AdminInquiriesPage() {
               {/* 치료사 추가 정보 */}
               {selectedInquiry.user.role === 'THERAPIST' && selectedInquiry.user.therapistProfile && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">치료사 정보</h3>
-                  <div className="bg-gray-50 p-4 rounded-md space-y-2">
+                  <h3 className="text-sm font-medium text-stone-500 mb-2 font-pretendard">치료사 정보</h3>
+                  <div className="bg-[#F9F9F9] p-4 rounded-xl space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">승인 상태</span>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm text-stone-600 font-pretendard">승인 상태</span>
+                      <span className="text-sm font-medium text-stone-900 font-pretendard">
                         {selectedInquiry.user.therapistProfile.approvalStatus === 'APPROVED' ? '승인됨' :
                          selectedInquiry.user.therapistProfile.approvalStatus === 'PENDING' ? '신청' :
                          selectedInquiry.user.therapistProfile.approvalStatus === 'WAITING' ? '대기' : '거절됨'}
@@ -475,10 +478,10 @@ export default function AdminInquiriesPage() {
               )}
             </div>
 
-            <div className="p-6 border-t bg-gray-50">
+            <div className="p-6 border-t bg-[#F9F9F9]">
               <button
                 onClick={() => setShowUserModal(false)}
-                className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                className="w-full px-4 py-2 bg-stone-200 text-stone-700 rounded-[10px] hover:bg-stone-300 transition-colors font-pretendard"
               >
                 닫기
               </button>

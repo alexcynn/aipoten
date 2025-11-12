@@ -204,10 +204,10 @@ export default function AdminSettingsPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600 font-pretendard">로딩 중...</p>
         </div>
       </div>
     )
@@ -223,9 +223,9 @@ export default function AdminSettingsPage() {
         {/* 메시지 표시 */}
         {message && (
           <div
-            className={`p-4 rounded-md ${
+            className={`p-4 rounded-xl font-pretendard ${
               message.type === 'success'
-                ? 'bg-green-50 text-green-800 border border-green-200'
+                ? 'bg-[#FFE5E5] text-[#FF6A00] border border-[#FF9999]'
                 : 'bg-red-50 text-red-800 border border-red-200'
             }`}
           >
@@ -234,13 +234,13 @@ export default function AdminSettingsPage() {
         )}
 
         {/* 계좌 정보 설정 */}
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow rounded-xl p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">아이포텐 입금 계좌 정보</h2>
+            <h2 className="text-xl font-semibold text-stone-900 font-pretendard">아이포텐 입금 계좌 정보</h2>
             <button
               onClick={handleSaveSettings}
               disabled={isSaving}
-              className="px-6 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-sm"
+              className="px-6 py-2 bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg transition-colors font-pretendard"
             >
               {isSaving ? '저장 중...' : '💾 설정 저장'}
             </button>
@@ -248,50 +248,50 @@ export default function AdminSettingsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                 은행명
               </label>
               <input
                 type="text"
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-pretendard"
                 placeholder="예: 국민은행"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                 계좌번호
               </label>
               <input
                 type="text"
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-pretendard"
                 placeholder="000-00-0000-000"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                 예금주
               </label>
               <input
                 type="text"
                 value={accountHolder}
                 onChange={(e) => setAccountHolder(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-pretendard"
                 placeholder="예: (주)아이포텐"
               />
             </div>
           </div>
 
           {/* 홈티 정산율 설정 */}
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h3 className="text-md font-semibold text-gray-800 mb-3">홈티 정산 설정</h3>
+          <div className="mb-6 p-4 bg-[#FFE5E5] border border-[#FFE5E5] rounded-xl">
+            <h3 className="text-md font-semibold text-stone-900 mb-3 font-pretendard">홈티 정산 설정</h3>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                 플랫폼 수수료율 (%)
               </label>
               <div className="flex items-center gap-4">
@@ -299,17 +299,17 @@ export default function AdminSettingsPage() {
                   type="number"
                   value={settlementRate}
                   onChange={(e) => setSettlementRate(parseFloat(e.target.value) || 0)}
-                  className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                  className="w-32 px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-pretendard"
                   min="0"
                   max="100"
                   step="0.1"
                 />
-                <span className="text-sm text-gray-600">%</span>
+                <span className="text-sm text-stone-600 font-pretendard">%</span>
               </div>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-stone-600 mt-2 font-pretendard">
                 홈티(THERAPY) 예약 시 플랫폼 수수료율입니다. (0~100 사이 값)
               </p>
-              <div className="mt-3 text-sm text-gray-600 bg-white p-3 rounded border border-gray-200">
+              <div className="mt-3 text-sm text-stone-700 bg-white p-3 rounded-xl border border-gray-200 font-pretendard">
                 <p className="font-medium mb-1">💡 계산 예시 (정산율 {settlementRate}%)</p>
                 <p>• 결제 금액: 100,000원</p>
                 <p>• 플랫폼 수수료: {Math.round(100000 * (settlementRate / 100)).toLocaleString()}원 ({settlementRate}%)</p>
@@ -319,55 +319,55 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* 언어컨설팅 기본값 설정 */}
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <h3 className="text-md font-semibold text-gray-800 mb-3">언어컨설팅 기본값 설정</h3>
+          <div className="mb-6 p-4 bg-[#F5EFE7] border border-[#F5EFE7] rounded-xl">
+            <h3 className="text-md font-semibold text-stone-900 mb-3 font-pretendard">언어컨설팅 기본값 설정</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                   부모 결제 금액 (원)
                 </label>
                 <input
                   type="number"
                   value={consultationDefaultFee}
                   onChange={(e) => setConsultationDefaultFee(parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-pretendard"
                   step="1000"
                   min="0"
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-stone-600 mt-1 font-pretendard">
                   새 치료사 등록 시 기본값으로 적용됩니다.
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
                   치료사 정산금 (원)
                 </label>
                 <input
                   type="number"
                   value={consultationDefaultSettlement}
                   onChange={(e) => setConsultationDefaultSettlement(parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] font-pretendard"
                   step="1000"
                   min="0"
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-stone-600 mt-1 font-pretendard">
                   새 치료사 등록 시 기본값으로 적용됩니다.
                 </p>
               </div>
             </div>
 
-            <div className="mt-4 text-sm text-gray-600 bg-white p-3 rounded border border-gray-200">
+            <div className="mt-4 text-sm text-stone-700 bg-white p-3 rounded-xl border border-gray-200 font-pretendard">
               <p className="font-medium mb-1">💰 현재 설정 기준 플랫폼 수익</p>
               <p>
-                • 플랫폼 수익: <strong className="text-aipoten-green text-base">
+                • 플랫폼 수익: <strong className="text-[#FF6A00] text-base">
                   {(consultationDefaultFee - consultationDefaultSettlement).toLocaleString()}원
                 </strong>
                 {consultationDefaultSettlement > consultationDefaultFee && (
                   <span className="text-red-600 font-medium ml-2">⚠️ 정산금이 비용보다 큽니다!</span>
                 )}
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-stone-500 mt-1">
                 (부모 결제 금액 - 치료사 정산금)
               </p>
             </div>
@@ -375,29 +375,29 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* 치료사 매핑 설정 */}
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">치료사 매핑 설정</h2>
-            <span className="text-xs bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
+            <h2 className="text-xl font-semibold text-stone-900 font-pretendard">치료사 매핑 설정</h2>
+            <span className="text-xs bg-[#FFE5E5] text-[#FF6A00] px-3 py-1 rounded-full font-semibold font-pretendard">
               ✓ 자동 저장
             </span>
           </div>
-          <p className="text-sm text-gray-600 mb-6">
+          <p className="text-sm text-stone-600 mb-6 font-pretendard">
             발달체크 결과에서 또래 수준 미달(추적검사 요망 이하)인 영역에 대해 추천할 치료 분야를 설정합니다.
             체크박스를 클릭하면 즉시 저장됩니다.
           </p>
 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-[#F9F9F9]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                     발달 영역
                   </th>
                   {THERAPY_TYPES.map(therapy => (
                     <th
                       key={therapy.value}
-                      className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-3 py-3 text-center text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard"
                     >
                       {therapy.label}
                     </th>
@@ -407,7 +407,7 @@ export default function AdminSettingsPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {DEVELOPMENT_CATEGORIES.map(category => (
                   <tr key={category.value}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900 font-pretendard">
                       {category.label}
                     </td>
                     {THERAPY_TYPES.map(therapy => (
@@ -416,7 +416,7 @@ export default function AdminSettingsPage() {
                           type="checkbox"
                           checked={isMapped(category.value, therapy.value)}
                           onChange={() => handleToggleMapping(category.value, therapy.value)}
-                          className="h-4 w-4 text-aipoten-green focus:ring-aipoten-green border-gray-300 rounded cursor-pointer"
+                          className="h-4 w-4 text-[#FF6A00] focus:ring-[#FF6A00] border-gray-300 rounded cursor-pointer"
                         />
                       </td>
                     ))}
@@ -426,7 +426,7 @@ export default function AdminSettingsPage() {
             </table>
           </div>
 
-          <div className="mt-4 text-sm text-gray-500">
+          <div className="mt-4 text-sm text-stone-600 font-pretendard">
             <p>
               ✓ 체크된 항목: 해당 발달 영역이 미달일 때 해당 치료 분야를 추천합니다.
             </p>

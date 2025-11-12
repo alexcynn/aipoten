@@ -159,10 +159,10 @@ export default function KnowledgeBasePage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600 font-pretendard">로딩 중...</p>
         </div>
       </div>
     )
@@ -177,41 +177,41 @@ export default function KnowledgeBasePage() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-gray-600">
+            <p className="text-stone-600 font-pretendard">
               발달체크 결과 분석에 활용되는 발달 이정표 지식을 관리합니다.
             </p>
           </div>
           <button
             onClick={handleCreate}
-            className="px-4 py-2 bg-aipoten-green text-white rounded-lg hover:bg-aipoten-navy transition-colors"
+            className="px-4 py-2 bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors font-pretendard"
           >
             지식 항목 추가
           </button>
         </div>
 
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-sm text-red-600 font-pretendard">{error}</p>
           </div>
         )}
 
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="bg-white shadow rounded-xl overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-[#F9F9F9]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                     제목
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                     카테고리
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                     월령
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                     상태
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                     작업
                   </th>
                 </tr>
@@ -219,34 +219,34 @@ export default function KnowledgeBasePage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {knowledgeItems.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={5} className="px-6 py-12 text-center text-stone-500 font-pretendard">
                       등록된 지식 항목이 없습니다.
                     </td>
                   </tr>
                 ) : (
                   knowledgeItems.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50">
+                    <tr key={item.id} className="hover:bg-[#FFF5F0]">
                       <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">{item.title}</div>
-                        <div className="text-sm text-gray-500 truncate max-w-md">
+                        <div className="text-sm font-medium text-stone-900 font-pretendard">{item.title}</div>
+                        <div className="text-sm text-stone-500 truncate max-w-md font-pretendard">
                           {item.content.substring(0, 100)}...
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-900">
+                        <span className="text-sm text-stone-900 font-pretendard">
                           {CATEGORY_LABELS[item.category] || item.category}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500 font-pretendard">
                         {item.ageMin || item.ageMax
                           ? `${item.ageMin || '~'}~${item.ageMax || '~'}개월`
                           : '전체'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full font-pretendard ${
                             item.isActive
-                              ? 'bg-green-100 text-green-800'
+                              ? 'bg-[#FFE5E5] text-[#FF6A00]'
                               : 'bg-gray-100 text-gray-800'
                           }`}
                         >
@@ -256,13 +256,13 @@ export default function KnowledgeBasePage() {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           onClick={() => handleEdit(item)}
-                          className="text-aipoten-green hover:text-aipoten-navy mr-4"
+                          className="text-[#FF6A00] hover:text-[#E55F00] mr-4 font-pretendard transition-colors"
                         >
                           수정
                         </button>
                         <button
                           onClick={() => handleDelete(item.id)}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-red-600 hover:text-red-900 font-pretendard transition-colors"
                         >
                           삭제
                         </button>
@@ -278,16 +278,16 @@ export default function KnowledgeBasePage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium text-stone-900 font-pretendard">
                 {editingItem ? '지식 항목 수정' : '새 지식 항목 추가'}
               </h3>
             </div>
 
             <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-stone-700 mb-1 font-pretendard">
                   제목 *
                 </label>
                 <input
@@ -295,12 +295,12 @@ export default function KnowledgeBasePage() {
                   required
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aipoten-green focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-stone-700 mb-1 font-pretendard">
                   내용 *
                 </label>
                 <textarea
@@ -308,20 +308,20 @@ export default function KnowledgeBasePage() {
                   rows={8}
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aipoten-green focus:border-transparent resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent resize-none font-pretendard"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-stone-700 mb-1 font-pretendard">
                     카테고리 *
                   </label>
                   <select
                     required
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aipoten-green focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
                   >
                     {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
                       <option key={key} value={key}>
@@ -337,16 +337,16 @@ export default function KnowledgeBasePage() {
                       type="checkbox"
                       checked={formData.isActive}
                       onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                      className="h-4 w-4 text-aipoten-green focus:ring-aipoten-green border-gray-300 rounded"
+                      className="h-4 w-4 text-[#FF6A00] focus:ring-[#FF6A00] border-gray-300 rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700">활성화</span>
+                    <span className="ml-2 text-sm text-stone-700 font-pretendard">활성화</span>
                   </label>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-stone-700 mb-1 font-pretendard">
                     최소 월령
                   </label>
                   <input
@@ -355,12 +355,12 @@ export default function KnowledgeBasePage() {
                     value={formData.ageMin}
                     onChange={(e) => setFormData({ ...formData, ageMin: e.target.value })}
                     placeholder="예: 0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aipoten-green focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-stone-700 mb-1 font-pretendard">
                     최대 월령
                   </label>
                   <input
@@ -369,7 +369,7 @@ export default function KnowledgeBasePage() {
                     value={formData.ageMax}
                     onChange={(e) => setFormData({ ...formData, ageMax: e.target.value })}
                     placeholder="예: 36"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aipoten-green focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
                   />
                 </div>
               </div>
@@ -379,14 +379,14 @@ export default function KnowledgeBasePage() {
                   type="button"
                   onClick={() => setShowModal(false)}
                   disabled={isSaving}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 border border-gray-300 text-stone-700 rounded-[10px] hover:bg-stone-50 transition-colors disabled:opacity-50 font-pretendard"
                 >
                   취소
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-4 py-2 bg-aipoten-green text-white rounded-lg hover:bg-aipoten-navy transition-colors disabled:opacity-50"
+                  className="px-4 py-2 bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors disabled:opacity-50 font-pretendard"
                 >
                   {isSaving ? '저장 중...' : '저장'}
                 </button>

@@ -159,10 +159,10 @@ export default function AdminRefundsPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600 font-pretendard">로딩 중...</p>
         </div>
       </div>
     )
@@ -178,7 +178,7 @@ export default function AdminRefundsPage() {
         {/* 메시지 */}
         {message && (
           <div
-            className={`p-4 rounded-md ${
+            className={`p-4 rounded-xl font-pretendard ${
               message.type === 'success'
                 ? 'bg-green-50 text-green-800 border border-green-200'
                 : 'bg-red-50 text-red-800 border border-red-200'
@@ -189,44 +189,44 @@ export default function AdminRefundsPage() {
         )}
 
         {/* 필터 */}
-        <div className="bg-white shadow rounded-lg p-4">
+        <div className="bg-white shadow rounded-xl p-4">
           <div className="flex gap-2">
             <button
               onClick={() => setFilter('PENDING')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
                 filter === 'PENDING'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
               }`}
             >
               대기 중
             </button>
             <button
               onClick={() => setFilter('APPROVED')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
                 filter === 'APPROVED'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
               }`}
             >
               승인됨
             </button>
             <button
               onClick={() => setFilter('REJECTED')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
                 filter === 'REJECTED'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
               }`}
             >
               거부됨
             </button>
             <button
               onClick={() => setFilter('ALL')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
                 filter === 'ALL'
-                  ? 'bg-aipoten-green text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
               }`}
             >
               전체
@@ -235,68 +235,68 @@ export default function AdminRefundsPage() {
         </div>
 
         {/* 환불 요청 목록 */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="bg-white shadow rounded-xl overflow-hidden">
           {refundRequests.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">환불 요청이 없습니다.</p>
+              <p className="text-stone-500 font-pretendard">환불 요청이 없습니다.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-[#F9F9F9]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase font-pretendard">
                       요청자/예약
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase font-pretendard">
                       요청 내용
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase font-pretendard">
                       요청 금액
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase font-pretendard">
                       상태
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase font-pretendard">
                       처리 결과
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase font-pretendard">
                       작업
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {refundRequests.map((request) => (
-                    <tr key={request.id}>
+                    <tr key={request.id} className="hover:bg-[#FFF5F0]">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-stone-900 font-pretendard">
                           {request.requestedByUser.name}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-stone-500 font-pretendard">
                           아이: {request.booking.child.name}
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-stone-400 font-pretendard">
                           예약금: ₩{request.booking.finalFee.toLocaleString()}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">{request.reason}</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-sm text-stone-900 font-pretendard">{request.reason}</div>
+                        <div className="text-xs text-stone-500 font-pretendard">
                           {new Date(request.createdAt).toLocaleDateString('ko-KR')}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-stone-900 font-pretendard">
                           ₩{request.requestedAmount.toLocaleString()}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full font-pretendard ${
                             request.status === 'PENDING'
-                              ? 'bg-yellow-100 text-yellow-800'
+                              ? 'bg-stone-100 text-stone-800'
                               : request.status === 'APPROVED'
-                              ? 'bg-green-100 text-green-800'
+                              ? 'bg-[#FFE5E5] text-[#FF6A00]'
                               : 'bg-red-100 text-red-800'
                           }`}
                         >
@@ -311,19 +311,19 @@ export default function AdminRefundsPage() {
                         {request.status !== 'PENDING' && (
                           <div>
                             {request.approvedAmount && (
-                              <div className="text-sm text-green-600 font-medium">
+                              <div className="text-sm text-[#FF6A00] font-medium font-pretendard">
                                 승인 금액: ₩{request.approvedAmount.toLocaleString()}
                               </div>
                             )}
                             {request.rejectionReason && (
-                              <div className="text-sm text-red-600">
+                              <div className="text-sm text-red-600 font-pretendard">
                                 거부 사유: {request.rejectionReason}
                               </div>
                             )}
                             {request.adminNote && (
-                              <div className="text-xs text-gray-500">메모: {request.adminNote}</div>
+                              <div className="text-xs text-stone-500 font-pretendard">메모: {request.adminNote}</div>
                             )}
-                            <div className="text-xs text-gray-400">
+                            <div className="text-xs text-stone-400 font-pretendard">
                               {new Date(request.processedAt!).toLocaleDateString('ko-KR')}
                             </div>
                           </div>
@@ -337,7 +337,7 @@ export default function AdminRefundsPage() {
                                 type="number"
                                 value={approvedAmount}
                                 onChange={(e) => setApprovedAmount(parseInt(e.target.value))}
-                                className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
+                                className="w-full px-2 py-1 border border-gray-300 rounded-[10px] text-sm font-pretendard focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
                                 placeholder="승인 금액"
                                 step="1000"
                               />
@@ -345,32 +345,32 @@ export default function AdminRefundsPage() {
                                 type="text"
                                 value={rejectionReason}
                                 onChange={(e) => setRejectionReason(e.target.value)}
-                                className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
+                                className="w-full px-2 py-1 border border-gray-300 rounded-[10px] text-sm font-pretendard focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
                                 placeholder="거부 사유 (선택)"
                               />
                               <input
                                 type="text"
                                 value={adminNote}
                                 onChange={(e) => setAdminNote(e.target.value)}
-                                className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
+                                className="w-full px-2 py-1 border border-gray-300 rounded-[10px] text-sm font-pretendard focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
                                 placeholder="관리자 메모"
                               />
                               <div className="flex gap-2">
                                 <button
                                   onClick={() => submitApproval(request.id)}
-                                  className="flex-1 px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700"
+                                  className="flex-1 px-3 py-1 bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors font-pretendard"
                                 >
                                   승인
                                 </button>
                                 <button
                                   onClick={() => submitRejection(request.id)}
-                                  className="flex-1 px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700"
+                                  className="flex-1 px-3 py-1 bg-red-600 text-white rounded-[10px] hover:bg-red-700 transition-colors font-pretendard"
                                 >
                                   거부
                                 </button>
                                 <button
                                   onClick={() => setProcessingId(null)}
-                                  className="px-3 py-1 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+                                  className="px-3 py-1 bg-stone-600 text-white rounded-[10px] hover:bg-stone-700 transition-colors font-pretendard"
                                 >
                                   취소
                                 </button>
@@ -380,13 +380,13 @@ export default function AdminRefundsPage() {
                             <div className="flex flex-col gap-1">
                               <button
                                 onClick={() => handleApprove(request)}
-                                className="text-green-600 hover:text-green-900"
+                                className="text-[#FF6A00] hover:text-[#E55F00] font-pretendard transition-colors"
                               >
                                 승인 처리
                               </button>
                               <button
                                 onClick={() => handleReject(request)}
-                                className="text-red-600 hover:text-red-900"
+                                className="text-red-600 hover:text-red-900 font-pretendard transition-colors"
                               >
                                 거부 처리
                               </button>

@@ -66,12 +66,12 @@ interface Therapy {
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  PENDING_PAYMENT: { label: '결제대기', color: 'bg-gray-100 text-gray-800' },
+  PENDING_PAYMENT: { label: '결제대기', color: 'bg-stone-100 text-stone-800' },
   PENDING_CONFIRMATION: { label: '예약대기', color: 'bg-yellow-100 text-yellow-800' },
-  CONFIRMED: { label: '진행예정', color: 'bg-blue-100 text-blue-800' },
+  CONFIRMED: { label: '진행예정', color: 'bg-[#FFE5E5] text-[#FF6A00]' },
   PENDING_SETTLEMENT: { label: '정산대기', color: 'bg-purple-100 text-purple-800' },
-  SETTLEMENT_COMPLETED: { label: '정산완료', color: 'bg-green-100 text-green-800' },
-  COMPLETED: { label: '완료', color: 'bg-green-100 text-green-800' },
+  SETTLEMENT_COMPLETED: { label: '정산완료', color: 'bg-[#FFE5E5] text-[#FF6A00]' },
+  COMPLETED: { label: '완료', color: 'bg-[#FFE5E5] text-[#FF6A00]' },
   CANCELLED: { label: '취소', color: 'bg-red-100 text-red-800' },
 }
 
@@ -231,10 +231,10 @@ export default function AdminTherapiesPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600 font-pretendard">로딩 중...</p>
         </div>
       </div>
     )
@@ -250,9 +250,9 @@ export default function AdminTherapiesPage() {
         {/* 메시지 */}
         {message && (
           <div
-            className={`p-4 rounded-md ${
+            className={`p-4 rounded-xl font-pretendard ${
               message.type === 'success'
-                ? 'bg-green-50 text-green-800 border border-green-200'
+                ? 'bg-[#FFE5E5] text-[#FF6A00] border border-orange-200'
                 : 'bg-red-50 text-red-800 border border-red-200'
             }`}
           >
@@ -261,110 +261,75 @@ export default function AdminTherapiesPage() {
         )}
 
         {/* 필터 */}
-        <div className="bg-white shadow rounded-lg p-4">
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div className="bg-white shadow rounded-xl p-4">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setFilter('ALL')}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: filter === 'ALL' ? '#386646' : '#F3F4F6',
-                color: filter === 'ALL' ? '#FFFFFF' : '#374151',
-              }}
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
+                filter === 'ALL'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
             >
               전체 ({allTherapies.length})
             </button>
             <button
               onClick={() => setFilter('PENDING_PAYMENT')}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: filter === 'PENDING_PAYMENT' ? '#386646' : '#F3F4F6',
-                color: filter === 'PENDING_PAYMENT' ? '#FFFFFF' : '#374151',
-              }}
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
+                filter === 'PENDING_PAYMENT'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
             >
               결제대기
             </button>
             <button
               onClick={() => setFilter('PENDING_CONFIRMATION')}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: filter === 'PENDING_CONFIRMATION' ? '#386646' : '#F3F4F6',
-                color: filter === 'PENDING_CONFIRMATION' ? '#FFFFFF' : '#374151',
-              }}
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
+                filter === 'PENDING_CONFIRMATION'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
             >
               예약대기
             </button>
             <button
               onClick={() => setFilter('CONFIRMED')}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: filter === 'CONFIRMED' ? '#386646' : '#F3F4F6',
-                color: filter === 'CONFIRMED' ? '#FFFFFF' : '#374151',
-              }}
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
+                filter === 'CONFIRMED'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
             >
               진행예정
             </button>
             <button
               onClick={() => setFilter('PENDING_SETTLEMENT')}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: filter === 'PENDING_SETTLEMENT' ? '#386646' : '#F3F4F6',
-                color: filter === 'PENDING_SETTLEMENT' ? '#FFFFFF' : '#374151',
-              }}
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
+                filter === 'PENDING_SETTLEMENT'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
             >
               정산대기
             </button>
             <button
               onClick={() => setFilter('SETTLEMENT_COMPLETED')}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: filter === 'SETTLEMENT_COMPLETED' ? '#386646' : '#F3F4F6',
-                color: filter === 'SETTLEMENT_COMPLETED' ? '#FFFFFF' : '#374151',
-              }}
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
+                filter === 'SETTLEMENT_COMPLETED'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
             >
               정산완료
             </button>
             <button
               onClick={() => setFilter('CANCELLED')}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: filter === 'CANCELLED' ? '#386646' : '#F3F4F6',
-                color: filter === 'CANCELLED' ? '#FFFFFF' : '#374151',
-              }}
+              className={`px-4 py-2 rounded-[10px] text-sm font-medium font-pretendard transition-colors ${
+                filter === 'CANCELLED'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              }`}
             >
               취소
             </button>
@@ -372,30 +337,30 @@ export default function AdminTherapiesPage() {
         </div>
 
         {/* 날짜 검색 */}
-        <div className="bg-white shadow rounded-lg p-4">
+        <div className="bg-white shadow rounded-xl p-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">시작일</label>
+              <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">시작일</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">종료일</label>
+              <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">종료일</label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green"
+                className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
               />
             </div>
             <div className="flex items-end">
               <button
                 onClick={fetchTherapies}
-                className="w-full px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy transition-colors"
+                className="w-full px-4 py-2 bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors font-pretendard"
               >
                 검색
               </button>
@@ -404,61 +369,61 @@ export default function AdminTherapiesPage() {
         </div>
 
         {/* 홈티 목록 */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="bg-white shadow rounded-xl overflow-hidden">
           {therapies.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">홈티 내역이 없습니다.</p>
+              <p className="text-stone-500 font-pretendard">홈티 내역이 없습니다.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-[#F9F9F9]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       부모/아이
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       치료사
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       일정
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       회차
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       금액
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       상담일지
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       후기
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       정산
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       상태
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider font-pretendard">
                       작업
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {therapies.map((therapy) => (
-                    <tr key={therapy.id} className="hover:bg-gray-50">
+                    <tr key={therapy.id} className="hover:bg-[#FFF5F0]">
                       {/* 부모/아이 */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => handleOpenParentModal(therapy.parentUser.id)}
                           className="text-left"
                         >
-                          <div className="text-sm font-medium text-aipoten-green hover:text-aipoten-navy cursor-pointer">
+                          <div className="text-sm font-medium text-[#FF6A00] hover:text-[#E55F00] cursor-pointer font-pretendard">
                             {therapy.parentUser.name}
                           </div>
-                          <div className="text-sm text-gray-600 hover:text-aipoten-navy cursor-pointer">
+                          <div className="text-sm text-stone-600 hover:text-[#FF6A00] cursor-pointer font-pretendard">
                             {therapy.child.name} ({therapy.child.gender === 'MALE' ? '남' : '여'})
                           </div>
                         </button>
@@ -470,7 +435,7 @@ export default function AdminTherapiesPage() {
                           onClick={() => handleOpenTherapistModal(therapy.therapist)}
                           className="text-left"
                         >
-                          <div className="text-sm text-aipoten-green hover:text-aipoten-navy cursor-pointer">
+                          <div className="text-sm text-[#FF6A00] hover:text-[#E55F00] cursor-pointer font-pretendard">
                             {therapy.therapist.user.name}
                           </div>
                         </button>
@@ -478,28 +443,28 @@ export default function AdminTherapiesPage() {
 
                       {/* 일정 */}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-stone-900 font-pretendard">
                           {new Date(therapy.timeSlot.date).toLocaleDateString('ko-KR')}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-stone-500 font-pretendard">
                           {therapy.timeSlot.startTime} - {therapy.timeSlot.endTime}
                         </div>
                       </td>
 
                       {/* 회차 */}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-stone-900 font-pretendard">
                           {therapy.sessionNumber} / {therapy.payment.totalSessions}회
                         </div>
                       </td>
 
                       {/* 금액 */}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-stone-900 font-pretendard">
                           ₩{therapy.payment.finalFee.toLocaleString()}
                         </div>
                         {therapy.payment.settlementAmount && (
-                          <div className="text-xs text-green-600">
+                          <div className="text-xs text-[#FF6A00] font-pretendard">
                             정산: ₩{therapy.payment.settlementAmount.toLocaleString()}
                           </div>
                         )}
@@ -510,13 +475,13 @@ export default function AdminTherapiesPage() {
                         {therapy.therapistNote ? (
                           <button
                             onClick={() => handleOpenJournalModal(therapy.id)}
-                            className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded hover:bg-green-200 transition-colors"
+                            className="inline-flex items-center px-2 py-1 bg-[#FFE5E5] text-[#FF6A00] text-xs font-medium rounded-[10px] hover:bg-orange-200 transition-colors font-pretendard"
                           >
                             <FileText size={14} className="mr-1" />
                             보기
                           </button>
                         ) : (
-                          <span className="text-gray-400 text-xs">-</span>
+                          <span className="text-stone-400 text-xs font-pretendard">-</span>
                         )}
                       </td>
 
@@ -525,40 +490,40 @@ export default function AdminTherapiesPage() {
                         {therapy.review ? (
                           <button
                             onClick={() => handleOpenReviewModal(therapy.id)}
-                            className="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded hover:bg-yellow-200 transition-colors"
+                            className="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-[10px] hover:bg-yellow-200 transition-colors font-pretendard"
                           >
                             <Star size={14} className="mr-1 fill-yellow-400 text-yellow-400" />
                             {therapy.review.rating}.0
                           </button>
                         ) : (
-                          <span className="text-gray-400 text-xs">-</span>
+                          <span className="text-stone-400 text-xs font-pretendard">-</span>
                         )}
                       </td>
 
                       {/* 정산 */}
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         {therapy.payment.settledAt ? (
-                          <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
+                          <span className="inline-flex items-center px-2 py-1 bg-[#FFE5E5] text-[#FF6A00] text-xs font-medium rounded-[10px] font-pretendard">
                             완료
                           </span>
                         ) : therapy.currentStatus === 'PENDING_SETTLEMENT' ? (
                           <button
                             onClick={() => handleSettlement(therapy.id)}
-                            className="inline-flex items-center px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
+                            className="inline-flex items-center px-2 py-1 bg-[#FF6A00] text-white text-xs font-medium rounded-[10px] hover:bg-[#E55F00] transition-colors font-pretendard"
                           >
                             <CreditCard size={14} className="mr-1" />
                             정산
                           </button>
                         ) : (
-                          <span className="text-gray-400 text-xs">-</span>
+                          <span className="text-stone-400 text-xs font-pretendard">-</span>
                         )}
                       </td>
 
                       {/* 상태 */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            statusLabels[therapy.currentStatus]?.color || 'bg-gray-100 text-gray-800'
+                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full font-pretendard ${
+                            statusLabels[therapy.currentStatus]?.color || 'bg-stone-100 text-stone-800'
                           }`}
                         >
                           {statusLabels[therapy.currentStatus]?.label || therapy.currentStatus}
@@ -569,7 +534,7 @@ export default function AdminTherapiesPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
                           onClick={() => handleOpenDetailModal(therapy.id)}
-                          className="inline-flex items-center px-3 py-1 bg-gray-600 text-white text-xs font-medium rounded hover:bg-gray-700 transition-colors"
+                          className="inline-flex items-center px-3 py-1 bg-stone-600 text-white text-xs font-medium rounded-[10px] hover:bg-stone-700 transition-colors font-pretendard"
                         >
                           <Eye size={14} className="mr-1" />
                           상세
@@ -585,16 +550,16 @@ export default function AdminTherapiesPage() {
 
         {/* 페이지네이션 */}
         {allTherapies.length > itemsPerPage && (
-          <div className="bg-white shadow rounded-lg p-4">
+          <div className="bg-white shadow rounded-xl p-4">
             <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-700">
+              <div className="text-sm text-stone-700 font-pretendard">
                 전체 {allTherapies.length}건 중 {Math.min((currentPage - 1) * itemsPerPage + 1, allTherapies.length)}-{Math.min(currentPage * itemsPerPage, allTherapies.length)}건 표시
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 border border-gray-300 rounded-[10px] text-sm font-medium text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-pretendard"
                 >
                   이전
                 </button>
@@ -603,10 +568,10 @@ export default function AdminTherapiesPage() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-1 border rounded-md text-sm font-medium ${
+                      className={`px-3 py-1 border rounded-[10px] text-sm font-medium transition-colors font-pretendard ${
                         currentPage === page
-                          ? 'bg-aipoten-green text-white border-aipoten-green'
-                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                          ? 'bg-[#FF6A00] text-white border-[#FF6A00]'
+                          : 'border-gray-300 text-stone-700 hover:bg-stone-50'
                       }`}
                     >
                       {page}
@@ -616,7 +581,7 @@ export default function AdminTherapiesPage() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(Math.ceil(allTherapies.length / itemsPerPage), prev + 1))}
                   disabled={currentPage === Math.ceil(allTherapies.length / itemsPerPage)}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 border border-gray-300 rounded-[10px] text-sm font-medium text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-pretendard"
                 >
                   다음
                 </button>
