@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Header from '@/components/layout/Header'
 import AddressSearchInput from '@/components/common/AddressSearchInput'
+import ServiceAreaInput from '@/components/common/ServiceAreaInput'
 
 type TherapyType = 'SPEECH_THERAPY' | 'SENSORY_INTEGRATION' | 'PLAY_THERAPY' | 'ART_THERAPY' | 'MUSIC_THERAPY' | 'OCCUPATIONAL_THERAPY' | 'COGNITIVE_THERAPY' | 'BEHAVIORAL_THERAPY'
 type EmploymentType = 'INSTITUTION' | 'FREELANCER'
@@ -78,13 +79,6 @@ const CHILD_AGE_RANGES = [
   { value: 'AGE_8_PLUS', label: '8세 이상' },
 ]
 
-const SEOUL_DISTRICTS = [
-  '강남구', '서초구', '송파구', '강동구', '광진구', '성동구',
-  '중구', '용산구', '성북구', '강북구', '도봉구', '노원구',
-  '은평구', '서대문구', '마포구', '양천구', '강서구', '구로구',
-  '금천구', '영등포구', '동작구', '관악구', '동대문구', '중랑구', '종로구'
-]
-
 const DEGREE_TYPES = [
   { value: 'HIGH_SCHOOL', label: '고등학교 졸업' },
   { value: 'ASSOCIATE', label: '전문학사' },
@@ -99,38 +93,6 @@ const BANKS = [
   '토스뱅크', '대구은행', '부산은행', '경남은행', '광주은행',
   '전북은행', '제주은행', '새마을금고', '신협', '우체국'
 ]
-
-// 서비스 가능 지역 코드 변환 함수
-const getServiceAreaLabel = (area: string) => {
-  const labels: { [key: string]: string } = {
-    GANGNAM: '강남구',
-    SEOCHO: '서초구',
-    SONGPA: '송파구',
-    GANGDONG: '강동구',
-    GWANGJIN: '광진구',
-    SEONGDONG: '성동구',
-    JUNG: '중구',
-    YONGSAN: '용산구',
-    SEONGBUK: '성북구',
-    GANGBUK: '강북구',
-    DOBONG: '도봉구',
-    NOWON: '노원구',
-    EUNPYEONG: '은평구',
-    SEODAEMUN: '서대문구',
-    MAPO: '마포구',
-    YANGCHEON: '양천구',
-    GANGSEO: '강서구',
-    GURO: '구로구',
-    GEUMCHEON: '금천구',
-    YEONGDEUNGPO: '영등포구',
-    DONGJAK: '동작구',
-    GWANAK: '관악구',
-    DONGDAEMUN: '동대문구',
-    JUNGNANG: '중랑구',
-    JONGNO: '종로구',
-  }
-  return labels[area] || area
-}
 
 export default function TherapistProfilePage() {
   const { data: session, status } = useSession()
@@ -272,12 +234,6 @@ export default function TherapistProfilePage() {
 
   const handleAgeRangeToggle = (value: string) => {
     setChildAgeRanges(prev =>
-      prev.includes(value) ? prev.filter(a => a !== value) : [...prev, value]
-    )
-  }
-
-  const handleServiceAreaToggle = (value: string) => {
-    setServiceAreas(prev =>
       prev.includes(value) ? prev.filter(a => a !== value) : [...prev, value]
     )
   }
@@ -621,7 +577,7 @@ export default function TherapistProfilePage() {
                             {profile.serviceAreas && profile.serviceAreas.length > 0 ? (
                               profile.serviceAreas.map((area) => (
                                 <span key={area} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                                  {getServiceAreaLabel(area)}
+                                  {area}
                                 </span>
                               ))
                             ) : (
@@ -930,31 +886,11 @@ export default function TherapistProfilePage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    치료 가능 지역 - 서울특별시 (중복 가능) <span className="text-red-500">*</span>
-                  </label>
-                  <div className="grid grid-cols-3 md:grid-cols-5 gap-2 max-h-64 overflow-y-auto p-4 border border-gray-300 rounded-md">
-                    {SEOUL_DISTRICTS.map(district => (
-                      <label
-                        key={district}
-                        className={`flex items-center p-2 border-2 rounded-md cursor-pointer transition-colors text-sm ${
-                          serviceAreas.includes(district)
-                            ? 'border-green-500 bg-green-50'
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={serviceAreas.includes(district)}
-                          onChange={() => handleServiceAreaToggle(district)}
-                          className="mr-2"
-                        />
-                        {district}
-                      </label>
-                    ))}
-                  </div>
-                </div>
+                <ServiceAreaInput
+                  serviceAreas={serviceAreas}
+                  onServiceAreasChange={setServiceAreas}
+                  maxAreas={15}
+                />
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">

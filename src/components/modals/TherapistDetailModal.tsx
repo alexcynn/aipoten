@@ -393,37 +393,6 @@ export default function TherapistDetailModal({
     return labels[ageRange] || ageRange
   }
 
-  const getServiceAreaLabel = (area: string) => {
-    const labels: { [key: string]: string } = {
-      GANGNAM: '강남구',
-      SEOCHO: '서초구',
-      SONGPA: '송파구',
-      GANGDONG: '강동구',
-      GWANGJIN: '광진구',
-      SEONGDONG: '성동구',
-      JUNG: '중구',
-      YONGSAN: '용산구',
-      SEONGBUK: '성북구',
-      GANGBUK: '강북구',
-      DOBONG: '도봉구',
-      NOWON: '노원구',
-      EUNPYEONG: '은평구',
-      SEODAEMUN: '서대문구',
-      MAPO: '마포구',
-      YANGCHEON: '양천구',
-      GANGSEO: '강서구',
-      GURO: '구로구',
-      GEUMCHEON: '금천구',
-      YEONGDEUNGPO: '영등포구',
-      DONGJAK: '동작구',
-      GWANAK: '관악구',
-      DONGDAEMUN: '동대문구',
-      JUNGNANG: '중랑구',
-      JONGNO: '종로구',
-    }
-    return labels[area] || area
-  }
-
   const getStatusBadge = (status: string) => {
     const badges: { [key: string]: { bg: string; text: string; label: string } } = {
       PENDING: { bg: 'bg-[#FFE5E5]', text: 'text-[#FF6A00]', label: '신청' },
@@ -711,7 +680,7 @@ export default function TherapistDetailModal({
                       {selectedTherapist.serviceAreas && selectedTherapist.serviceAreas.length > 0 ? (
                         selectedTherapist.serviceAreas.map((area) => (
                           <span key={area} className="px-3 py-1 text-sm font-semibold bg-purple-100 text-purple-800 rounded-full font-pretendard">
-                            {getServiceAreaLabel(area)}
+                            {area}
                           </span>
                         ))
                       ) : (

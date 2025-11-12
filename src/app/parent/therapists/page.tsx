@@ -42,7 +42,6 @@ function TherapistsSearchPageContent() {
     if (urlSpecialties) return urlSpecialties.split(',').filter(Boolean)
     return []
   })
-  const [selectedServiceAreas, setSelectedServiceAreas] = useState<string[]>([])
   const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>(() => {
     if (urlAgeRange) return [urlAgeRange]
     return []
@@ -50,8 +49,27 @@ function TherapistsSearchPageContent() {
   const [maxFee, setMaxFee] = useState('')
   const [dayOfWeek, setDayOfWeek] = useState('')
   const [timeRange, setTimeRange] = useState('')
+  const [parentAddress, setParentAddress] = useState<string>('')
 
   const router = useRouter()
+
+  // 부모 주소 가져오기
+  useEffect(() => {
+    const fetchParentAddress = async () => {
+      try {
+        const response = await fetch('/api/parent/profile')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.address) {
+            setParentAddress(data.address)
+          }
+        }
+      } catch (error) {
+        console.error('주소 조회 실패:', error)
+      }
+    }
+    fetchParentAddress()
+  }, [])
 
   const fetchTherapists = async () => {
     setIsLoading(true)
@@ -59,8 +77,9 @@ function TherapistsSearchPageContent() {
 
     try {
       const params = new URLSearchParams()
+      if (isConsultation) params.append('type', 'consultation')
       if (selectedSpecialties.length > 0) params.append('specialty', selectedSpecialties.join(','))
-      if (selectedServiceAreas.length > 0) params.append('serviceArea', selectedServiceAreas.join(','))
+      if (parentAddress) params.append('parentAddress', parentAddress)
       if (selectedAgeRanges.length > 0) params.append('childAgeRange', selectedAgeRanges.join(','))
       if (maxFee) params.append('maxFee', maxFee)
       if (dayOfWeek) params.append('dayOfWeek', dayOfWeek)
@@ -82,19 +101,16 @@ function TherapistsSearchPageContent() {
   }
 
   useEffect(() => {
-    fetchTherapists()
-  }, [])
+    // 주소가 로드되면 검색 실행
+    if (parentAddress) {
+      fetchTherapists()
+    }
+  }, [parentAddress])
 
   // 체크박스 토글 핸들러
   const toggleSpecialty = (value: string) => {
     if (isConsultation) return // 언어 컨설팅에서는 변경 불가
     setSelectedSpecialties(prev =>
-      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
-    )
-  }
-
-  const toggleServiceArea = (value: string) => {
-    setSelectedServiceAreas(prev =>
       prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
     )
   }
@@ -114,13 +130,6 @@ function TherapistsSearchPageContent() {
     { value: 'OCCUPATIONAL_THERAPY', label: '작업치료' },
     { value: 'COGNITIVE_THERAPY', label: '인지치료' },
     { value: 'BEHAVIORAL_THERAPY', label: '행동치료' },
-  ]
-
-  const areaOptions = [
-    { value: 'GANGNAM', label: '강남구' },
-    { value: 'SEOCHO', label: '서초구' },
-    { value: 'SONGPA', label: '송파구' },
-    { value: 'GANGDONG', label: '강동구' },
   ]
 
   const ageRangeOptions = [
@@ -203,32 +212,17 @@ function TherapistsSearchPageContent() {
               </div>
             </div>
 
-            {/* 서비스 지역 (체크박스) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                서비스 지역
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {areaOptions.map((option) => (
-                  <label
-                    key={option.value}
-                    className={`flex items-center space-x-2 p-2 border rounded-md cursor-pointer transition-colors ${
-                      selectedServiceAreas.includes(option.value)
-                        ? 'bg-green-50 border-green-500'
-                        : 'border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedServiceAreas.includes(option.value)}
-                      onChange={() => toggleServiceArea(option.value)}
-                      className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                    />
-                    <span className="text-sm text-gray-700">{option.label}</span>
-                  </label>
-                ))}
+            {/* 서비스 지역은 자동으로 부모 주소를 기반으로 매칭됩니다 */}
+            {parentAddress && (
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                <p className="text-sm text-blue-800">
+                  <span className="font-medium">📍 현재 설정된 주소:</span> {parentAddress}
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  이 주소를 기반으로 서비스 가능한 치료사를 검색합니다.
+                </p>
               </div>
-            </div>
+            )}
 
             {/* 아이 연령 (체크박스) */}
             <div>

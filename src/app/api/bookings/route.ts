@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
+import { matchesServiceArea } from '@/lib/utils/addressUtils'
 
 /**
  * POST /api/bookings
@@ -178,6 +179,29 @@ export async function POST(request: NextRequest) {
         { error: '해당 치료사는 현재 예약을 받을 수 없습니다.' },
         { status: 400 }
       )
+    }
+
+    // 부모 주소와 치료사 서비스 지역 매칭 확인
+    const parentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { address: true }
+    })
+
+    if (parentUser?.address && therapist.serviceAreas) {
+      const serviceAreasList = JSON.parse(therapist.serviceAreas)
+      const isMatching = matchesServiceArea(parentUser.address, serviceAreasList)
+
+      if (!isMatching) {
+        return NextResponse.json(
+          {
+            error: '선택하신 치료사는 해당 지역에서 서비스를 제공하지 않습니다.',
+            details: '다른 치료사를 선택해주세요.'
+          },
+          { status: 400 }
+        )
+      }
+
+      console.log(`✅ 주소 매칭 확인: ${parentUser.address} ↔ [${serviceAreasList.join(', ')}]`)
     }
 
     // 시스템 설정 조회 (정산율 및 기본값)

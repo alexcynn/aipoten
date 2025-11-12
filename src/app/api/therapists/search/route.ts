@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { extractCityDistrict, matchesServiceArea } from '@/lib/utils/addressUtils'
 
 /**
  * GET /api/therapists/search
@@ -8,7 +9,7 @@ import { prisma } from '@/lib/prisma'
  * Query Parameters:
  * - type: 검색 유형 ("consultation" - 언어 컨설팅, "therapy" - 홈티)
  * - specialty: 전문 분야 (예: "SPEECH_THERAPY", "SENSORY_INTEGRATION")
- * - serviceArea: 서비스 지역 (예: "GANGNAM", "SEOCHO")
+ * - parentAddress: 부모 주소 전체 (예: "서울특별시 강남구 역삼동 123-45")
  * - childAgeRange: 아이 연령 범위 (예: "AGE_0_12", "AGE_13_24")
  * - startDate: 가용성 검색 시작 날짜 (예: "2025-11-01")
  * - endDate: 가용성 검색 종료 날짜 (예: "2025-11-30")
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
     // 검색 파라미터
     const type = searchParams.get('type')
     const specialtyParam = searchParams.get('specialty')
-    const serviceAreaParam = searchParams.get('serviceArea')
+    const parentAddress = searchParams.get('parentAddress') // 부모 주소 (전체)
     const childAgeRangeParam = searchParams.get('childAgeRange')
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
@@ -41,13 +42,20 @@ export async function GET(request: NextRequest) {
 
     // 다중 선택 필터를 배열로 변환
     const specialties = specialtyParam ? specialtyParam.split(',').filter(Boolean) : []
-    const serviceAreas = serviceAreaParam ? serviceAreaParam.split(',').filter(Boolean) : []
     const childAgeRanges = childAgeRangeParam ? childAgeRangeParam.split(',').filter(Boolean) : []
+
+    // 부모 주소에서 시/군/구 추출
+    let parentCityDistrict: string | null = null
+    if (parentAddress) {
+      parentCityDistrict = extractCityDistrict(parentAddress)
+      console.log('🏠 부모 주소:', parentAddress, '→ 추출:', parentCityDistrict)
+    }
 
     console.log('📥 치료사 검색 요청:', {
       type,
       specialties,
-      serviceAreas,
+      parentAddress,
+      parentCityDistrict,
       childAgeRanges,
       startDate,
       endDate,
@@ -82,14 +90,8 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // 서비스 지역 필터 (다중 선택 지원)
-    if (serviceAreas.length > 0) {
-      andConditions.push({
-        OR: serviceAreas.map(area => ({
-          serviceAreas: { contains: area }
-        }))
-      })
-    }
+    // 서비스 지역 필터는 나중에 JavaScript에서 처리
+    // (정확한 주소 매칭을 위해 모든 치료사를 가져온 후 필터링)
 
     // 아이 연령 범위 필터 (다중 선택 지원)
     if (childAgeRanges.length > 0) {
@@ -217,15 +219,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 전체 카운트 조회
-    const totalCount = await prisma.therapistProfile.count({ where })
-    const totalPages = Math.ceil(totalCount / limit)
-    const skip = (page - 1) * limit
+    // 주소 필터가 있는 경우 모든 데이터를 가져와서 필터링 후 페이징
+    // 없는 경우 기존대로 DB 페이징
+    const needsAddressFiltering = Boolean(parentAddress && parentCityDistrict)
+    const skip = needsAddressFiltering ? 0 : (page - 1) * limit
+    const take = needsAddressFiltering ? undefined : limit
 
-    console.log('📊 검색 통계:', {
-      totalCount,
-      totalPages,
-      currentPage: page,
+    console.log('📊 검색 설정:', {
+      needsAddressFiltering,
+      skip,
+      take,
+      page,
       limit
     })
 
@@ -282,18 +286,56 @@ export async function GET(request: NextRequest) {
           }
         } : {})
       },
-      skip,
-      take: limit,
+      ...(skip !== undefined ? { skip } : {}),
+      ...(take !== undefined ? { take } : {}),
       orderBy: [
         { sessionFee: 'asc' }, // 상담료 낮은 순
         { createdAt: 'desc' }  // 최신 등록순
       ]
     })
 
-    console.log(`✅ ${therapists.length}명의 치료사 조회 완료`)
+    console.log(`✅ ${therapists.length}명의 치료사 조회 완료 (DB 필터링 후)`)
+
+    // 서비스 지역 필터링 (JavaScript에서 정확한 주소 매칭)
+    let filteredTherapists = therapists
+    if (parentAddress && parentCityDistrict) {
+      filteredTherapists = therapists.filter(therapist => {
+        if (!therapist.serviceAreas) return false
+
+        const serviceAreasList = JSON.parse(therapist.serviceAreas)
+        const matches = matchesServiceArea(parentAddress, serviceAreasList)
+
+        if (matches) {
+          console.log(`✅ [${therapist.user.name}] 매칭 성공: ${parentCityDistrict} in [${serviceAreasList.join(', ')}]`)
+        }
+
+        return matches
+      })
+      console.log(`🏠 주소 매칭 후: ${filteredTherapists.length}명`)
+    }
+
+    // 주소 필터링이 적용된 경우 페이지네이션 처리
+    let paginatedTherapists = filteredTherapists
+    let totalCount = filteredTherapists.length
+
+    if (needsAddressFiltering) {
+      // JavaScript에서 페이징
+      const startIndex = (page - 1) * limit
+      const endIndex = startIndex + limit
+      paginatedTherapists = filteredTherapists.slice(startIndex, endIndex)
+    }
+
+    const totalPages = Math.ceil(totalCount / limit)
+
+    console.log('📊 최종 통계:', {
+      totalCount,
+      totalPages,
+      currentPage: page,
+      returnedCount: paginatedTherapists.length
+    })
 
     // 응답 데이터 가공
-    const response = therapists.map(therapist => ({
+    const response = paginatedTherapists.map(therapist => ({
       id: therapist.id,
       user: therapist.user,
       gender: therapist.gender,
