@@ -287,10 +287,10 @@ export default function ParentDashboardPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5EFE7] flex items-center justify-center font-pretendard">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600">로딩 중...</p>
         </div>
       </div>
     )
@@ -301,27 +301,27 @@ export default function ParentDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-[#F5EFE7] font-pretendard">
       <Header />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="py-6">
           {/* Welcome Section */}
-          <div className="bg-white overflow-hidden shadow rounded-lg mb-6">
-            <div className="px-4 py-5 sm:p-6">
+          <div className="bg-white overflow-hidden shadow-sm rounded-xl md:rounded-2xl mb-6">
+            <div className="px-4 py-5 sm:p-6 md:p-8">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-stone-900 mb-2">
                     안녕하세요, {session.user?.name}님!
                   </h1>
-                  <p className="text-gray-600">
+                  <p className="text-sm sm:text-base md:text-lg text-stone-700">
                     아이포텐에서 우리 아이의 발달을 체크하고 관리해보세요.
                   </p>
 
                   {/* ChildSelector와 등록 버튼 */}
                   {children.length > 0 && (
-                    <div className="mt-4 flex items-center gap-3">
+                    <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                       <div className="flex-1">
                         <ChildSelector
                           children={children}
@@ -331,13 +331,13 @@ export default function ParentDashboardPage() {
                       </div>
                       <Link
                         href="/parent/profile"
-                        className="px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-md hover:bg-gray-200 transition-colors whitespace-nowrap shadow-md"
+                        className="px-4 sm:px-6 py-2 sm:py-3 bg-white text-stone-700 font-semibold rounded-[10px] border-2 border-stone-300 hover:border-stone-400 hover:bg-stone-50 transition-colors whitespace-nowrap shadow-sm text-center"
                       >
                         프로필 관리
                       </Link>
                       <Link
                         href="/parent/children/new"
-                        className="px-4 py-2 bg-brand-accent text-brand-navy font-semibold rounded-md hover:bg-brand-green hover:text-white transition-colors whitespace-nowrap shadow-md"
+                        className="px-4 sm:px-6 py-2 sm:py-3 bg-[#FF6A00] text-white font-semibold rounded-[10px] hover:bg-[#E55F00] transition-colors whitespace-nowrap shadow-lg text-center"
                       >
                         + 아이 등록
                       </Link>
@@ -350,14 +350,14 @@ export default function ParentDashboardPage() {
 
           {/* 최근 발달체크 카드와 퀵 액션 버튼 */}
           {selectedChildId && children.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
               {/* 최근 발달체크 카드 */}
-              <div className="lg:col-span-2 bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">최근 발달체크</h2>
+              <div className="lg:col-span-2 bg-white overflow-hidden shadow-sm rounded-xl md:rounded-2xl">
+                <div className="px-4 py-5 sm:p-6 md:p-8">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900 mb-4">최근 발달체크</h2>
 
                 {latestAssessment ? (
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 sm:p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
@@ -417,53 +417,32 @@ export default function ParentDashboardPage() {
                       </div>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <Link
                         href="/parent/assessments/new"
-                        className="inline-flex items-center px-6 py-3 rounded-md font-medium text-white transition-colors shadow-md"
-                        style={{ backgroundColor: '#F78C6B' }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                        className="inline-flex items-center justify-center px-4 sm:px-6 md:px-8 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base md:text-lg text-white bg-[#FF6A00] hover:bg-[#E55F00] transition-colors shadow-lg"
                       >
                         발달체크 시작하기
                       </Link>
                       <Link
                         href="/parent/assessments"
-                        className="inline-flex items-center px-6 py-3 rounded-md font-medium transition-colors shadow-md"
-                        style={{
-                          color: '#386646',
-                          borderColor: '#386646',
-                          borderWidth: '2px',
-                          borderStyle: 'solid',
-                          backgroundColor: '#FFFFFF'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#386646'
-                          e.currentTarget.style.color = '#FFFFFF'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#FFFFFF'
-                          e.currentTarget.style.color = '#386646'
-                        }}
+                        className="inline-flex items-center justify-center px-4 sm:px-6 md:px-8 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base md:text-lg text-[#FF6A00] bg-white border-2 border-[#FF6A00] hover:bg-[#FFE5E5] transition-colors shadow-sm"
                       >
                         발달체크 기록 보기
                       </Link>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-lg p-6 text-center">
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl p-4 sm:p-6 text-center">
                     <div className="text-4xl mb-3">📋</div>
-                    <p className="text-gray-600 mb-4">아직 발달체크 기록이 없습니다.</p>
-                    <p className="text-sm text-gray-500 mb-6">
+                    <p className="text-stone-700 mb-4 text-sm sm:text-base">아직 발달체크 기록이 없습니다.</p>
+                    <p className="text-xs sm:text-sm text-stone-600 mb-6">
                       우리 아이의 발달 상태를 체크해보세요.
                     </p>
                     <div className="flex gap-3 justify-center">
                       <Link
                         href="/parent/assessments/new"
-                        className="inline-flex items-center px-6 py-3 rounded-md font-medium text-white transition-colors shadow-md"
-                        style={{ backgroundColor: '#F78C6B' }}
-                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                        className="inline-flex items-center justify-center px-4 sm:px-6 md:px-8 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base text-white bg-[#FF6A00] hover:bg-[#E55F00] transition-colors shadow-lg"
                       >
                         첫 발달체크 시작하기
                       </Link>
@@ -474,37 +453,37 @@ export default function ParentDashboardPage() {
               </div>
 
               {/* 퀵 액션 버튼들 */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
                 {/* 언어컨설팅 버튼 */}
                 <Link
                   href="/parent/consultations"
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-lg p-8 hover:shadow-lg hover:border-blue-400 transition-all flex items-center justify-center"
+                  className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-blue-400 transition-all flex items-center justify-center"
                 >
-                  <h3 className="text-lg font-bold text-gray-900">언어 컨설팅</h3>
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">언어 컨설팅</h3>
                 </Link>
 
                 {/* 홈티 버튼 */}
                 <Link
                   href="/parent/therapies"
-                  className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-lg p-8 hover:shadow-lg hover:border-green-400 transition-all flex items-center justify-center"
+                  className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-green-400 transition-all flex items-center justify-center"
                 >
-                  <h3 className="text-lg font-bold text-gray-900">홈티</h3>
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">홈티</h3>
                 </Link>
 
                 {/* 결제 버튼 */}
                 <Link
                   href="/parent/payments"
-                  className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-lg p-8 hover:shadow-lg hover:border-purple-400 transition-all flex items-center justify-center"
+                  className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-purple-400 transition-all flex items-center justify-center"
                 >
-                  <h3 className="text-lg font-bold text-gray-900">결제</h3>
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">결제</h3>
                 </Link>
 
                 {/* 1:1 문의 버튼 */}
                 <Link
                   href="/parent/inquiries"
-                  className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-300 rounded-lg p-8 hover:shadow-lg hover:border-orange-400 transition-all flex items-center justify-center"
+                  className="bg-gradient-to-br from-[#FFE5E5] to-[#FF9999]/30 border-2 border-[#FF9999] rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-[#FF8888] transition-all flex items-center justify-center"
                 >
-                  <h3 className="text-lg font-bold text-gray-900">1:1 문의</h3>
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">1:1 문의</h3>
                 </Link>
               </div>
             </div>
@@ -512,9 +491,9 @@ export default function ParentDashboardPage() {
 
           {/* 세션 캘린더 - 모든 아이의 세션 일정 */}
           {selectedChildId && children.length > 0 && (
-            <div className="bg-white overflow-hidden shadow rounded-lg mb-6">
-              <div className="px-4 py-5 sm:p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">모든 아이의 세션 일정</h2>
+            <div className="bg-white overflow-hidden shadow-sm rounded-xl md:rounded-2xl mb-6">
+              <div className="px-4 py-5 sm:p-6 md:p-8">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900 mb-4">모든 아이의 세션 일정</h2>
                 <SessionsCalendar
                   sessions={myBookings
                     .filter((booking: any) => booking.scheduledAt)
@@ -538,42 +517,36 @@ export default function ParentDashboardPage() {
 
           {/* 추천영상 */}
           {selectedChildId && children.length > 0 && (
-            <div className="bg-white shadow rounded-lg mb-6">
-              <div className="p-6">
+            <div className="bg-white shadow-sm rounded-xl md:rounded-2xl mb-6">
+              <div className="px-4 py-5 sm:p-6 md:p-8">
                   <div>
                     <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900">
                         {children.find(c => c.id === selectedChildId)?.name}님을 위한 추천 영상
                       </h3>
                       <Link
                         href={`/videos?childId=${selectedChildId}`}
-                        className="text-sm text-aipoten-green hover:text-aipoten-navy"
+                        className="text-sm sm:text-base text-[#FF6A00] hover:text-[#E55F00] font-medium transition-colors"
                       >
                         전체 보기 →
                       </Link>
                     </div>
 
                     {recommendedVideos.length === 0 ? (
-                      <div className="text-center py-12 bg-gray-50 rounded-lg">
+                      <div className="text-center py-12 bg-[#F5EFE7] rounded-xl">
                         <div className="text-4xl mb-4">📹</div>
-                        <p className="text-gray-600 mb-4">아직 추천 영상이 없습니다.</p>
+                        <p className="text-stone-700 mb-4 text-sm sm:text-base">아직 추천 영상이 없습니다.</p>
                         <Link
                           href="/videos"
-                          className="inline-flex items-center px-4 py-2 rounded-md transition-colors"
-                          style={{
-                            backgroundColor: '#386646',
-                            color: '#FFFFFF'
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#193149'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
+                          className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 rounded-[10px] font-semibold text-sm sm:text-base text-white bg-[#FF6A00] hover:bg-[#E55F00] transition-colors shadow-lg"
                         >
                           전체 영상 보러가기
                         </Link>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {recommendedVideos.map((video) => (
-                          <div key={video.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                          <div key={video.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
                             {/* Thumbnail - 클릭하면 상세 페이지로 */}
                             <Link href={`/videos/${video.id}`}>
                               <div className="aspect-video bg-gray-200 relative cursor-pointer group">
@@ -605,7 +578,7 @@ export default function ParentDashboardPage() {
                             {/* Content */}
                             <div className="p-4">
                               <Link href={`/videos/${video.id}`}>
-                                <h4 className="font-medium text-gray-900 mb-2 line-clamp-2 hover:text-aipoten-green cursor-pointer">
+                                <h4 className="font-semibold text-stone-900 mb-2 line-clamp-2 hover:text-[#FF6A00] cursor-pointer transition-colors text-sm sm:text-base">
                                   {video.title}
                                 </h4>
                               </Link>
@@ -614,15 +587,14 @@ export default function ParentDashboardPage() {
                                   💡 {video.recommendationReason}
                                 </p>
                               )}
-                              <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                              <p className="text-xs sm:text-sm text-stone-600 mb-3 line-clamp-2">
                                 {video.description}
                               </p>
-                              <div className="flex gap-2 mb-3">
+                              <div className="flex gap-2 mb-3 flex-wrap">
                                 {video.developmentCategories && video.developmentCategories.slice(0, 2).map((cat: string) => (
                                   <span
                                     key={cat}
-                                    className="text-xs px-2 py-1 rounded-full"
-                                    style={{ backgroundColor: '#E8F5E9', color: '#386646' }}
+                                    className="text-xs px-2 py-1 rounded-full bg-green-50 text-green-700 font-medium"
                                   >
                                     {CATEGORY_LABELS[cat] || cat}
                                   </span>
@@ -630,8 +602,7 @@ export default function ParentDashboardPage() {
                               </div>
                               <Link
                                 href={`/videos/${video.id}`}
-                                className="inline-block w-full text-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white hover:opacity-90"
-                                style={{ backgroundColor: '#F78C6B' }}
+                                className="inline-block w-full text-center px-3 py-2 text-xs sm:text-sm font-semibold rounded-[10px] text-white bg-[#FF6A00] hover:bg-[#E55F00] transition-colors shadow-sm"
                               >
                                 시청하기
                               </Link>

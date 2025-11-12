@@ -94,27 +94,27 @@ export default function SessionsCalendar({ sessions, onEventClick }: SessionsCal
   const weekDays = ['일', '월', '화', '수', '목', '금', '토']
 
   return (
-    <div className="w-full">
+    <div className="w-full font-pretendard">
       {/* 월 네비게이션 */}
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={previousMonth}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+          className="p-2 hover:bg-[#FFE5E5] rounded-[10px] transition-colors"
           type="button"
         >
-          <ChevronLeft className="w-5 h-5 text-gray-600" />
+          <ChevronLeft className="w-5 h-5 text-stone-600 hover:text-[#FF6A00]" />
         </button>
 
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-base sm:text-lg md:text-xl font-bold text-stone-900">
           {currentMonth.getFullYear()}년 {currentMonth.getMonth() + 1}월
         </h3>
 
         <button
           onClick={nextMonth}
-          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+          className="p-2 hover:bg-[#FFE5E5] rounded-[10px] transition-colors"
           type="button"
         >
-          <ChevronRight className="w-5 h-5 text-gray-600" />
+          <ChevronRight className="w-5 h-5 text-stone-600 hover:text-[#FF6A00]" />
         </button>
       </div>
 
@@ -123,8 +123,8 @@ export default function SessionsCalendar({ sessions, onEventClick }: SessionsCal
         {weekDays.map((day, index) => (
           <div
             key={day}
-            className={`text-center text-sm font-medium py-2 ${
-              index === 0 ? 'text-red-600' : index === 6 ? 'text-blue-600' : 'text-gray-700'
+            className={`text-center text-xs sm:text-sm font-bold py-2 ${
+              index === 0 ? 'text-red-600' : index === 6 ? 'text-blue-600' : 'text-stone-700'
             }`}
           >
             {day}
@@ -148,18 +148,19 @@ export default function SessionsCalendar({ sessions, onEventClick }: SessionsCal
             <div
               key={index}
               className={`
-                relative min-h-[80px] p-1 text-sm border border-gray-200 transition-all
+                relative min-h-[80px] p-1 text-sm border border-gray-200 rounded-md transition-all
                 ${!isCurrentMonth ? 'bg-gray-50' : 'bg-white'}
-                ${isToday ? 'border-2 border-green-600 bg-green-50' : ''}
+                ${isToday ? 'border-2 border-[#FF6A00] bg-[#FFE5E5]/30' : ''}
               `}
             >
               {/* 날짜 */}
               <div
-                className={`text-xs font-medium mb-1 ${
+                className={`text-xs font-bold mb-1 ${
                   !isCurrentMonth ? 'text-gray-300' :
+                  isToday ? 'text-[#FF6A00]' :
                   isSunday ? 'text-red-600' :
                   isSaturday ? 'text-blue-600' :
-                  'text-gray-900'
+                  'text-stone-900'
                 }`}
               >
                 {date.getDate()}
@@ -204,7 +205,7 @@ export default function SessionsCalendar({ sessions, onEventClick }: SessionsCal
 
       {/* 범례 */}
       <div className="mt-4 space-y-2">
-        <div className="flex items-center justify-center gap-4 text-xs text-gray-600">
+        <div className="flex items-center justify-center gap-4 text-xs text-stone-600">
           <div className="flex items-center gap-1">
             <span className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></span>
             <span>언어컨설팅</span>
@@ -214,11 +215,11 @@ export default function SessionsCalendar({ sessions, onEventClick }: SessionsCal
             <span>홈티</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="w-4 h-4 border-2 border-green-600 rounded"></span>
+            <span className="w-4 h-4 border-2 border-[#FF6A00] bg-[#FFE5E5]/30 rounded"></span>
             <span>오늘</span>
           </div>
         </div>
-        <div className="flex items-center justify-center gap-3 text-xs text-gray-600 flex-wrap">
+        <div className="flex items-center justify-center gap-3 text-xs text-stone-600 flex-wrap">
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
             <span>결제대기</span>

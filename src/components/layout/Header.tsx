@@ -158,12 +158,12 @@ const Header: React.FC<HeaderProps> = ({
               </button>
 
               {isGuideMenuOpen && (
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-[10px] shadow-lg border border-gray-200 py-2 z-50">
                   {guideSubItems.map((subItem) => (
                     <Link
                       key={subItem.href}
                       href={subItem.href}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors font-pretendard"
+                      className="block px-4 py-2 text-sm text-stone-700 hover:bg-[#FFE5E5] hover:text-[#FF6A00] transition-colors font-pretendard"
                     >
                       {subItem.label}
                     </Link>
@@ -232,7 +232,7 @@ const Header: React.FC<HeaderProps> = ({
               <Link
                 key={item.href}
                 href={item.href}
-                className="block px-3 py-2 rounded-md text-base font-medium font-pretendard text-stone-900 hover:text-orange-500 transition-colors"
+                className="block px-3 py-2 rounded-[10px] text-base font-medium font-pretendard text-stone-900 hover:bg-[#FFE5E5] hover:text-[#FF6A00] transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.label}
@@ -249,7 +249,7 @@ const Header: React.FC<HeaderProps> = ({
                   <Link
                     key={subItem.href}
                     href={subItem.href}
-                    className="block px-3 py-2 rounded-md text-sm font-pretendard text-gray-600 hover:text-orange-500 transition-colors"
+                    className="block px-3 py-2 rounded-[10px] text-sm font-pretendard text-stone-600 hover:bg-[#FFE5E5] hover:text-[#FF6A00] transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {subItem.label}
@@ -265,7 +265,7 @@ const Header: React.FC<HeaderProps> = ({
                     {session.user.name}님
                   </div>
                   <button
-                    className="w-full text-left px-3 py-2 font-pretendard text-stone-900 hover:text-orange-500 transition-colors"
+                    className="w-full text-left px-3 py-2 rounded-[10px] font-pretendard text-stone-900 hover:bg-[#FFE5E5] hover:text-[#FF6A00] transition-colors"
                     onClick={handleSignOut}
                   >
                     로그아웃
@@ -275,7 +275,7 @@ const Header: React.FC<HeaderProps> = ({
                 <>
                   <Link
                     href="/login"
-                    className="block px-3 py-2 font-pretendard text-stone-900 hover:text-orange-500 transition-colors"
+                    className="block px-3 py-2 rounded-[10px] font-pretendard text-stone-900 hover:bg-[#FFE5E5] hover:text-[#FF6A00] transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     로그인
@@ -285,7 +285,7 @@ const Header: React.FC<HeaderProps> = ({
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="block px-3"
                   >
-                    <div className="flex h-9 justify-center items-center gap-[10px] rounded-[10px] bg-[#FF6A00] hover:bg-orange-600 transition-colors">
+                    <div className="flex h-9 justify-center items-center gap-[10px] rounded-[10px] bg-[#FF6A00] hover:bg-[#E55F00] transition-colors shadow-lg">
                       <span className="text-neutral-50 text-base font-medium font-pretendard">
                         회원가입
                       </span>

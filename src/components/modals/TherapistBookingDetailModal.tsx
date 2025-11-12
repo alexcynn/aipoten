@@ -199,12 +199,13 @@ export default function TherapistBookingDetailModal({
           alignItems: 'center',
           justifyContent: 'center',
           padding: '16px',
+          fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, sans-serif',
         }}
       >
         <div
           style={{
             backgroundColor: 'white',
-            borderRadius: '8px',
+            borderRadius: '16px',
             maxWidth: '900px',
             width: '100%',
             maxHeight: '90vh',
@@ -225,11 +226,11 @@ export default function TherapistBookingDetailModal({
             }}
           >
             <div>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
+              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1c1917' }}>
                 예약 상세 정보
               </h2>
               {booking && (
-                <p style={{ fontSize: '14px', color: '#6B7280', marginTop: '4px' }}>
+                <p style={{ fontSize: '14px', color: '#57534e', marginTop: '4px' }}>
                   {sessionTypeLabel} 예약
                 </p>
               )}
@@ -238,20 +239,22 @@ export default function TherapistBookingDetailModal({
               onClick={onClose}
               style={{
                 padding: '8px',
-                color: '#6B7280',
+                color: '#57534e',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                borderRadius: '4px',
+                borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#F3F4F6'
+                e.currentTarget.style.backgroundColor = '#FFE5E5'
+                e.currentTarget.style.color = '#FF6A00'
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent'
+                e.currentTarget.style.color = '#57534e'
               }}
             >
               <X style={{ width: '24px', height: '24px' }} />
@@ -274,12 +277,12 @@ export default function TherapistBookingDetailModal({
                     width: '48px',
                     height: '48px',
                     border: '4px solid #E5E7EB',
-                    borderTopColor: '#10B981',
+                    borderTopColor: '#FF6A00',
                     borderRadius: '50%',
                     animation: 'spin 1s linear infinite',
                   }}
                 />
-                <p style={{ marginTop: '16px', color: '#6B7280' }}>로딩 중...</p>
+                <p style={{ marginTop: '16px', color: '#57534e' }}>로딩 중...</p>
               </div>
             )}
 
@@ -338,24 +341,24 @@ export default function TherapistBookingDetailModal({
                   {/* Booking Info */}
                   <div
                     style={{
-                      backgroundColor: '#F9FAFB',
-                      borderRadius: '8px',
+                      backgroundColor: '#F5EFE7',
+                      borderRadius: '10px',
                       padding: '20px',
                     }}
                   >
-                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1c1917', marginBottom: '16px' }}>
                       예약 정보
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#6B7280' }}>세션 번호:</span>
-                        <span style={{ fontWeight: '500', color: '#111827' }}>
+                        <span style={{ color: '#57534e' }}>세션 번호:</span>
+                        <span style={{ fontWeight: '500', color: '#1c1917' }}>
                           {booking.sessionNumber} / {booking.payment.totalSessions}회
                         </span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#6B7280' }}>예약 일시:</span>
-                        <span style={{ fontWeight: '500', color: '#111827' }}>
+                        <span style={{ color: '#57534e' }}>예약 일시:</span>
+                        <span style={{ fontWeight: '500', color: '#1c1917' }}>
                           {new Date(booking.scheduledAt).toLocaleString('ko-KR', {
                             year: 'numeric',
                             month: 'long',
@@ -366,12 +369,12 @@ export default function TherapistBookingDetailModal({
                         </span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#6B7280' }}>세션 시간:</span>
-                        <span style={{ fontWeight: '500', color: '#111827' }}>{booking.duration}분</span>
+                        <span style={{ color: '#57534e' }}>세션 시간:</span>
+                        <span style={{ fontWeight: '500', color: '#1c1917' }}>{booking.duration}분</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#6B7280' }}>결제 상태:</span>
-                        <span style={{ fontWeight: '500', color: '#111827' }}>
+                        <span style={{ color: '#57534e' }}>결제 상태:</span>
+                        <span style={{ fontWeight: '500', color: '#1c1917' }}>
                           {getPaymentStatusLabel(booking.payment.status)}
                         </span>
                       </div>
@@ -381,28 +384,28 @@ export default function TherapistBookingDetailModal({
                   {/* Child Info */}
                   <div
                     style={{
-                      backgroundColor: '#F9FAFB',
-                      borderRadius: '8px',
+                      backgroundColor: '#F5EFE7',
+                      borderRadius: '10px',
                       padding: '20px',
                     }}
                   >
-                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1c1917', marginBottom: '16px' }}>
                       아동 정보
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#6B7280' }}>이름:</span>
-                        <span style={{ fontWeight: '500', color: '#111827' }}>{booking.child.name}</span>
+                        <span style={{ color: '#57534e' }}>이름:</span>
+                        <span style={{ fontWeight: '500', color: '#1c1917' }}>{booking.child.name}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#6B7280' }}>생년월일:</span>
-                        <span style={{ fontWeight: '500', color: '#111827' }}>
+                        <span style={{ color: '#57534e' }}>생년월일:</span>
+                        <span style={{ fontWeight: '500', color: '#1c1917' }}>
                           {new Date(booking.child.birthDate).toLocaleDateString('ko-KR')}
                         </span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#6B7280' }}>성별:</span>
-                        <span style={{ fontWeight: '500', color: '#111827' }}>
+                        <span style={{ color: '#57534e' }}>성별:</span>
+                        <span style={{ fontWeight: '500', color: '#1c1917' }}>
                           {booking.child.gender === 'MALE' ? '남' : '여'}
                         </span>
                       </div>
@@ -412,27 +415,27 @@ export default function TherapistBookingDetailModal({
                   {/* Parent Info */}
                   <div
                     style={{
-                      backgroundColor: '#F9FAFB',
-                      borderRadius: '8px',
+                      backgroundColor: '#F5EFE7',
+                      borderRadius: '10px',
                       padding: '20px',
                     }}
                   >
-                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1c1917', marginBottom: '16px' }}>
                       부모 정보
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#6B7280' }}>이름:</span>
-                        <span style={{ fontWeight: '500', color: '#111827' }}>{booking.parentUser.name}</span>
+                        <span style={{ color: '#57534e' }}>이름:</span>
+                        <span style={{ fontWeight: '500', color: '#1c1917' }}>{booking.parentUser.name}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <span style={{ color: '#6B7280' }}>이메일:</span>
+                        <span style={{ color: '#57534e' }}>이메일:</span>
                         <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontWeight: '500', color: '#111827' }}>
+                          <span style={{ fontWeight: '500', color: '#1c1917' }}>
                             {showContactInfo ? booking.parentUser.email : maskEmail(booking.parentUser.email)}
                           </span>
                           {!showContactInfo && (
-                            <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '4px', fontStyle: 'italic' }}>
+                            <p style={{ fontSize: '12px', color: '#78716c', marginTop: '4px', fontStyle: 'italic' }}>
                               * 예약 확정 후 공개
                             </p>
                           )}
@@ -440,13 +443,13 @@ export default function TherapistBookingDetailModal({
                       </div>
                       {booking.parentUser.phone && (
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <span style={{ color: '#6B7280' }}>연락처:</span>
+                          <span style={{ color: '#57534e' }}>연락처:</span>
                           <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontWeight: '500', color: '#111827' }}>
+                            <span style={{ fontWeight: '500', color: '#1c1917' }}>
                               {showContactInfo ? booking.parentUser.phone : maskPhone(booking.parentUser.phone)}
                             </span>
                             {!showContactInfo && (
-                              <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '4px', fontStyle: 'italic' }}>
+                              <p style={{ fontSize: '12px', color: '#78716c', marginTop: '4px', fontStyle: 'italic' }}>
                                 * 예약 확정 후 공개
                               </p>
                             )}
@@ -462,25 +465,25 @@ export default function TherapistBookingDetailModal({
                   {/* Visit Address */}
                   <div
                     style={{
-                      backgroundColor: '#F9FAFB',
-                      borderRadius: '8px',
+                      backgroundColor: '#F5EFE7',
+                      borderRadius: '10px',
                       padding: '20px',
                     }}
                   >
-                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1c1917', marginBottom: '16px' }}>
                       방문 주소
                     </h3>
                     <div style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                      <p style={{ color: '#111827', fontWeight: '500' }}>
+                      <p style={{ color: '#1c1917', fontWeight: '500' }}>
                         {showContactInfo
                           ? booking.visitAddress
                           : maskAddress(booking.visitAddress, booking.visitAddressDetail)}
                       </p>
                       {showContactInfo && booking.visitAddressDetail && (
-                        <p style={{ color: '#6B7280', marginTop: '4px' }}>{booking.visitAddressDetail}</p>
+                        <p style={{ color: '#57534e', marginTop: '4px' }}>{booking.visitAddressDetail}</p>
                       )}
                       {!showContactInfo && (
-                        <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '8px', fontStyle: 'italic' }}>
+                        <p style={{ fontSize: '12px', color: '#78716c', marginTop: '8px', fontStyle: 'italic' }}>
                           * 예약 확정 후 공개됩니다
                         </p>
                       )}
@@ -490,24 +493,24 @@ export default function TherapistBookingDetailModal({
                   {/* Payment Info */}
                   <div
                     style={{
-                      backgroundColor: '#F9FAFB',
-                      borderRadius: '8px',
+                      backgroundColor: '#F5EFE7',
+                      borderRadius: '10px',
                       padding: '20px',
                     }}
                   >
-                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1c1917', marginBottom: '16px' }}>
                       결제 정보
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#6B7280' }}>원가:</span>
-                        <span style={{ fontWeight: '500', color: '#111827' }}>
+                        <span style={{ color: '#57534e' }}>원가:</span>
+                        <span style={{ fontWeight: '500', color: '#1c1917' }}>
                           ₩{booking.payment.originalFee.toLocaleString()}
                         </span>
                       </div>
                       {booking.payment.discountRate > 0 && (
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ color: '#6B7280' }}>할인율:</span>
+                          <span style={{ color: '#57534e' }}>할인율:</span>
                           <span style={{ fontWeight: '500', color: '#DC2626' }}>
                             {booking.payment.discountRate}%
                           </span>
@@ -521,8 +524,8 @@ export default function TherapistBookingDetailModal({
                           borderTop: '1px solid #E5E7EB',
                         }}
                       >
-                        <span style={{ fontSize: '16px', fontWeight: '600', color: '#111827' }}>최종 금액:</span>
-                        <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#10B981' }}>
+                        <span style={{ fontSize: '16px', fontWeight: '600', color: '#1c1917' }}>최종 금액:</span>
+                        <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#FF6A00' }}>
                           ₩{booking.payment.finalFee.toLocaleString()}
                         </span>
                       </div>
@@ -533,15 +536,15 @@ export default function TherapistBookingDetailModal({
                   {booking.parentNote && (
                     <div
                       style={{
-                        backgroundColor: '#F9FAFB',
-                        borderRadius: '8px',
+                        backgroundColor: '#F5EFE7',
+                        borderRadius: '10px',
                         padding: '20px',
                       }}
                     >
-                      <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '12px' }}>
+                      <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1c1917', marginBottom: '12px' }}>
                         부모님 메모
                       </h3>
-                      <p style={{ fontSize: '14px', color: '#374151', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                      <p style={{ fontSize: '14px', color: '#44403c', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
                         {booking.parentNote}
                       </p>
                     </div>
@@ -588,23 +591,24 @@ export default function TherapistBookingDetailModal({
                   style={{
                     flex: 1,
                     padding: '12px 24px',
-                    backgroundColor: isConfirming ? '#9CA3AF' : '#10B981',
+                    backgroundColor: isConfirming ? '#9CA3AF' : '#FF6A00',
                     color: 'white',
                     border: 'none',
-                    borderRadius: '6px',
+                    borderRadius: '10px',
                     fontSize: '16px',
-                    fontWeight: '500',
+                    fontWeight: '600',
                     cursor: isConfirming ? 'not-allowed' : 'pointer',
                     opacity: isConfirming ? 0.5 : 1,
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
                   onMouseEnter={(e) => {
                     if (!isConfirming) {
-                      e.currentTarget.style.backgroundColor = '#059669'
+                      e.currentTarget.style.backgroundColor = '#E55F00'
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isConfirming) {
-                      e.currentTarget.style.backgroundColor = '#10B981'
+                      e.currentTarget.style.backgroundColor = '#FF6A00'
                     }
                   }}
                 >
@@ -619,19 +623,20 @@ export default function TherapistBookingDetailModal({
                   style={{
                     flex: 1,
                     padding: '12px 24px',
-                    backgroundColor: '#3B82F6',
+                    backgroundColor: '#FF6A00',
                     color: 'white',
                     border: 'none',
-                    borderRadius: '6px',
+                    borderRadius: '10px',
                     fontSize: '16px',
-                    fontWeight: '500',
+                    fontWeight: '600',
                     cursor: 'pointer',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#2563EB'
+                    e.currentTarget.style.backgroundColor = '#E55F00'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#3B82F6'
+                    e.currentTarget.style.backgroundColor = '#FF6A00'
                   }}
                 >
                   상담일지 작성

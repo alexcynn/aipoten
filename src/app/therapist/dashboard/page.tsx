@@ -205,10 +205,10 @@ export default function TherapistDashboardPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5EFE7] font-pretendard flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600">로딩 중...</p>
         </div>
       </div>
     )
@@ -219,33 +219,33 @@ export default function TherapistDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-[#F5EFE7] font-pretendard">
       <Header />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           {/* Welcome Section */}
-          <div className="bg-white overflow-hidden shadow rounded-lg mb-6">
-            <div className="px-4 py-5 sm:p-6">
+          <div className="bg-white overflow-hidden shadow-sm rounded-xl md:rounded-2xl mb-6">
+            <div className="px-4 py-5 sm:p-6 md:p-8">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-stone-900 mb-2">
                     안녕하세요, {session.user?.name} 치료사님!
                   </h1>
                   {profile ? (
                     <div className="space-y-1">
-                      <p className="text-gray-600">
+                      <p className="text-sm sm:text-base text-stone-700">
                         전문분야: {getSpecialtyName(profile.specialty)} | 경력: {profile.experience}년
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-xs sm:text-sm text-stone-600">
                         승인 상태: <span className={`font-medium ${profile.status === 'APPROVED' ? 'text-green-600' : 'text-yellow-600'}`}>
                           {getStatusName(profile.status)}
                         </span>
                       </p>
                     </div>
                   ) : (
-                    <p className="text-gray-600">
+                    <p className="text-sm sm:text-base text-stone-700">
                       프로필을 설정하여 매칭 서비스를 시작해보세요.
                     </p>
                   )}
@@ -255,21 +255,21 @@ export default function TherapistDashboardPage() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
             <Link
               href="/therapist/bookings/consultations"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+              className="bg-white p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#FFE5E5]"
             >
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-aipoten-blue rounded flex items-center justify-center">
-                    <span className="text-white text-sm">💬</span>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFE5E5] rounded-xl flex items-center justify-center">
+                    <span className="text-2xl">💬</span>
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">언어컨설팅</h3>
-                  <p className="text-sm text-gray-500">요청 대기</p>
-                  <p className="text-2xl font-bold text-aipoten-blue">
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">언어컨설팅</h3>
+                  <p className="text-xs sm:text-sm text-stone-600">요청 대기</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF6A00]">
                     {getConsultationPendingCount()}
                   </p>
                 </div>
@@ -278,18 +278,18 @@ export default function TherapistDashboardPage() {
 
             <Link
               href="/therapist/bookings/therapies"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+              className="bg-white p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#FFE5E5]"
             >
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-aipoten-green rounded flex items-center justify-center">
-                    <span className="text-white text-sm">🏠</span>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFE5E5] rounded-xl flex items-center justify-center">
+                    <span className="text-2xl">🏠</span>
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">홈티</h3>
-                  <p className="text-sm text-gray-500">요청 대기</p>
-                  <p className="text-2xl font-bold text-aipoten-green">
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">홈티</h3>
+                  <p className="text-xs sm:text-sm text-stone-600">요청 대기</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF6A00]">
                     {getTherapyPendingCount()}
                   </p>
                 </div>
@@ -298,18 +298,18 @@ export default function TherapistDashboardPage() {
 
             <Link
               href="/therapist/earnings"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+              className="bg-white p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#FFE5E5]"
             >
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-aipoten-orange rounded flex items-center justify-center">
-                    <span className="text-white text-sm">💰</span>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFE5E5] rounded-xl flex items-center justify-center">
+                    <span className="text-2xl">💰</span>
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">이달 수입금</h3>
-                  <p className="text-sm text-gray-500">정산 완료</p>
-                  <p className="text-2xl font-bold text-aipoten-orange">
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">이달 수입금</h3>
+                  <p className="text-xs sm:text-sm text-stone-600">정산 완료</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF6A00]">
                     ₩{calculateMonthlyEarnings().toLocaleString()}
                   </p>
                 </div>
@@ -318,20 +318,20 @@ export default function TherapistDashboardPage() {
 
             <Link
               href="/therapist/reviews"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+              className="bg-white p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#FFE5E5]"
             >
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-aipoten-red rounded flex items-center justify-center">
-                    <span className="text-white text-sm">⭐</span>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFE5E5] rounded-xl flex items-center justify-center">
+                    <span className="text-2xl">⭐</span>
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">평점</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">평점</h3>
+                  <p className="text-xs sm:text-sm text-stone-600">
                     {myBookings.filter(b => b.review?.rating).length}개 리뷰
                   </p>
-                  <p className="text-2xl font-bold text-aipoten-red">
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF6A00]">
                     {calculateAverageRating() === '0.0' ? '-' : calculateAverageRating()}
                   </p>
                 </div>
@@ -340,80 +340,56 @@ export default function TherapistDashboardPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
             <Link
               href="/therapist/profile"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+              className="bg-gradient-to-br from-[#FFE5E5] to-[#FF9999]/30 border-2 border-[#FF9999] rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-[#FF8888] transition-all"
             >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-aipoten-blue rounded flex items-center justify-center">
-                    <span className="text-white font-bold">👤</span>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">프로필 관리</h3>
-                  <p className="text-sm text-gray-500">프로필 수정</p>
-                </div>
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl mb-2">👤</div>
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900 mb-1">프로필 관리</h3>
+                <p className="text-xs sm:text-sm text-stone-700">프로필 수정</p>
               </div>
             </Link>
 
             <Link
               href="/therapist/schedule"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+              className="bg-gradient-to-br from-[#F5EFE7] to-[#E8DCC8] border-2 border-[#D4C4A8] rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-[#C4B498] transition-all"
             >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-aipoten-green rounded flex items-center justify-center">
-                    <span className="text-white">📅</span>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">일정 관리</h3>
-                  <p className="text-sm text-gray-500">스케줄 설정</p>
-                </div>
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl mb-2">📅</div>
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900 mb-1">일정 관리</h3>
+                <p className="text-xs sm:text-sm text-stone-700">스케줄 설정</p>
               </div>
             </Link>
 
             <Link
               href="/therapist/inquiries"
-              className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+              className="bg-gradient-to-br from-[#FFE5E5] to-[#FF9999]/30 border-2 border-[#FF9999] rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-[#FF8888] transition-all"
             >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-aipoten-red rounded flex items-center justify-center">
-                    <span className="text-white">💬</span>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">1:1 문의</h3>
-                  <p className="text-sm text-gray-500">문의 관리</p>
-                </div>
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl mb-2">💬</div>
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900 mb-1">1:1 문의</h3>
+                <p className="text-xs sm:text-sm text-stone-700">문의 관리</p>
               </div>
             </Link>
 
             <Link
               href="/therapist/journal-test"
-              className="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+              className="bg-gradient-to-br from-[#FF6A00] to-[#E55F00] border-2 border-[#FF6A00] rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-[#FF7A10] transition-all"
             >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-white bg-opacity-20 rounded flex items-center justify-center">
-                    <span className="text-white">✨</span>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-white">AI 상담일지</h3>
-                  <p className="text-sm text-purple-100">자동 생성 테스트</p>
-                </div>
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl mb-2">✨</div>
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-white mb-1">AI 상담일지</h3>
+                <p className="text-xs sm:text-sm text-orange-100">자동 생성 테스트</p>
               </div>
             </Link>
           </div>
 
           {/* 세션 캘린더 - 월별 일정 */}
-          <div className="bg-white overflow-hidden shadow rounded-lg mb-6">
-            <div className="px-4 py-5 sm:p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">월별 세션 일정</h2>
+          <div className="bg-white overflow-hidden shadow-sm rounded-xl md:rounded-2xl mb-6">
+            <div className="px-4 py-5 sm:p-6 md:p-8">
+              <h2 className="text-base sm:text-lg md:text-xl font-bold text-stone-900 mb-4">월별 세션 일정</h2>
               <SessionsCalendar
                 sessions={myBookings
                   .filter((booking: any) => booking.scheduledAt)
