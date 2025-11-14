@@ -7,7 +7,8 @@
       "Bash(if not exist \"C:\\work\\aipoten\\public\\images\" mkdir \"C:\\work\\aipoten\\public\\images\")",
       "Bash(cat:*)",
       "Bash(find:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

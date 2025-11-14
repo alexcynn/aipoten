@@ -1,8 +1,12 @@
+'use client'
+
 import React from 'react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear()
+  const { data: session } = useSession()
 
   const footerSections = [
     {
@@ -27,6 +31,11 @@ const Footer: React.FC = () => {
         { href: '/faq', label: '자주묻는질문' },
         { href: '/privacy', label: '개인정보처리방침' },
         { href: '/terms', label: '이용약관' },
+        ...(session?.user?.role === 'THERAPIST'
+          ? [{ href: '/therapist-terms', label: '전문가 이용약관' }]
+          : []
+        ),
+        { href: '/payment-policy', label: '결제 및 환불정책' },
       ],
     },
     {

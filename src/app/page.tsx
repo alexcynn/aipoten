@@ -308,8 +308,16 @@ export default function Home() {
 
           {/* Links */}
           <div className="mb-4 md:mb-6">
-            <div className="flex gap-3 md:gap-4 text-xs sm:text-sm text-stone-900">
+            <div className="flex flex-wrap gap-2 md:gap-3 text-xs sm:text-sm text-stone-900">
               <Link href="/terms" className="hover:underline">이용약관</Link>
+              <span className="text-gray-400">·</span>
+              {session?.user?.role === 'THERAPIST' && (
+                <>
+                  <Link href="/therapist-terms" className="hover:underline">전문가 이용약관</Link>
+                  <span className="text-gray-400">·</span>
+                </>
+              )}
+              <Link href="/payment-policy" className="hover:underline">결제 및 환불정책</Link>
               <span className="text-gray-400">·</span>
               <Link href="/privacy" className="font-semibold hover:underline">개인정보 처리방침</Link>
             </div>
@@ -317,8 +325,8 @@ export default function Home() {
 
           {/* Company Info */}
           <div className="text-[10px] sm:text-xs text-[#999999] space-y-1 mb-4 md:mb-6">
-            <p>주식: UNAI 주식회사 대표이사: 김OO 사업자: 사업자 등록번호: 000-00-00000</p>
-            <p>사업자주소: 00시 00구 · 대표: 대표번호 · 사업자번호: 262-08-00275 · 통신판매업 번호: 11-1111</p>
+            <p>사업자명: 아이포텐 (AIPOTEN) | 대표: 김은홍 | 사업자 등록번호: 262-08-03275</p>
+            <p>주소: 경기도 성남시 수정구 창업로 43, 1층 196호 | 이메일: contact@aipoten.co.kr</p>
           </div>
 
           {/* Copyright */}
