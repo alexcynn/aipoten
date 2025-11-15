@@ -545,20 +545,6 @@ export default function TherapistDetailModal({
                       <p className="mt-1 text-sm text-orange-900 font-medium font-pretendard">→ {selectedTherapist.pendingUpdateRequest.requestData.gender === 'MALE' ? '남성' : selectedTherapist.pendingUpdateRequest.requestData.gender === 'FEMALE' ? '여성' : '미입력'}</p>
                     )}
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-stone-500 font-pretendard">생년</label>
-                    <p className="mt-1 text-sm text-stone-900 font-pretendard">{selectedTherapist.birthYear ? `${selectedTherapist.birthYear}년` : '미입력'}</p>
-                    {selectedTherapist.pendingUpdateRequest && selectedTherapist.birthYear !== selectedTherapist.pendingUpdateRequest.requestData.birthYear && (
-                      <p className="mt-1 text-sm text-orange-900 font-medium font-pretendard">→ {selectedTherapist.pendingUpdateRequest.requestData.birthYear}년</p>
-                    )}
-                  </div>
-                  <div className="col-span-2">
-                    <label className="text-sm font-medium text-stone-500 font-pretendard">주소</label>
-                    <p className="mt-1 text-sm text-stone-900 font-pretendard">{selectedTherapist.address || '미입력'}</p>
-                    {selectedTherapist.pendingUpdateRequest && selectedTherapist.address !== selectedTherapist.pendingUpdateRequest.requestData.address && (
-                      <p className="mt-1 text-sm text-orange-900 font-medium font-pretendard">→ {selectedTherapist.pendingUpdateRequest.requestData.address}</p>
-                    )}
-                  </div>
                   <div className="col-span-2">
                     <label className="flex items-center space-x-2 cursor-pointer">
                       <input
@@ -673,6 +659,16 @@ export default function TherapistDetailModal({
                         <p className="text-sm text-stone-400 font-pretendard">미입력</p>
                       )}
                     </div>
+                    {selectedTherapist.pendingUpdateRequest && JSON.stringify(selectedTherapist.childAgeRanges) !== JSON.stringify(selectedTherapist.pendingUpdateRequest.requestData.childAgeRanges) && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <p className="text-sm text-orange-900 font-medium font-pretendard w-full">→ 변경 요청:</p>
+                        {selectedTherapist.pendingUpdateRequest.requestData.childAgeRanges.map((range) => (
+                          <span key={range} className="px-3 py-1 text-sm font-semibold bg-orange-100 text-orange-800 rounded-full font-pretendard">
+                            {getAgeRangeLabel(range)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="text-sm font-medium text-stone-500 mb-2 block font-pretendard">서비스 가능 지역</label>
@@ -687,6 +683,16 @@ export default function TherapistDetailModal({
                         <p className="text-sm text-stone-400 font-pretendard">미입력</p>
                       )}
                     </div>
+                    {selectedTherapist.pendingUpdateRequest && JSON.stringify(selectedTherapist.serviceAreas) !== JSON.stringify(selectedTherapist.pendingUpdateRequest.requestData.serviceAreas) && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <p className="text-sm text-orange-900 font-medium font-pretendard w-full">→ 변경 요청:</p>
+                        {selectedTherapist.pendingUpdateRequest.requestData.serviceAreas.map((area) => (
+                          <span key={area} className="px-3 py-1 text-sm font-semibold bg-orange-100 text-orange-800 rounded-full font-pretendard">
+                            {area}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="text-sm font-medium text-stone-500 font-pretendard">세션 비용 (50분 기준)</label>

@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Header from '@/components/layout/Header'
-import AddressSearchInput from '@/components/common/AddressSearchInput'
 import ServiceAreaInput from '@/components/common/ServiceAreaInput'
 
 type TherapyType = 'SPEECH_THERAPY' | 'SENSORY_INTEGRATION' | 'PLAY_THERAPY' | 'ART_THERAPY' | 'MUSIC_THERAPY' | 'OCCUPATIONAL_THERAPY' | 'COGNITIVE_THERAPY' | 'BEHAVIORAL_THERAPY'
@@ -109,10 +108,7 @@ export default function TherapistProfilePage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [gender, setGender] = useState<'MALE' | 'FEMALE' | ''>('')
-  const [birthYear, setBirthYear] = useState('')
   const [phone, setPhone] = useState('')
-  const [address, setAddress] = useState('')
-  const [addressDetail, setAddressDetail] = useState('')
 
   // Step 2: Professional Info
   const [specialties, setSpecialties] = useState<string[]>([])
@@ -170,16 +166,15 @@ export default function TherapistProfilePage() {
 
       const profileData = await response.json()
       console.log('프로필 데이터:', profileData)
+      console.log('전화번호 데이터:', profileData.user.phone)
       setProfile(profileData)
 
       // Load existing data
       setName(profileData.user.name || '')
       setEmail(profileData.user.email || '')
       setGender(profileData.gender || '')
-      setBirthYear(profileData.birthYear?.toString() || '')
       setPhone(profileData.user.phone || '')
-      setAddress(profileData.address || '')
-      setAddressDetail(profileData.addressDetail || '')
+      console.log('전화번호 상태 설정됨:', profileData.user.phone)
       setSpecialties(profileData.specialties || [])
       setChildAgeRanges(profileData.childAgeRanges || [])
       setServiceAreas(profileData.serviceAreas || [])
@@ -339,10 +334,7 @@ export default function TherapistProfilePage() {
         body: JSON.stringify({
           name,
           gender,
-          birthYear: birthYear ? parseInt(birthYear) : null,
           phone,
-          address,
-          addressDetail,
           specialties,
           childAgeRanges,
           serviceAreas,
@@ -441,6 +433,7 @@ export default function TherapistProfilePage() {
                       alert('프로필 수정 요청이 승인 대기 중입니다. 승인 후 다시 수정할 수 있습니다.')
                       return
                     }
+                    console.log('수정 모드 진입 - 현재 phone 상태:', phone)
                     setIsEditMode(true)
                     setCurrentStep(1)
                   }}
@@ -524,17 +517,8 @@ export default function TherapistProfilePage() {
                           <p className="text-lg text-stone-900">{profile.gender === 'MALE' ? '남성' : profile.gender === 'FEMALE' ? '여성' : '미입력'}</p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-stone-500 mb-1">생년</label>
-                          <p className="text-lg text-stone-900">{profile.birthYear ? `${profile.birthYear}년생` : '미입력'}</p>
-                        </div>
-                        <div>
                           <label className="block text-sm font-medium text-stone-500 mb-1">전화번호</label>
                           <p className="text-lg text-stone-900">{profile.user.phone || '미입력'}</p>
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-stone-500 mb-1">주소</label>
-                          <p className="text-lg text-stone-900">{profile.address || '미입력'}</p>
-                          {profile.addressDetail && <p className="text-sm text-stone-600 mt-1">{profile.addressDetail}</p>}
                         </div>
                       </div>
                     </div>
@@ -732,7 +716,7 @@ export default function TherapistProfilePage() {
             <div className="flex justify-between px-4">
               <span className={`text-sm text-left flex-1 ${currentStep >= 1 ? 'text-green-400 font-medium' : 'text-white/70'}`}>기본 정보</span>
               <span className={`text-sm text-center flex-1 ${currentStep >= 2 ? 'text-green-400 font-medium' : 'text-white/70'}`}>전문 정보</span>
-              <span className={`text-sm text-right flex-1 ${currentStep >= 3 ? 'text-green-400 font-medium' : 'text-white/70'}`}>자격증 · 경력</span>
+              <span className={`text-sm text-right flex-1 ${currentStep >= 3 ? 'text-green-400 font-medium' : 'text-white/70'}`}>학력·자격증·경력</span>
             </div>
           </div>
 
@@ -796,17 +780,6 @@ export default function TherapistProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">생년</label>
-                  <input
-                    type="number"
-                    value={birthYear}
-                    onChange={(e) => setBirthYear(e.target.value)}
-                    placeholder="1990"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
-                  />
-                </div>
-
-                <div>
                   <label className="block text-sm font-medium text-stone-700 mb-2">
                     전화번호 <span className="text-red-500">*</span>
                   </label>
@@ -819,13 +792,6 @@ export default function TherapistProfilePage() {
                     required
                   />
                 </div>
-
-                <AddressSearchInput
-                  address={address}
-                  addressDetail={addressDetail}
-                  onAddressChange={setAddress}
-                  onAddressDetailChange={setAddressDetail}
-                />
               </div>
             )}
 
@@ -962,7 +928,15 @@ export default function TherapistProfilePage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
 
+            {/* Step 3: Education, Certifications & Experience */}
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-stone-900 mb-4">학력·자격증·경력</h2>
+
+                {/* 학력 섹션 */}
                 <div>
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-medium text-stone-900">학력</h3>
@@ -1054,13 +1028,6 @@ export default function TherapistProfilePage() {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Step 3: Certifications & Experience */}
-            {currentStep === 3 && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-bold text-stone-900 mb-4">자격증 및 경력</h2>
 
                 {/* 예비 치료사 체크박스 */}
                 <div className="bg-blue-50 p-4 rounded-[10px] border border-blue-200">

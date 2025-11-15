@@ -83,7 +83,7 @@ export default function Home() {
                 아이의 발달 상태를 한눈에.
               </h3>
               <p className="text-sm sm:text-base md:text-lg text-stone-600">
-                1분개월~6세 아이들의 대근육·소근육·언어·인지·정서
+                12개월~6세 아이들의 대근육·소근육·언어·인지·정서
                 <br className="hidden md:block" />
                 발달을 분석하고 분석 리포트를 즉시 제공합니다.
               </p>
@@ -139,7 +139,7 @@ export default function Home() {
                 60분 심층 평가 진행
               </h3>
               <p className="text-sm sm:text-base md:text-lg text-stone-600">
-                수출 표준 언어 능력을 전반적으로 점검하고
+                수준 높은 언어 능력을 전반적으로 점검하고
                 <br className="hidden md:block" />
                 가정에서도 실천 가능한 코칭 플랜을 제공합니다.
               </p>

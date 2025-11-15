@@ -133,9 +133,14 @@ export default function ServiceAreaInput({
       )}
 
       {/* 설명 */}
-      <p className="text-sm text-gray-500 mt-2">
-        부모님이 입력한 주소와 앞부분(시/군/구)이 일치하는 치료사에게 매칭됩니다.
-      </p>
+      <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-[10px]">
+        <p className="text-sm text-blue-800">
+          ℹ️ 주소 검색 시 <strong>시/군/구까지만 저장</strong>됩니다. (상세 주소는 저장되지 않습니다)
+        </p>
+        <p className="text-xs text-blue-600 mt-1">
+          예: "서울특별시 강남구 테헤란로 123" → "서울 강남구"로 저장
+        </p>
+      </div>
 
       {/* 에러 메시지 */}
       {errors.length > 0 && (

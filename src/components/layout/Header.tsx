@@ -36,6 +36,7 @@ const Header: React.FC<HeaderProps> = ({
   const guestNavItems = [
     { href: '/', label: '홈' },
     { href: '/assessments', label: '발달체크' },
+    { href: '/language-consulting', label: '언어컨설팅' },
     { href: '/videos', label: '놀이영상' },
     { href: '/boards/community', label: '육아소통' },
   ]
@@ -43,6 +44,7 @@ const Header: React.FC<HeaderProps> = ({
   // 부모 메뉴
   const parentNavItems = [
     { href: '/parent/dashboard', label: '대시보드' },
+    { href: '/language-consulting', label: '언어컨설팅' },
     { href: '/videos', label: '놀이영상' },
     { href: '/boards/community', label: '육아소통' },
   ]
@@ -50,6 +52,7 @@ const Header: React.FC<HeaderProps> = ({
   // 치료사 메뉴
   const therapistNavItems = [
     { href: '/therapist/dashboard', label: '대시보드' },
+    { href: '/language-consulting', label: '언어컨설팅' },
     { href: '/videos', label: '놀이영상' },
     { href: '/boards/community', label: '육아소통' },
   ]
@@ -57,6 +60,7 @@ const Header: React.FC<HeaderProps> = ({
   // 관리자 메뉴
   const adminNavItems = [
     { href: '/admin/dashboard', label: '대시보드' },
+    { href: '/language-consulting', label: '언어컨설팅' },
     { href: '/videos', label: '놀이영상' },
     { href: '/boards/community', label: '육아소통' },
   ]

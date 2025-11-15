@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import Header from '@/components/layout/Header'
-import AddressSearchInput from '@/components/common/AddressSearchInput'
+import ServiceAreaInput from '@/components/common/ServiceAreaInput'
 
 type TherapyType = 'SPEECH_THERAPY' | 'SENSORY_INTEGRATION' | 'PLAY_THERAPY' | 'ART_THERAPY' | 'MUSIC_THERAPY' | 'OCCUPATIONAL_THERAPY' | 'COGNITIVE_THERAPY' | 'BEHAVIORAL_THERAPY'
 type EmploymentType = 'INSTITUTION' | 'FREELANCER'
@@ -53,13 +54,6 @@ const CHILD_AGE_RANGES = [
   { value: 'AGE_8_PLUS', label: '8세 이상' },
 ]
 
-const SEOUL_DISTRICTS = [
-  '강남구', '서초구', '송파구', '강동구', '광진구', '성동구',
-  '중구', '용산구', '성북구', '강북구', '도봉구', '노원구',
-  '은평구', '서대문구', '마포구', '양천구', '강서구', '구로구',
-  '금천구', '영등포구', '동작구', '관악구', '동대문구', '중랑구', '종로구'
-]
-
 const DEGREE_TYPES = [
   { value: 'HIGH_SCHOOL', label: '고등학교 졸업' },
   { value: 'ASSOCIATE', label: '전문학사' },
@@ -77,8 +71,14 @@ const BANKS = [
 
 export default function TherapistRegisterPage() {
   const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Step 0: Terms Agreement
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [agreedToTherapistTerms, setAgreedToTherapistTerms] = useState(false)
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false)
+  const [agreedToAll, setAgreedToAll] = useState(false)
 
   // Step 1: Basic Info
   const [email, setEmail] = useState('')
@@ -86,10 +86,7 @@ export default function TherapistRegisterPage() {
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [name, setName] = useState('')
   const [gender, setGender] = useState<'MALE' | 'FEMALE' | ''>('')
-  const [birthYear, setBirthYear] = useState('')
   const [phone, setPhone] = useState('')
-  const [address, setAddress] = useState('')
-  const [addressDetail, setAddressDetail] = useState('')
 
   // Step 2: Professional Info
   const [specialties, setSpecialties] = useState<string[]>([])
@@ -118,12 +115,6 @@ export default function TherapistRegisterPage() {
 
   const handleAgeRangeToggle = (value: string) => {
     setChildAgeRanges(prev =>
-      prev.includes(value) ? prev.filter(a => a !== value) : [...prev, value]
-    )
-  }
-
-  const handleServiceAreaToggle = (value: string) => {
-    setServiceAreas(prev =>
       prev.includes(value) ? prev.filter(a => a !== value) : [...prev, value]
     )
   }
@@ -168,6 +159,31 @@ export default function TherapistRegisterPage() {
     const updated = [...experiences]
     updated[index] = { ...updated[index], [field]: value }
     setExperiences(updated)
+  }
+
+  // Handle "Agree to All" toggle
+  const handleAgreeToAll = (checked: boolean) => {
+    setAgreedToAll(checked)
+    setAgreedToTerms(checked)
+    setAgreedToTherapistTerms(checked)
+    setAgreedToPrivacy(checked)
+  }
+
+  // Sync "Agree to All" when individual checkboxes change
+  useEffect(() => {
+    if (agreedToTerms && agreedToTherapistTerms && agreedToPrivacy) {
+      setAgreedToAll(true)
+    } else {
+      setAgreedToAll(false)
+    }
+  }, [agreedToTerms, agreedToTherapistTerms, agreedToPrivacy])
+
+  const validateStep0 = () => {
+    if (!agreedToTerms || !agreedToTherapistTerms || !agreedToPrivacy) {
+      alert('모든 약관에 동의해주세요.')
+      return false
+    }
+    return true
   }
 
   const validateStep1 = () => {
@@ -245,6 +261,7 @@ export default function TherapistRegisterPage() {
   }
 
   const handleNext = () => {
+    if (currentStep === 0 && !validateStep0()) return
     if (currentStep === 1 && !validateStep1()) return
     if (currentStep === 2 && !validateStep2()) return
     setCurrentStep(currentStep + 1)
@@ -263,10 +280,7 @@ export default function TherapistRegisterPage() {
           password,
           name,
           gender,
-          birthYear: birthYear ? parseInt(birthYear) : null,
           phone,
-          address,
-          addressDetail,
           specialties,
           childAgeRanges,
           serviceAreas,
@@ -305,40 +319,160 @@ export default function TherapistRegisterPage() {
           {/* Progress Bar */}
           <div className="bg-stone-900 p-6">
             <h1 className="text-2xl font-bold text-white mb-4 font-pretendard">치료사 회원가입</h1>
-            <div className="relative flex justify-between items-center px-8 mb-4">
+            <div className="relative flex justify-between items-center px-4 mb-4">
               {/* 연결선 */}
-              <div className="absolute left-0 right-0 top-1/2 h-1 bg-white/30 -translate-y-1/2" style={{ left: 'calc(2rem + 28px)', right: 'calc(2rem + 28px)' }}></div>
+              <div className="absolute left-0 right-0 top-1/2 h-1 bg-white/30 -translate-y-1/2" style={{ left: 'calc(1rem + 24px)', right: 'calc(1rem + 24px)' }}></div>
 
               {/* 진행된 연결선 */}
-              {currentStep > 1 && (
+              {currentStep > 0 && (
                 <div className="absolute top-1/2 h-1 bg-[#FF6A00] -translate-y-1/2 transition-all" style={{
-                  left: 'calc(2rem + 28px)',
-                  width: currentStep === 2 ? 'calc(50% - 2rem - 28px)' : 'calc(100% - 4rem - 56px)'
+                  left: 'calc(1rem + 24px)',
+                  width: currentStep === 1 ? 'calc(33.33% - 1rem - 24px)' : currentStep === 2 ? 'calc(66.66% - 1.33rem - 24px)' : 'calc(100% - 2rem - 48px)'
                 }}></div>
               )}
 
               {/* 숫자 원들 */}
-              {[1, 2, 3].map((step) => (
+              {[0, 1, 2, 3].map((step) => (
                 <div
                   key={step}
-                  className={`relative w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg border-2 transition-all leading-none z-10 font-pretendard ${
+                  className={`relative w-12 h-12 rounded-full flex items-center justify-center font-bold text-base border-2 transition-all leading-none z-10 font-pretendard ${
                     currentStep >= step
                       ? 'bg-[#FF6A00] text-white border-[#FF6A00] shadow-lg'
                       : 'bg-stone-900 text-white border-white/40'
                   }`}
                 >
-                  {step}
+                  {step + 1}
                 </div>
               ))}
             </div>
-            <div className="flex justify-between px-4 font-pretendard">
-              <span className={`text-sm text-left flex-1 ${currentStep >= 1 ? 'text-[#FF9999] font-medium' : 'text-white/70'}`}>기본 정보</span>
-              <span className={`text-sm text-center flex-1 ${currentStep >= 2 ? 'text-[#FF9999] font-medium' : 'text-white/70'}`}>전문 정보</span>
-              <span className={`text-sm text-right flex-1 ${currentStep >= 3 ? 'text-[#FF9999] font-medium' : 'text-white/70'}`}>자격증 · 경력</span>
+            <div className="flex justify-between font-pretendard text-xs sm:text-sm">
+              <span className={`${currentStep >= 0 ? 'text-[#FF9999] font-medium' : 'text-white/70'}`}>약관동의</span>
+              <span className={`${currentStep >= 1 ? 'text-[#FF9999] font-medium' : 'text-white/70'}`}>기본정보</span>
+              <span className={`${currentStep >= 2 ? 'text-[#FF9999] font-medium' : 'text-white/70'}`}>전문정보</span>
+              <span className={`${currentStep >= 3 ? 'text-[#FF9999] font-medium' : 'text-white/70'}`}>학력·자격증·경력</span>
             </div>
           </div>
 
           <div className="p-8">
+            {/* Step 0: Terms Agreement */}
+            {currentStep === 0 && (
+              <div className="space-y-6">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-stone-900 font-pretendard mb-3">약관 동의</h2>
+                  <p className="text-stone-600 font-pretendard">
+                    치료사 회원가입을 위해 아래 약관에 동의해주세요
+                  </p>
+                </div>
+
+                {/* 전체 동의 */}
+                <div className="p-5 bg-[#FFF5E6] border-2 border-[#FF6A00] rounded-xl">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={agreedToAll}
+                      onChange={(e) => handleAgreeToAll(e.target.checked)}
+                      className="w-5 h-5 text-[#FF6A00] border-gray-300 rounded focus:ring-[#FF6A00] mr-3"
+                    />
+                    <span className="text-lg font-bold text-stone-900 font-pretendard">
+                      전체 동의
+                    </span>
+                  </label>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4"></div>
+
+                {/* 개별 약관 동의 */}
+                <div className="space-y-4">
+                  {/* 서비스 이용약관 */}
+                  <div className="p-4 border border-gray-300 rounded-xl hover:border-[#FF6A00] transition-colors">
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="flex items-center cursor-pointer flex-1">
+                        <input
+                          type="checkbox"
+                          checked={agreedToTerms}
+                          onChange={(e) => setAgreedToTerms(e.target.checked)}
+                          className="w-4 h-4 text-[#FF6A00] border-gray-300 rounded focus:ring-[#FF6A00] mr-3"
+                        />
+                        <span className="font-medium text-stone-900 font-pretendard">
+                          [필수] 서비스 이용약관
+                        </span>
+                      </label>
+                      <Link
+                        href="/terms"
+                        target="_blank"
+                        className="text-sm text-[#FF6A00] hover:underline font-pretendard ml-2"
+                      >
+                        보기
+                      </Link>
+                    </div>
+                    <div className="max-h-32 overflow-y-auto p-3 bg-gray-50 rounded-lg text-xs text-stone-600 font-pretendard">
+                      <p>아이포텐 서비스 이용약관의 주요 내용을 확인하세요...</p>
+                    </div>
+                  </div>
+
+                  {/* 전문가 이용약관 */}
+                  <div className="p-4 border border-gray-300 rounded-xl hover:border-[#FF6A00] transition-colors">
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="flex items-center cursor-pointer flex-1">
+                        <input
+                          type="checkbox"
+                          checked={agreedToTherapistTerms}
+                          onChange={(e) => setAgreedToTherapistTerms(e.target.checked)}
+                          className="w-4 h-4 text-[#FF6A00] border-gray-300 rounded focus:ring-[#FF6A00] mr-3"
+                        />
+                        <span className="font-medium text-stone-900 font-pretendard">
+                          [필수] 전문가 이용약관
+                        </span>
+                      </label>
+                      <Link
+                        href="/therapist-terms"
+                        target="_blank"
+                        className="text-sm text-[#FF6A00] hover:underline font-pretendard ml-2"
+                      >
+                        보기
+                      </Link>
+                    </div>
+                    <div className="max-h-32 overflow-y-auto p-3 bg-gray-50 rounded-lg text-xs text-stone-600 font-pretendard">
+                      <p>전문가 회원 전용 약관입니다. 직거래 금지, 노쇼 시 위약금 등의 내용이 포함되어 있습니다...</p>
+                    </div>
+                  </div>
+
+                  {/* 개인정보 처리방침 */}
+                  <div className="p-4 border border-gray-300 rounded-xl hover:border-[#FF6A00] transition-colors">
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="flex items-center cursor-pointer flex-1">
+                        <input
+                          type="checkbox"
+                          checked={agreedToPrivacy}
+                          onChange={(e) => setAgreedToPrivacy(e.target.checked)}
+                          className="w-4 h-4 text-[#FF6A00] border-gray-300 rounded focus:ring-[#FF6A00] mr-3"
+                        />
+                        <span className="font-medium text-stone-900 font-pretendard">
+                          [필수] 개인정보 처리방침
+                        </span>
+                      </label>
+                      <Link
+                        href="/privacy"
+                        target="_blank"
+                        className="text-sm text-[#FF6A00] hover:underline font-pretendard ml-2"
+                      >
+                        보기
+                      </Link>
+                    </div>
+                    <div className="max-h-32 overflow-y-auto p-3 bg-gray-50 rounded-lg text-xs text-stone-600 font-pretendard">
+                      <p>개인정보의 수집, 이용, 보관, 파기 등에 대한 방침을 확인하세요...</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-stone-700 font-pretendard">
+                    ⓘ 모든 약관에 동의하셔야 회원가입을 진행할 수 있습니다.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Step 1: Basic Info */}
             {currentStep === 1 && (
               <div className="space-y-6">
@@ -429,17 +563,6 @@ export default function TherapistRegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 font-pretendard mb-2">생년</label>
-                  <input
-                    type="number"
-                    value={birthYear}
-                    onChange={(e) => setBirthYear(e.target.value)}
-                    placeholder="1990"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
-                  />
-                </div>
-
-                <div>
                   <label className="block text-sm font-medium text-stone-700 font-pretendard mb-2">
                     전화번호 <span className="text-red-500">*</span>
                   </label>
@@ -452,13 +575,6 @@ export default function TherapistRegisterPage() {
                     required
                   />
                 </div>
-
-                <AddressSearchInput
-                  address={address}
-                  addressDetail={addressDetail}
-                  onAddressChange={setAddress}
-                  onAddressDetailChange={setAddressDetail}
-                />
               </div>
             )}
 
@@ -519,31 +635,11 @@ export default function TherapistRegisterPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 font-pretendard mb-2">
-                    치료 가능 지역 - 서울특별시 (중복 가능) <span className="text-red-500">*</span>
-                  </label>
-                  <div className="grid grid-cols-3 md:grid-cols-5 gap-2 max-h-64 overflow-y-auto p-4 border border-gray-300 rounded-[10px]">
-                    {SEOUL_DISTRICTS.map(district => (
-                      <label
-                        key={district}
-                        className={`flex items-center p-2 border-2 rounded-[10px] cursor-pointer transition-colors text-sm ${
-                          serviceAreas.includes(district)
-                            ? 'border-[#FF6A00] bg-[#FF6A00]/10'
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={serviceAreas.includes(district)}
-                          onChange={() => handleServiceAreaToggle(district)}
-                          className="mr-2"
-                        />
-                        {district}
-                      </label>
-                    ))}
-                  </div>
-                </div>
+                <ServiceAreaInput
+                  serviceAreas={serviceAreas}
+                  onServiceAreasChange={setServiceAreas}
+                  maxAreas={15}
+                />
 
                 <div>
                   <label className="block text-sm font-medium text-stone-700 font-pretendard mb-2">
@@ -615,7 +711,15 @@ export default function TherapistRegisterPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
 
+            {/* Step 3: Education, Certifications & Experience */}
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-stone-900 font-pretendard mb-4">학력·자격증·경력</h2>
+
+                {/* 학력 섹션 */}
                 <div>
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-medium text-stone-900 font-pretendard">학력</h3>
@@ -707,13 +811,6 @@ export default function TherapistRegisterPage() {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Step 3: Certifications & Experience */}
-            {currentStep === 3 && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-bold text-stone-900 font-pretendard mb-4">자격증 및 경력</h2>
 
                 {/* 예비 치료사 체크박스 */}
                 <div className="bg-blue-50 p-4 rounded-[10px] border border-blue-200">
@@ -980,7 +1077,7 @@ export default function TherapistRegisterPage() {
               <button
                 type="button"
                 onClick={() => setCurrentStep(currentStep - 1)}
-                disabled={currentStep === 1}
+                disabled={currentStep === 0}
                 className="px-6 py-3 border-2 border-gray-300 rounded-lg text-stone-700 font-pretendard font-medium hover:bg-[#F9F9F9] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 이전
