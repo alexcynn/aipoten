@@ -17,6 +17,9 @@ interface Therapist {
   childAgeRanges: string[]
   serviceAreas: string[]
   sessionFee: number | null
+  consultationFee: number | null
+  consultationSettlementAmount: number | null
+  canDoConsultation: boolean | null
   education: string | null
   introduction: string | null
   approvedAt: string
@@ -169,16 +172,16 @@ function TherapistsSearchPageContent() {
     }
   }
 
-  // 언어 컨설팅 또는 홈티 예약에서 선택된 자녀 연령 자동 설정
+  // 선택된 자녀 연령 자동 설정 (언어컨설팅 및 홈티 모두)
   useEffect(() => {
-    if (isConsultation && selectedChildId && children.length > 0) {
+    if (selectedChildId && children.length > 0) {
       const selectedChild = children.find(child => child.id === selectedChildId)
       if (selectedChild) {
         const ageRange = getAgeRangeFromMonths(selectedChild.ageInMonths)
         setSelectedAgeRanges([ageRange])
       }
     }
-  }, [isConsultation, selectedChildId, children])
+  }, [selectedChildId, children])
 
   useEffect(() => {
     // 주소가 로드되면 검색 실행
@@ -308,88 +311,59 @@ function TherapistsSearchPageContent() {
               </div>
             )}
 
-            {/* 아이 선택 및 연령 - 언어 컨설팅에서는 선택한 자녀 연령 자동 설정 */}
-            {!isConsultation ? (
-              <div>
-                <label className="block text-sm font-semibold text-stone-700 mb-3">
-                  아이 연령
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {ageRangeOptions.map((option) => (
-                    <label
-                      key={option.value}
-                      className={`flex items-center space-x-2 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
-                        selectedAgeRanges.includes(option.value)
-                          ? 'bg-blue-50 border-blue-500'
-                          : 'border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedAgeRanges.includes(option.value)}
-                        onChange={() => toggleAgeRange(option.value)}
-                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-stone-700 font-medium">{option.label}</span>
-                    </label>
-                  ))}
+            {/* 자녀 선택 (공통) */}
+            <div>
+              <label className="block text-sm font-semibold text-stone-700 mb-3">
+                자녀 선택
+              </label>
+              {children.length > 0 ? (
+                <div className="space-y-3">
+                  <select
+                    value={selectedChildId}
+                    onChange={(e) => setSelectedChildId(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-medium"
+                  >
+                    <option value="">자녀를 선택해주세요</option>
+                    {children.map((child) => (
+                      <option key={child.id} value={child.id}>
+                        {child.name} ({ageRangeOptions.find(opt => opt.value === getAgeRangeFromMonths(child.ageInMonths))?.label || `${child.ageInMonths}개월`})
+                      </option>
+                    ))}
+                  </select>
+
+                  {selectedChildId && (
+                    <div className={`${isConsultation ? 'bg-[#FFE5E5] border-[#FF9999]' : 'bg-blue-50 border-blue-200'} border rounded-xl p-4`}>
+                      <p className="text-sm text-stone-800">
+                        <span className="font-semibold">👶 선택된 자녀:</span> {children.find(c => c.id === selectedChildId)?.name} ({ageRangeOptions.find(opt => opt.value === getAgeRangeFromMonths(children.find(c => c.id === selectedChildId)?.ageInMonths || 0))?.label})
+                      </p>
+                      <p className="text-xs text-stone-600 mt-1">
+                        자녀의 연령이 자동으로 설정되어 검색됩니다.
+                      </p>
+                    </div>
+                  )}
+
+                  {!selectedChildId && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <p className="text-sm text-blue-800">
+                        <span className="font-semibold">ℹ️ 자녀를 선택해주세요.</span>
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        선택한 자녀의 연령에 맞는 치료사를 검색합니다.
+                      </p>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ) : (
-              // 언어 컨설팅 모드: 자녀 선택
-              <div>
-                <label className="block text-sm font-semibold text-stone-700 mb-3">
-                  자녀 선택
-                </label>
-                {children.length > 0 ? (
-                  <div className="space-y-3">
-                    <select
-                      value={selectedChildId}
-                      onChange={(e) => setSelectedChildId(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-medium"
-                    >
-                      <option value="">자녀를 선택해주세요</option>
-                      {children.map((child) => (
-                        <option key={child.id} value={child.id}>
-                          {child.name} ({ageRangeOptions.find(opt => opt.value === getAgeRangeFromMonths(child.ageInMonths))?.label || `${child.ageInMonths}개월`})
-                        </option>
-                      ))}
-                    </select>
-
-                    {selectedChildId && (
-                      <div className="bg-[#FFE5E5] border border-[#FF9999] rounded-xl p-4">
-                        <p className="text-sm text-stone-800">
-                          <span className="font-semibold">👶 선택된 자녀:</span> {children.find(c => c.id === selectedChildId)?.name} ({ageRangeOptions.find(opt => opt.value === getAgeRangeFromMonths(children.find(c => c.id === selectedChildId)?.ageInMonths || 0))?.label})
-                        </p>
-                        <p className="text-xs text-stone-600 mt-1">
-                          자녀의 연령이 자동으로 설정되어 검색됩니다.
-                        </p>
-                      </div>
-                    )}
-
-                    {!selectedChildId && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                        <p className="text-sm text-blue-800">
-                          <span className="font-semibold">ℹ️ 자녀를 선택해주세요.</span>
-                        </p>
-                        <p className="text-xs text-blue-600 mt-1">
-                          선택한 자녀의 연령에 맞는 치료사를 검색합니다.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                    <p className="text-sm text-yellow-800">
-                      <span className="font-semibold">⚠️ 등록된 자녀가 없습니다.</span>
-                    </p>
-                    <p className="text-xs text-yellow-600 mt-1">
-                      마이페이지에서 자녀 정보를 등록해주세요.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
+              ) : (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                  <p className="text-sm text-yellow-800">
+                    <span className="font-semibold">⚠️ 등록된 자녀가 없습니다.</span>
+                  </p>
+                  <p className="text-xs text-yellow-600 mt-1">
+                    마이페이지에서 자녀 정보를 등록해주세요.
+                  </p>
+                </div>
+              )}
+            </div>
 
             {/* 기타 필터 */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-6 border-t border-gray-200">
@@ -504,9 +478,9 @@ function TherapistsSearchPageContent() {
                     📍 {therapist.serviceAreas.join(', ')}
                   </div>
 
-                  {therapist.sessionFee && (
+                  {((isConsultation && therapist.consultationFee) || (!isConsultation && therapist.sessionFee)) && (
                     <div className="text-lg md:text-xl font-bold text-[#FF6A00]">
-                      ₩{therapist.sessionFee.toLocaleString()}
+                      ₩{(isConsultation ? therapist.consultationFee : therapist.sessionFee)?.toLocaleString()}
                       <span className="text-sm text-stone-500 font-normal"> / 50분</span>
                     </div>
                   )}

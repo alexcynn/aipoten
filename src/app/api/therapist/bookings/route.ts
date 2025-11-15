@@ -35,11 +35,19 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status')
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
+    const sessionType = searchParams.get('sessionType') // CONSULTATION 또는 THERAPY
 
-    console.log('📋 조회 조건:', { status, startDate, endDate })
+    console.log('📋 조회 조건:', { status, startDate, endDate, sessionType })
 
     const where: any = {
       therapistId: therapistProfile.id
+    }
+
+    // 세션 타입 필터 (언어컨설팅 vs 홈티)
+    if (sessionType) {
+      where.payment = {
+        sessionType: sessionType
+      }
     }
 
     // 상태 필터

@@ -172,7 +172,7 @@ export default function TherapistTherapiesPage() {
                     className={`
                       whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors
                       ${activeTab === tab.key
-                        ? 'border-green-600 text-green-600'
+                        ? 'border-[#FF6A00] text-[#FF6A00]'
                         : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-gray-300'
                       }
                     `}
@@ -197,7 +197,7 @@ export default function TherapistTherapiesPage() {
                       setStartDate(e.target.value)
                       handleFilterChange()
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
                   />
                 </div>
 
@@ -212,7 +212,7 @@ export default function TherapistTherapiesPage() {
                       setEndDate(e.target.value)
                       handleFilterChange()
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
                   />
                 </div>
               </div>
@@ -286,7 +286,7 @@ export default function TherapistTherapiesPage() {
                               {booking.sessionNumber} / {booking.payment.totalSessions}회
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-900">
-                              ₩{booking.payment.finalFee.toLocaleString()}
+                              ₩{(booking.payment.finalFee / booking.payment.totalSessions).toLocaleString()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
                               <span
@@ -356,7 +356,7 @@ export default function TherapistTherapiesPage() {
                               <span className="font-medium">세션:</span> {booking.sessionNumber} / {booking.payment.totalSessions}회
                             </p>
                             <p>
-                              <span className="font-medium">금액:</span> ₩{booking.payment.finalFee.toLocaleString()}
+                              <span className="font-medium">금액:</span> ₩{(booking.payment.finalFee / booking.payment.totalSessions).toLocaleString()}
                             </p>
                           </div>
 
@@ -397,7 +397,7 @@ export default function TherapistTherapiesPage() {
                       onClick={() => handlePageChange(page)}
                       className={`px-3 py-1 border rounded-[10px] text-sm ${
                         page === pagination.page
-                          ? 'bg-[#FF6A00] text-white border-green-600'
+                          ? 'bg-[#FF6A00] text-white border-[#FF6A00]'
                           : 'border-gray-300 hover:bg-[#FFE5E5]'
                       }`}
                     >

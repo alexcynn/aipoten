@@ -131,7 +131,7 @@ export default function AIJournalModal({
           }}
         >
           <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#111827', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Sparkles style={{ width: '24px', height: '24px', color: '#10B981' }} />
+            <Sparkles style={{ width: '24px', height: '24px', color: '#FF6A00' }} />
             AI 상담일지 작성
           </h2>
           <button
@@ -170,7 +170,7 @@ export default function AIJournalModal({
                     outline: 'none'
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#10B981'
+                    e.currentTarget.style.borderColor = '#FF6A00'
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = '#D1D5DB'
@@ -221,7 +221,7 @@ export default function AIJournalModal({
                     outline: 'none'
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#10B981'
+                    e.currentTarget.style.borderColor = '#FF6A00'
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = '#D1D5DB'
@@ -249,7 +249,7 @@ export default function AIJournalModal({
                     outline: 'none'
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#10B981'
+                    e.currentTarget.style.borderColor = '#FF6A00'
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = '#D1D5DB'
@@ -277,7 +277,7 @@ export default function AIJournalModal({
                     outline: 'none'
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#10B981'
+                    e.currentTarget.style.borderColor = '#FF6A00'
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = '#D1D5DB'
@@ -304,7 +304,7 @@ export default function AIJournalModal({
                       outline: 'none'
                     }}
                     onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#10B981'
+                      e.currentTarget.style.borderColor = '#FF6A00'
                     }}
                     onBlur={(e) => {
                       e.currentTarget.style.borderColor = '#D1D5DB'
@@ -330,7 +330,7 @@ export default function AIJournalModal({
                       outline: 'none'
                     }}
                     onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#10B981'
+                      e.currentTarget.style.borderColor = '#FF6A00'
                     }}
                     onBlur={(e) => {
                       e.currentTarget.style.borderColor = '#D1D5DB'
@@ -358,7 +358,7 @@ export default function AIJournalModal({
                       outline: 'none'
                     }}
                     onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#10B981'
+                      e.currentTarget.style.borderColor = '#FF6A00'
                     }}
                     onBlur={(e) => {
                       e.currentTarget.style.borderColor = '#D1D5DB'
@@ -384,7 +384,7 @@ export default function AIJournalModal({
                       outline: 'none'
                     }}
                     onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#10B981'
+                      e.currentTarget.style.borderColor = '#FF6A00'
                     }}
                     onBlur={(e) => {
                       e.currentTarget.style.borderColor = '#D1D5DB'
@@ -413,7 +413,7 @@ export default function AIJournalModal({
                     outline: 'none'
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#10B981'
+                    e.currentTarget.style.borderColor = '#FF6A00'
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = '#D1D5DB'
@@ -427,7 +427,7 @@ export default function AIJournalModal({
                 style={{
                   width: '100%',
                   padding: '12px 16px',
-                  backgroundColor: isGenerating ? '#9CA3AF' : '#10B981',
+                  backgroundColor: isGenerating ? '#9CA3AF' : '#FF6A00',
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
@@ -442,12 +442,12 @@ export default function AIJournalModal({
                 }}
                 onMouseEnter={(e) => {
                   if (!isGenerating) {
-                    e.currentTarget.style.backgroundColor = '#059669'
+                    e.currentTarget.style.backgroundColor = '#E55F00'
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isGenerating) {
-                    e.currentTarget.style.backgroundColor = '#10B981'
+                    e.currentTarget.style.backgroundColor = '#FF6A00'
                   }
                 }}
               >
@@ -477,7 +477,7 @@ export default function AIJournalModal({
                     outline: 'none'
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#10B981'
+                    e.currentTarget.style.borderColor = '#FF6A00'
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = '#D1D5DB'
@@ -517,7 +517,7 @@ export default function AIJournalModal({
                   style={{
                     flex: 1,
                     padding: '10px 16px',
-                    backgroundColor: '#10B981',
+                    backgroundColor: '#FF6A00',
                     color: 'white',
                     border: 'none',
                     borderRadius: '6px',
@@ -527,10 +527,10 @@ export default function AIJournalModal({
                     transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#059669'
+                    e.currentTarget.style.backgroundColor = '#E55F00'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#10B981'
+                    e.currentTarget.style.backgroundColor = '#FF6A00'
                   }}
                 >
                   상담일지에 반영

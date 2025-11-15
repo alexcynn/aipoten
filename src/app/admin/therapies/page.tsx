@@ -101,13 +101,11 @@ const formatSpecialties = (specialties: string | null) => {
 
 // 날짜 기본값 계산 함수
 const getDefaultDates = () => {
-  const today = new Date()
-  const oneMonthAgo = new Date(today)
-  oneMonthAgo.setMonth(today.getMonth() - 1)
+  const oneMonthAgo = new Date()
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
 
   return {
-    startDate: oneMonthAgo.toISOString().split('T')[0],
-    endDate: today.toISOString().split('T')[0]
+    startDate: oneMonthAgo.toISOString().split('T')[0]
   }
 }
 
@@ -124,7 +122,7 @@ export default function AdminTherapiesPage() {
   // 날짜 검색
   const defaultDates = getDefaultDates()
   const [startDate, setStartDate] = useState(defaultDates.startDate)
-  const [endDate, setEndDate] = useState(defaultDates.endDate)
+  const [endDate, setEndDate] = useState('') // 기본값 비움
 
   // 페이지네이션
   const [currentPage, setCurrentPage] = useState(1)
@@ -167,7 +165,7 @@ export default function AdminTherapiesPage() {
     try {
       let url = `/api/admin/therapies?status=${filter}`
       if (startDate) url += `&startDate=${startDate}`
-      if (endDate) url += `&endDate=${endDate}`
+      if (endDate) url += `&endDate=${endDate}` // 종료일이 있을 때만 전달
 
       const response = await fetch(url)
       if (response.ok) {
@@ -349,11 +347,12 @@ export default function AdminTherapiesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">종료일</label>
+              <label className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">종료일 (선택)</label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+                placeholder="미입력시 제한 없음"
                 className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent font-pretendard"
               />
             </div>

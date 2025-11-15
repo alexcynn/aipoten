@@ -177,7 +177,7 @@ export default function ReviewModal({
                 onChange={(e) => setContent(e.target.value)}
                 rows={6}
                 placeholder="치료 경험을 자유롭게 작성해주세요..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF6A00] resize-none"
                 disabled={isSubmitting}
               />
               <p className="mt-1 text-sm text-gray-500">
@@ -207,7 +207,7 @@ export default function ReviewModal({
             <button
               type="submit"
               disabled={isSubmitting || rating < 1}
-              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-[#FF6A00] text-white rounded-md hover:bg-[#E55F00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? '저장 중...' : isEditMode ? '수정하기' : '작성하기'}
             </button>

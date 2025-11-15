@@ -88,14 +88,14 @@ export default function AddressSearchInput({
             value={address}
             readOnly
             placeholder="주소 검색 버튼을 클릭하세요"
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
             disabled={disabled}
           />
           <button
             type="button"
             onClick={handleAddressSearch}
             disabled={disabled || !scriptLoaded}
-            className="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            className="px-4 py-2 bg-[#FF6A00] text-white font-medium rounded-md hover:bg-[#E55F00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
           >
             주소 검색
           </button>
@@ -112,7 +112,7 @@ export default function AddressSearchInput({
           value={addressDetail}
           onChange={(e) => onAddressDetailChange(e.target.value)}
           placeholder="상세주소를 입력하세요 (예: 101동 1234호)"
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
           disabled={disabled}
         />
       </div>

@@ -109,7 +109,7 @@ export default function TherapistJournalPage() {
     return (
       <div className="min-h-screen bg-neutral-light flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
           <p className="mt-4 text-gray-600">로딩 중...</p>
         </div>
       </div>
@@ -238,7 +238,7 @@ export default function TherapistJournalPage() {
                     alignItems: 'center',
                     gap: '6px',
                     padding: '8px 16px',
-                    backgroundColor: '#10B981',
+                    backgroundColor: '#FF6A00',
                     color: 'white',
                     border: 'none',
                     borderRadius: '6px',
@@ -248,10 +248,10 @@ export default function TherapistJournalPage() {
                     transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#059669'
+                    e.currentTarget.style.backgroundColor = '#E55F00'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#10B981'
+                    e.currentTarget.style.backgroundColor = '#FF6A00'
                   }}
                 >
                   <Sparkles style={{ width: '16px', height: '16px' }} />
@@ -281,7 +281,7 @@ export default function TherapistJournalPage() {
               }}
               onFocus={(e) => {
                 if (!isReadOnly) {
-                  e.currentTarget.style.borderColor = '#3B82F6'
+                  e.currentTarget.style.borderColor = '#FF6A00'
                 }
               }}
               onBlur={(e) => {
@@ -323,7 +323,7 @@ export default function TherapistJournalPage() {
                 disabled={isSaving || !journal.trim()}
                 style={{
                   padding: '10px 20px',
-                  backgroundColor: isSaving || !journal.trim() ? '#9CA3AF' : '#10B981',
+                  backgroundColor: isSaving || !journal.trim() ? '#9CA3AF' : '#FF6A00',
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
@@ -335,12 +335,12 @@ export default function TherapistJournalPage() {
                 }}
                 onMouseEnter={(e) => {
                   if (!isSaving && journal.trim()) {
-                    e.currentTarget.style.backgroundColor = '#059669'
+                    e.currentTarget.style.backgroundColor = '#E55F00'
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isSaving && journal.trim()) {
-                    e.currentTarget.style.backgroundColor = '#10B981'
+                    e.currentTarget.style.backgroundColor = '#FF6A00'
                   }
                 }}
               >

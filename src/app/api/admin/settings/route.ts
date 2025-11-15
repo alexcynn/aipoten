@@ -3,38 +3,29 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-config'
 
-// GET - 시스템 설정 조회
+// GET - 시스템 설정 조회 (공개 API - 계좌 정보 등을 위해 인증 불필요)
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: '인증이 필요합니다.' },
-        { status: 401 }
-      )
-    }
-
-    if (session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: '관리자 권한이 필요합니다.' },
-        { status: 403 }
-      )
-    }
+    console.log('📥 [API] 시스템 설정 조회 시작...')
 
     // 시스템 설정 조회 (없으면 기본값으로 생성)
     let settings = await prisma.systemSettings.findUnique({
       where: { id: 'system' },
     })
 
+    console.log('📥 [API] 조회 결과:', settings ? '데이터 있음' : '데이터 없음')
+
     if (!settings) {
+      console.log('📥 [API] 시스템 설정이 없어 새로 생성합니다...')
       settings = await prisma.systemSettings.create({
         data: {
           id: 'system',
         },
       })
+      console.log('📥 [API] 시스템 설정 생성 완료:', settings)
     }
 
+    console.log('📥 [API] 응답 데이터:', JSON.stringify(settings, null, 2))
     return NextResponse.json(settings)
   } catch (error) {
     console.error('시스템 설정 조회 오류:', error)

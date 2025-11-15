@@ -91,7 +91,7 @@ export default function ReviewViewModal({ bookingId, isOpen, onClose }: ReviewVi
         <div className="px-6 py-6">
           {isLoading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
               <p className="mt-4 text-gray-600">로딩 중...</p>
             </div>
           ) : error ? (

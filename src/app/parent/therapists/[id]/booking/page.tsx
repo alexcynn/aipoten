@@ -113,13 +113,20 @@ export default function BookingPage() {
 
     const fetchSystemSettings = async () => {
       try {
-        const response = await fetch('/api/admin/system-settings')
+        console.log('📥 시스템 설정 조회 시작...')
+        const response = await fetch('/api/settings')
+        console.log('📥 응답 상태:', response.status, response.ok)
+
         if (response.ok) {
           const data = await response.json()
-          setSystemSettings(data.settings)
+          console.log('📥 받은 데이터:', data)
+          setSystemSettings(data)
+        } else {
+          const errorData = await response.json()
+          console.error('❌ API 에러:', errorData)
         }
       } catch (err) {
-        console.error('시스템 설정 조회 실패:', err)
+        console.error('❌ 시스템 설정 조회 실패:', err)
       }
     }
 

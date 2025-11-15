@@ -143,9 +143,9 @@ export default function Calendar({ availableDates, selectedDate, onDateSelect }:
                 relative aspect-square p-2 text-sm rounded-md transition-all
                 ${!isCurrentMonth ? 'text-gray-300' : ''}
                 ${isPast || !isAvailable ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}
-                ${isAvailable && !isPast ? 'hover:bg-green-50' : ''}
-                ${isSelected ? 'bg-green-600 text-white font-bold hover:bg-green-700' : ''}
-                ${!isSelected && isToday ? 'border-2 border-green-600' : ''}
+                ${isAvailable && !isPast ? 'hover:bg-[#FFE5E5]' : ''}
+                ${isSelected ? 'bg-[#FF6A00] text-white font-bold hover:bg-[#E55F00]' : ''}
+                ${!isSelected && isToday ? 'border-2 border-[#FF6A00]' : ''}
                 ${!isSelected && isSunday && isCurrentMonth ? 'text-red-600' : ''}
                 ${!isSelected && isSaturday && isCurrentMonth ? 'text-blue-600' : ''}
                 ${!isSelected && !isSunday && !isSaturday && isCurrentMonth ? 'text-gray-900' : ''}
@@ -155,7 +155,7 @@ export default function Calendar({ availableDates, selectedDate, onDateSelect }:
 
               {/* 예약 가능한 날짜 표시 */}
               {isAvailable && !isSelected && !isPast && (
-                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-green-600 rounded-full"></span>
+                <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-[#FF6A00] rounded-full"></span>
               )}
             </button>
           )
@@ -165,15 +165,15 @@ export default function Calendar({ availableDates, selectedDate, onDateSelect }:
       {/* 범례 */}
       <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-600">
         <div className="flex items-center gap-1">
-          <span className="w-2 h-2 bg-green-600 rounded-full"></span>
+          <span className="w-2 h-2 bg-[#FF6A00] rounded-full"></span>
           <span>예약 가능</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="w-4 h-4 border-2 border-green-600 rounded"></span>
+          <span className="w-4 h-4 border-2 border-[#FF6A00] rounded"></span>
           <span>오늘</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="w-4 h-4 bg-green-600 rounded"></span>
+          <span className="w-4 h-4 bg-[#FF6A00] rounded"></span>
           <span>선택됨</span>
         </div>
       </div>
