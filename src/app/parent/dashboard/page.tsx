@@ -42,10 +42,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 const LEVEL_LABELS: Record<string, { text: string; color: string; bgColor: string }> = {
-  ADVANCED: { text: '빠른 발달', color: '#1976D2', bgColor: '#E3F2FD' },
-  NORMAL: { text: '또래 수준', color: '#388E3C', bgColor: '#E8F5E9' },
-  NEEDS_TRACKING: { text: '추적 필요', color: '#F57C00', bgColor: '#FFF3E0' },
-  NEEDS_ASSESSMENT: { text: '심화 평가 필요', color: '#D32F2F', bgColor: '#FFEBEE' }
+  ADVANCED: { text: '빠른수준', color: '#0EBCFF', bgColor: '#F0FBFF' },
+  NORMAL: { text: '또래수준', color: '#7CCF3C', bgColor: '#EDFCE2' },
+  NEEDS_TRACKING: { text: '추적검사요망', color: '#FFA01B', bgColor: '#FFF5E8' },
+  NEEDS_ASSESSMENT: { text: '심화평가권고', color: '#EB4C25', bgColor: '#FFF1ED' }
 }
 
 // 전체 발달 수준 판정 (가장 낮은 수준 기준)
@@ -224,6 +224,23 @@ export default function ParentDashboardPage() {
     ))
   }
 
+  // 예약 목록 새로고침 함수
+  const fetchMyBookings = async () => {
+    try {
+      const bookingsRes = await fetch('/api/bookings')
+      if (bookingsRes.ok) {
+        const bookingsData = await bookingsRes.json()
+        const bookingsArray = bookingsData.bookings || []
+        const sortedBookings = bookingsArray.sort((a: any, b: any) =>
+          new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()
+        )
+        setMyBookings(sortedBookings)
+      }
+    } catch (error) {
+      console.error('예약 목록 조회 오류:', error)
+    }
+  }
+
   // 나이 계산
   const calculateAge = (birthDate: string) => {
     const birth = new Date(birthDate)
@@ -307,311 +324,447 @@ export default function ParentDashboardPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="py-6">
-          {/* Welcome Section */}
-          <div className="bg-white overflow-hidden shadow-sm rounded-xl md:rounded-2xl mb-6">
-            <div className="px-4 py-5 sm:p-6 md:p-8">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-stone-900 mb-2">
-                    안녕하세요, {session.user?.name}님!
-                  </h1>
-                  <p className="text-sm sm:text-base md:text-lg text-stone-700">
-                    아이포텐에서 우리 아이의 발달을 체크하고 관리해보세요.
-                  </p>
-
-                  {/* ChildSelector와 등록 버튼 */}
-                  {children.length > 0 && (
-                    <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                      <div className="flex-1">
-                        <ChildSelector
-                          children={children}
-                          selectedChildId={selectedChildId}
-                          onSelectChild={handleSelectChild}
-                        />
-                      </div>
-                      <Link
-                        href="/parent/profile"
-                        className="px-4 sm:px-6 py-2 sm:py-3 bg-white text-stone-700 font-semibold rounded-[10px] border-2 border-stone-300 hover:border-stone-400 hover:bg-stone-50 transition-colors whitespace-nowrap shadow-sm text-center"
-                      >
-                        프로필 관리
-                      </Link>
-                      <Link
-                        href="/parent/children/new"
-                        className="px-4 sm:px-6 py-2 sm:py-3 bg-[#FF6A00] text-white font-semibold rounded-[10px] hover:bg-[#E55F00] transition-colors whitespace-nowrap shadow-lg text-center"
-                      >
-                        + 아이 등록
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              </div>
+          {/* Banner Section */}
+          <div className="bg-[#FFF6E8] rounded-2xl px-6 py-5 mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-[#1E1307] mb-1">
+                안녕하세요! {session.user?.name}님
+              </h2>
+              <p className="text-base text-[#555555]">
+                지금 {children.find(c => c.id === selectedChildId)?.name || '민준'}이의 발달, 한눈에 확인하세요
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/parent/profile"
+                className="text-[#FF6A00] border border-[#FF6A00] rounded-lg px-4 py-2 font-semibold hover:bg-[#FFF5EB] transition-colors flex items-center gap-1"
+              >
+                부모 프로필 관리
+              </Link>
+              <Link
+                href="/parent/inquiries"
+                className="bg-[#FF6A00] text-white rounded-lg px-4 py-2 font-semibold hover:bg-[#E55F00] transition-colors flex items-center gap-1"
+              >
+                1:1 문의
+              </Link>
             </div>
           </div>
 
-          {/* 최근 발달체크 카드와 퀵 액션 버튼 */}
+          {/* 2-Column Layout */}
           {selectedChildId && children.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
-              {/* 최근 발달체크 카드 */}
-              <div className="lg:col-span-2 bg-white overflow-hidden shadow-sm rounded-xl md:rounded-2xl">
-                <div className="px-4 py-5 sm:p-6 md:p-8">
-                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900 mb-4">최근 발달체크</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column: Child Profile + Videos */}
+              <div className="space-y-6">
+                {/* Child Profile Card with Navigation */}
+                <div className="relative">
+                  <div className="bg-white rounded-[20px] shadow-sm px-[40px] py-[50px] flex items-center justify-between">
+                    {/* Left Arrow */}
+                    {children.length > 1 && (
+                      <button
+                        onClick={() => {
+                          const currentIndex = children.findIndex(c => c.id === selectedChildId)
+                          const prevIndex = currentIndex > 0 ? currentIndex - 1 : children.length - 1
+                          setSelectedChildId(children[prevIndex].id)
+                        }}
+                        className="absolute left-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+                      >
+                        <span className="text-xl text-[#FF6A00]">←</span>
+                      </button>
+                    )}
 
-                {latestAssessment ? (
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 sm:p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-sm font-medium text-gray-600">
-                            {children.find(c => c.id === selectedChildId)?.name}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {new Date(latestAssessment.createdAt).toLocaleDateString('ko-KR')}
-                          </span>
-                        </div>
-
-                        <div className="mb-3">
-                          <span className="text-sm font-medium text-gray-700 mr-2">발달 수준:</span>
+                    {/* Child Info - Left */}
+                    <div className="flex flex-col gap-[10px]">
+                      <p className="font-semibold text-[30px] text-[#1E1307]">
+                        {children.find(c => c.id === selectedChildId)?.name || '김민준'}
+                      </p>
+                      <div className="flex flex-col gap-[4px] text-[20px] text-[#666666] tracking-[0.2px]">
+                        <p>
                           {(() => {
-                            const overallLevel = getOverallLevel(latestAssessment.results)
-                            const levelInfo = LEVEL_LABELS[overallLevel] || LEVEL_LABELS['NEEDS_ASSESSMENT']
-                            return (
-                              <span
-                                className="inline-block px-4 py-2 rounded-full text-base font-bold"
-                                style={{
-                                  backgroundColor: levelInfo.bgColor,
-                                  color: levelInfo.color
-                                }}
-                              >
-                                {levelInfo.text}
-                              </span>
-                            )
+                            const child = children.find(c => c.id === selectedChildId)
+                            if (!child) return '30개월 ∙ 남아'
+                            const age = calculateAge(child.birthDate)
+                            return `${age} ∙ ${child.gender === 'MALE' ? '남아' : '여아'}`
                           })()}
-                        </div>
-
-                        {latestAssessment.results && latestAssessment.results.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mb-3">
-                            {latestAssessment.results.map((result, idx) => {
-                              const resultLevelInfo = LEVEL_LABELS[result.level] || LEVEL_LABELS['NEEDS_ASSESSMENT']
-                              return (
-                                <div
-                                  key={idx}
-                                  className="text-xs px-3 py-1 rounded-full font-medium"
-                                  style={{
-                                    backgroundColor: resultLevelInfo.bgColor,
-                                    color: resultLevelInfo.color
-                                  }}
-                                >
-                                  {CATEGORY_LABELS[result.category] || result.category}: {resultLevelInfo.text}
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )}
-
-                        {getNextCheckDate() && (
-                          <p className="text-sm text-gray-600">
-                            <span className="font-medium">다음 체크 권장:</span>{' '}
-                            {getNextCheckDate()!.toLocaleDateString('ko-KR')}
-                          </p>
-                        )}
+                        </p>
+                        <p>
+                          생년월일 : {(() => {
+                            const child = children.find(c => c.id === selectedChildId)
+                            if (!child) return '2022.06.24'
+                            return new Date(child.birthDate).toLocaleDateString('ko-KR', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit'
+                            }).replace(/\. /g, '.').replace(/\.$/, '')
+                          })()}
+                        </p>
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <Link
-                        href="/parent/assessments/new"
-                        className="inline-flex items-center justify-center px-4 sm:px-6 md:px-8 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base md:text-lg text-white bg-[#FF6A00] hover:bg-[#E55F00] transition-colors shadow-lg"
+                    {/* Avatar - Right */}
+                    <div className="relative w-[132px] h-[132px]">
+                      {userAvatar ? (
+                        <img src={userAvatar} alt="아이" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        <img src="/images/child-avatar-default.svg" alt="아이" className="w-full h-full" />
+                      )}
+                      <button
+                        onClick={() => setIsEditModalOpen(true)}
+                        className="absolute bottom-0 right-0 w-[40px] h-[40px] cursor-pointer"
                       >
-                        발달체크 시작하기
-                      </Link>
+                        <img src="/images/edit-button.svg" alt="편집" className="w-full h-full" />
+                      </button>
+                    </div>
+
+                    {/* Right Arrow */}
+                    {children.length > 1 && (
+                      <button
+                        onClick={() => {
+                          const currentIndex = children.findIndex(c => c.id === selectedChildId)
+                          const nextIndex = currentIndex < children.length - 1 ? currentIndex + 1 : 0
+                          setSelectedChildId(children[nextIndex].id)
+                        }}
+                        className="absolute right-[-20px] top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+                      >
+                        <span className="text-xl text-[#FF6A00]">→</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Add Child Button */}
+                  <Link
+                    href="/parent/children/new"
+                    className="mt-4 w-full bg-white border-2 border-dashed border-[#FF6A00] rounded-[20px] px-6 py-4 flex items-center justify-center gap-2 hover:bg-[#FFF5EB] transition-colors"
+                  >
+                    <span className="text-2xl text-[#FF6A00]">+</span>
+                    <span className="font-semibold text-[18px] text-[#FF6A00]">아이 등록</span>
+                  </Link>
+                </div>
+
+                {/* Development Check Section */}
+                {latestAssessment && (
+                  <div className="bg-white rounded-[20px] shadow-sm px-[40px] py-[50px]">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="font-bold text-[24px] text-[#1E1307]">최근 발달 체크</h3>
+                      <p className="text-[22px] text-[#555555] leading-[28px]">
+                        {new Date(latestAssessment.createdAt).toLocaleDateString('ko-KR', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit'
+                        }).replace(/\. /g, '.').replace(/\.$/, '')}
+                      </p>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="h-[2px] bg-[#666666] mb-6" />
+
+                    {/* Development Summary */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex flex-col gap-[13px]">
+                        <p className="font-bold text-[22px] text-[#1E1307] leading-[28px] tracking-[-0.44px]">
+                          발달 수준
+                        </p>
+                        <div className="text-[20px] text-[#1E1307] leading-[28px] tracking-[0.2px]">
+                          <p className="mb-0">전반적으로 건강하게 발달하고 있으나</p>
+                          <p>언어 분야는 추적이 필요합니다.</p>
+                        </div>
+                      </div>
+                      <div className="relative w-[90px] h-[90px]">
+                        {/* Star background */}
+                        <div className="absolute inset-0">
+                          <div className="absolute inset-[3.54%]">
+                            <img
+                              src="/images/badge-star-green.svg"
+                              alt=""
+                              className="w-full h-full"
+                            />
+                          </div>
+                        </div>
+                        {/* Inner circle */}
+                        <div className="absolute left-[5%] right-[5%] top-[4.5px] aspect-square">
+                          <div className="absolute inset-[3.48%]">
+                            <img
+                              src="/images/badge-circle.svg"
+                              alt=""
+                              className="w-full h-full"
+                            />
+                          </div>
+                        </div>
+                        {/* Text */}
+                        <div className="absolute inset-[30.58%_33.82%_29.73%_32.62%]">
+                          <img
+                            src="/images/badge-text-normal.svg"
+                            alt="또래수준"
+                            className="w-full h-full"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Development Categories Grid */}
+                    <div className="flex flex-col gap-[12px] mb-6">
+                      {/* Row 1 */}
+                      <div className="flex gap-[12px]">
+                        {latestAssessment.results?.slice(0, 2).map((result, idx) => {
+                          const levelInfo = LEVEL_LABELS[result.level] || LEVEL_LABELS['NEEDS_ASSESSMENT']
+                          const categoryLabel = CATEGORY_LABELS[result.category] || result.category
+
+                          return (
+                            <div
+                              key={idx}
+                              className="flex-1 h-[80px] rounded-[20px] px-4 py-2.5 flex items-center justify-between"
+                              style={{ backgroundColor: levelInfo.bgColor }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-[40px] h-[40px]">
+                                  {/* Category icon would go here */}
+                                  <span className="text-2xl">
+                                    {result.category === 'GROSS_MOTOR' ? '🏃' : '✋'}
+                                  </span>
+                                </div>
+                                <p className="font-semibold text-[17px] text-[#1E1307] tracking-[0.17px] leading-[20px]">
+                                  {categoryLabel}운동
+                                </p>
+                              </div>
+                              <div
+                                className="px-[10px] py-1 rounded-[120px] flex items-center justify-center"
+                                style={{ backgroundColor: levelInfo.color }}
+                              >
+                                <p className="font-bold text-[14px] text-white tracking-[0.14px]">
+                                  {levelInfo.text}
+                                </p>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+
+                      {/* Row 2 */}
+                      <div className="flex gap-[12px]">
+                        {latestAssessment.results?.slice(2, 4).map((result, idx) => {
+                          const levelInfo = LEVEL_LABELS[result.level] || LEVEL_LABELS['NEEDS_ASSESSMENT']
+                          const categoryLabel = CATEGORY_LABELS[result.category] || result.category
+
+                          return (
+                            <div
+                              key={idx}
+                              className="flex-1 h-[80px] rounded-[20px] px-4 py-2.5 flex items-center justify-between"
+                              style={{ backgroundColor: levelInfo.bgColor }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-[40px] h-[40px]">
+                                  <span className="text-2xl">
+                                    {result.category === 'LANGUAGE' ? '💬' : '💡'}
+                                  </span>
+                                </div>
+                                <p className="font-semibold text-[17px] text-[#1E1307] tracking-[0.17px] leading-[20px]">
+                                  {categoryLabel}발달
+                                </p>
+                              </div>
+                              <div
+                                className="px-[10px] py-1 rounded-[120px] flex items-center justify-center"
+                                style={{ backgroundColor: levelInfo.color }}
+                              >
+                                <p className="font-bold text-[14px] text-white tracking-[0.14px]">
+                                  {levelInfo.text}
+                                </p>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+
+                      {/* Row 3 - Social */}
+                      {latestAssessment.results?.[4] && (
+                        <div className="flex gap-[12px]">
+                          <div
+                            className="w-full h-[80px] rounded-[20px] px-4 py-2.5 flex items-center justify-between"
+                            style={{ backgroundColor: LEVEL_LABELS[latestAssessment.results[4].level]?.bgColor || '#FFEBEE' }}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="w-[40px] h-[40px]">
+                                <span className="text-2xl">😊</span>
+                              </div>
+                              <p className="font-semibold text-[17px] text-[#1E1307] tracking-[0.17px] leading-[20px]">
+                                사회성 발달
+                              </p>
+                            </div>
+                            <div
+                              className="px-[10px] py-1 rounded-[120px] flex items-center justify-center"
+                              style={{ backgroundColor: LEVEL_LABELS[latestAssessment.results[4].level]?.color || '#EB4C25' }}
+                            >
+                              <p className="font-bold text-[14px] text-white tracking-[0.14px]">
+                                {LEVEL_LABELS[latestAssessment.results[4].level]?.text || '심화평가권고'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Next Check Date */}
+                    {getNextCheckDate() && (
+                      <div className="bg-[#F9F9F9] rounded-[100px] px-5 py-5 flex items-center justify-center gap-[14px] mb-6">
+                        <div className="w-[22px] h-[22px]">
+                          <img src="/images/calendar-icon.svg" alt="" className="w-full h-full" />
+                        </div>
+                        <p className="text-[20px] text-[#1E1307] tracking-[-0.4px] leading-[28px]">
+                          다음 검사 권장일{' '}
+                          <span className="font-bold">
+                            {getNextCheckDate()!.toLocaleDateString('ko-KR', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit'
+                            }).replace(/\. /g, '.').replace(/\.$/, '')}
+                          </span>
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-[10px]">
                       <Link
                         href="/parent/assessments"
-                        className="inline-flex items-center justify-center px-4 sm:px-6 md:px-8 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base md:text-lg text-[#FF6A00] bg-white border-2 border-[#FF6A00] hover:bg-[#FFE5E5] transition-colors shadow-sm"
+                        className="flex-1 h-[70px] border-[1.5px] border-[#FF6A00] rounded-[14px] flex items-center justify-center gap-[10px] hover:bg-[#FFF5EB] transition-colors"
                       >
-                        발달체크 기록 보기
+                        <p className="font-bold text-[18px] text-[#FF6A00] tracking-[-0.36px]">
+                          발달체크 기록보기
+                        </p>
+                        <div className="w-2 h-5">
+                          <img src="/images/arrow-orange.svg" alt="" className="w-full h-full" />
+                        </div>
                       </Link>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl p-4 sm:p-6 text-center">
-                    <div className="text-4xl mb-3">📋</div>
-                    <p className="text-stone-700 mb-4 text-sm sm:text-base">아직 발달체크 기록이 없습니다.</p>
-                    <p className="text-xs sm:text-sm text-stone-600 mb-6">
-                      우리 아이의 발달 상태를 체크해보세요.
-                    </p>
-                    <div className="flex gap-3 justify-center">
                       <Link
                         href="/parent/assessments/new"
-                        className="inline-flex items-center justify-center px-4 sm:px-6 md:px-8 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base text-white bg-[#FF6A00] hover:bg-[#E55F00] transition-colors shadow-lg"
+                        className="flex-1 h-[70px] bg-[#FF6A00] rounded-[14px] flex items-center justify-center gap-[10px] hover:bg-[#E55F00] transition-colors"
                       >
-                        첫 발달체크 시작하기
+                        <p className="font-bold text-[18px] text-white tracking-[-0.36px]">
+                          발달체크 시작하기
+                        </p>
+                        <div className="w-2 h-5">
+                          <img src="/images/arrow-white.svg" alt="" className="w-full h-full" />
+                        </div>
                       </Link>
                     </div>
                   </div>
                 )}
-                </div>
-              </div>
 
-              {/* 퀵 액션 버튼들 */}
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
-                {/* 언어컨설팅 버튼 */}
-                <Link
-                  href="/parent/consultations"
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-blue-400 transition-all flex items-center justify-center"
-                >
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">언어 컨설팅</h3>
-                </Link>
+                {/* Recommended Videos Carousel */}
+                <div className="bg-white rounded-2xl shadow-sm p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-[#1E1307]">
+                      {children.find(c => c.id === selectedChildId)?.name}님을 위한 맞춤 영상
+                    </h3>
+                    <Link
+                      href="/videos"
+                      className="text-sm text-[#FF6A00] font-semibold hover:text-[#E55F00]"
+                    >
+                      전체 보기 &gt;
+                    </Link>
+                  </div>
 
-                {/* 홈티 버튼 */}
-                <Link
-                  href="/parent/therapies"
-                  className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-green-400 transition-all flex items-center justify-center"
-                >
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">홈티</h3>
-                </Link>
-
-                {/* 결제 버튼 */}
-                <Link
-                  href="/parent/payments"
-                  className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-purple-400 transition-all flex items-center justify-center"
-                >
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">결제</h3>
-                </Link>
-
-                {/* 1:1 문의 버튼 */}
-                <Link
-                  href="/parent/inquiries"
-                  className="bg-gradient-to-br from-[#FFE5E5] to-[#FF9999]/30 border-2 border-[#FF9999] rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-[#FF8888] transition-all flex items-center justify-center"
-                >
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">1:1 문의</h3>
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {/* 세션 캘린더 - 모든 아이의 세션 일정 */}
-          {selectedChildId && children.length > 0 && (
-            <div className="bg-white overflow-hidden shadow-sm rounded-xl md:rounded-2xl mb-6">
-              <div className="px-4 py-5 sm:p-6 md:p-8">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900 mb-4">모든 아이의 세션 일정</h2>
-                <SessionsCalendar
-                  sessions={myBookings
-                    .filter((booking: any) => booking.scheduledAt)
-                    .map((booking: any) => ({
-                      id: booking.id,
-                      scheduledAt: booking.scheduledAt,
-                      sessionType: booking.payment?.sessionType || 'CONSULTATION',
-                      status: booking.status,
-                      child: booking.child,
-                      therapist: booking.therapist,
-                      payment: booking.payment ? { status: booking.payment.status } : undefined
-                    }))}
-                  onEventClick={(bookingId) => {
-                    setSelectedBookingId(bookingId)
-                    setIsBookingModalOpen(true)
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* 추천영상 */}
-          {selectedChildId && children.length > 0 && (
-            <div className="bg-white shadow-sm rounded-xl md:rounded-2xl mb-6">
-              <div className="px-4 py-5 sm:p-6 md:p-8">
-                  <div>
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900">
-                        {children.find(c => c.id === selectedChildId)?.name}님을 위한 추천 영상
-                      </h3>
-                      <Link
-                        href={`/videos?childId=${selectedChildId}`}
-                        className="text-sm sm:text-base text-[#FF6A00] hover:text-[#E55F00] font-medium transition-colors"
-                      >
-                        전체 보기 →
-                      </Link>
-                    </div>
-
-                    {recommendedVideos.length === 0 ? (
-                      <div className="text-center py-12 bg-[#F5EFE7] rounded-xl">
-                        <div className="text-4xl mb-4">📹</div>
-                        <p className="text-stone-700 mb-4 text-sm sm:text-base">아직 추천 영상이 없습니다.</p>
-                        <Link
-                          href="/videos"
-                          className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 rounded-[10px] font-semibold text-sm sm:text-base text-white bg-[#FF6A00] hover:bg-[#E55F00] transition-colors shadow-lg"
-                        >
-                          전체 영상 보러가기
-                        </Link>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                        {recommendedVideos.map((video) => (
-                          <div key={video.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
-                            {/* Thumbnail - 클릭하면 상세 페이지로 */}
+                  {recommendedVideos.length > 0 ? (
+                    <div className="relative">
+                      {/* Carousel */}
+                      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth">
+                        {recommendedVideos.slice(0, 3).map((video) => (
+                          <div key={video.id} className="flex-none w-64 snap-start">
                             <Link href={`/videos/${video.id}`}>
-                              <div className="aspect-video bg-gray-200 relative cursor-pointer group">
+                              <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden mb-2 relative group">
                                 {video.thumbnailUrl ? (
-                                  <img
-                                    src={video.thumbnailUrl}
-                                    alt={video.title}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                  />
+                                  <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
                                     <span className="text-4xl">📹</span>
                                   </div>
                                 )}
-                                {/* 재생 아이콘 오버레이 */}
                                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all">
                                   <div className="w-12 h-12 bg-white bg-opacity-90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                     <span className="text-xl ml-1">▶️</span>
                                   </div>
                                 </div>
-                                {video.duration && (
-                                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
-                                    {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}
-                                  </div>
-                                )}
                               </div>
+                              <h4 className="font-semibold text-sm text-[#1E1307] line-clamp-2">{video.title}</h4>
                             </Link>
-
-                            {/* Content */}
-                            <div className="p-4">
-                              <Link href={`/videos/${video.id}`}>
-                                <h4 className="font-semibold text-stone-900 mb-2 line-clamp-2 hover:text-[#FF6A00] cursor-pointer transition-colors text-sm sm:text-base">
-                                  {video.title}
-                                </h4>
-                              </Link>
-                              {video.recommendationReason && (
-                                <p className="text-xs text-blue-600 mb-2">
-                                  💡 {video.recommendationReason}
-                                </p>
-                              )}
-                              <p className="text-xs sm:text-sm text-stone-600 mb-3 line-clamp-2">
-                                {video.description}
-                              </p>
-                              <div className="flex gap-2 mb-3 flex-wrap">
-                                {video.developmentCategories && video.developmentCategories.slice(0, 2).map((cat: string) => (
-                                  <span
-                                    key={cat}
-                                    className="text-xs px-2 py-1 rounded-full bg-green-50 text-green-700 font-medium"
-                                  >
-                                    {CATEGORY_LABELS[cat] || cat}
-                                  </span>
-                                ))}
-                              </div>
-                              <Link
-                                href={`/videos/${video.id}`}
-                                className="inline-block w-full text-center px-3 py-2 text-xs sm:text-sm font-semibold rounded-[10px] text-white bg-[#FF6A00] hover:bg-[#E55F00] transition-colors shadow-sm"
-                              >
-                                시청하기
-                              </Link>
-                            </div>
                           </div>
                         ))}
                       </div>
-                    )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-[#888888]">
+                      <p>추천 영상이 없습니다</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column: Calendar */}
+              <div className="space-y-6">
+                {/* Calendar Card */}
+                <div className="bg-white rounded-2xl shadow-sm p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-[#1E1307]">
+                      {children.find(c => c.id === selectedChildId)?.name}님의 상담 일정
+                    </h3>
+                    <Link
+                      href="/parent/payments"
+                      className="text-sm text-[#FF6A00] font-semibold hover:text-[#E55F00]"
+                    >
+                      결제내역 보기 &gt;
+                    </Link>
                   </div>
+
+                  {/* Sessions Calendar */}
+                  <SessionsCalendar
+                    sessions={myBookings
+                      .filter((booking: any) => booking.scheduledAt)
+                      .map((booking: any) => ({
+                        id: booking.id,
+                        scheduledAt: booking.scheduledAt,
+                        sessionType: booking.payment?.sessionType || 'CONSULTATION',
+                        status: booking.status,
+                        child: booking.child,
+                        therapist: booking.therapist,
+                        payment: booking.payment ? { status: booking.payment.status } : undefined
+                      }))}
+                  onEventClick={(bookingId) => {
+                    setSelectedBookingId(bookingId)
+                    setIsBookingModalOpen(true)
+                  }}
+                />
+
+                  {/* Calendar Legend */}
+                  <div className="flex items-center justify-center gap-4 mt-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      <span className="text-[#888888]">임상검사</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                      <span className="text-[#888888]">추천</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <span className="text-[#888888]">치료 · 연습</span>
+                    </div>
+                  </div>
+
+                  {/* Booking Buttons */}
+                  <div className="flex gap-3 mt-6">
+                    <Link
+                      href="/parent/consultations"
+                      className="flex-1 px-4 py-3 rounded-lg border-2 border-[#FF6A00] text-[#FF6A00] font-semibold text-center hover:bg-[#FFF5EB] transition-colors"
+                    >
+                      언어 컨설팅 예약하기 &gt;
+                    </Link>
+                    <Link
+                      href="/parent/therapies"
+                      className="flex-1 px-4 py-3 rounded-lg bg-[#FF6A00] text-white font-semibold text-center hover:bg-[#E55F00] transition-colors"
+                    >
+                      홈티 예약하기 &gt;
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           )}

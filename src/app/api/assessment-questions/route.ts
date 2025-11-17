@@ -24,37 +24,16 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // 해당 월령에 맞는 질문들 가져오기
-    console.log('Fetching questions for age:', ageInMonths)
-    const questions = await prisma.assessmentQuestion.findMany({
-      where: {
-        ageMin: {
-          lte: ageInMonths
-        },
-        ageMax: {
-          gte: ageInMonths
-        }
-      },
+    // 모든 질문 가져오기 (나이 제한 없음)
+    console.log('Fetching all questions (age filtering disabled)')
+    const allQuestions = await prisma.assessmentQuestion.findMany({
       orderBy: {
         order: 'asc'
       }
     })
 
-    console.log('Found questions:', questions.length)
-
-    // 질문이 없으면 모든 질문 반환 (fallback)
-    if (questions.length === 0) {
-      console.log('No questions found for age, returning all questions')
-      const allQuestions = await prisma.assessmentQuestion.findMany({
-        orderBy: {
-          order: 'asc'
-        }
-      })
-      console.log('All questions count:', allQuestions.length)
-      return NextResponse.json(allQuestions)
-    }
-
-    return NextResponse.json(questions)
+    console.log('Found questions:', allQuestions.length)
+    return NextResponse.json(allQuestions)
 
   } catch (error: any) {
     console.error('평가 질문 조회 오류 상세:', {

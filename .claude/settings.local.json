@@ -10,7 +10,8 @@
       "Bash(wc:*)",
       "Bash(mkdir:*)",
       "Bash(dir:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(npx tsx:*)"
     ],
     "deny": [],
     "ask": []
