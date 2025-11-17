@@ -35,7 +35,7 @@ export default function Home() {
             최적의 전문가를 찾아드립니다
           </h1>
           <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-6 md:mb-8 text-stone-700">
-            세계적인 분석과 검증된 전문가로 아이의 건강한 성장을 지원합니다
+            체계적인 분석과 검증된 전문가로 아이의 건강한 성장을 지원합니다
           </p>
           <Link
             href="/parent/therapists"

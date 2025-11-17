@@ -128,6 +128,7 @@ const Header: React.FC<HeaderProps> = ({
       className={`
         sticky top-0 z-50 w-full h-16 px-4 sm:px-6 lg:px-80
         bg-white/80 border-b border-gray-200 backdrop-blur-[5px]
+        lg:min-w-[1280px]
         ${className}
       `}
     >

@@ -2,219 +2,296 @@
 
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer'
 
-export default function AssessmentsLandingPage() {
+export default function AssessmentsPage() {
   const categories = [
     {
       id: 'GROSS_MOTOR',
-      name: '대근육 운동',
-      icon: '🤸',
-      description: '걷기, 달리기, 점프 등 큰 근육을 사용하는 운동 능력을 평가합니다.',
-      examples: '• 계단 오르내리기\n• 공 던지고 받기\n• 균형 잡고 서기',
-      color: 'from-blue-500 to-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
+      name: '대근육운동',
+      icon: '/images/assess-category-01.svg',
+      description: '걷고, 뛰고, 균형 잡는힘',
     },
     {
       id: 'FINE_MOTOR',
-      name: '소근육 운동',
-      icon: '✋',
-      description: '손가락, 손목 등 작은 근육을 사용하는 정교한 동작 능력을 평가합니다.',
-      examples: '• 블록 쌓기\n• 크레용으로 그리기\n• 단추 끼우기',
-      color: 'from-purple-500 to-purple-600',
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200',
+      name: '소근육운동',
+      icon: '/images/assess-category-02.svg',
+      description: '섬세한 손동작의 발달',
     },
     {
       id: 'LANGUAGE',
-      name: '언어 발달',
-      icon: '💬',
-      description: '말하기, 이해하기, 의사소통 능력을 평가합니다.',
-      examples: '• 단어와 문장 말하기\n• 질문에 대답하기\n• 이야기 이해하기',
-      color: 'from-green-500 to-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
-      isPopular: true,
+      name: '언어발달',
+      icon: '/images/assess-category-03.svg',
+      description: '말과 이해의 시작',
+      isFree: true,
     },
     {
       id: 'COGNITIVE',
       name: '인지 발달',
-      icon: '🧠',
-      description: '생각하기, 문제 해결, 기억력 등 인지 능력을 평가합니다.',
-      examples: '• 색깔과 모양 구분\n• 숫자 세기\n• 원인과 결과 이해',
-      color: 'from-orange-500 to-orange-600',
-      bgColor: 'bg-orange-50',
-      borderColor: 'border-orange-200',
+      icon: '/images/assess-category-04.svg',
+      description: '생각하고 탐구하는 힘',
     },
     {
       id: 'SOCIAL',
       name: '사회성 발달',
-      icon: '👥',
-      description: '다른 사람과의 상호작용, 사회적 규칙 이해 능력을 평가합니다.',
-      examples: '• 친구와 놀이하기\n• 차례 지키기\n• 감정 표현하기',
-      color: 'from-pink-500 to-pink-600',
-      bgColor: 'bg-pink-50',
-      borderColor: 'border-pink-200',
-    },
-    {
-      id: 'EMOTIONAL',
-      name: '정서 발달',
-      icon: '❤️',
-      description: '감정 조절, 정서적 안정성, 자기 인식 능력을 평가합니다.',
-      examples: '• 감정 인식하기\n• 스트레스 대처하기\n• 자신감 갖기',
-      color: 'from-red-500 to-red-600',
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-200',
+      icon: '/images/assess-category-05.svg',
+      description: '함께 자라는 힘',
     },
   ]
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-brand-accent bg-opacity-20 text-brand-green mb-4">
-            무료 체험
-          </span>
-          <h1 className="text-4xl font-bold text-brand-navy mb-4">
-            발달체크 소개
-          </h1>
-          <p className="text-xl text-gray-600 mb-2">
-            우리 아이의 발달 상태를 6가지 영역으로 체계적으로 평가합니다
-          </p>
-          <p className="text-gray-500">
-            로그인 없이 언어 발달 영역을 무료로 체험해보세요
-          </p>
+      {/* Hero Section with Background */}
+      <section className="relative bg-[#fffaf3] overflow-hidden">
+        {/* Background Image with Backdrop Blur */}
+        <div className="absolute inset-0 w-full h-[398px]">
+          <div className="absolute inset-0">
+            <img
+              src="/images/assess-hero-bg.png"
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div
+            className="absolute inset-0 bg-[rgba(239,218,195,0.7)]"
+            style={{
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)'
+            }}
+          />
         </div>
 
-        {/* Development Categories */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            6가지 발달 영역
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.map((category) => (
-              <div
-                key={category.id}
-                className={`relative bg-white rounded-lg shadow-md border-2 ${category.borderColor} overflow-hidden hover:shadow-lg transition-shadow`}
-              >
-                {category.isPopular && (
-                  <div className="absolute top-4 right-4">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-400 text-gray-900">
-                      ⭐ 체험 가능
-                    </span>
+        {/* Hero Content */}
+        <div className="relative z-10 max-w-[1280px] mx-auto px-[80px] py-[101px]">
+          <div className="flex flex-col items-center gap-[12px] max-w-[900px] mx-auto text-center">
+            <h1 className="font-bold text-[40px] leading-[64px] text-[#1e1307]">
+              아이포텐에서 우리아이 발달체크하기
+            </h1>
+            <div className="text-[24px] leading-[34px] text-[#1e1307] tracking-[0.24px]">
+              <p className="mb-0">아이포텐은 언어치료사,작업치료사 등 각 분야 전문가가 설계한</p>
+              <p>정교한 발달체크를 제공합니다.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Category Cards Section */}
+      <section className="bg-[#fffaf3] py-[80px]">
+        <div className="max-w-[1280px] mx-auto px-[80px]">
+          <div className="flex flex-col gap-[32px] items-end">
+            {/* First Row - 3 cards */}
+            <div className="flex gap-[30px] w-full">
+              {categories.slice(0, 3).map((category) => (
+                <div
+                  key={category.id}
+                  className="relative bg-white rounded-[30px] shadow-[0px_4px_20px_0px_rgba(204,137,88,0.3)] px-[50px] py-[40px] flex flex-col items-center gap-[30px] w-[406px] h-[340px]"
+                >
+                  {category.isFree && (
+                    <div className="absolute right-[21px] top-[21px] bg-[#ff6a00] rounded-[100px] flex items-center gap-[4px] px-[10px] py-[10px] z-10">
+                      <div className="w-[20px] h-[19px]">
+                        <img src="/images/assess-icon-star.svg" alt="" className="w-full h-full" />
+                      </div>
+                      <p className="font-bold text-[21px] text-white tracking-[0.21px]">
+                        무료체험
+                      </p>
+                    </div>
+                  )}
+                  <div className="w-[136px] h-[136px] flex items-center justify-center relative">
+                    {category.id === 'GROSS_MOTOR' && (
+                      <div className="text-[80px]">🏃</div>
+                    )}
+                    {category.id === 'FINE_MOTOR' && (
+                      <>
+                        <img src="/images/assess-icon-bg-orange.svg" alt="" className="absolute inset-0 w-full h-full" />
+                        <img src="/images/assess-icon-hand.svg" alt="" className="absolute inset-[25%] w-1/2 h-1/2" />
+                      </>
+                    )}
+                    {category.id === 'LANGUAGE' && (
+                      <img src="/images/assess-category-03.svg" alt="" className="w-full h-full" />
+                    )}
                   </div>
-                )}
-                <div className={`h-2 bg-gradient-to-r ${category.color}`}></div>
-                <div className="p-6">
-                  <div className="text-4xl mb-3 text-center">{category.icon}</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">
-                    {category.name}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-4">
-                    {category.description}
-                  </p>
-                  <div className={`${category.bgColor} rounded-lg p-3`}>
-                    <p className="text-xs font-semibold text-gray-700 mb-1">평가 예시:</p>
-                    <p className="text-xs text-gray-600 whitespace-pre-line">
-                      {category.examples}
+                  <div className="flex flex-col items-center gap-[8px] text-center">
+                    <p className="font-semibold text-[36px] tracking-[0.36px] text-[#1e1307]">
+                      {category.name}
+                    </p>
+                    <p className="text-[24px] leading-[34px] tracking-[0.24px] text-[#555555]">
+                      {category.description}
                     </p>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Second Row - 2 cards centered */}
+            <div className="flex gap-[30px] justify-center w-full">
+              {categories.slice(3).map((category) => (
+                <div
+                  key={category.id}
+                  className="bg-white rounded-[30px] shadow-[0px_4px_20px_0px_rgba(204,137,88,0.3)] px-[50px] py-[40px] flex flex-col items-center gap-[30px] w-[406px] h-[340px]"
+                >
+                  <div className="w-[136px] h-[136px] flex items-center justify-center relative">
+                    {category.id === 'COGNITIVE' && (
+                      <div className="text-[80px]">💡</div>
+                    )}
+                    {category.id === 'SOCIAL' && (
+                      <div className="text-[80px]">😊</div>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-center gap-[8px] text-center">
+                    <p className="font-semibold text-[36px] tracking-[0.36px] text-[#1e1307]">
+                      {category.name}
+                    </p>
+                    <p className="text-[24px] leading-[34px] tracking-[0.24px] text-[#555555]">
+                      {category.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Comparison Table Section */}
+      <section className="bg-[#fffaf3] pb-[100px]">
+        <div className="max-w-[1280px] mx-auto px-[80px]">
+          <div className="bg-[#fdf2e4] rounded-[40px] px-[100px] pt-[80px] pb-[40px] flex flex-col items-center gap-[40px]">
+            {/* Title */}
+            <div className="flex flex-col items-center gap-[8px] text-center">
+              <h2 className="font-bold text-[40px] tracking-[0.4px] text-[#1e1307]">
+                체험판 vs 전체 진단 비교
+              </h2>
+              <p className="text-[24px] leading-normal tracking-[0.24px] text-[#555555]">
+                언어발달 무료 체험으로 시작하고, 전체 진단으로 더 깊은 분석까지 받아보세요.
+              </p>
+            </div>
+
+            {/* Table */}
+            <div className="w-full">
+              <div className="flex flex-col">
+                {/* Header Row */}
+                <div className="flex items-center justify-between border-b border-[#f8e6da] py-[24px]">
+                  <p className="text-[24px] leading-normal text-[#1e1307] w-[240px]">
+                    진단 영역
+                  </p>
+                  <div className="flex items-center text-center">
+                    <p className="font-semibold text-[24px] leading-normal text-[#1e1307] w-[330px]">
+                      언어 발달만
+                    </p>
+                    <p className="font-semibold text-[24px] leading-normal text-[#1e1307] w-[330px]">
+                      전체 5개 영역
+                    </p>
+                  </div>
+                </div>
+
+                {/* Row 1 */}
+                <div className="flex items-center justify-between border-b border-[#f8e6da] py-[24px]">
+                  <p className="text-[24px] leading-normal text-[#1e1307] w-[240px]">
+                    문항 수
+                  </p>
+                  <div className="flex items-center text-center">
+                    <p className="font-bold text-[24px] leading-normal text-[#1e1307] w-[330px]">
+                      10문항
+                    </p>
+                    <p className="font-semibold text-[24px] leading-normal text-[#1e1307] w-[330px]">
+                      40문항
+                    </p>
+                  </div>
+                </div>
+
+                {/* Row 2 */}
+                <div className="flex items-center justify-between border-b border-[#f8e6da] py-[24px]">
+                  <p className="text-[24px] leading-normal text-[#1e1307] w-[240px]">
+                    결과지 제공
+                  </p>
+                  <div className="flex items-center">
+                    <p className="text-[30px] leading-normal text-[#1e1307] text-center w-[330px]">
+                      -
+                    </p>
+                    <div className="w-[330px] flex justify-center">
+                      <span className="text-[36px] text-[#ff6a00]">✓</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 3 */}
+                <div className="flex items-center justify-between border-b border-[#f8e6da] py-[24px]">
+                  <p className="text-[24px] leading-normal text-[#1e1307] w-[240px]">
+                    발달 수준 그래프
+                  </p>
+                  <div className="flex items-center">
+                    <p className="text-[30px] leading-normal text-[#1e1307] text-center w-[330px]">
+                      -
+                    </p>
+                    <div className="w-[330px] flex justify-center">
+                      <span className="text-[36px] text-[#ff6a00]">✓</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 4 */}
+                <div className="flex items-center justify-between border-b border-[#f8e6da] py-[24px]">
+                  <p className="text-[24px] leading-normal text-[#1e1307] w-[240px]">
+                    맞춤 놀이영상 추천
+                  </p>
+                  <div className="flex items-center">
+                    <p className="text-[30px] leading-normal text-[#1e1307] text-center w-[330px]">
+                      -
+                    </p>
+                    <div className="w-[330px] flex justify-center">
+                      <span className="text-[36px] text-[#ff6a00]">✓</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 5 */}
+                <div className="flex items-center justify-between py-[24px]">
+                  <p className="text-[24px] leading-normal text-[#1e1307] w-[240px]">
+                    치료사 연계
+                  </p>
+                  <div className="flex items-center">
+                    <p className="text-[30px] leading-normal text-[#1e1307] text-center w-[330px]">
+                      -
+                    </p>
+                    <div className="w-[330px] flex justify-center">
+                      <span className="text-[36px] text-[#ff6a00]">✓</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            ))}
+
+              {/* Notice */}
+              <p className="text-[18px] leading-[30px] text-[#555555] mt-[20px]">
+                💡 체험판은 언어 발달 영역 8문항만 평가하며, 결과는 저장되지 않습니다. 전체 5개 영역 진단과 맞춤 서비스를 이용하시려면 회원가입이 필요합니다.
+              </p>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex gap-[40px] items-center">
+              <Link
+                href="/assessments/trial/start"
+                className="border-[3px] border-[#ff6a00] rounded-[100px] h-[80px] w-[360px] flex items-center justify-center px-[10px] py-[10px] hover:bg-[#fff5eb] transition-colors"
+              >
+                <p className="font-bold text-[24px] leading-normal text-[#ff6a00]">
+                  언어발달체험하기
+                </p>
+              </Link>
+              <Link
+                href="/login?redirect=/parent/assessments/new"
+                className="bg-[#ff6a00] rounded-[100px] h-[80px] w-[360px] flex items-center justify-center px-[10px] py-[10px] hover:bg-[#e55f00] transition-colors"
+              >
+                <p className="font-bold text-[24px] leading-normal text-white">
+                  전체 진단 시작하기
+                </p>
+              </Link>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Trial vs Full Comparison */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            체험판 vs 전체 진단 비교
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="border-b-2 border-gray-300">
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">기능</th>
-                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900">
-                    체험판 (비로그인)
-                  </th>
-                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900">
-                    전체 진단 (로그인)
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">진단 영역</td>
-                  <td className="px-6 py-4 text-sm text-center text-gray-600">
-                    언어 발달만
-                  </td>
-                  <td className="px-6 py-4 text-sm text-center text-green-600 font-semibold">
-                    전체 6개 영역
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">문항 수</td>
-                  <td className="px-6 py-4 text-sm text-center text-gray-600">10문항</td>
-                  <td className="px-6 py-4 text-sm text-center text-green-600 font-semibold">
-                    60문항
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">결과 저장</td>
-                  <td className="px-6 py-4 text-sm text-center text-red-600">✗</td>
-                  <td className="px-6 py-4 text-sm text-center text-green-600 font-semibold">✓</td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">발달 추이 그래프</td>
-                  <td className="px-6 py-4 text-sm text-center text-red-600">✗</td>
-                  <td className="px-6 py-4 text-sm text-center text-green-600 font-semibold">✓</td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">맞춤 놀이영상 추천</td>
-                  <td className="px-6 py-4 text-sm text-center text-red-600">✗</td>
-                  <td className="px-6 py-4 text-sm text-center text-green-600 font-semibold">✓</td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">치료사 연결</td>
-                  <td className="px-6 py-4 text-sm text-center text-red-600">✗</td>
-                  <td className="px-6 py-4 text-sm text-center text-green-600 font-semibold">✓</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-          <Link
-            href="/assessments/trial/start"
-            style={{ backgroundColor: '#F78C6B' }}
-            className="w-full sm:w-auto px-10 py-5 text-white rounded-xl hover:opacity-90 transition-all font-bold text-xl shadow-2xl text-center transform hover:scale-105"
-          >
-            언어 발달 체험하기 →
-          </Link>
-          <Link
-            href="/login?redirect=/parent/assessments/new"
-            style={{ borderColor: '#193149', borderWidth: '3px' }}
-            className="w-full sm:w-auto px-10 py-5 bg-white rounded-xl hover:bg-gray-50 transition-all font-bold text-xl shadow-lg text-center"
-          >
-            <span style={{ color: '#193149' }}>전체 진단 시작하기</span>
-          </Link>
-        </div>
-
-        {/* Info Notice */}
-        <div className="mt-8 bg-blue-50 rounded-lg p-6 text-center">
-          <p className="text-sm text-blue-900">
-            💡 <strong>체험판</strong>은 언어 발달 영역 10문항만 평가하며, 결과는 저장되지 않습니다.<br />
-            전체 6개 영역 진단과 맞춤 서비스를 이용하시려면 회원가입이 필요합니다.
-          </p>
-        </div>
-      </main>
+      <Footer />
     </div>
   )
 }

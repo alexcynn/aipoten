@@ -13,7 +13,7 @@ export default function LanguageConsultingPage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative bg-[#F5EFE7] overflow-hidden h-[204px] lg:h-[1103px]">
+      <section className="relative bg-[#F5EFE7] overflow-hidden h-[204px] lg:h-[1103px] lg:min-w-[1280px]">
         {/* Combined Background Image with Deco Round */}
         <div className="absolute inset-0 w-full h-full">
           <img
@@ -229,7 +229,7 @@ export default function LanguageConsultingPage() {
 
       {/* 이런분들에게 권해드립니다 Section */}
       <section className="bg-[#ffe6c8] pt-[60px] lg:pt-[80px] pb-[60px] lg:pb-[100px] px-[40px] lg:px-[320px] flex flex-col gap-[10px] items-center justify-center">
-        <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-[40px] lg:gap-0">
+        <div className="flex flex-col lg:flex-row items-center justify-between w-full max-w-[1280px] gap-[40px] lg:gap-0">
           {/* Title - Mobile */}
           <div className="lg:hidden relative w-[157px] h-[76px]">
             <img
@@ -301,7 +301,7 @@ export default function LanguageConsultingPage() {
               <img
                 src="/images/lang-timeline-line.svg"
                 alt=""
-                className="absolute top-[-1px] left-0 w-full"
+                className="absolute top-[-1px] left-0 w-full h-[2px]"
               />
             </div>
 
@@ -727,63 +727,78 @@ export default function LanguageConsultingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative h-[400px] lg:h-[560px] overflow-hidden">
-        {/* Background Logo - Desktop */}
-        <div className="hidden lg:block absolute left-[263px] top-[78px] w-[1407.19px] h-[402.706px] opacity-30">
-          <img
-            src="/images/lang-cta-bg-logo.svg"
-            alt=""
-            className="block w-full h-full max-w-none"
+      <section className="relative h-[326px] lg:h-[560px] overflow-hidden">
+        {/* Mobile Background */}
+        <div className="lg:hidden absolute inset-0">
+          {/* Background Logo */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-[37px] w-[316.886px] h-[260.011px]">
+            <img
+              src="/images/lang-mo-cta-bg-logo.svg"
+              alt=""
+              className="block w-full h-full max-w-none"
+            />
+          </div>
+          {/* Backdrop Blur Overlay */}
+          <div
+            className="absolute inset-0 bg-[rgba(254,114,13,0.8)]"
+            style={{
+              backdropFilter: 'blur(5px)',
+              WebkitBackdropFilter: 'blur(5px)'
+            }}
           />
         </div>
 
-        {/* Background Logo - Mobile */}
-        <div className="lg:hidden absolute left-[27px] top-[37px] w-[316.886px] h-[260.011px] opacity-30">
-          <img
-            src="/images/lang-mo-cta-bg-logo.svg"
-            alt=""
-            className="block w-full h-full max-w-none"
+        {/* Desktop Background */}
+        <div className="hidden lg:block absolute inset-0">
+          {/* Background Logo */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-[78px] w-[1407.19px] h-[402.706px]">
+            <img
+              src="/images/lang-cta-bg-logo.svg"
+              alt=""
+              className="block w-full h-full max-w-none"
+            />
+          </div>
+          {/* Backdrop Blur Overlay */}
+          <div
+            className="absolute inset-0 bg-[rgba(254,114,13,0.8)]"
+            style={{
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)'
+            }}
           />
         </div>
-
-        {/* Backdrop Blur Background */}
-        <div
-          className="absolute inset-0 w-full h-full"
-          style={{
-            backgroundColor: 'rgba(254, 114, 13, 0.8)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)'
-          }}
-        />
 
         {/* Content */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[280px] lg:max-w-[1280px] px-[40px] lg:px-0 flex flex-col gap-[30px] lg:gap-[50px] items-center z-10">
-          {/* Text Section */}
-          <div className="flex flex-col gap-[20px] lg:gap-[33px] items-center w-full">
-            {/* Mobile Title */}
-            <div className="lg:hidden flex justify-center">
-              <img
-                src="/images/lang-mo-cta-title.svg"
-                alt="우리 아이 언어발달 전문가와 함께하세요"
-                className="h-auto"
-              />
-            </div>
-
-            {/* Desktop Title SVG */}
-            <div className="hidden lg:block relative w-full flex justify-center">
-              <img
-                src="/images/lang-cta-title.svg"
-                alt="우리 아이 언어발달 전문가와 함께하세요"
-                className="h-auto"
-              />
-            </div>
-
+        <div className="relative h-full flex flex-col items-center justify-center gap-[30px] lg:gap-[50px] z-10">
+          {/* Mobile Content */}
+          <div className="lg:hidden flex flex-col items-center gap-[10px] w-full">
+            {/* Title Image */}
+            <img
+              src="/images/lang-mo-cta-title.svg"
+              alt="전문가 1:1 상담, 바로 시작해보세요"
+              className="w-[277px] h-[24px]"
+            />
             {/* Price */}
-            <div className="flex flex-col gap-[5px] items-center text-center w-full">
-              <p className="font-bold text-[40px] lg:text-[70px] leading-normal text-white">
+            <p className="font-bold text-[30px] leading-normal text-white">
+              ₩150,000
+            </p>
+            <p className="text-[14px] leading-normal text-white/80">
+              언어컨설팅 이용 가격
+            </p>
+          </div>
+
+          {/* Desktop Content */}
+          <div className="hidden lg:flex flex-col gap-[33px] items-center w-full max-w-[1280px]">
+            <img
+              src="/images/lang-cta-title.svg"
+              alt="우리 아이 언어발달 전문가와 함께하세요"
+              className="h-auto"
+            />
+            <div className="flex flex-col gap-[5px] items-center text-center">
+              <p className="font-bold text-[70px] leading-normal text-white">
                 ₩150,000
               </p>
-              <p className="text-[16px] lg:text-[27px] leading-normal text-white/80">
+              <p className="text-[27px] leading-normal text-white/80">
                 언어컨설팅 이용 가격
               </p>
             </div>
@@ -793,16 +808,16 @@ export default function LanguageConsultingPage() {
           {session ? (
             <Link
               href="/parent/therapists"
-              className="bg-white rounded-[100px] h-[60px] lg:h-[80px] w-full max-w-[280px] lg:max-w-[400px] flex items-center justify-center px-[30px] lg:px-[40px] py-[20px] lg:py-[30px] hover:bg-stone-100 transition-colors"
+              className="bg-white rounded-[100px] h-[50px] lg:h-[80px] w-full max-w-[257px] lg:max-w-[400px] flex items-center justify-center px-[40px] py-[15px] lg:py-[30px] hover:bg-stone-100 transition-colors"
             >
-              <p className="font-bold text-[18px] lg:text-[24px] leading-normal text-[#ff6a00] whitespace-nowrap">
+              <p className="font-bold text-[16px] lg:text-[24px] leading-normal text-[#ff6a00] whitespace-nowrap">
                 상담 신청하기
               </p>
             </Link>
           ) : (
             <Link
               href="/login"
-              className="bg-white rounded-[100px] h-[60px] lg:h-[80px] w-full max-w-[280px] lg:max-w-[400px] flex items-center justify-center px-[30px] lg:px-[40px] py-[20px] lg:py-[30px] hover:bg-stone-100 transition-colors"
+              className="bg-white rounded-[100px] h-[50px] lg:h-[80px] w-full max-w-[257px] lg:max-w-[400px] flex items-center justify-center px-[40px] py-[15px] lg:py-[30px] hover:bg-stone-100 transition-colors"
             >
               <p className="font-bold text-[16px] lg:text-[24px] leading-normal text-[#ff6a00] text-center lg:whitespace-nowrap">
                 로그인 하고 컨설팅 시작하기
