@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 360 145" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Deco Round">
+<foreignObject x="-10" y="-10" width="380" height="165"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(5px);clip-path:url(#bgblur_0_499_2015_clip_path);height:100%;width:100%"></div></foreignObject><path id="Subtract" data-figma-bg-blur-radius="10" d="M360 145H0V0C58.5292 31.7595 118.665 48.2949 180 48.2949C241.335 48.2949 301.471 31.7595 360 0V145Z" fill="var(--fill-0, #FF6600)" fill-opacity="0.2"/>
+<path id="Subtract_2" d="M360 91.0244H0V43.3642C58.7187 61.5785 118.826 71.0195 180 71.0195C241.174 71.0195 301.281 61.5784 360 43.3642V91.0244Z" fill="var(--fill-0, #FCEBD5)"/>
+</g>
+<defs>
+<clipPath id="bgblur_0_499_2015_clip_path" transform="translate(10 10)"><path d="M360 145H0V0C58.5292 31.7595 118.665 48.2949 180 48.2949C241.335 48.2949 301.471 31.7595 360 0V145Z"/>
+</clipPath></defs>
+</svg>
