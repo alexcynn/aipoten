@@ -686,7 +686,7 @@ function AssessmentContent() {
                     </button>
                   </div>
                 ) : showConcernsStep ? (
-                  /* 서술형 우려 사항 질문 */}
+                  /* 서술형 우려 사항 질문 */
                   <div className="py-8 md:py-12">
                     <div className="text-center mb-8 md:mb-12">
                       <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-900 mb-4 md:mb-6">

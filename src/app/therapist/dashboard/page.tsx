@@ -225,188 +225,232 @@ export default function TherapistDashboardPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          {/* Welcome Section */}
-          <div className="bg-white overflow-hidden shadow-sm rounded-xl md:rounded-2xl mb-6">
-            <div className="px-4 py-5 sm:p-6 md:p-8">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-stone-900 mb-2">
-                    안녕하세요, {session.user?.name} 치료사님!
-                  </h1>
-                  {profile ? (
-                    <div className="space-y-1">
-                      <p className="text-sm sm:text-base text-stone-700">
-                        전문분야: {getSpecialtyName(profile.specialty)} | 경력: {profile.experience}년
-                      </p>
-                      <p className="text-xs sm:text-sm text-stone-600">
-                        승인 상태: <span className={`font-medium ${profile.status === 'APPROVED' ? 'text-green-600' : 'text-yellow-600'}`}>
-                          {getStatusName(profile.status)}
-                        </span>
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-sm sm:text-base text-stone-700">
-                      프로필을 설정하여 매칭 서비스를 시작해보세요.
-                    </p>
+          {/* Banner Section */}
+          <div className="bg-[#FFF6E8] rounded-2xl px-6 py-5 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-stone-900">
+                {session.user?.name} 치료사님, 오늘도 좋은 하루 되세요!
+              </h1>
+              {profile && (
+                <p className="text-sm sm:text-base text-stone-600 mt-1">
+                  {getSpecialtyName(profile.specialty)} · 경력 {profile.experience}년
+                  {profile.status === 'APPROVED' && (
+                    <span className="ml-2 text-green-600 font-medium">✓ 승인됨</span>
                   )}
-                </div>
-              </div>
+                </p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Link
+                href="/therapist/profile"
+                className="px-4 py-2 bg-white text-stone-700 text-sm rounded-lg hover:bg-stone-50 transition-colors border border-stone-200"
+              >
+                프로필 관리
+              </Link>
+              <Link
+                href="/therapist/inquiries"
+                className="px-4 py-2 bg-[#FF6A00] text-white text-sm rounded-lg hover:bg-[#E55F00] transition-colors"
+              >
+                1:1 문의
+              </Link>
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-            <Link
-              href="/therapist/bookings/consultations"
-              className="bg-white p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#FFE5E5]"
-            >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFE5E5] rounded-xl flex items-center justify-center">
-                    <span className="text-2xl">💬</span>
+          {/* 2-Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Stats Cards */}
+              <div className="grid grid-cols-2 gap-4">
+                <Link
+                  href="/therapist/bookings/consultations"
+                  className="bg-white p-4 sm:p-6 rounded-[20px] shadow-sm hover:shadow-lg transition-all cursor-pointer border border-transparent hover:border-[#ffbda6]"
+                >
+                  <div className="text-center">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#e4edff] rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-2xl">💬</span>
+                    </div>
+                    <h3 className="text-sm sm:text-base font-bold text-[#1e1307] mb-1">언어컨설팅</h3>
+                    <p className="text-xs text-stone-500 mb-2">요청 대기</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-[#FF6A00]">
+                      {getConsultationPendingCount()}
+                    </p>
                   </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">언어컨설팅</h3>
-                  <p className="text-xs sm:text-sm text-stone-600">요청 대기</p>
-                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF6A00]">
-                    {getConsultationPendingCount()}
-                  </p>
-                </div>
-              </div>
-            </Link>
+                </Link>
 
-            <Link
-              href="/therapist/bookings/therapies"
-              className="bg-white p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#FFE5E5]"
-            >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFE5E5] rounded-xl flex items-center justify-center">
-                    <span className="text-2xl">🏠</span>
+                <Link
+                  href="/therapist/bookings/therapies"
+                  className="bg-white p-4 sm:p-6 rounded-[20px] shadow-sm hover:shadow-lg transition-all cursor-pointer border border-transparent hover:border-[#ffbda6]"
+                >
+                  <div className="text-center">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#e4edff] rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-2xl">🏠</span>
+                    </div>
+                    <h3 className="text-sm sm:text-base font-bold text-[#1e1307] mb-1">홈티</h3>
+                    <p className="text-xs text-stone-500 mb-2">요청 대기</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-[#FF6A00]">
+                      {getTherapyPendingCount()}
+                    </p>
                   </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">홈티</h3>
-                  <p className="text-xs sm:text-sm text-stone-600">요청 대기</p>
-                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF6A00]">
-                    {getTherapyPendingCount()}
-                  </p>
-                </div>
-              </div>
-            </Link>
+                </Link>
 
-            <Link
-              href="/therapist/earnings"
-              className="bg-white p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#FFE5E5]"
-            >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFE5E5] rounded-xl flex items-center justify-center">
-                    <span className="text-2xl">💰</span>
+                <Link
+                  href="/therapist/earnings"
+                  className="bg-white p-4 sm:p-6 rounded-[20px] shadow-sm hover:shadow-lg transition-all cursor-pointer border border-transparent hover:border-[#ffbda6]"
+                >
+                  <div className="text-center">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#e4edff] rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-2xl">💰</span>
+                    </div>
+                    <h3 className="text-sm sm:text-base font-bold text-[#1e1307] mb-1">이달 수입금</h3>
+                    <p className="text-xs text-stone-500 mb-2">정산 완료</p>
+                    <p className="text-xl sm:text-2xl font-bold text-[#FF6A00]">
+                      ₩{calculateMonthlyEarnings().toLocaleString()}
+                    </p>
                   </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">이달 수입금</h3>
-                  <p className="text-xs sm:text-sm text-stone-600">정산 완료</p>
-                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF6A00]">
-                    ₩{calculateMonthlyEarnings().toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            </Link>
+                </Link>
 
-            <Link
-              href="/therapist/reviews"
-              className="bg-white p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-[#FFE5E5]"
-            >
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFE5E5] rounded-xl flex items-center justify-center">
-                    <span className="text-2xl">⭐</span>
+                <Link
+                  href="/therapist/reviews"
+                  className="bg-white p-4 sm:p-6 rounded-[20px] shadow-sm hover:shadow-lg transition-all cursor-pointer border border-transparent hover:border-[#ffbda6]"
+                >
+                  <div className="text-center">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#e4edff] rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-2xl">⭐</span>
+                    </div>
+                    <h3 className="text-sm sm:text-base font-bold text-[#1e1307] mb-1">평점</h3>
+                    <p className="text-xs text-stone-500 mb-2">
+                      {myBookings.filter(b => b.review?.rating).length}개 리뷰
+                    </p>
+                    <p className="text-2xl sm:text-3xl font-bold text-[#FF6A00]">
+                      {calculateAverageRating() === '0.0' ? '-' : calculateAverageRating()}
+                    </p>
                   </div>
+                </Link>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white rounded-[20px] shadow-sm p-6">
+                <h2 className="text-base sm:text-lg font-bold text-[#1e1307] mb-4">빠른 메뉴</h2>
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    href="/therapist/schedule"
+                    className="flex items-center gap-3 p-3 rounded-xl bg-[#FFF6E8] hover:bg-[#FFE5D0] transition-colors"
+                  >
+                    <span className="text-xl">📅</span>
+                    <div>
+                      <p className="text-sm font-semibold text-[#1e1307]">일정 관리</p>
+                      <p className="text-xs text-stone-500">스케줄 설정</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/therapist/journal-test"
+                    className="flex items-center gap-3 p-3 rounded-xl bg-[#FF6A00] hover:bg-[#E55F00] transition-colors"
+                  >
+                    <span className="text-xl">✨</span>
+                    <div>
+                      <p className="text-sm font-semibold text-white">AI 상담일지</p>
+                      <p className="text-xs text-orange-100">자동 생성</p>
+                    </div>
+                  </Link>
                 </div>
-                <div className="ml-4">
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900">평점</h3>
-                  <p className="text-xs sm:text-sm text-stone-600">
-                    {myBookings.filter(b => b.review?.rating).length}개 리뷰
-                  </p>
-                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF6A00]">
-                    {calculateAverageRating() === '0.0' ? '-' : calculateAverageRating()}
-                  </p>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* 세션 캘린더 - 월별 일정 */}
+              <div className="bg-white overflow-hidden shadow-sm rounded-[20px]">
+                <div className="px-4 py-5 sm:p-6">
+                  <h2 className="text-base sm:text-lg font-bold text-[#1e1307] mb-4">월별 세션 일정</h2>
+                  <SessionsCalendar
+                    sessions={myBookings
+                      .filter((booking: any) => booking.scheduledAt)
+                      .map((booking: any) => ({
+                        id: booking.id,
+                        scheduledAt: booking.scheduledAt,
+                        sessionType: booking.payment?.sessionType || 'CONSULTATION',
+                        status: booking.status,
+                        child: booking.child,
+                        therapist: booking.therapist,
+                        payment: booking.payment ? { status: booking.payment.status } : undefined
+                      }))}
+                    onEventClick={(bookingId) => {
+                      setSelectedBookingId(bookingId)
+                      setIsBookingModalOpen(true)
+                    }}
+                  />
                 </div>
               </div>
-            </Link>
-          </div>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-            <Link
-              href="/therapist/profile"
-              className="bg-gradient-to-br from-[#FFE5E5] to-[#FF9999]/30 border-2 border-[#FF9999] rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-[#FF8888] transition-all"
-            >
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl mb-2">👤</div>
-                <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900 mb-1">프로필 관리</h3>
-                <p className="text-xs sm:text-sm text-stone-700">프로필 수정</p>
+              {/* 오늘의 일정 */}
+              <div className="bg-white overflow-hidden shadow-sm rounded-[20px]">
+                <div className="px-4 py-5 sm:p-6">
+                  <h2 className="text-base sm:text-lg font-bold text-[#1e1307] mb-4">오늘의 일정</h2>
+                  {(() => {
+                    const today = new Date()
+                    today.setHours(0, 0, 0, 0)
+                    const tomorrow = new Date(today)
+                    tomorrow.setDate(tomorrow.getDate() + 1)
+
+                    const todaySessions = myBookings.filter((booking: any) => {
+                      if (!booking.scheduledAt) return false
+                      const bookingDate = new Date(booking.scheduledAt)
+                      return bookingDate >= today && bookingDate < tomorrow
+                    }).sort((a: any, b: any) =>
+                      new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+                    )
+
+                    if (todaySessions.length === 0) {
+                      return (
+                        <div className="text-center py-8">
+                          <p className="text-stone-500 text-sm">오늘 예정된 세션이 없습니다.</p>
+                        </div>
+                      )
+                    }
+
+                    return (
+                      <div className="space-y-3">
+                        {todaySessions.map((session: any) => (
+                          <div
+                            key={session.id}
+                            className="flex items-center justify-between p-3 bg-[#FFF6E8] rounded-xl cursor-pointer hover:bg-[#FFE5D0] transition-colors"
+                            onClick={() => {
+                              setSelectedBookingId(session.id)
+                              setIsBookingModalOpen(true)
+                            }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                                <span className="text-sm">
+                                  {session.payment?.sessionType === 'CONSULTATION' ? '💬' : '🏠'}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-[#1e1307]">
+                                  {session.child?.name || '이름 없음'}
+                                </p>
+                                <p className="text-xs text-stone-500">
+                                  {session.payment?.sessionType === 'CONSULTATION' ? '언어컨설팅' : '홈티'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-bold text-[#FF6A00]">
+                                {new Date(session.scheduledAt).toLocaleTimeString('ko-KR', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })()}
+                </div>
               </div>
-            </Link>
-
-            <Link
-              href="/therapist/schedule"
-              className="bg-gradient-to-br from-[#F5EFE7] to-[#E8DCC8] border-2 border-[#D4C4A8] rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-[#C4B498] transition-all"
-            >
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl mb-2">📅</div>
-                <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900 mb-1">일정 관리</h3>
-                <p className="text-xs sm:text-sm text-stone-700">스케줄 설정</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/therapist/inquiries"
-              className="bg-gradient-to-br from-[#FFE5E5] to-[#FF9999]/30 border-2 border-[#FF9999] rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-[#FF8888] transition-all"
-            >
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl mb-2">💬</div>
-                <h3 className="text-sm sm:text-base md:text-lg font-bold text-stone-900 mb-1">1:1 문의</h3>
-                <p className="text-xs sm:text-sm text-stone-700">문의 관리</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/therapist/journal-test"
-              className="bg-gradient-to-br from-[#FF6A00] to-[#E55F00] border-2 border-[#FF6A00] rounded-xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-[#FF7A10] transition-all"
-            >
-              <div className="text-center">
-                <div className="text-3xl sm:text-4xl mb-2">✨</div>
-                <h3 className="text-sm sm:text-base md:text-lg font-bold text-white mb-1">AI 상담일지</h3>
-                <p className="text-xs sm:text-sm text-orange-100">자동 생성 테스트</p>
-              </div>
-            </Link>
-          </div>
-
-          {/* 세션 캘린더 - 월별 일정 */}
-          <div className="bg-white overflow-hidden shadow-sm rounded-xl md:rounded-2xl mb-6">
-            <div className="px-4 py-5 sm:p-6 md:p-8">
-              <h2 className="text-base sm:text-lg md:text-xl font-bold text-stone-900 mb-4">월별 세션 일정</h2>
-              <SessionsCalendar
-                sessions={myBookings
-                  .filter((booking: any) => booking.scheduledAt)
-                  .map((booking: any) => ({
-                    id: booking.id,
-                    scheduledAt: booking.scheduledAt,
-                    sessionType: booking.payment?.sessionType || 'CONSULTATION',
-                    status: booking.status,
-                    child: booking.child,
-                    therapist: booking.therapist,
-                    payment: booking.payment ? { status: booking.payment.status } : undefined
-                  }))}
-                onEventClick={(bookingId) => {
-                  setSelectedBookingId(bookingId)
-                  setIsBookingModalOpen(true)
-                }}
-              />
             </div>
           </div>
         </div>
