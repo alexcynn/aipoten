@@ -65,3 +65,4 @@ logs
 # temporary files
 .tmp/
 .temp/
+.mcp.json
