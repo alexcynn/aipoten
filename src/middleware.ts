@@ -23,6 +23,7 @@ export async function middleware(request: NextRequest) {
     '/api/auth',
     '/api/health',
     '/api/public',
+    '/api/assessment-questions', // 체험판 발달체크용
   ]
 
   // 공개 API는 통과

@@ -173,120 +173,152 @@ export default function Home() {
           {/* Steps */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-12">
             {/* Step 1 */}
-            <div className="bg-white rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 text-center relative">
-              <div className="inline-block bg-[#FF9999] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
+            <div className="bg-white border border-[#ffbda6] rounded-[20px] md:rounded-[40px] p-4 sm:p-6 md:p-8 text-center relative">
+              <div className="inline-block bg-[#ff9898] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
                 STEP 01
               </div>
               {/* Arrow */}
-              <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-[12px] -translate-y-1/2 z-10">
+              <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-[50%] -translate-y-1/2 z-10">
                 <Image
-                  src="/images/Arrow.svg"
+                  src="/images/main-arrow.svg"
                   alt="arrow"
-                  width={48}
-                  height={48}
+                  width={68}
+                  height={68}
                 />
               </div>
               <div className="mb-3 md:mb-4 flex justify-center">
                 <Image
-                  src="/images/ic_step_01.svg"
+                  src="/images/main-step-01-icon.svg"
                   alt="아이정보 입력"
-                  width={48}
-                  height={48}
-                  className="w-12 h-12 md:w-16 md:h-16"
+                  width={58}
+                  height={58}
+                  className="w-12 h-12 md:w-14 md:h-14"
                 />
               </div>
-              <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-stone-900 mb-2 md:mb-3">
+              <h3 className="text-sm sm:text-base md:text-lg lg:text-[30px] font-bold text-[#1e1307] mb-2 md:mb-3">
                 아이정보 입력
               </h3>
-              <p className="text-xs md:text-sm text-blue-600">⏱ 30초 소요</p>
+              <div className="inline-flex items-center gap-1 bg-[#e4edff] px-3 py-1 rounded-full">
+                <Image
+                  src="/images/main-ic-time.svg"
+                  alt="time"
+                  width={13}
+                  height={13}
+                />
+                <p className="text-xs md:text-sm text-[#001b72]">30초 소요</p>
+              </div>
             </div>
 
             {/* Step 2 */}
-            <div className="bg-white rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 text-center relative">
-              <div className="inline-block bg-[#FF9999] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
+            <div className="bg-white border border-[#ffbda6] rounded-[20px] md:rounded-[40px] p-4 sm:p-6 md:p-8 text-center relative">
+              <div className="inline-block bg-[#ff9898] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
                 STEP 02
               </div>
               {/* Arrow */}
-              <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-[12px] -translate-y-1/2 z-10">
+              <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-[50%] -translate-y-1/2 z-10">
                 <Image
-                  src="/images/Arrow.svg"
+                  src="/images/main-arrow.svg"
                   alt="arrow"
-                  width={48}
-                  height={48}
+                  width={68}
+                  height={68}
                 />
               </div>
               <div className="mb-3 md:mb-4 flex justify-center">
                 <Image
-                  src="/images/ic_step_02.svg"
+                  src="/images/main-step-02-icon.svg"
                   alt="3단계 문진 체크"
-                  width={48}
-                  height={48}
-                  className="w-12 h-12 md:w-16 md:h-16"
+                  width={58}
+                  height={58}
+                  className="w-12 h-12 md:w-14 md:h-14"
                 />
               </div>
-              <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-stone-900 mb-2 md:mb-3">
+              <h3 className="text-sm sm:text-base md:text-lg lg:text-[30px] font-bold text-[#1e1307] mb-2 md:mb-3">
                 3단계 문진 체크
               </h3>
-              <p className="text-xs md:text-sm text-blue-600">⏱ 2-3분 소요</p>
+              <div className="inline-flex items-center gap-1 bg-[#e4edff] px-3 py-1 rounded-full">
+                <Image
+                  src="/images/main-ic-time-alt.svg"
+                  alt="time"
+                  width={13}
+                  height={13}
+                />
+                <p className="text-xs md:text-sm text-[#001b72]">2-3분 소요</p>
+              </div>
             </div>
 
             {/* Step 3 */}
-            <div className="bg-white rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 text-center relative">
-              <div className="inline-block bg-[#FF9999] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
+            <div className="bg-white border border-[#ffbda6] rounded-[20px] md:rounded-[40px] p-4 sm:p-6 md:p-8 text-center relative">
+              <div className="inline-block bg-[#ff9898] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
                 STEP 03
               </div>
               {/* Arrow */}
-              <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-[12px] -translate-y-1/2 z-10">
+              <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-[50%] -translate-y-1/2 z-10">
                 <Image
-                  src="/images/Arrow.svg"
+                  src="/images/main-arrow.svg"
                   alt="arrow"
-                  width={48}
-                  height={48}
+                  width={68}
+                  height={68}
                 />
               </div>
               <div className="mb-3 md:mb-4 flex justify-center">
                 <Image
-                  src="/images/ic_step_03.svg"
+                  src="/images/main-step-03-icon.svg"
                   alt="AI 분석 리포트"
-                  width={48}
-                  height={48}
-                  className="w-12 h-12 md:w-16 md:h-16"
+                  width={58}
+                  height={58}
+                  className="w-12 h-12 md:w-14 md:h-14"
                 />
               </div>
-              <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-stone-900 mb-2 md:mb-3">
+              <h3 className="text-sm sm:text-base md:text-lg lg:text-[30px] font-bold text-[#1e1307] mb-2 md:mb-3">
                 AI 분석 리포트
               </h3>
-              <p className="text-xs md:text-sm text-blue-600">📧 추가 발송 확인</p>
+              <div className="inline-flex items-center gap-1 bg-[#e4edff] px-3 py-1 rounded-full">
+                <Image
+                  src="/images/main-ic-light.svg"
+                  alt="light"
+                  width={13}
+                  height={13}
+                />
+                <p className="text-xs md:text-sm text-[#001b72]">즉시 결과 확인</p>
+              </div>
             </div>
 
             {/* Step 4 */}
-            <div className="bg-white rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 text-center">
-              <div className="inline-block bg-[#FF9999] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
+            <div className="bg-white border border-[#ffbda6] rounded-[20px] md:rounded-[40px] p-4 sm:p-6 md:p-8 text-center">
+              <div className="inline-block bg-[#ff9898] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
                 STEP 04
               </div>
               <div className="mb-3 md:mb-4 flex justify-center">
                 <Image
-                  src="/images/ic_step_04.svg"
+                  src="/images/main-step-04-icon.svg"
                   alt="맞춤 솔루션 추천"
-                  width={48}
-                  height={48}
-                  className="w-12 h-12 md:w-16 md:h-16"
+                  width={58}
+                  height={58}
+                  className="w-12 h-12 md:w-14 md:h-14"
                 />
               </div>
-              <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-stone-900 mb-2 md:mb-3">
+              <h3 className="text-sm sm:text-base md:text-lg lg:text-[30px] font-bold text-[#1e1307] mb-2 md:mb-3">
                 맞춤 솔루션 추천
               </h3>
-              <p className="text-xs md:text-sm text-blue-600">📋 실용적인 안내</p>
+              <div className="inline-flex items-center gap-1 bg-[#e4edff] px-3 py-1 rounded-full">
+                <Image
+                  src="/images/main-ic-connect.svg"
+                  alt="connect"
+                  width={13}
+                  height={13}
+                />
+                <p className="text-xs md:text-sm text-[#001b72]">전문가 자동 연결</p>
+              </div>
             </div>
           </div>
 
           {/* CTA Button */}
           <div className="text-center">
             <Link
-              href="/assessments/trial"
-              className="inline-block bg-[#FF9999] text-white px-6 sm:px-8 md:px-12 py-3 md:py-4 rounded-full font-semibold text-sm sm:text-base md:text-lg hover:bg-[#FF8888] transition-colors shadow-lg"
+              href="/assessments/trial/start"
+              className="inline-block bg-[#ff7e57] text-white px-6 sm:px-8 md:px-12 py-3 md:py-4 rounded-full font-semibold text-sm sm:text-base md:text-lg lg:text-[24px] hover:bg-[#e66d47] transition-colors shadow-lg"
             >
-              3분 안에 무료 발달체크 시작하기
+              3분 만에 무료 발달체크 시작하기
             </Link>
           </div>
         </div>

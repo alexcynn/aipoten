@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 42 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group">
+<path id="Vector" d="M20.5318 10.4792C13.3367 10.4945 7.50134 16.3453 7.50134 23.5556C7.50134 26.4581 8.44834 29.1315 10.0523 31.3007C11.9924 33.8212 13.3062 36.7695 13.8867 39.9012C14.1311 41.2455 14.2686 42.605 14.2686 43.9799V45.2936C14.2686 48.7613 17.0794 51.5874 20.5471 51.6027C24.0148 51.5874 26.8255 48.7613 26.8255 45.2936V43.9799C26.8255 42.605 26.9478 41.2455 27.2074 39.9012C27.7879 36.7695 29.1017 33.8212 31.0418 31.3007C32.6458 29.1315 33.593 26.4581 33.593 23.5556C33.593 16.3453 27.7574 10.5098 20.5624 10.4792H20.5318Z" fill="var(--fill-0, #FFF0B2)"/>
+<path id="Intersect" d="M27.0173 41.0781C26.8889 42.0376 26.8259 43.0045 26.8259 43.9794V45.2939C26.8257 48.7613 24.015 51.587 20.5476 51.6025C17.08 51.5872 14.2685 48.7614 14.2683 45.2939V43.9794C14.2683 43.0046 14.1984 42.0375 14.071 41.0781H27.0173Z" fill="var(--fill-0, #D9D9D9)"/>
+<g id="Group 57">
+<path id="Vector_2" d="M20.5316 4.32318V1.52762" stroke="var(--stroke-0, #FFCF86)" stroke-width="3.05523" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_3" d="M3.94144 13.9014L1.52788 12.5113" stroke="var(--stroke-0, #FFCF86)" stroke-width="3.05523" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_4" d="M3.95674 33.0728L1.52788 34.463" stroke="var(--stroke-0, #FFCF86)" stroke-width="3.05523" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_5" d="M37.1362 33.0422L39.55 34.4476" stroke="var(--stroke-0, #FFCF86)" stroke-width="3.05523" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_6" d="M37.1213 13.8863L39.5503 12.4962" stroke="var(--stroke-0, #FFCF86)" stroke-width="3.05523" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>

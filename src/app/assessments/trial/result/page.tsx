@@ -30,7 +30,7 @@ function TrialResultContent() {
     const percentage = parseInt(searchParams.get('percentage') || '0')
 
     if (!ageInMonths || !gender) {
-      router.push('/assessments/trial')
+      router.push('/assessments/trial/start')
       return
     }
 
@@ -82,41 +82,38 @@ function TrialResultContent() {
   const feedback = getFeedback(resultData.totalScore)
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-[#F5EFE7]">
       <Header />
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-12 md:py-16 px-4 sm:px-6 lg:px-8">
         {/* Result Card */}
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+        <div className="bg-white shadow-lg rounded-xl md:rounded-2xl overflow-hidden mb-8">
           {/* Header Banner */}
           <div
+            className="p-6 sm:p-8 md:p-10 text-center"
             style={{
-              background: 'linear-gradient(to right, #386646, #98C15E)'
+              background: 'linear-gradient(135deg, #FFE5E5 0%, #FF9999 100%)'
             }}
-            className="p-8 text-center"
           >
-            <span
-              style={{ color: '#386646' }}
-              className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-white mb-4"
-            >
+            <div className="inline-block bg-[#FF9999] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4">
               체험판 결과
-            </span>
-            <h1 className="text-3xl font-bold text-white mb-2">
+            </div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-900 mb-3 md:mb-4">
               언어 발달 체크 완료!
             </h1>
-            <p className="text-white opacity-90">
+            <p className="text-sm sm:text-base md:text-lg text-stone-700">
               {resultData.ageInMonths}개월 • {resultData.gender === 'MALE' ? '남아' : '여아'}
             </p>
           </div>
 
           {/* Score */}
-          <div className="p-8 text-center border-b">
+          <div className="p-6 sm:p-8 md:p-10 text-center border-b border-gray-100">
             <div className="inline-flex flex-col items-center">
-              <div className="text-6xl mb-4">{level.emoji}</div>
-              <div className="text-gray-600 mb-4">언어 발달 수준</div>
-              <div className={`inline-flex items-center px-8 py-4 rounded-full ${level.bgColor}`}>
-                <span className={`text-3xl font-bold ${level.color}`}>
+              <div className="text-5xl sm:text-6xl md:text-7xl mb-4 md:mb-6">{level.emoji}</div>
+              <div className="text-sm sm:text-base text-stone-600 mb-3 md:mb-4">언어 발달 수준</div>
+              <div className={`inline-flex items-center px-6 sm:px-8 md:px-10 py-3 md:py-4 rounded-full ${level.bgColor}`}>
+                <span className={`text-xl sm:text-2xl md:text-3xl font-bold ${level.color}`}>
                   {level.label}
                 </span>
               </div>
@@ -124,98 +121,99 @@ function TrialResultContent() {
           </div>
 
           {/* Feedback */}
-          <div className="p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">평가 결과</h2>
-            <p className="text-gray-700 leading-relaxed mb-6">
+          <div className="p-6 sm:p-8 md:p-10">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900 mb-4 md:mb-6">평가 결과</h2>
+            <p className="text-sm sm:text-base md:text-lg text-stone-700 leading-relaxed mb-6 md:mb-8">
               {feedback}
             </p>
 
             {/* Limited Info Box */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-yellow-900 mb-2">
-                ⚠️ 체험판 한계
+            <div className="bg-[#FFF5E8] border-2 border-[#FFA01B] rounded-xl p-4 sm:p-6">
+              <h3 className="text-sm sm:text-base font-bold text-[#FFA01B] mb-3 flex items-center">
+                <span className="mr-2">⚠️</span>
+                체험판 한계
               </h3>
-              <ul className="text-sm text-yellow-800 space-y-1">
-                <li>• 이 결과는 언어 발달 영역만 평가한 것입니다</li>
-                <li>• 대근육, 소근육, 인지, 사회성 영역은 평가되지 않았습니다</li>
-                <li>• 결과가 저장되지 않으며, 발달 추이를 확인할 수 없습니다</li>
-                <li>• 정확한 발달 평가를 위해서는 전체 진단을 권장합니다</li>
+              <ul className="text-xs sm:text-sm text-stone-700 space-y-2">
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>이 결과는 언어 발달 영역만 평가한 것입니다</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>대근육, 소근육, 인지, 사회성 영역은 평가되지 않았습니다</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>결과가 저장되지 않으며, 발달 추이를 확인할 수 없습니다</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>정확한 발달 평가를 위해서는 전체 진단을 권장합니다</span>
+                </li>
               </ul>
             </div>
           </div>
         </div>
 
         {/* CTA Section */}
-        <div className="bg-white shadow-lg rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="bg-white shadow-lg rounded-xl md:rounded-2xl p-6 sm:p-8 md:p-10 text-center">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-stone-900 mb-3 md:mb-4">
             전체 발달체크로 더 정확한 평가를!
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-sm sm:text-base md:text-lg text-stone-600 mb-8 md:mb-12">
             회원가입 후 5개 영역 전체 진단을 받으시면<br />
             상세한 발달 리포트, 맞춤 놀이영상, 발달 추이 그래프를 확인하실 수 있습니다.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="text-center">
-              <div
-                style={{ backgroundColor: '#98C15E' }}
-                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
-              >
-                <span className="text-2xl">📊</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+            <div className="bg-[#F5EFE7] rounded-xl p-6 text-center hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 bg-[#FF9999]">
+                <span className="text-xl sm:text-2xl">📊</span>
               </div>
-              <h3 style={{ color: '#193149' }} className="font-semibold mb-1">5개 영역 진단</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="text-base sm:text-lg font-bold text-stone-900 mb-2">5개 영역 진단</h3>
+              <p className="text-xs sm:text-sm text-stone-600">
                 대근육, 소근육, 언어, 인지, 사회성
               </p>
             </div>
-            <div className="text-center">
-              <div
-                style={{ backgroundColor: '#5D93B3' }}
-                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
-              >
-                <span className="text-2xl">📈</span>
+            <div className="bg-[#F5EFE7] rounded-xl p-6 text-center hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 bg-[#FF9999]">
+                <span className="text-xl sm:text-2xl">📈</span>
               </div>
-              <h3 style={{ color: '#193149' }} className="font-semibold mb-1">발달 추이</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="text-base sm:text-lg font-bold text-stone-900 mb-2">발달 추이</h3>
+              <p className="text-xs sm:text-sm text-stone-600">
                 시간에 따른 성장 기록
               </p>
             </div>
-            <div className="text-center">
-              <div
-                style={{ backgroundColor: '#F78C6B' }}
-                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
-              >
-                <span className="text-2xl">🎯</span>
+            <div className="bg-[#F5EFE7] rounded-xl p-6 text-center hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 bg-[#FF9999]">
+                <span className="text-xl sm:text-2xl">🎯</span>
               </div>
-              <h3 style={{ color: '#193149' }} className="font-semibold mb-1">맞춤 추천</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="text-base sm:text-lg font-bold text-stone-900 mb-2">맞춤 추천</h3>
+              <p className="text-xs sm:text-sm text-stone-600">
                 AI 기반 놀이영상 추천
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
             <Link
               href="/signup"
-              style={{ backgroundColor: '#F78C6B' }}
-              className="px-8 py-3 text-white rounded-md hover:opacity-90 transition-all font-medium text-lg shadow-md"
+              className="inline-block bg-[#FF6A00] text-white px-6 sm:px-8 md:px-10 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base md:text-lg hover:bg-[#E55F00] transition-colors shadow-lg"
             >
               회원가입하고 전체 진단받기
             </Link>
             <Link
               href="/login?redirect=/parent/assessments"
-              style={{ borderColor: '#193149', borderWidth: '2px', color: '#193149' }}
-              className="px-8 py-3 bg-white rounded-md hover:bg-gray-50 transition-colors font-medium text-lg"
+              className="inline-block border-2 border-stone-900 text-stone-900 px-6 sm:px-8 md:px-10 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base md:text-lg hover:bg-gray-50 transition-colors"
             >
               로그인
             </Link>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 md:mt-8">
             <Link
               href="/assessments/trial/start"
-              style={{ color: '#386646' }}
-              className="text-sm hover:opacity-70 underline font-medium"
+              className="text-xs sm:text-sm text-stone-600 hover:text-[#FF6A00] underline font-medium transition-colors"
             >
               다시 체험하기
             </Link>

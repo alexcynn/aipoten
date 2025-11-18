@@ -137,28 +137,28 @@ export default function AssessmentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-[#F5EFE7]">
       <Header />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <main className="max-w-7xl mx-auto py-12 md:py-16 px-4 sm:px-6 lg:px-8">
+        <div className="sm:px-0">
           {/* Header Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">발달체크</h1>
-            <p className="mt-2 text-gray-600">
+          <div className="mb-8 md:mb-12">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-stone-900 mb-3 md:mb-4">발달체크</h1>
+            <p className="text-sm sm:text-base md:text-lg text-stone-700">
               우리 아이의 발달 상태를 정기적으로 체크하고 관리해보세요.
             </p>
           </div>
 
           {/* Action Bar */}
-          <div className="bg-white shadow rounded-lg p-6 mb-8">
+          <div className="bg-white shadow-sm rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 mb-6 md:mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
                 <select
                   value={selectedChildId}
                   onChange={(e) => setSelectedChildId(e.target.value)}
-                  className="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green"
+                  className="border-2 border-gray-300 rounded-[10px] shadow-sm py-2 md:py-3 px-3 md:px-4 focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent text-sm sm:text-base"
                 >
                   <option value="">모든 아이</option>
                   {children.map((child) => (
@@ -172,17 +172,14 @@ export default function AssessmentsPage() {
               {children.length > 0 ? (
                 <Link
                   href="/parent/assessments/new"
-                  className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md shadow-md text-white transition-colors"
-                  style={{ backgroundColor: '#F78C6B' }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                  className="inline-block bg-[#FF6A00] text-white px-6 sm:px-8 md:px-10 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base md:text-lg hover:bg-[#E55F00] transition-colors shadow-lg w-full sm:w-auto text-center"
                 >
                   발달체크 시작하기
                 </Link>
               ) : (
                 <Link
                   href="/parent/children/new"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-blue hover:bg-aipoten-navy"
+                  className="inline-block bg-[#FF9999] text-white px-6 sm:px-8 py-3 rounded-[10px] font-semibold text-sm sm:text-base hover:bg-[#FF8888] transition-colors shadow-lg w-full sm:w-auto text-center"
                 >
                   먼저 아이를 등록하세요
                 </Link>
@@ -191,19 +188,19 @@ export default function AssessmentsPage() {
           </div>
 
           {/* Assessments List */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">발달체크 기록</h3>
+          <div className="bg-white shadow-sm rounded-xl md:rounded-2xl">
+            <div className="px-4 py-5 sm:p-6 md:p-8">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900 mb-4 md:mb-6">발달체크 기록</h3>
 
               {filteredAssessments.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-4xl">📊</span>
+                <div className="text-center py-12 md:py-16">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#FFE5E5] rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+                    <span className="text-3xl sm:text-4xl md:text-5xl">📊</span>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-stone-900 mb-2 md:mb-3">
                     {selectedChildId ? '해당 아이의 발달체크 기록이 없습니다' : '아직 발달체크 기록이 없습니다'}
                   </h3>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-sm sm:text-base text-stone-600 mb-6 md:mb-8">
                     {selectedChildId
                       ? '첫 번째 발달체크를 시작해보세요.'
                       : '첫 번째 발달체크를 시작해보세요.'}
@@ -211,17 +208,14 @@ export default function AssessmentsPage() {
                   {children.length > 0 && (
                     <Link
                       href="/parent/assessments/new"
-                      className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md shadow-md text-white transition-colors"
-                      style={{ backgroundColor: '#F78C6B' }}
-                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                      className="inline-block bg-[#FF6A00] text-white px-6 sm:px-8 md:px-10 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base md:text-lg hover:bg-[#E55F00] transition-colors shadow-lg"
                     >
                       첫 발달체크 시작하기
                     </Link>
                   )}
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-4 md:space-y-6">
                   {filteredAssessments.map((assessment) => {
                     const date = new Date(assessment.createdAt)
                     const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
@@ -236,21 +230,21 @@ export default function AssessmentsPage() {
                         href={`/parent/assessments/${assessment.id}`}
                         className="block"
                       >
-                        <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:border-aipoten-green transition-all cursor-pointer">
+                        <div className="bg-white border-2 border-gray-200 rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-[#FF6A00] transition-all cursor-pointer">
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-3">
-                                <h4 className="text-lg font-semibold text-gray-900">
+                              <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                                <h4 className="text-base sm:text-lg md:text-xl font-bold text-stone-900">
                                   {assessment.child.name}의 발달체크
                                 </h4>
-                                <span className="text-sm font-medium text-gray-600">{formattedDate}</span>
-                                <span className="text-sm text-gray-500">
+                                <span className="text-xs sm:text-sm font-medium text-stone-600">{formattedDate}</span>
+                                <span className="text-xs sm:text-sm text-stone-500">
                                   {assessment.ageInMonths}개월
                                 </span>
                                 <span
-                                  className="px-3 py-1 rounded-full text-xs font-medium"
+                                  className="px-2 md:px-3 py-1 rounded-full text-xs font-semibold"
                                   style={{
-                                    backgroundColor: assessment.completedAt ? '#98C15E' : '#E5E7EB',
+                                    backgroundColor: assessment.completedAt ? '#7CCF3C' : '#E5E7EB',
                                     color: assessment.completedAt ? 'white' : '#6B7280'
                                   }}
                                 >
@@ -260,7 +254,7 @@ export default function AssessmentsPage() {
 
                               {/* 전체 발달 수준 표시 */}
                               <div
-                                className="inline-block px-4 py-2 rounded-lg text-lg font-bold mb-3"
+                                className="inline-block px-3 md:px-4 py-2 rounded-lg text-sm sm:text-base md:text-lg font-bold mb-3"
                                 style={{
                                   backgroundColor: levelInfo.bgColor,
                                   color: levelInfo.color
@@ -277,7 +271,7 @@ export default function AssessmentsPage() {
                                     return (
                                       <div
                                         key={idx}
-                                        className="text-xs px-2 py-1 rounded font-medium"
+                                        className="text-xs px-2 md:px-3 py-1 rounded-md font-medium"
                                         style={{
                                           backgroundColor: resultLevelInfo.bgColor,
                                           color: resultLevelInfo.color
@@ -290,8 +284,8 @@ export default function AssessmentsPage() {
                                 </div>
                               )}
                             </div>
-                            <div className="ml-4">
-                              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="ml-4 flex-shrink-0">
+                              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                               </svg>
                             </div>

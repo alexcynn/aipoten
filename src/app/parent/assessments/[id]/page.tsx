@@ -341,48 +341,48 @@ ${assessment.concernsText ? `## 부모님의 우려 사항\n${assessment.concern
   const interpretation = getOverallInterpretation()
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-[#F5EFE7]">
       <Header />
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <main className="max-w-7xl mx-auto py-12 md:py-16 px-4 sm:px-6 lg:px-8">
+        <div className="sm:px-0">
           {/* Assessment Header */}
-          <div className="bg-white shadow rounded-lg mb-6">
-            <div className="px-4 py-5 sm:p-6">
-              <div className="flex justify-between items-start mb-4">
+          <div className="bg-white shadow-sm rounded-xl md:rounded-2xl mb-6 md:mb-8">
+            <div className="px-4 py-5 sm:p-6 md:p-8">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 md:mb-8">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-stone-900 mb-2">
                     {assessment.child.name}의 발달체크 결과
                   </h1>
-                  <p className="text-gray-600 mt-1">
+                  <p className="text-sm sm:text-base text-stone-600">
                     평가일: {new Date(assessment.createdAt).toLocaleDateString('ko-KR')} •
                     당시 월령: {assessment.ageInMonths}개월
                   </p>
                 </div>
                 <Link
                   href={`/assessments/new?childId=${assessment.child.id}`}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy"
+                  className="inline-block bg-[#FF9999] text-white px-4 sm:px-6 md:px-8 py-2 md:py-3 rounded-[10px] font-semibold text-sm sm:text-base hover:bg-[#FF8888] transition-colors shadow-lg whitespace-nowrap"
                 >
                   새 평가 시작
                 </Link>
               </div>
 
               {/* Overall Result */}
-              <div className="bg-gray-50 rounded-lg p-8 text-center">
-                <div className={`text-3xl font-bold mb-4 ${interpretation.color}`}>
+              <div className="bg-gradient-to-r from-[#FFE5E5] to-[#FF9999] rounded-xl md:rounded-2xl p-6 sm:p-8 md:p-10 text-center">
+                <div className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 ${interpretation.color}`}>
                   {interpretation.level}
                 </div>
-                <div className="text-sm text-gray-500 mb-4">종합 발달 수준</div>
-                <p className="text-gray-700">{interpretation.description}</p>
+                <div className="text-xs sm:text-sm text-stone-600 mb-3 md:mb-4 font-medium">종합 발달 수준</div>
+                <p className="text-sm sm:text-base md:text-lg text-stone-700 leading-relaxed">{interpretation.description}</p>
               </div>
             </div>
           </div>
 
           {/* Radar Chart */}
-          <div className="bg-white shadow rounded-lg mb-6">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-6 text-center">발달 영역 종합 차트</h3>
+          <div className="bg-white shadow-sm rounded-xl md:rounded-2xl mb-6 md:mb-8">
+            <div className="px-4 py-5 sm:p-6 md:p-8">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900 mb-6 md:mb-8 text-center">발달 영역 종합 차트</h3>
               <div className="flex justify-center">
                 <ResponsiveContainer width="100%" height={400}>
                   <RadarChart data={getRadarChartData()}>
@@ -435,20 +435,20 @@ ${assessment.concernsText ? `## 부모님의 우려 사항\n${assessment.concern
           </div>
 
           {/* Category Results */}
-          <div className="bg-white shadow rounded-lg mb-6">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">영역별 발달 수준</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="bg-white shadow-sm rounded-xl md:rounded-2xl mb-6 md:mb-8">
+            <div className="px-4 py-5 sm:p-6 md:p-8">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900 mb-4 md:mb-6">영역별 발달 수준</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
                 {(assessment.results || []).map((result) => {
                   const levelInfo = LEVEL_LABELS[result.level] || LEVEL_LABELS.NORMAL
                   return (
-                    <div key={result.id} className="border border-gray-200 rounded-lg p-4 text-center">
-                      <h4 className="font-medium text-gray-900 mb-3">
+                    <div key={result.id} className="border-2 border-gray-200 rounded-xl p-4 md:p-6 text-center hover:shadow-md transition-shadow">
+                      <h4 className="font-bold text-sm sm:text-base text-stone-900 mb-3">
                         {CATEGORY_LABELS[result.category] || result.category}
                       </h4>
-                      <div className="text-3xl mb-2">{levelInfo.emoji}</div>
-                      <div className={`inline-flex items-center px-3 py-2 rounded-full ${levelInfo.bgColor}`}>
-                        <span className={`text-sm font-medium ${levelInfo.color}`}>
+                      <div className="text-3xl sm:text-4xl md:text-5xl mb-3">{levelInfo.emoji}</div>
+                      <div className={`inline-flex items-center px-2 md:px-3 py-1 md:py-2 rounded-full ${levelInfo.bgColor}`}>
+                        <span className={`text-xs sm:text-sm font-semibold ${levelInfo.color}`}>
                           {levelInfo.label}
                         </span>
                       </div>
@@ -460,10 +460,10 @@ ${assessment.concernsText ? `## 부모님의 우려 사항\n${assessment.concern
           </div>
 
           {/* AI Analysis Section */}
-          <div className="mt-6 bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">AI 종합 분석</h3>
+          <div className="mt-6 md:mt-8 bg-white shadow-sm rounded-xl md:rounded-2xl">
+            <div className="px-4 py-5 sm:p-6 md:p-8">
+              <div className="flex items-center justify-between mb-4 md:mb-6">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900">AI 종합 분석</h3>
               </div>
 
               {/* 프롬프트 관리 섹션 */}
@@ -589,23 +589,7 @@ ${assessment.concernsText ? `## 부모님의 우려 사항\n${assessment.concern
                 <button
                   onClick={handleGenerateAnalysis}
                   disabled={isGeneratingAnalysis}
-                  style={{
-                    width: '100%',
-                    backgroundColor: isGeneratingAnalysis ? '#9CA3AF' : '#386646',
-                    color: 'white',
-                    padding: '12px',
-                    borderRadius: '6px',
-                    fontWeight: '600',
-                    cursor: isGeneratingAnalysis ? 'not-allowed' : 'pointer',
-                    border: 'none',
-                    marginBottom: '16px',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isGeneratingAnalysis) e.currentTarget.style.backgroundColor = '#193149'
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isGeneratingAnalysis) e.currentTarget.style.backgroundColor = '#386646'
-                  }}
+                  className="w-full bg-[#FF6A00] text-white px-6 md:px-8 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base md:text-lg hover:bg-[#E55F00] transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mb-4 md:mb-6"
                 >
                   {isGeneratingAnalysis ? '분석 생성 중...' : 'AI 분석 생성하기'}
                 </button>
@@ -674,51 +658,51 @@ ${assessment.concernsText ? `## 부모님의 우려 사항\n${assessment.concern
           </div>
 
           {/* Recommendations */}
-          <div className="mt-6 bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">추천 활동</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="mt-6 md:mt-8 bg-white shadow-sm rounded-xl md:rounded-2xl">
+            <div className="px-4 py-5 sm:p-6 md:p-8">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900 mb-4 md:mb-6">추천 활동</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <Link
                   href={`/videos?childId=${assessment.child.id}&age=${assessment.ageInMonths}`}
-                  className="p-4 border-2 border-gray-200 rounded-lg hover:border-aipoten-green hover:bg-gray-50 transition-colors"
+                  className="bg-white p-4 md:p-6 border-2 border-gray-200 rounded-xl hover:border-[#FF6A00] hover:shadow-md transition-all"
                 >
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-aipoten-red rounded-full flex items-center justify-center mr-3">
-                      <span className="text-white">📹</span>
+                  <div className="flex flex-col sm:flex-row items-center text-center sm:text-left">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#FF9999] rounded-full flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 flex-shrink-0">
+                      <span className="text-2xl">📹</span>
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900">추천 영상</h4>
-                      <p className="text-sm text-gray-500">발달에 도움되는 영상</p>
+                      <h4 className="font-bold text-sm sm:text-base text-stone-900 mb-1">추천 영상</h4>
+                      <p className="text-xs sm:text-sm text-stone-600">발달에 도움되는 영상</p>
                     </div>
                   </div>
                 </Link>
 
                 <Link
                   href={`/spirituality?childId=${assessment.child.id}`}
-                  className="p-4 border-2 border-gray-200 rounded-lg hover:border-aipoten-green hover:bg-gray-50 transition-colors"
+                  className="bg-white p-4 md:p-6 border-2 border-gray-200 rounded-xl hover:border-[#FF6A00] hover:shadow-md transition-all"
                 >
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-aipoten-orange rounded-full flex items-center justify-center mr-3">
-                      <span className="text-white">🎮</span>
+                  <div className="flex flex-col sm:flex-row items-center text-center sm:text-left">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#FF6A00] rounded-full flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 flex-shrink-0">
+                      <span className="text-2xl">🎮</span>
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900">놀이 영성</h4>
-                      <p className="text-sm text-gray-500">맞춤 놀이 활동</p>
+                      <h4 className="font-bold text-sm sm:text-base text-stone-900 mb-1">놀이 영성</h4>
+                      <p className="text-xs sm:text-sm text-stone-600">맞춤 놀이 활동</p>
                     </div>
                   </div>
                 </Link>
 
                 <Link
                   href="/boards"
-                  className="p-4 border-2 border-gray-200 rounded-lg hover:border-aipoten-green hover:bg-gray-50 transition-colors"
+                  className="bg-white p-4 md:p-6 border-2 border-gray-200 rounded-xl hover:border-[#FF6A00] hover:shadow-md transition-all"
                 >
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-aipoten-blue rounded-full flex items-center justify-center mr-3">
-                      <span className="text-white">💬</span>
+                  <div className="flex flex-col sm:flex-row items-center text-center sm:text-left">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#FF9999] rounded-full flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 flex-shrink-0">
+                      <span className="text-2xl">💬</span>
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900">커뮤니티</h4>
-                      <p className="text-sm text-gray-500">다른 부모와 소통</p>
+                      <h4 className="font-bold text-sm sm:text-base text-stone-900 mb-1">커뮤니티</h4>
+                      <p className="text-xs sm:text-sm text-stone-600">다른 부모와 소통</p>
                     </div>
                   </div>
                 </Link>
@@ -727,15 +711,15 @@ ${assessment.concernsText ? `## 부모님의 우려 사항\n${assessment.concern
                   <button
                     onClick={handleTherapistRecommendation}
                     disabled={isLoadingRecommendations}
-                    className="p-4 border-2 border-green-500 rounded-lg hover:border-green-600 hover:bg-green-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                    className="bg-white p-4 md:p-6 border-2 border-[#7CCF3C] rounded-xl hover:border-[#FF6A00] hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left"
                   >
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-white">👨‍⚕️</span>
+                    <div className="flex flex-col sm:flex-row items-center text-center sm:text-left">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#7CCF3C] rounded-full flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 flex-shrink-0">
+                        <span className="text-2xl">👨‍⚕️</span>
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-900">치료사 추천</h4>
-                        <p className="text-sm text-gray-500">
+                        <h4 className="font-bold text-sm sm:text-base text-stone-900 mb-1">치료사 추천</h4>
+                        <p className="text-xs sm:text-sm text-stone-600">
                           {isLoadingRecommendations ? '로딩 중...' : '맞춤 치료사 찾기'}
                         </p>
                       </div>

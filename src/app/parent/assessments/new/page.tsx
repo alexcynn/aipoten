@@ -577,53 +577,53 @@ function AssessmentContent() {
   const progress = getTotalQuestions() > 0 ? (getCompletedQuestions() / getTotalQuestions()) * 100 : 0
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-[#F5EFE7]">
       <Header />
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <main className="max-w-7xl mx-auto py-12 md:py-16 px-4 sm:px-6 lg:px-8">
+        <div className="sm:px-0">
           {selectedChild ? (
             /* Assessment Form with Q1→Q2→Q3 Flow */
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
+            <div className="bg-white shadow-sm rounded-xl md:rounded-2xl">
+              <div className="px-4 py-5 sm:p-6 md:p-8">
                 {/* Header */}
-                <div className="mb-6">
-                  <div className="mb-4">
-                    <h1 className="text-2xl font-bold text-gray-900">
+                <div className="mb-6 md:mb-8">
+                  <div className="mb-4 md:mb-6">
+                    <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-stone-900 mb-2">
                       {selectedChild?.name}의 발달체크
                     </h1>
-                    <p className="text-gray-600 mt-1">
+                    <p className="text-sm sm:text-base md:text-lg text-stone-600">
                       현재 월령: {calculateAge(selectedChild?.birthDate || '')}개월
                     </p>
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="mb-4">
-                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <div className="mb-4 md:mb-6">
+                    <div className="flex justify-between text-xs sm:text-sm text-stone-600 mb-2">
                       <span>
                         {currentQuestion ? (
-                          <span className="font-medium text-aipoten-green">
+                          <span className="font-semibold text-[#FF6A00]">
                             {CATEGORY_LABELS[currentQuestion.category]} 영역 테스트 중
                           </span>
                         ) : (
                           <span>진행률</span>
                         )}
                       </span>
-                      <span>{getCompletedQuestions()} / {getTotalQuestions()}</span>
+                      <span className="font-medium">{getCompletedQuestions()} / {getTotalQuestions()}</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 md:h-3">
                       <div
-                        className="h-3 rounded-full transition-all duration-300"
+                        className="h-2.5 md:h-3 rounded-full transition-all duration-300"
                         style={{
                           width: `${progress}%`,
-                          backgroundColor: '#386646'
+                          backgroundColor: '#FF6A00'
                         }}
                       ></div>
                     </div>
 
                     {/* Category Progress Indicators */}
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-3 md:mt-4 flex flex-wrap gap-2">
                       {getActualCategoryOrder().map(category => {
                         const categoryProgress = getCategoryProgress()[category]
                         if (!categoryProgress || categoryProgress.total === 0) return null
@@ -634,12 +634,12 @@ function AssessmentContent() {
                         return (
                           <div
                             key={category}
-                            className={`text-xs px-2 py-1 rounded-full ${
+                            className={`text-xs px-2 md:px-3 py-1 rounded-full font-medium ${
                               isCompleted
-                                ? 'bg-green-100 text-green-800'
+                                ? 'bg-[#EDFCE2] text-[#7CCF3C]'
                                 : isCurrent
-                                ? 'bg-blue-100 text-blue-800 font-medium'
-                                : 'bg-gray-100 text-gray-600'
+                                ? 'bg-[#FFF5E8] text-[#FF6A00] font-semibold'
+                                : 'bg-gray-100 text-stone-600'
                             }`}
                           >
                             {CATEGORY_LABELS[category]} {categoryProgress.completed}/{categoryProgress.total}
@@ -652,8 +652,8 @@ function AssessmentContent() {
 
                 {/* Completion Message */}
                 {completionMessage && (
-                  <div className="mb-6 p-4 bg-green-50 border-2 border-green-300 rounded-lg text-center animate-fade-in">
-                    <p className="text-green-800 font-medium text-lg">
+                  <div className="mb-6 md:mb-8 p-4 md:p-6 bg-[#EDFCE2] border-2 border-[#7CCF3C] rounded-xl text-center animate-fade-in">
+                    <p className="text-[#7CCF3C] font-semibold text-base sm:text-lg md:text-xl">
                       {completionMessage}
                     </p>
                   </div>
@@ -661,15 +661,14 @@ function AssessmentContent() {
 
                 {/* Category Transition Screen */}
                 {showCategoryTransition && categoryCompleted ? (
-                  <div className="text-center py-12">
-                    <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
-                      style={{ backgroundColor: '#10b981' }}>
-                      <span className="text-white text-4xl">✓</span>
+                  <div className="text-center py-12 md:py-16">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 bg-[#7CCF3C]">
+                      <span className="text-white text-3xl sm:text-4xl md:text-5xl">✓</span>
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-stone-900 mb-3 md:mb-4">
                       {CATEGORY_LABELS[categoryCompleted]} 영역 완료!
                     </h2>
-                    <p className="text-gray-600 mb-8 text-lg">
+                    <p className="text-sm sm:text-base md:text-lg text-stone-600 mb-8 md:mb-12">
                       {isLastCategory()
                         ? '모든 발달 영역 평가를 완료하셨습니다!'
                         : `다음은 ${getNextCategoryLabel()} 영역입니다.`
@@ -678,17 +677,7 @@ function AssessmentContent() {
                     <button
                       onClick={isLastCategory() ? handleMoveToConcernsStep : handleContinueToNextCategory}
                       disabled={isSubmitting}
-                      className="px-8 py-4 text-lg font-medium rounded-lg shadow-lg transition-all disabled:opacity-50"
-                      style={{
-                        backgroundColor: '#386646',
-                        color: '#FFFFFF'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isSubmitting) e.currentTarget.style.backgroundColor = '#193149'
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isSubmitting) e.currentTarget.style.backgroundColor = '#386646'
-                      }}
+                      className="inline-block bg-[#FF6A00] text-white px-6 sm:px-8 md:px-10 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base md:text-lg hover:bg-[#E55F00] transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLastCategory()
                         ? '다음'
@@ -697,55 +686,48 @@ function AssessmentContent() {
                     </button>
                   </div>
                 ) : showConcernsStep ? (
-                  /* 서술형 우려 사항 질문 */
-                  <div className="py-8">
-                    <div className="text-center mb-8">
-                      <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  /* 서술형 우려 사항 질문 */}
+                  <div className="py-8 md:py-12">
+                    <div className="text-center mb-8 md:mb-12">
+                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-900 mb-4 md:mb-6">
                         마지막 질문입니다
                       </h2>
-                      <p className="text-lg text-gray-600">
+                      <p className="text-sm sm:text-base md:text-lg text-stone-600 mb-2">
                         아이의 발달에 대해 특별히 궁금하거나 우려되는 점이 있으신가요?
                       </p>
-                      <p className="text-sm text-gray-500 mt-2">
+                      <p className="text-xs sm:text-sm text-stone-500">
                         (선택 사항) 작성하신 내용은 AI 분석에 반영되어 더 맞춤화된 피드백을 제공합니다.
                       </p>
                     </div>
 
-                    <div className="max-w-2xl mx-auto">
+                    <div className="max-w-3xl mx-auto">
                       <textarea
                         value={concernsText}
                         onChange={(e) => setConcernsText(e.target.value)}
                         placeholder="예: 또래 아이들에 비해 말이 느린 것 같아 걱정됩니다..."
                         rows={6}
                         maxLength={1000}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aipoten-green focus:border-transparent resize-none"
+                        className="w-full px-4 md:px-5 py-3 md:py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent resize-none text-sm sm:text-base"
                       />
-                      <div className="text-right text-sm text-gray-500 mt-2">
+                      <div className="text-right text-xs sm:text-sm text-stone-500 mt-2">
                         {concernsText.length} / 1000
                       </div>
 
-                      <div className="flex gap-3 mt-6">
+                      <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mt-6 md:mt-8">
                         <button
                           onClick={() => {
                             setConcernsText('')
                             handleSubmit()
                           }}
                           disabled={isSubmitting}
-                          className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                          className="flex-1 px-6 md:px-8 py-3 md:py-4 border-2 border-gray-300 text-stone-700 rounded-[10px] hover:bg-gray-50 transition-colors disabled:opacity-50 font-semibold text-sm sm:text-base"
                         >
                           건너뛰기
                         </button>
                         <button
                           onClick={handleSubmit}
                           disabled={isSubmitting}
-                          className="flex-1 px-6 py-3 text-white rounded-lg transition-colors disabled:opacity-50"
-                          style={{ backgroundColor: '#386646' }}
-                          onMouseEnter={(e) => {
-                            if (!isSubmitting) e.currentTarget.style.backgroundColor = '#193149'
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isSubmitting) e.currentTarget.style.backgroundColor = '#386646'
-                          }}
+                          className="flex-1 bg-[#FF6A00] text-white px-6 md:px-8 py-3 md:py-4 rounded-[10px] hover:bg-[#E55F00] transition-colors disabled:opacity-50 font-semibold text-sm sm:text-base shadow-lg"
                         >
                           {isSubmitting ? '저장 중...' : '제출하고 결과 보기'}
                         </button>
@@ -753,22 +735,22 @@ function AssessmentContent() {
                     </div>
                   </div>
                 ) : currentQuestion ? (
-                  <div className="space-y-6">
-                    <div className="bg-gray-50 p-6 rounded-lg">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-aipoten-accent bg-opacity-20 text-aipoten-green">
+                  <div className="space-y-6 md:space-y-8">
+                    <div className="bg-[#F5EFE7] p-4 sm:p-6 md:p-8 rounded-xl md:rounded-2xl">
+                      <div className="flex items-center justify-between mb-4 md:mb-6">
+                        <span className="inline-flex items-center px-3 md:px-4 py-1 md:py-2 rounded-full text-xs sm:text-sm font-semibold bg-[#FF9999] text-white">
                           {CATEGORY_LABELS[currentQuestion.category]}
                         </span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-xs sm:text-sm text-stone-500 font-medium">
                           {currentQuestion.level}
                         </span>
                       </div>
-                      <h2 className="text-lg font-medium text-gray-900 mb-6">
+                      <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-stone-900 mb-6 md:mb-8 leading-relaxed">
                         {currentQuestion.questionText}
                       </h2>
 
                       {/* Answer Options */}
-                      <div className="grid grid-cols-1 gap-3">
+                      <div className="grid grid-cols-1 gap-3 md:gap-4">
                         {(currentQuestion.answerType === 'FOUR_POINT'
                           ? FOUR_POINT_OPTIONS
                           : currentQuestion.level === 'Q3'
@@ -778,25 +760,25 @@ function AssessmentContent() {
                           <button
                             key={option.value}
                             onClick={() => handleAnswer(option.value, option.score)}
-                            className="p-4 border-2 border-gray-300 rounded-lg hover:border-aipoten-green hover:bg-aipoten-green hover:bg-opacity-5 transition-colors text-left"
+                            className="p-4 md:p-5 border-2 border-gray-300 rounded-[10px] hover:border-[#FF6A00] hover:bg-[#FFF5EB] transition-colors text-left"
                           >
-                            <span className="text-gray-900 font-medium">{option.value}</span>
+                            <span className="text-sm sm:text-base md:text-lg text-stone-900 font-semibold">{option.value}</span>
                           </button>
                         ))}
                       </div>
                     </div>
 
                     {/* Navigation */}
-                    <div className="flex justify-between items-center pt-4">
+                    <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                       <button
                         onClick={handlePrevious}
                         disabled={currentQuestionIndex === 0}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 md:px-6 py-2 md:py-3 text-xs sm:text-sm font-semibold text-stone-700 bg-white border-2 border-gray-300 rounded-[10px] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         ← 이전
                       </button>
 
-                      <div className="text-sm text-gray-500">
+                      <div className="text-xs sm:text-sm text-stone-500 font-medium">
                         응답 완료: {responses.length}개
                       </div>
                     </div>
