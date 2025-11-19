@@ -636,10 +636,10 @@ function AssessmentContent() {
       }
 
       const assessment = await response.json()
+      // 성공 시 isSubmitting을 유지하여 버튼 비활성화 상태 유지
       router.push(`/parent/assessments/${assessment.id}`)
     } catch (err: any) {
       setError(err.message)
-    } finally {
       setIsSubmitting(false)
     }
   }
@@ -832,7 +832,15 @@ function AssessmentContent() {
                           disabled={isSubmitting}
                           className="flex-1 bg-[#FF6A00] text-white px-6 md:px-8 py-3 md:py-4 rounded-[10px] hover:bg-[#E55F00] transition-colors disabled:opacity-50 font-semibold text-sm sm:text-base shadow-lg"
                         >
-                          {isSubmitting ? '저장 중...' : '제출하고 결과 보기'}
+                          {isSubmitting ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                              AI가 결과를 분석 중입니다...
+                            </span>
+                          ) : '제출하고 결과 보기'}
                         </button>
                         {/* 프롬프트 보기 버튼 - 임시 숨김
                         <button
@@ -911,7 +919,15 @@ function AssessmentContent() {
                       disabled={isSubmitting}
                       className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-aipoten-green hover:bg-aipoten-navy disabled:opacity-50"
                     >
-                      {isSubmitting ? '저장 중...' : '평가 완료 및 결과 보기'}
+                      {isSubmitting ? (
+                        <span className="flex items-center gap-2">
+                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          AI가 결과를 분석 중입니다...
+                        </span>
+                      ) : '평가 완료 및 결과 보기'}
                     </button>
                   </div>
                 )}

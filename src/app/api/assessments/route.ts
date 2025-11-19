@@ -94,10 +94,13 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 자동 AI 분석 생성 (백그라운드에서 실행)
-    triggerAIAnalysis(assessment.id, ageInMonths, savedResults, concernsText).catch((error) => {
-      console.error('자동 AI 분석 생성 실패:', error)
-    })
+    // AI 분석 생성 (완료까지 대기)
+    try {
+      await triggerAIAnalysis(assessment.id, ageInMonths, savedResults, concernsText)
+    } catch (error) {
+      console.error('AI 분석 생성 실패:', error)
+      // AI 분석 실패해도 발달체크 결과는 반환
+    }
 
     return NextResponse.json({
       message: '발달 체크가 완료되었습니다.',

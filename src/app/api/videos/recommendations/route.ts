@@ -31,16 +31,6 @@ export async function GET(request: NextRequest) {
       where: {
         id: childId,
         userId: session.user.id
-      },
-      include: {
-        assessments: {
-          where: { status: 'COMPLETED' },
-          include: {
-            results: true
-          },
-          orderBy: { completedAt: 'desc' },
-          take: 1
-        }
       }
     })
 
@@ -51,6 +41,18 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // 최근 완료된 발달체크 결과 조회
+    const latestAssessment = await prisma.developmentAssessment.findFirst({
+      where: {
+        childId: childId,
+        status: 'COMPLETED'
+      },
+      include: {
+        results: true
+      },
+      orderBy: { completedAt: 'desc' }
+    })
+
     // 현재 월령 계산
     const birthDate = new Date(child.birthDate)
     const today = new Date()
@@ -58,53 +60,30 @@ export async function GET(request: NextRequest) {
       (today.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
     )
 
-    // 기본 추천: 연령대에 맞는 영상
-    let recommendedVideos = await prisma.video.findMany({
-      where: {
-        isPublished: true,
-        targetAgeMin: { lte: ageInMonths },
-        targetAgeMax: { gte: ageInMonths }
-      },
-      orderBy: [
-        { priority: 'desc' },
-        { viewCount: 'desc' }
-      ],
-      take: limit
-    })
+    let recommendedVideos: any[] = []
+    let priorityCategories: string[] = []
 
-    // 연령대에 맞는 영상이 없으면 전체 공개 영상에서 가져오기
-    if (recommendedVideos.length === 0) {
-      recommendedVideos = await prisma.video.findMany({
-        where: {
-          isPublished: true
-        },
-        orderBy: [
-          { priority: 'desc' },
-          { viewCount: 'desc' }
-        ],
-        take: limit
-      })
-    }
+    // 최근 발달 체크 결과가 있는 경우 취약 영역 영상만 추천
+    if (latestAssessment) {
+      // NEEDS_ASSESSMENT(전문가 상담 필요)와 NEEDS_TRACKING(관심필요)을 분리
+      const needsAssessmentCategories: string[] = []
+      const needsTrackingCategories: string[] = []
 
-    // 최근 발달 체크 결과가 있는 경우 맞춤 추천
-    if (child.assessments.length > 0) {
-      const latestAssessment = child.assessments[0]
-      const weakCategories: string[] = []
-      const weakLevels: string[] = []
-
-      // 점수가 낮은 영역과 레벨 찾기
       latestAssessment.results.forEach(result => {
-        weakCategories.push(result.category)
-        if (result.score < 60) {
-          // NEEDS_TRACKING, NEEDS_ASSESSMENT 레벨
-          if (result.level === 'NEEDS_TRACKING' || result.level === 'NEEDS_ASSESSMENT') {
-            weakLevels.push(result.level)
-          }
+        if (result.level === 'NEEDS_ASSESSMENT') {
+          needsAssessmentCategories.push(result.category)
+        } else if (result.level === 'NEEDS_TRACKING') {
+          needsTrackingCategories.push(result.category)
         }
       })
 
-      // 약한 영역에 맞는 영상 우선 추천 (developmentCategories 필드 활용)
-      if (weakCategories.length > 0) {
+      // NEEDS_ASSESSMENT 영역 우선, 없으면 NEEDS_TRACKING 영역 사용
+      priorityCategories = needsAssessmentCategories.length > 0
+        ? needsAssessmentCategories
+        : needsTrackingCategories
+
+      // 취약 영역이 있는 경우 해당 영역 영상만 추천
+      if (priorityCategories.length > 0) {
         const allVideos = await prisma.video.findMany({
           where: {
             isPublished: true,
@@ -113,52 +92,56 @@ export async function GET(request: NextRequest) {
           }
         })
 
-        // developmentCategories와 recommendedForLevels를 파싱하여 매칭
-        const targetedVideos = allVideos
+        // developmentCategories와 매칭하여 필터링 - 취약 영역만
+        recommendedVideos = allVideos
           .filter(video => {
             const categories = video.developmentCategories
               ? JSON.parse(video.developmentCategories)
               : []
-            const levels = video.recommendedForLevels
-              ? JSON.parse(video.recommendedForLevels)
-              : []
 
-            // 약한 영역과 매칭되거나, 추천 레벨과 매칭되는 영상
+            // 취약 영역과 매칭되는 영상만 필터링
             const hasMatchingCategory = categories.some((cat: string) =>
-              weakCategories.includes(cat)
-            )
-            const hasMatchingLevel = levels.length === 0 || levels.some((level: string) =>
-              weakLevels.includes(level)
+              priorityCategories.includes(cat)
             )
 
-            return hasMatchingCategory || hasMatchingLevel
+            return hasMatchingCategory
           })
           .sort((a, b) => {
             // priority 높은 순, viewCount 높은 순
             if (a.priority !== b.priority) return b.priority - a.priority
             return b.viewCount - a.viewCount
           })
-          .slice(0, Math.ceil(limit * 0.7))
+          .slice(0, limit)
+      }
+    }
 
-        // 나머지는 일반 추천으로 채우기
-        const remainingCount = limit - targetedVideos.length
-        const generalVideos = await prisma.video.findMany({
+    // 발달체크가 없거나 취약 영역이 없는 경우에만 일반 추천
+    if (recommendedVideos.length === 0 && priorityCategories.length === 0) {
+      recommendedVideos = await prisma.video.findMany({
+        where: {
+          isPublished: true,
+          targetAgeMin: { lte: ageInMonths },
+          targetAgeMax: { gte: ageInMonths }
+        },
+        orderBy: [
+          { priority: 'desc' },
+          { viewCount: 'desc' }
+        ],
+        take: limit
+      })
+
+      // 연령대에 맞는 영상이 없으면 전체 공개 영상에서 가져오기
+      if (recommendedVideos.length === 0) {
+        recommendedVideos = await prisma.video.findMany({
           where: {
-            isPublished: true,
-            targetAgeMin: { lte: ageInMonths },
-            targetAgeMax: { gte: ageInMonths },
-            NOT: {
-              id: { in: targetedVideos.map(v => v.id) }
-            }
+            isPublished: true
           },
           orderBy: [
             { priority: 'desc' },
             { viewCount: 'desc' }
           ],
-          take: remainingCount
+          take: limit
         })
-
-        recommendedVideos = [...targetedVideos, ...generalVideos]
       }
     }
 
@@ -174,13 +157,18 @@ export async function GET(request: NextRequest) {
         ? JSON.parse(video.recommendedForLevels)
         : []
 
-      if (child.assessments.length > 0) {
-        const latestAssessment = child.assessments[0]
-        const weakAreas = latestAssessment.results
-          .filter(r => r.score < 60)
+      if (latestAssessment) {
+        // NEEDS_ASSESSMENT 우선, 없으면 NEEDS_TRACKING
+        const needsAssessment = latestAssessment.results
+          .filter(r => r.level === 'NEEDS_ASSESSMENT')
+          .map(r => r.category)
+        const needsTracking = latestAssessment.results
+          .filter(r => r.level === 'NEEDS_TRACKING')
           .map(r => r.category)
 
-        if (weakAreas.length > 0) {
+        const priorityAreas = needsAssessment.length > 0 ? needsAssessment : needsTracking
+
+        if (priorityAreas.length > 0) {
           const categories: Record<string, string> = {
             'GROSS_MOTOR': '대근육',
             'FINE_MOTOR': '소근육',
@@ -190,9 +178,9 @@ export async function GET(request: NextRequest) {
             'EMOTIONAL': '정서'
           }
 
-          // developmentCategories에서 약한 영역과 매칭되는 것 찾기
+          // developmentCategories에서 우선순위 취약 영역과 매칭되는 것 찾기
           const matchingCategories = developmentCategories.filter((cat: string) =>
-            weakAreas.includes(cat)
+            priorityAreas.includes(cat)
           )
 
           if (matchingCategories.length > 0) {
@@ -217,7 +205,7 @@ export async function GET(request: NextRequest) {
         ageInMonths
       },
       videos: videosWithReasons,
-      assessmentBased: child.assessments.length > 0
+      assessmentBased: !!latestAssessment
     })
   } catch (error) {
     console.error('영상 추천 오류:', error)

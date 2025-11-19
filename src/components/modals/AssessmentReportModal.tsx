@@ -42,6 +42,14 @@ interface AssessmentReportModalProps {
   onClose: () => void
 }
 
+interface TherapyMapping {
+  id: string
+  developmentCategory: string
+  therapyType: string
+  priority: number
+  isActive: boolean
+}
+
 const CATEGORY_LABELS: Record<string, string> = {
   GROSS_MOTOR: '대근육 운동',
   FINE_MOTOR: '소근육 운동',
@@ -144,6 +152,38 @@ export default function AssessmentReportModal({ assessmentId, isOpen, onClose }:
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'detail' | 'analysis'>('detail')
+  const [therapyMappings, setTherapyMappings] = useState<TherapyMapping[]>([])
+
+  // 취약 영역에 맞는 치료 분야 가져오기
+  const getRecommendedSpecialties = (): string[] => {
+    if (!assessment?.results || therapyMappings.length === 0) return []
+
+    // 취약 영역 (NEEDS_TRACKING 또는 NEEDS_ASSESSMENT) 찾기
+    const vulnerableCategories = assessment.results
+      .filter(r => r.level === 'NEEDS_TRACKING' || r.level === 'NEEDS_ASSESSMENT')
+      .map(r => r.category)
+
+    if (vulnerableCategories.length === 0) return []
+
+    // 매핑된 치료 분야 찾기
+    const specialties = new Set<string>()
+    vulnerableCategories.forEach(category => {
+      therapyMappings
+        .filter(m => m.developmentCategory === category)
+        .forEach(m => specialties.add(m.therapyType))
+    })
+
+    return Array.from(specialties)
+  }
+
+  // 홈티 예약 링크 생성
+  const getTherapistBookingLink = (): string => {
+    const specialties = getRecommendedSpecialties()
+    if (specialties.length > 0) {
+      return `/parent/therapists?specialties=${specialties.join(',')}&autoFilter=true`
+    }
+    return '/parent/therapists'
+  }
 
   useEffect(() => {
     if (!isOpen || !assessmentId) return
@@ -176,6 +216,25 @@ export default function AssessmentReportModal({ assessmentId, isOpen, onClose }:
     fetchAssessment()
   }, [isOpen, assessmentId])
 
+  // 치료사 매핑 정보 가져오기
+  useEffect(() => {
+    const fetchTherapyMappings = async () => {
+      try {
+        const response = await fetch('/api/therapy-mappings')
+        if (response.ok) {
+          const data = await response.json()
+          setTherapyMappings(data.mappings || [])
+        }
+      } catch (error) {
+        console.error('치료사 매핑 조회 오류:', error)
+      }
+    }
+
+    if (isOpen) {
+      fetchTherapyMappings()
+    }
+  }, [isOpen])
+
   const getOverallSummary = () => {
     if (!assessment || !assessment.results || assessment.results.length === 0) {
       return '평가 결과가 없습니다.'
@@ -196,21 +255,44 @@ export default function AssessmentReportModal({ assessmentId, isOpen, onClose }:
 
   const getItemFeedbacks = (category: string): ItemFeedback[] => {
     if (!assessment) return []
+
+    // 1. AssessmentResult의 itemFeedbacks에서 먼저 확인
     const result = assessment.results.find(r => r.category === category)
     if (result?.itemFeedbacks) {
       try {
-        return JSON.parse(result.itemFeedbacks)
-      } catch {}
+        const parsed = JSON.parse(result.itemFeedbacks)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed
+        }
+      } catch (e) {
+        console.error('itemFeedbacks 파싱 오류:', e)
+      }
     }
+
+    // 2. aiCategoryAnalysis에서 확인
     if (assessment.aiCategoryAnalysis) {
       try {
         const categoryAnalysis = JSON.parse(assessment.aiCategoryAnalysis)
         if (categoryAnalysis[category]?.itemFeedbacks) {
           return categoryAnalysis[category].itemFeedbacks
         }
-      } catch {}
+      } catch (e) {
+        console.error('aiCategoryAnalysis 파싱 오류:', e)
+      }
     }
+
     return []
+  }
+
+  // 카테고리별 분석 텍스트 가져오기
+  const getCategoryAnalysisText = (category: string): string | null => {
+    if (!assessment?.aiCategoryAnalysis) return null
+    try {
+      const categoryAnalysis = JSON.parse(assessment.aiCategoryAnalysis)
+      return categoryAnalysis[category]?.analysis || null
+    } catch {
+      return null
+    }
   }
 
   const getRecommendations = (): string[] => {
@@ -377,8 +459,12 @@ export default function AssessmentReportModal({ assessmentId, isOpen, onClose }:
                                       <p className="text-[12px] text-[#454545] leading-[18px]">{feedback.feedback}</p>
                                     </div>
                                   ))
+                                ) : getCategoryAnalysisText(result.category) ? (
+                                  <p className="text-[12px] text-[#454545] leading-[18px] whitespace-pre-wrap">
+                                    {getCategoryAnalysisText(result.category)}
+                                  </p>
                                 ) : (
-                                  <p className="text-[12px] text-[#777777]">AI 분석 데이터가 없습니다.</p>
+                                  <p className="text-[12px] text-[#777777]">상세 분석 데이터가 없습니다.</p>
                                 )}
                               </div>
                             </div>
@@ -419,6 +505,41 @@ export default function AssessmentReportModal({ assessmentId, isOpen, onClose }:
                     )}
                   </div>
                 )}
+
+                {/* 면책 문구 및 액션 버튼 - 탭과 상관없이 항상 표시 */}
+                <div className="p-5 border-t border-gray-200">
+                  {/* 면책 문구 */}
+                  <p className="text-[10px] text-[#777777] text-center mb-4 leading-[14px]">
+                    *본 리포트는 AI 분석기반 참고자료이며, 의학적 진단이 아닙니다.<br />
+                    '심화평가 권고' 시 전문 평가를 권장합니다
+                  </p>
+
+                  {/* 액션 버튼 */}
+                  <div className="flex gap-[12px]">
+                    <button
+                      onClick={() => {
+                        onClose()
+                        window.location.href = '/videos'
+                      }}
+                      className="flex-1 h-[48px] bg-[#FF6A00] rounded-[10px] flex items-center justify-center hover:bg-[#E55F00] transition-colors"
+                    >
+                      <span className="font-semibold text-[16px] text-white tracking-[0.16px]">
+                        홈케어 콘텐츠 보기
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        onClose()
+                        window.location.href = getTherapistBookingLink()
+                      }}
+                      className="flex-1 h-[48px] bg-[#FF6A00] rounded-[10px] flex items-center justify-center hover:bg-[#E55F00] transition-colors"
+                    >
+                      <span className="font-semibold text-[16px] text-white tracking-[0.16px]">
+                        홈티 예약하기
+                      </span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           ) : null}

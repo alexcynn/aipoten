@@ -108,19 +108,9 @@ const Header: React.FC<HeaderProps> = ({
     }, 200)
   }
 
-  // 로고 링크 URL
+  // 로고 링크 URL - 항상 메인화면으로 이동
   const getLogoHref = () => {
-    if (!session?.user) return '/'
-    switch (session.user.role) {
-      case 'PARENT':
-        return '/parent/dashboard'
-      case 'THERAPIST':
-        return '/therapist/dashboard'
-      case 'ADMIN':
-        return '/admin/dashboard'
-      default:
-        return '/'
-    }
+    return '/'
   }
 
   return (

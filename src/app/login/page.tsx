@@ -76,63 +76,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* 테스트 계정 정보 */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-blue-800 mb-2">🧪 테스트 계정</h3>
-          <div className="space-y-2 text-xs text-blue-700">
-            <div className="flex justify-between">
-              <span className="font-medium">👨‍👩‍👧 부모:</span>
-              <span>parent@test.com / test123!</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-medium">👨‍💼 관리자:</span>
-              <span>admin@test.com / test123!</span>
-            </div>
-            <div className="border-t border-blue-300 pt-2 mt-2">
-              <div className="font-medium mb-1">👩‍⚕️ 치료사들 (비밀번호: password123)</div>
-              <div className="space-y-1 ml-2 text-xs">
-                <div>• 김지은(언어): jieun.kim@therapist.com</div>
-                <div>• 박민호(작업): minho.park@therapist.com</div>
-                <div>• 이소영(물리): soyoung.lee@therapist.com</div>
-                <div>• 최지훈(심리): jihoon.choi@therapist.com</div>
-                <div>• 정유나(놀이): yuna.jung@therapist.com</div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('parent@test.com')
-                setPassword('test123!')
-              }}
-              className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded text-xs font-medium transition-colors"
-            >
-              부모 계정
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('jieun.kim@therapist.com')
-                setPassword('password123')
-              }}
-              className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-800 rounded text-xs font-medium transition-colors"
-            >
-              치료사(김지은)
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('admin@test.com')
-                setPassword('test123!')
-              }}
-              className="px-3 py-1 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded text-xs font-medium transition-colors"
-            >
-              관리자
-            </button>
-          </div>
-        </div>
-
         <form className="mt-6 md:mt-8 space-y-5 md:space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>

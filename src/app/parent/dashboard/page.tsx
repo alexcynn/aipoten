@@ -360,7 +360,7 @@ export default function ParentDashboardPage() {
                 안녕하세요! {session.user?.name}님
               </h2>
               <p className="text-base text-[#555555]">
-                지금 {children.find(c => c.id === selectedChildId)?.name || '민준'}이의 발달, 한눈에 확인하세요
+                지금 {children.find(c => c.id === selectedChildId)?.name || '민준'}의 발달, 한눈에 확인하세요
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -470,7 +470,7 @@ export default function ParentDashboardPage() {
                 </div>
 
                 {/* Development Check Section */}
-                {latestAssessment && (
+                {latestAssessment ? (
                   <div className="bg-white rounded-[20px] shadow-sm px-[40px] py-[50px]">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
@@ -651,6 +651,31 @@ export default function ParentDashboardPage() {
                       <Link
                         href="/parent/assessments/new"
                         className="flex-1 h-[70px] bg-[#FF6A00] rounded-[14px] flex items-center justify-center gap-[10px] hover:bg-[#E55F00] transition-colors"
+                      >
+                        <p className="font-bold text-[18px] text-white tracking-[-0.36px]">
+                          발달체크 시작하기
+                        </p>
+                        <div className="w-2 h-5">
+                          <img src="/images/arrow-white.svg" alt="" className="w-full h-full" />
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  /* 발달체크가 없을 때 */
+                  <div className="bg-white rounded-[20px] shadow-sm px-[40px] py-[50px]">
+                    <div className="text-center">
+                      <div className="w-20 h-20 bg-[#FFF5EB] rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-4xl">📊</span>
+                      </div>
+                      <h3 className="font-bold text-[24px] text-[#1E1307] mb-2">발달체크를 시작해보세요</h3>
+                      <p className="text-[18px] text-[#666666] mb-6">
+                        우리 아이의 발달 상태를 확인하고<br />
+                        맞춤형 발달 리포트를 받아보세요
+                      </p>
+                      <Link
+                        href="/parent/assessments/new"
+                        className="inline-flex items-center justify-center gap-[10px] h-[70px] px-8 bg-[#FF6A00] rounded-[14px] hover:bg-[#E55F00] transition-colors"
                       >
                         <p className="font-bold text-[18px] text-white tracking-[-0.36px]">
                           발달체크 시작하기

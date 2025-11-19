@@ -315,7 +315,7 @@ export default function Home() {
           {/* CTA Button */}
           <div className="text-center">
             <Link
-              href="/assessments/trial/start"
+              href="/language-consulting"
               className="inline-block bg-[#ff7e57] text-white px-6 sm:px-8 md:px-12 py-3 md:py-4 rounded-full font-semibold text-sm sm:text-base md:text-lg lg:text-[24px] hover:bg-[#e66d47] transition-colors shadow-lg"
             >
               3분 만에 무료 발달체크 시작하기
