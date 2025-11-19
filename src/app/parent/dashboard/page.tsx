@@ -48,6 +48,34 @@ const LEVEL_LABELS: Record<string, { text: string; color: string; bgColor: strin
   NEEDS_ASSESSMENT: { text: '심화평가권고', color: '#EB4C25', bgColor: '#FFF1ED' }
 }
 
+// YouTube URL에서 썸네일 URL 추출
+const getYouTubeThumbnail = (videoUrl: string): string | null => {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/]+)/,
+    /youtube\.com\/v\/([^&?/]+)/
+  ]
+
+  for (const pattern of patterns) {
+    const match = videoUrl.match(pattern)
+    if (match && match[1]) {
+      return `https://i.ytimg.com/vi/${match[1]}/hqdefault.jpg`
+    }
+  }
+  return null
+}
+
+// 비디오의 썸네일 URL 결정 (저장된 것 또는 YouTube 자동 추출)
+const getVideoThumbnail = (video: any): string | null => {
+  if (video.thumbnailUrl) {
+    return video.thumbnailUrl
+  }
+  // YouTube URL인 경우 자동 추출
+  if (video.videoUrl && (video.videoUrl.includes('youtube.com') || video.videoUrl.includes('youtu.be'))) {
+    return getYouTubeThumbnail(video.videoUrl)
+  }
+  return null
+}
+
 // 전체 발달 수준 판정 (가장 낮은 수준 기준)
 const getOverallLevel = (results?: { level: string }[]) => {
   if (!results || results.length === 0) return 'NEEDS_ASSESSMENT'
@@ -670,19 +698,21 @@ export default function ParentDashboardPage() {
                         {recommendedVideos.slice(0, 3).map((video) => (
                           <div key={video.id} className="flex-none w-64 snap-start">
                             <Link href={`/videos/${video.id}`}>
-                              <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden mb-2 relative group">
-                                {video.thumbnailUrl ? (
-                                  <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center">
-                                    <span className="text-4xl">📹</span>
-                                  </div>
-                                )}
-                                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all">
-                                  <div className="w-12 h-12 bg-white bg-opacity-90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span className="text-xl ml-1">▶️</span>
-                                  </div>
-                                </div>
+                              <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden mb-2">
+                                {(() => {
+                                  const thumbnail = getVideoThumbnail(video)
+                                  return thumbnail ? (
+                                    <img
+                                      src={thumbnail}
+                                      alt={video.title}
+                                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                      <span className="text-4xl">📹</span>
+                                    </div>
+                                  )
+                                })()}
                               </div>
                               <h4 className="font-semibold text-sm text-[#1E1307] line-clamp-2">{video.title}</h4>
                             </Link>

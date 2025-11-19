@@ -79,6 +79,109 @@ function AssessmentContent() {
   const [showCategoryTransition, setShowCategoryTransition] = useState(false)
   const [showConcernsStep, setShowConcernsStep] = useState(false)
   const [concernsText, setConcernsText] = useState('')
+  const [showPromptModal, setShowPromptModal] = useState(false)
+  const [generatedPrompt, setGeneratedPrompt] = useState('')
+
+  // 프롬프트 생성 함수
+  const generatePrompt = () => {
+    if (!selectedChild) return ''
+
+    const ageInMonths = calculateAge(selectedChild.birthDate)
+    const years = Math.floor(ageInMonths / 12)
+    const months = ageInMonths % 12
+
+    // 질문과 답변을 카테고리별로 정리
+    const responsesByCategory: Record<string, { question: string; answer: string; level: string }[]> = {}
+
+    responses.forEach(response => {
+      const question = allQuestions.find(q => q.id === response.questionId)
+      if (question) {
+        if (!responsesByCategory[question.category]) {
+          responsesByCategory[question.category] = []
+        }
+        responsesByCategory[question.category].push({
+          question: question.questionText,
+          answer: response.answer,
+          level: response.level
+        })
+      }
+    })
+
+    // 프롬프트 구성
+    let prompt = `당신은 아동 발달 전문가입니다. 다음은 ${selectedChild.name} 아이(${years}세 ${months}개월, ${selectedChild.gender === 'MALE' ? '남아' : '여아'})의 발달체크 결과입니다.
+
+## 발달체크 응답 내용
+
+`
+
+    // 카테고리별 질문과 답변 추가
+    CATEGORY_ORDER.forEach(category => {
+      if (responsesByCategory[category] && responsesByCategory[category].length > 0) {
+        prompt += `### ${CATEGORY_LABELS[category]} 발달\n`
+        responsesByCategory[category].forEach((item, index) => {
+          prompt += `${index + 1}. Q: ${item.question}\n   A: ${item.answer}\n`
+        })
+        prompt += '\n'
+      }
+    })
+
+    // 우려 사항 추가
+    if (concernsText.trim()) {
+      prompt += `### 부모 우려 사항\n${concernsText}\n\n`
+    }
+
+    // 응답 형식 지시
+    prompt += `## 요청 사항
+
+위 발달체크 결과를 분석하여 다음 형식으로 응답해주세요:
+
+### 1. 발달 영역별 현황 요약 (70자 이내)
+전체적인 발달 상태를 한 문장으로 요약해주세요. 예: "전반적으로 건강하게 발달하고 있으니 언어 분야는 추적 필요합니다."
+
+### 2. 영역별 발달 수준 및 상세 분석
+각 영역에 대해 다음 4단계 중 하나로 평가하고, 질문 응답을 바탕으로 상세 분석을 작성해주세요:
+- 빠른수준: 해당 월령 기준 상위 발달
+- 또래수준: 해당 월령에 맞는 발달
+- 추적/심화상담: 지속적인 관찰 필요
+- 심화평가권고: 전문가 평가 권장
+
+각 영역별로 다음 형식으로 작성해주세요:
+
+#### 대근육 운동 - [수준]
+[질문 응답을 바탕으로 100-150자 분석. 아이가 잘하는 부분, 발달 특징, 개선이 필요한 부분을 구체적으로 설명. 예: "달리기와 점프 등 기본 대근육 활동을 능숙하게 수행하며, 균형 감각도 우수합니다. 계단 오르내리기에서 한 발씩 번갈아 사용하는 능력이 또래보다 발달되어 있습니다."]
+
+#### 소근육 운동 - [수준]
+[질문 응답을 바탕으로 100-150자 분석. 손가락 조작, 그리기, 가위질 등 소근육 발달 상태를 구체적으로 설명]
+
+#### 언어 발달 - [수준]
+[질문 응답을 바탕으로 100-150자 분석. 어휘력, 문장 구사력, 의사소통 능력 등을 구체적으로 설명]
+
+#### 인지 발달 - [수준]
+[질문 응답을 바탕으로 100-150자 분석. 문제해결력, 기억력, 개념 이해 등을 구체적으로 설명]
+
+#### 사회성 발달 - [수준]
+[질문 응답을 바탕으로 100-150자 분석. 또래 관계, 감정 조절, 규칙 이해 등을 구체적으로 설명]
+
+### 3. AI 종합 분석 (200-300자)
+아이의 전반적인 발달 상태와 특징적인 강점, 그리고 앞으로 주의 깊게 살펴볼 부분을 종합적으로 설명해주세요.
+
+### 4. 맞춤 권장사항 (5개)
+가정에서 실천할 수 있는 구체적인 활동을 불릿 포인트로 제시해주세요.
+예:
+• 매일 15분씩 그림책을 읽어 아이와 대화 나누기
+• 일상생활에서 2단어 문장을 자주 모델링해주기
+• 소근육 발달을 위한 점토놀이, 스티커 붙이기 활동
+• 또래와 만날 수 있는 기회를 자주 만들어주기
+• 적극적 격려를 통해 자신감 키워주기`
+
+    return prompt
+  }
+
+  const handleShowPrompt = () => {
+    const prompt = generatePrompt()
+    setGeneratedPrompt(prompt)
+    setShowPromptModal(true)
+  }
 
   useEffect(() => {
     if (status === 'loading') return
@@ -731,6 +834,12 @@ function AssessmentContent() {
                         >
                           {isSubmitting ? '저장 중...' : '제출하고 결과 보기'}
                         </button>
+                        <button
+                          onClick={handleShowPrompt}
+                          className="flex-1 px-6 md:px-8 py-3 md:py-4 border-2 border-[#FF6A00] text-[#FF6A00] rounded-[10px] hover:bg-[#FFF5EB] transition-colors font-semibold text-sm sm:text-base"
+                        >
+                          프롬프트 보기
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -832,6 +941,47 @@ function AssessmentContent() {
           )}
         </div>
       </main>
+
+      {/* 프롬프트 보기 모달 */}
+      {showPromptModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-4 md:p-6 border-b">
+              <h2 className="text-lg md:text-xl font-bold text-stone-900">AI 분석 프롬프트</h2>
+              <button
+                onClick={() => setShowPromptModal(false)}
+                className="text-stone-400 hover:text-stone-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 md:p-6">
+              <pre className="whitespace-pre-wrap text-sm text-stone-700 font-mono bg-gray-50 p-4 rounded-lg">
+                {generatedPrompt}
+              </pre>
+            </div>
+            <div className="p-4 md:p-6 border-t flex gap-3">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(generatedPrompt)
+                  alert('프롬프트가 클립보드에 복사되었습니다.')
+                }}
+                className="flex-1 px-4 py-3 bg-[#FF6A00] text-white rounded-lg hover:bg-[#E55F00] transition-colors font-semibold"
+              >
+                클립보드에 복사
+              </button>
+              <button
+                onClick={() => setShowPromptModal(false)}
+                className="flex-1 px-4 py-3 border-2 border-gray-300 text-stone-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

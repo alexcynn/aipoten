@@ -328,7 +328,7 @@ model Video {
   category              String?        // 카테고리 (레거시)
   difficulty            Difficulty
   developmentCategories String?        // JSON 배열: ["GROSS_MOTOR", "FINE_MOTOR", ...]
-  recommendedForLevels  String?        // JSON 배열: ["NEEDS_ATTENTION", "CAUTION", ...]
+  recommendedForLevels  String?        // JSON 배열: ["NEEDS_TRACKING", "NEEDS_ASSESSMENT", ...]
   viewCount             Int            @default(0)
   bookmarkCount         Int            @default(0)
   isPublished           Boolean        @default(false)

@@ -152,10 +152,10 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5EFE7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600">로딩 중...</p>
         </div>
       </div>
     )
@@ -163,12 +163,12 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
 
   if (!video) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5EFE7] flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">영상을 찾을 수 없습니다.</p>
           <Link
             href="/videos"
-            className="inline-flex items-center px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy"
+            className="inline-flex items-center px-4 py-2 bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00]"
           >
             목록으로 돌아가기
           </Link>
@@ -178,16 +178,16 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-[#F5EFE7]">
       <Header />
 
-      <main className="max-w-6xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="py-6">
           {/* 뒤로가기 버튼 */}
           <div className="mb-4">
             <Link
               href="/videos"
-              className="text-sm text-gray-600 hover:text-aipoten-green"
+              className="text-sm text-stone-600 hover:text-[#FF6A00]"
             >
               ← 목록으로 돌아가기
             </Link>
@@ -196,7 +196,7 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* 왼쪽: 영상 플레이어 */}
             <div className="lg:col-span-2">
-              <div className="bg-white shadow rounded-lg overflow-hidden">
+              <div className="bg-white shadow-sm rounded-xl md:rounded-2xl overflow-hidden">
                 {/* 영상 플레이어 */}
                 <div className="aspect-video bg-black">
                   {video.videoPlatform === 'YOUTUBE' ? (
@@ -218,7 +218,7 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
                           href={video.videoUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center px-4 py-2 bg-white text-black rounded-md hover:bg-gray-200"
+                          className="inline-flex items-center px-4 py-2 bg-white text-black rounded-[10px] hover:bg-stone-200"
                         >
                           외부 링크로 시청하기
                         </a>
@@ -228,9 +228,9 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
                 </div>
 
                 {/* 영상 정보 */}
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   <div className="flex items-start gap-2 mb-3">
-                    <h1 className="text-2xl font-bold text-gray-900">{video.title}</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-stone-900">{video.title}</h1>
                     {!video.isPublished && (
                       <span className="inline-block bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full mt-1">
                         비공개
@@ -242,29 +242,28 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
                     {video.developmentCategories.map((cat) => (
                       <span
                         key={cat}
-                        className="inline-block px-3 py-1 rounded-full text-sm font-medium"
-                        style={{ backgroundColor: '#E8F5E9', color: '#386646' }}
+                        className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-[#FFE5E5] text-[#FF6A00]"
                       >
                         {CATEGORY_LABELS[cat] || cat}
                       </span>
                     ))}
-                    <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+                    <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-stone-100 text-stone-700">
                       {video.targetAgeMin}-{video.targetAgeMax}개월
                     </span>
                   </div>
 
-                  <p className="text-gray-700 mb-4 whitespace-pre-wrap">{video.description}</p>
+                  <p className="text-stone-700 mb-4 whitespace-pre-wrap">{video.description}</p>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-500 border-t pt-4">
-                    <span>👁️ 조회수 {video.viewCount.toLocaleString()}</span>
-                    <span>📅 {new Date(video.createdAt).toLocaleDateString('ko-KR')}</span>
+                  <div className="flex items-center gap-4 text-sm text-stone-500 border-t border-stone-200 pt-4">
+                    <span>조회수 {video.viewCount.toLocaleString()}</span>
+                    <span>{new Date(video.createdAt).toLocaleDateString('ko-KR')}</span>
                   </div>
                 </div>
               </div>
 
               {/* 댓글 섹션 */}
-              <div className="bg-white shadow rounded-lg mt-6 p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">
+              <div className="bg-white shadow-sm rounded-xl md:rounded-2xl mt-6 p-4 sm:p-6">
+                <h2 className="text-xl font-bold text-stone-900 mb-4">
                   댓글 {comments.length}개
                 </h2>
 
@@ -276,24 +275,24 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="댓글을 입력하세요..."
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-aipoten-green focus:border-aipoten-green resize-none"
+                      className="w-full px-3 py-2 border border-stone-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-[#FF6A00] resize-none"
                     />
                     <div className="mt-2 flex justify-end">
                       <button
                         type="submit"
                         disabled={isSubmitting || !newComment.trim()}
-                        className="px-4 py-2 bg-aipoten-green text-white rounded-md hover:bg-aipoten-navy disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 py-2 bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isSubmitting ? '작성 중...' : '댓글 작성'}
                       </button>
                     </div>
                   </form>
                 ) : (
-                  <div className="mb-6 p-4 bg-gray-50 rounded-lg text-center">
-                    <p className="text-gray-600 mb-2">댓글을 작성하려면 로그인이 필요합니다.</p>
+                  <div className="mb-6 p-4 bg-stone-50 rounded-lg text-center">
+                    <p className="text-stone-600 mb-2">댓글을 작성하려면 로그인이 필요합니다.</p>
                     <Link
                       href="/login"
-                      className="text-aipoten-green hover:text-aipoten-navy"
+                      className="text-[#FF6A00] hover:text-[#E55F00]"
                     >
                       로그인하기
                     </Link>
@@ -303,13 +302,13 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
                 {/* 댓글 목록 */}
                 <div className="space-y-4">
                   {comments.length === 0 ? (
-                    <p className="text-center text-gray-500 py-8">첫 댓글을 작성해보세요!</p>
+                    <p className="text-center text-stone-500 py-8">첫 댓글을 작성해보세요!</p>
                   ) : (
                     comments.map((comment) => (
-                      <div key={comment.id} className="border-b border-gray-200 pb-4 last:border-0">
+                      <div key={comment.id} className="border-b border-stone-200 pb-4 last:border-0">
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3 flex-1">
-                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-stone-200 rounded-full flex items-center justify-center flex-shrink-0">
                               {comment.user.avatar ? (
                                 <img
                                   src={comment.user.avatar}
@@ -317,19 +316,19 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
                                   className="w-full h-full rounded-full object-cover"
                                 />
                               ) : (
-                                <span className="text-gray-500">👤</span>
+                                <span className="text-stone-500">👤</span>
                               )}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="font-medium text-gray-900">
+                                <span className="font-medium text-stone-900">
                                   {comment.user.name || '익명'}
                                 </span>
-                                <span className="text-xs text-gray-500">
+                                <span className="text-xs text-stone-500">
                                   {new Date(comment.createdAt).toLocaleString('ko-KR')}
                                 </span>
                               </div>
-                              <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+                              <p className="text-stone-700 whitespace-pre-wrap">{comment.content}</p>
                             </div>
                           </div>
                           {session && (session.user.id === comment.user.id || session.user.role === 'ADMIN') && (
@@ -350,18 +349,18 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
 
             {/* 오른쪽: 추가 정보 */}
             <div className="lg:col-span-1">
-              <div className="bg-white shadow rounded-lg p-6 sticky top-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">영상 정보</h3>
+              <div className="bg-white shadow-sm rounded-xl md:rounded-2xl p-4 sm:p-6 sticky top-6">
+                <h3 className="text-lg font-bold text-stone-900 mb-4">영상 정보</h3>
 
                 <div className="space-y-3 text-sm">
                   <div>
-                    <dt className="font-medium text-gray-500">대상 연령</dt>
-                    <dd className="text-gray-900">{video.targetAgeMin}-{video.targetAgeMax}개월</dd>
+                    <dt className="font-medium text-stone-500">대상 연령</dt>
+                    <dd className="text-stone-900">{video.targetAgeMin}-{video.targetAgeMax}개월</dd>
                   </div>
 
                   <div>
-                    <dt className="font-medium text-gray-500">난이도</dt>
-                    <dd className="text-gray-900">
+                    <dt className="font-medium text-stone-500">난이도</dt>
+                    <dd className="text-stone-900">
                       {video.difficulty === 'EASY' && '쉬움'}
                       {video.difficulty === 'MEDIUM' && '보통'}
                       {video.difficulty === 'HARD' && '어려움'}
@@ -370,21 +369,20 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
 
                   {video.duration && (
                     <div>
-                      <dt className="font-medium text-gray-500">재생 시간</dt>
-                      <dd className="text-gray-900">
+                      <dt className="font-medium text-stone-500">재생 시간</dt>
+                      <dd className="text-stone-900">
                         {Math.floor(video.duration / 60)}분 {video.duration % 60}초
                       </dd>
                     </div>
                   )}
 
                   <div>
-                    <dt className="font-medium text-gray-500">발달 영역</dt>
+                    <dt className="font-medium text-stone-500">발달 영역</dt>
                     <dd className="flex flex-wrap gap-1 mt-1">
                       {video.developmentCategories.map((cat) => (
                         <span
                           key={cat}
-                          className="inline-block px-2 py-1 text-xs rounded-full"
-                          style={{ backgroundColor: '#E8F5E9', color: '#386646' }}
+                          className="inline-block px-2 py-1 text-xs rounded-full bg-[#FFE5E5] text-[#FF6A00]"
                         >
                           {CATEGORY_LABELS[cat] || cat}
                         </span>
@@ -394,10 +392,10 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
                 </div>
 
                 {session?.user?.role === 'ADMIN' && (
-                  <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="mt-6 pt-6 border-t border-stone-200">
                     <Link
                       href={`/videos/edit/${video.id}`}
-                      className="block w-full text-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+                      className="block w-full text-center px-4 py-2 bg-stone-100 text-stone-700 rounded-[10px] hover:bg-stone-200"
                     >
                       영상 수정
                     </Link>

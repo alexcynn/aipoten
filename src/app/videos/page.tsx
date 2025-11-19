@@ -21,6 +21,34 @@ interface Video {
   createdAt: string
 }
 
+// YouTube URL에서 썸네일 URL 추출
+const getYouTubeThumbnail = (videoUrl: string): string | null => {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/]+)/,
+    /youtube\.com\/v\/([^&?/]+)/
+  ]
+
+  for (const pattern of patterns) {
+    const match = videoUrl.match(pattern)
+    if (match && match[1]) {
+      return `https://i.ytimg.com/vi/${match[1]}/hqdefault.jpg`
+    }
+  }
+  return null
+}
+
+// 비디오의 썸네일 URL 결정 (저장된 것 또는 YouTube 자동 추출)
+const getVideoThumbnail = (video: Video): string | null => {
+  if (video.thumbnailUrl) {
+    return video.thumbnailUrl
+  }
+  // YouTube URL인 경우 자동 추출
+  if (video.videoUrl && (video.videoUrl.includes('youtube.com') || video.videoUrl.includes('youtu.be'))) {
+    return getYouTubeThumbnail(video.videoUrl)
+  }
+  return null
+}
+
 interface Child {
   id: string
   name: string
@@ -138,38 +166,35 @@ function VideosContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5EFE7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: '#386646' }}></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600">로딩 중...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-[#F5EFE7]">
       {/* Header */}
       <Header />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="py-6">
           {/* Header Section */}
           <div className="mb-8 flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">놀이 영상</h1>
-              <p className="mt-2 text-gray-600">
+              <h1 className="text-2xl sm:text-3xl font-bold text-stone-900">놀이 영상</h1>
+              <p className="mt-2 text-stone-600">
                 우리 아이의 발달 단계에 맞는 교육 영상을 찾아보세요.
               </p>
             </div>
             {session?.user?.role === 'ADMIN' && (
               <Link
                 href="/videos/new"
-                className="inline-flex items-center px-4 py-2 border-0 text-sm font-medium rounded-md shadow-sm transition-colors"
-                style={{ backgroundColor: '#386646', color: 'white' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2d4f36'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
+                className="inline-flex items-center px-4 py-2 border-0 text-sm font-medium rounded-[10px] shadow-sm transition-colors bg-[#FF6A00] text-white hover:bg-[#E55F00]"
               >
                 영상 추가
               </Link>
@@ -177,18 +202,18 @@ function VideosContent() {
           </div>
 
           {/* Filters */}
-          <div className="bg-white shadow rounded-lg p-6 mb-8">
+          <div className="bg-white shadow-sm rounded-xl md:rounded-2xl p-4 sm:p-6 mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Child Selection */}
               <div>
-                <label htmlFor="child-select" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="child-select" className="block text-sm font-medium text-stone-700 mb-2">
                   아이 선택
                 </label>
                 <select
                   id="child-select"
                   value={selectedChildId}
                   onChange={(e) => setSelectedChildId(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green"
+                  className="w-full border border-stone-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-[#FF6A00]"
                 >
                   <option value="">모든 연령대</option>
                   {children.map((child) => (
@@ -201,7 +226,7 @@ function VideosContent() {
 
               {/* Search */}
               <div>
-                <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="search" className="block text-sm font-medium text-stone-700 mb-2">
                   검색
                 </label>
                 <input
@@ -210,7 +235,7 @@ function VideosContent() {
                   placeholder="영상 제목이나 내용으로 검색..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-aipoten-green focus:border-aipoten-green"
+                  className="w-full border border-stone-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-[#FF6A00]"
                 />
               </div>
             </div>
@@ -218,15 +243,15 @@ function VideosContent() {
 
           {/* Videos Grid */}
           {filteredVideos.length === 0 ? (
-            <div className="bg-white shadow rounded-lg">
+            <div className="bg-white shadow-sm rounded-xl md:rounded-2xl">
               <div className="px-4 py-12 text-center">
-                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-24 h-24 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-4xl">📹</span>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="text-lg font-medium text-stone-900 mb-2">
                   검색 조건에 맞는 영상이 없습니다
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-stone-600 mb-6">
                   다른 검색 조건을 시도해보시거나 필터를 초기화해보세요.
                 </p>
                 <button
@@ -234,10 +259,7 @@ function VideosContent() {
                     setSelectedChildId('')
                     setSearchQuery('')
                   }}
-                  className="inline-flex items-center px-4 py-2 border-0 text-sm font-medium rounded-md shadow-sm transition-colors"
-                  style={{ backgroundColor: '#386646', color: 'white' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2d4f36'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
+                  className="inline-flex items-center px-4 py-2 border-0 text-sm font-medium rounded-[10px] shadow-sm transition-colors bg-[#FF6A00] text-white hover:bg-[#E55F00]"
                 >
                   필터 초기화
                 </button>
@@ -246,31 +268,28 @@ function VideosContent() {
           ) : (
             <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {currentVideos.map((video) => (
-                <div key={video.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+              {currentVideos.map((video) => {
+                const thumbnail = getVideoThumbnail(video)
+                // 디버깅용 - 콘솔에서 확인
+                if (typeof window !== 'undefined') {
+                  console.log('Video:', video.title, 'URL:', video.videoUrl, 'Thumbnail:', thumbnail)
+                }
+                return (
+                <div key={video.id} className="bg-white rounded-xl md:rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                   {/* Thumbnail - 클릭하면 상세 페이지로 */}
                   <Link href={`/videos/${video.id}`}>
-                    <div className="aspect-video bg-gray-200 rounded-t-lg relative overflow-hidden cursor-pointer group">
-                      {video.thumbnailUrl ? (
+                    <div className="aspect-video bg-stone-200 rounded-t-xl md:rounded-t-2xl overflow-hidden cursor-pointer">
+                      {thumbnail ? (
                         <img
-                          src={video.thumbnailUrl}
+                          src={thumbnail}
                           alt={video.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-4xl text-gray-400">📹</span>
+                          <span className="text-4xl text-stone-400">📹</span>
                         </div>
                       )}
-                      {/* 재생 아이콘 오버레이 */}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all">
-                        <div className="w-16 h-16 bg-white bg-opacity-90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="text-2xl ml-1">▶️</span>
-                        </div>
-                      </div>
-                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
-                        {formatDuration(video.duration)}
-                      </div>
                     </div>
                   </Link>
 
@@ -282,27 +301,23 @@ function VideosContent() {
                           비공개
                         </span>
                       )}
-                      <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                      <span className="inline-block bg-[#FFE5E5] text-[#FF6A00] text-xs px-2 py-1 rounded-full">
                         {video.targetAgeMin}-{video.targetAgeMax}개월
                       </span>
                     </div>
 
                     <Link href={`/videos/${video.id}`}>
-                      <h3
-                        className="font-medium text-gray-900 mb-2 line-clamp-2 cursor-pointer transition-colors"
-                        onMouseEnter={(e) => e.currentTarget.style.color = '#386646'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = '#111827'}
-                      >
+                      <h3 className="font-medium text-stone-900 mb-2 line-clamp-2 cursor-pointer transition-colors hover:text-[#FF6A00]">
                         {video.title}
                       </h3>
                     </Link>
 
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+                    <p className="text-sm text-stone-600 mb-4 line-clamp-3">
                       {video.description}
                     </p>
 
                     <div className="flex justify-between items-center gap-2">
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-stone-500">
                         {new Date(video.createdAt).toLocaleDateString('ko-KR')}
                       </span>
                       <div className="flex gap-2">
@@ -310,7 +325,7 @@ function VideosContent() {
                           <>
                             <Link
                               href={`/videos/edit/${video.id}`}
-                              className="inline-flex items-center px-2 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                              className="inline-flex items-center px-2 py-1 border border-stone-300 text-xs font-medium rounded text-stone-700 bg-white hover:bg-stone-50"
                             >
                               수정
                             </Link>
@@ -341,10 +356,7 @@ function VideosContent() {
                           href={video.videoUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center px-3 py-2 border-0 text-sm font-medium rounded-md transition-colors"
-                          style={{ backgroundColor: '#386646', color: 'white' }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2d4f36'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#386646'}
+                          className="inline-flex items-center px-3 py-2 border-0 text-sm font-medium rounded-[10px] transition-colors bg-[#FF6A00] text-white hover:bg-[#E55F00]"
                         >
                           시청
                         </a>
@@ -352,7 +364,8 @@ function VideosContent() {
                     </div>
                   </div>
                 </div>
-              ))}
+              )})}
+
             </div>
 
             {/* Pagination */}
@@ -362,7 +375,7 @@ function VideosContent() {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="px-3 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-2 rounded-lg border border-stone-300 text-sm font-medium text-stone-700 bg-white hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     이전
                   </button>
@@ -379,16 +392,11 @@ function VideosContent() {
                         <button
                           key={pageNumber}
                           onClick={() => handlePageChange(pageNumber)}
-                          className={`px-4 py-2 rounded-md text-sm font-medium ${
+                          className={`px-4 py-2 rounded-lg text-sm font-medium ${
                             currentPage === pageNumber
-                              ? 'text-white'
-                              : 'text-gray-700 bg-white hover:bg-gray-50 border border-gray-300'
+                              ? 'text-white bg-[#FF6A00]'
+                              : 'text-stone-700 bg-white hover:bg-stone-50 border border-stone-300'
                           }`}
-                          style={
-                            currentPage === pageNumber
-                              ? { backgroundColor: '#386646' }
-                              : {}
-                          }
                         >
                           {pageNumber}
                         </button>
@@ -397,7 +405,7 @@ function VideosContent() {
                       pageNumber === currentPage - 2 ||
                       pageNumber === currentPage + 2
                     ) {
-                      return <span key={pageNumber} className="px-2 text-gray-500">...</span>
+                      return <span key={pageNumber} className="px-2 text-stone-500">...</span>
                     }
                     return null
                   })}
@@ -405,7 +413,7 @@ function VideosContent() {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-2 rounded-lg border border-stone-300 text-sm font-medium text-stone-700 bg-white hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     다음
                   </button>
@@ -417,10 +425,10 @@ function VideosContent() {
 
           {/* Stats */}
           {filteredVideos.length > 0 && (
-            <div className="mt-8 bg-white shadow rounded-lg p-6">
+            <div className="mt-8 bg-white shadow-sm rounded-xl md:rounded-2xl p-6">
               <div className="text-center">
-                <p className="text-gray-600">
-                  총 <span className="font-semibold" style={{ color: '#386646' }}>{filteredVideos.length}</span>개의 영상이 있습니다
+                <p className="text-stone-600">
+                  총 <span className="font-semibold text-[#FF6A00]">{filteredVideos.length}</span>개의 영상이 있습니다
                   {selectedChildId && (
                     <>
                       {' '}• {children.find(c => c.id === selectedChildId)?.name}님의 연령에 맞는 영상입니다
@@ -439,10 +447,10 @@ function VideosContent() {
 export default function VideosPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5EFE7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: '#386646' }}></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
+          <p className="mt-4 text-stone-600">로딩 중...</p>
         </div>
       </div>
     }>

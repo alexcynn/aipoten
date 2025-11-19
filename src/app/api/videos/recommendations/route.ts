@@ -82,8 +82,8 @@ export async function GET(request: NextRequest) {
       latestAssessment.results.forEach(result => {
         weakCategories.push(result.category)
         if (result.score < 60) {
-          // NEEDS_ATTENTION, CAUTION 레벨
-          if (result.level === 'NEEDS_ATTENTION' || result.level === 'CAUTION') {
+          // NEEDS_TRACKING, NEEDS_ASSESSMENT 레벨
+          if (result.level === 'NEEDS_TRACKING' || result.level === 'NEEDS_ASSESSMENT') {
             weakLevels.push(result.level)
           }
         }
