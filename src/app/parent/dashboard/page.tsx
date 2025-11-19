@@ -25,6 +25,7 @@ interface Assessment {
   totalScore: number
   createdAt: string
   completedAt?: string
+  aiAnalysisSummary?: string
   results?: {
     category: string
     score: number
@@ -493,38 +494,23 @@ export default function ParentDashboardPage() {
                           발달 수준
                         </p>
                         <div className="text-[20px] text-[#1E1307] leading-[28px] tracking-[0.2px]">
-                          <p className="mb-0">전반적으로 건강하게 발달하고 있으나</p>
-                          <p>언어 분야는 추적이 필요합니다.</p>
-                        </div>
-                      </div>
-                      <div className="relative w-[90px] h-[90px]">
-                        {/* Star background */}
-                        <div className="absolute inset-0">
-                          <div className="absolute inset-[3.54%]">
-                            <img
-                              src="/images/badge-star-green.svg"
-                              alt=""
-                              className="w-full h-full"
-                            />
-                          </div>
-                        </div>
-                        {/* Inner circle */}
-                        <div className="absolute left-[5%] right-[5%] top-[4.5px] aspect-square">
-                          <div className="absolute inset-[3.48%]">
-                            <img
-                              src="/images/badge-circle.svg"
-                              alt=""
-                              className="w-full h-full"
-                            />
-                          </div>
-                        </div>
-                        {/* Text */}
-                        <div className="absolute inset-[30.58%_33.82%_29.73%_32.62%]">
-                          <img
-                            src="/images/badge-text-normal.svg"
-                            alt="또래수준"
-                            className="w-full h-full"
-                          />
+                          <p className="mb-0">
+                            {latestAssessment.aiAnalysisSummary || (() => {
+                              // aiAnalysisSummary가 없는 경우 결과 기반 기본 메시지 생성
+                              const hasWeakArea = latestAssessment.results?.some(
+                                r => r.level === 'NEEDS_TRACKING' || r.level === 'NEEDS_ASSESSMENT'
+                              )
+                              const weakAreas = latestAssessment.results
+                                ?.filter(r => r.level === 'NEEDS_TRACKING' || r.level === 'NEEDS_ASSESSMENT')
+                                .map(r => CATEGORY_LABELS[r.category])
+                                .join(', ')
+
+                              if (hasWeakArea && weakAreas) {
+                                return `전반적으로 건강하게 발달하고 있으나 ${weakAreas} 분야는 추적이 필요합니다.`
+                              }
+                              return '전반적으로 건강하게 발달하고 있습니다.'
+                            })()}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -551,7 +537,7 @@ export default function ParentDashboardPage() {
                                   </span>
                                 </div>
                                 <p className="font-semibold text-[17px] text-[#1E1307] tracking-[0.17px] leading-[20px]">
-                                  {categoryLabel}운동
+                                  {categoryLabel}
                                 </p>
                               </div>
                               <div
@@ -757,27 +743,11 @@ export default function ParentDashboardPage() {
                         therapist: booking.therapist,
                         payment: booking.payment ? { status: booking.payment.status } : undefined
                       }))}
-                  onEventClick={(bookingId) => {
-                    setSelectedBookingId(bookingId)
-                    setIsBookingModalOpen(true)
-                  }}
-                />
-
-                  {/* Calendar Legend */}
-                  <div className="flex items-center justify-center gap-4 mt-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                      <span className="text-[#888888]">임상검사</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                      <span className="text-[#888888]">추천</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                      <span className="text-[#888888]">치료 · 연습</span>
-                    </div>
-                  </div>
+                    onEventClick={(bookingId) => {
+                      setSelectedBookingId(bookingId)
+                      setIsBookingModalOpen(true)
+                    }}
+                  />
 
                   {/* Booking Buttons */}
                   <div className="flex gap-3 mt-6">

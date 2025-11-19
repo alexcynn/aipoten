@@ -5,13 +5,19 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend, Tooltip } from 'recharts'
+
+interface ItemFeedback {
+  question: string
+  feedback: string
+  icon: 'check' | 'warning'
+}
 
 interface AssessmentResult {
   id: string
   category: string
   score: number
   level: 'ADVANCED' | 'NORMAL' | 'NEEDS_TRACKING' | 'NEEDS_ASSESSMENT'
+  itemFeedbacks?: string | null
 }
 
 interface Assessment {
@@ -22,6 +28,9 @@ interface Assessment {
   createdAt: string
   concernsText?: string | null
   aiAnalysis?: string | null
+  aiAnalysisSummary?: string | null
+  aiRecommendations?: string | null
+  aiCategoryAnalysis?: string | null
   aiAnalyzedAt?: string | null
   child: {
     id: string
@@ -38,16 +47,131 @@ interface PageParams {
 const CATEGORY_LABELS: Record<string, string> = {
   GROSS_MOTOR: '대근육 운동',
   FINE_MOTOR: '소근육 운동',
-  COGNITIVE: '인지',
-  LANGUAGE: '언어',
-  SOCIAL: '사회성',
+  COGNITIVE: '인지 발달',
+  LANGUAGE: '언어 발달',
+  SOCIAL: '사회성 발달',
 }
 
-const LEVEL_LABELS: Record<string, { label: string; color: string; bgColor: string; emoji: string }> = {
-  ADVANCED: { label: '빠른 수준', color: 'text-green-600', bgColor: 'bg-green-50', emoji: '🎉' },
-  NORMAL: { label: '또래 수준', color: 'text-blue-600', bgColor: 'bg-blue-50', emoji: '😊' },
-  NEEDS_TRACKING: { label: '추적검사 요망', color: 'text-yellow-600', bgColor: 'bg-yellow-50', emoji: '🤔' },
-  NEEDS_ASSESSMENT: { label: '심화평가 권고', color: 'text-red-600', bgColor: 'bg-red-50', emoji: '😟' },
+const CATEGORY_ORDER = ['GROSS_MOTOR', 'FINE_MOTOR', 'LANGUAGE', 'COGNITIVE', 'SOCIAL']
+
+const LEVEL_CONFIG: Record<string, { label: string; bgColor: string; textColor: string; cardBg: string }> = {
+  ADVANCED: { label: '빠른수준', bgColor: 'bg-[#0EBCFF]', textColor: 'text-white', cardBg: 'bg-[#F0FBFF]' },
+  NORMAL: { label: '또래수준', bgColor: 'bg-[#7CCF3C]', textColor: 'text-white', cardBg: 'bg-[#EDFCE2]' },
+  NEEDS_TRACKING: { label: '추적검사요망', bgColor: 'bg-[#FFA01B]', textColor: 'text-white', cardBg: 'bg-[#FFF5E8]' },
+  NEEDS_ASSESSMENT: { label: '심화평가권고', bgColor: 'bg-[#EB4C25]', textColor: 'text-white', cardBg: 'bg-[#FFF1ED]' },
+}
+
+const CATEGORY_ICONS: Record<string, string> = {
+  GROSS_MOTOR: '👟',
+  FINE_MOTOR: '✋',
+  LANGUAGE: 'ㄱ',
+  COGNITIVE: '💡',
+  SOCIAL: '😊',
+}
+
+// 레벨별 색상 (HEX)
+const LEVEL_COLORS: Record<string, string> = {
+  ADVANCED: '#0EBCFF',
+  NORMAL: '#7CCF3C',
+  NEEDS_TRACKING: '#FFA01B',
+  NEEDS_ASSESSMENT: '#EB4C25',
+}
+
+// 오각형 레이더 차트 컴포넌트
+const PentagonRadarChart = ({ results }: { results: AssessmentResult[] }) => {
+  // 5개 카테고리 순서대로 정렬
+  const sortedResults = [...results].sort((a, b) => {
+    return CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)
+  })
+
+  // 점 위치 (Figma 디자인 기반, 170x160 viewBox)
+  const dotPositions = [
+    { x: 80, y: 16 },    // 위 (대근육)
+    { x: 135, y: 57 },   // 오른쪽 위 (소근육)
+    { x: 115, y: 121 },  // 오른쪽 아래 (언어)
+    { x: 44, y: 121 },   // 왼쪽 아래 (인지)
+    { x: 24, y: 57 },    // 왼쪽 위 (사회성)
+  ]
+
+  // 라벨 위치
+  const labelPositions = [
+    { x: 75, y: 5, anchor: 'middle' as const },
+    { x: 149, y: 60, anchor: 'start' as const },
+    { x: 118, y: 136, anchor: 'start' as const },
+    { x: 32, y: 137, anchor: 'end' as const },
+    { x: 0, y: 60, anchor: 'start' as const },
+  ]
+
+  return (
+    <div className="flex justify-center my-4">
+      <div className="relative w-[170px] h-[160px]">
+        {/* 오각형 배경 (3개 레이어) */}
+        <div className="absolute left-[15px] top-[10px] w-[140px] h-[140px]">
+          {/* 외곽 오각형 */}
+          <img
+            src="/images/radar-chart-pentagon-outer.svg"
+            alt=""
+            className="absolute left-0 top-0 w-[140px] h-[140px] z-[1]"
+          />
+          {/* 중간 오각형 */}
+          <img
+            src="/images/radar-chart-pentagon-middle.svg"
+            alt=""
+            className="absolute left-[9px] top-[9px] w-[122px] h-[122px] z-[2]"
+          />
+          {/* 내부 오각형 */}
+          <img
+            src="/images/radar-chart-pentagon-inner.svg"
+            alt=""
+            className="absolute left-[16px] top-[16px] w-[108px] h-[108px] z-[3]"
+          />
+          {/* 중앙 아이 얼굴 */}
+          <img
+            src="/images/radar-chart-child-face.svg"
+            alt=""
+            className="absolute left-[49px] top-[48px] w-[43px] h-[41px] z-[4]"
+          />
+        </div>
+
+        {/* 각 카테고리별 점 */}
+        {sortedResults.map((result, i) => {
+          const pos = dotPositions[i]
+          const color = LEVEL_COLORS[result.level] || LEVEL_COLORS.NORMAL
+          return (
+            <div
+              key={result.id}
+              className="absolute w-[11px] h-[11px] rounded-full z-[10]"
+              style={{
+                left: `${pos.x}px`,
+                top: `${pos.y}px`,
+                backgroundColor: color,
+              }}
+            />
+          )
+        })}
+
+        {/* 라벨 */}
+        {sortedResults.map((result, i) => {
+          const pos = labelPositions[i]
+          const levelLabel = LEVEL_CONFIG[result.level]?.label.replace('수준', '').replace('검사요망', '').replace('평가권고', '') || ''
+          return (
+            <p
+              key={`label-${i}`}
+              className="absolute text-[12px] text-gray-500 whitespace-nowrap z-[20]"
+              style={{
+                left: `${pos.x}px`,
+                top: `${pos.y}px`,
+                textAlign: pos.anchor === 'middle' ? 'center' : pos.anchor === 'start' ? 'left' : 'right',
+                transform: pos.anchor === 'middle' ? 'translateX(-50%)' : pos.anchor === 'end' ? 'translateX(-100%)' : 'none',
+              }}
+            >
+              {levelLabel}
+            </p>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 export default function AssessmentDetailPage({ params }: { params: Promise<PageParams> }) {
@@ -56,15 +180,9 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
   const [assessment, setAssessment] = useState<Assessment | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
-  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false)
+  const [activeTab, setActiveTab] = useState<'detail' | 'analysis'>('detail')
   const [isGeneratingAnalysis, setIsGeneratingAnalysis] = useState(false)
   const [analysisError, setAnalysisError] = useState('')
-
-  // Prompt management
-  const [showPrompt, setShowPrompt] = useState(false)
-  const [customPrompt, setCustomPrompt] = useState('')
-  const [isPromptEdited, setIsPromptEdited] = useState(false)
-  const [showGuide, setShowGuide] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -89,9 +207,7 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
           return
         }
         const data = await response.json()
-        // API는 { assessment } 형태로 반환
         const assessmentData = data.assessment || data
-
         setAssessment(assessmentData)
       } catch (error) {
         console.error('평가 결과 조회 오류:', error)
@@ -104,138 +220,26 @@ export default function AssessmentDetailPage({ params }: { params: Promise<PageP
     fetchAssessment()
   }, [session, status, router, params])
 
-  const getOverallInterpretation = () => {
+  const getOverallSummary = () => {
     if (!assessment || !assessment.results || assessment.results.length === 0) {
-      return { level: '-', color: 'text-gray-600', description: '평가 결과가 없습니다.' }
+      return '평가 결과가 없습니다.'
     }
 
-    // 가장 낮은 레벨을 기준으로 종합 평가
+    if (assessment.aiAnalysisSummary) {
+      return assessment.aiAnalysisSummary
+    }
+
+    // 기본 요약 생성
     const hasAssessment = assessment.results.some(r => r.level === 'NEEDS_ASSESSMENT')
     const hasTracking = assessment.results.some(r => r.level === 'NEEDS_TRACKING')
-    const hasNormal = assessment.results.some(r => r.level === 'NORMAL')
-    const allAdvanced = assessment.results.every(r => r.level === 'ADVANCED')
+    const weakAreas = assessment.results
+      .filter(r => r.level === 'NEEDS_TRACKING' || r.level === 'NEEDS_ASSESSMENT')
+      .map(r => CATEGORY_LABELS[r.category].replace(' 발달', '').replace(' 운동', ''))
 
-    if (allAdvanced) {
-      return { level: '빠른 수준', color: 'text-green-600', description: '모든 영역에서 빠른 발달을 보이고 있습니다.' }
+    if (hasAssessment || hasTracking) {
+      return `전반적으로 건강하게 발달하고 있으나 ${weakAreas.join(', ')} 분야는 추적이 필요합니다.`
     }
-    if (hasAssessment) {
-      return { level: '심화평가 필요', color: 'text-red-600', description: '일부 영역에서 심화평가가 권고됩니다. 전문가 상담을 고려해보세요.' }
-    }
-    if (hasTracking) {
-      return { level: '추적 필요', color: 'text-yellow-600', description: '일부 영역에서 추적검사가 필요할 수 있습니다.' }
-    }
-    if (hasNormal) {
-      return { level: '또래 수준', color: 'text-blue-600', description: '대체로 또래 수준의 발달을 보이고 있습니다.' }
-    }
-    return { level: '빠른 수준', color: 'text-green-600', description: '빠른 발달을 보이고 있습니다.' }
-  }
-
-  const handleTherapistRecommendation = async () => {
-    if (!assessment) return
-
-    setIsLoadingRecommendations(true)
-    try {
-      const response = await fetch(`/api/therapists/recommendations?assessmentId=${assessment.id}`)
-      const data = await response.json()
-
-      if (response.ok) {
-        // 추천 치료 분야와 연령대를 쿼리 파라미터로 전달하여 치료사 검색 페이지로 이동
-        const params = new URLSearchParams()
-        if (data.recommendedSpecialties && data.recommendedSpecialties.length > 0) {
-          params.append('specialties', data.recommendedSpecialties.join(','))
-        }
-        if (data.childAgeRange) {
-          params.append('ageRange', data.childAgeRange)
-        }
-        params.append('autoFilter', 'true') // 자동 필터 적용 표시
-
-        router.push(`/parent/therapists?${params.toString()}`)
-      } else {
-        alert(data.error || '추천 치료사를 불러오는 중 오류가 발생했습니다.')
-      }
-    } catch (error) {
-      console.error('치료사 추천 오류:', error)
-      alert('서버 오류가 발생했습니다.')
-    } finally {
-      setIsLoadingRecommendations(false)
-    }
-  }
-
-  const hasBelowLevelResults = () => {
-    if (!assessment || !assessment.results) return false
-    return assessment.results.some(
-      r => r.level === 'NEEDS_TRACKING' || r.level === 'NEEDS_ASSESSMENT'
-    )
-  }
-
-  // 프롬프트 생성 함수
-  const createAssessmentAnalysisPrompt = () => {
-    if (!assessment) return ''
-
-    const categoryNames: Record<string, string> = {
-      GROSS_MOTOR: '대근육 운동',
-      FINE_MOTOR: '소근육 운동',
-      LANGUAGE: '언어',
-      COGNITIVE: '인지',
-      SOCIAL: '사회성',
-    }
-
-    const levelNames: Record<string, string> = {
-      ADVANCED: '또래보다 빠른 수준',
-      NORMAL: '또래 수준',
-      NEEDS_TRACKING: '추적검사 권장',
-      NEEDS_ASSESSMENT: '심화평가 권장',
-    }
-
-    const resultsText = assessment.results
-      .map((r) => {
-        const category = categoryNames[r.category] || r.category
-        const level = levelNames[r.level] || r.level
-        return `- ${category}: ${r.score}점 (${level})`
-      })
-      .join('\n')
-
-    return `당신은 아동 발달 전문가입니다. 다음 발달체크 결과를 바탕으로 종합 분석을 제공해주세요.
-
-## 아이 정보
-- 월령: ${assessment.ageInMonths}개월
-
-## 발달체크 결과
-${resultsText}
-
-${assessment.concernsText ? `## 부모님의 우려 사항\n${assessment.concernsText}\n` : ''}
-
-## 참고할 전문 지식
-[RAG 시스템이 월령과 발달 영역에 맞는 전문 지식을 자동으로 가져옵니다]
-
-## 요청사항
-위 정보를 바탕으로 다음 내용을 포함한 종합 분석을 작성해주세요:
-
-1. **전반적인 발달 상태 요약** (2-3문장)
-2. **영역별 상세 분석**
-   - 각 발달 영역(대근육, 소근육, 언어, 인지, 사회성)에 대한 평가
-   - 강점 영역과 주의가 필요한 영역 구분
-3. **맞춤 육아 팁 및 활동 추천** (3-5가지)
-   - 월령에 맞는 구체적인 놀이 및 활동
-   - 일상생활에서 실천 가능한 팁
-4. **전문가 상담 필요성**
-   - 전문가 상담이 필요한지 여부
-   - 필요하다면 어떤 분야의 치료사와 상담이 도움이 될지
-
-응답은 마크다운 형식으로 작성하되, 부모님이 읽기 쉽고 따뜻한 톤으로 작성해주세요.`
-  }
-
-  // 프롬프트 미리보기 업데이트
-  const updatePromptPreview = () => {
-    if (!isPromptEdited) {
-      setCustomPrompt(createAssessmentAnalysisPrompt())
-    }
-  }
-
-  // 기본 프롬프트로 복원
-  const resetToDefaultPrompt = () => {
-    setCustomPrompt(createAssessmentAnalysisPrompt())
-    setIsPromptEdited(false)
+    return '전반적으로 건강하게 발달하고 있습니다.'
   }
 
   const handleGenerateAnalysis = async () => {
@@ -245,19 +249,12 @@ ${assessment.concernsText ? `## 부모님의 우려 사항\n${assessment.concern
     setAnalysisError('')
 
     try {
-      const body: any = {}
-
-      // 커스텀 프롬프트가 있으면 추가
-      if (isPromptEdited && customPrompt) {
-        body.customPrompt = customPrompt
-      }
-
       const response = await fetch(`/api/assessments/${assessment.id}/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify({}),
       })
 
       if (!response.ok) {
@@ -267,10 +264,12 @@ ${assessment.concernsText ? `## 부모님의 우려 사항\n${assessment.concern
 
       const data = await response.json()
 
-      // 분석 결과를 현재 assessment에 반영
       setAssessment(prev => prev ? {
         ...prev,
         aiAnalysis: data.data.aiAnalysis,
+        aiAnalysisSummary: data.data.aiAnalysisSummary,
+        aiRecommendations: JSON.stringify(data.data.aiRecommendations),
+        aiCategoryAnalysis: JSON.stringify(data.data.aiCategoryAnalysis),
         aiAnalyzedAt: data.data.aiAnalyzedAt,
       } : null)
     } catch (error: any) {
@@ -281,51 +280,71 @@ ${assessment.concernsText ? `## 부모님의 우려 사항\n${assessment.concern
     }
   }
 
-  const getRadarChartData = () => {
-    if (!assessment || !assessment.results) return []
+  const getItemFeedbacks = (category: string): ItemFeedback[] => {
+    if (!assessment) return []
 
-    // 발달 수준을 4점 척도로 변환
-    const levelToScore = (level: string) => {
-      switch (level) {
-        case 'ADVANCED': return 4      // 빠른 수준
-        case 'NORMAL': return 3         // 또래 수준
-        case 'NEEDS_TRACKING': return 2 // 추적검사 요망
-        case 'NEEDS_ASSESSMENT': return 1 // 심화평가 권고
-        default: return 0
+    // 먼저 AssessmentResult의 itemFeedbacks 확인
+    const result = assessment.results.find(r => r.category === category)
+    if (result?.itemFeedbacks) {
+      try {
+        return JSON.parse(result.itemFeedbacks)
+      } catch {
+        // 파싱 실패
       }
     }
 
-    return assessment.results.map(result => ({
-      category: CATEGORY_LABELS[result.category] || result.category,
-      score: levelToScore(result.level),
-      fullMark: 4
-    }))
+    // aiCategoryAnalysis에서 확인
+    if (assessment.aiCategoryAnalysis) {
+      try {
+        const categoryAnalysis = JSON.parse(assessment.aiCategoryAnalysis)
+        if (categoryAnalysis[category]?.itemFeedbacks) {
+          return categoryAnalysis[category].itemFeedbacks
+        }
+      } catch {
+        // 파싱 실패
+      }
+    }
+
+    return []
+  }
+
+  const getRecommendations = (): string[] => {
+    if (!assessment?.aiRecommendations) return []
+    try {
+      return JSON.parse(assessment.aiRecommendations)
+    } catch {
+      return []
+    }
+  }
+
+  const getSortedResults = () => {
+    if (!assessment?.results) return []
+    return [...assessment.results].sort((a, b) => {
+      return CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category)
+    })
   }
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F3F3F3] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto"></div>
           <p className="mt-4 text-gray-600">로딩 중...</p>
         </div>
       </div>
     )
   }
 
-  if (!session) {
-    return null
-  }
+  if (!session) return null
 
   if (error) {
     return (
-      <div className="min-h-screen bg-neutral-light flex items-center justify-center">
+      <div className="min-h-screen bg-[#F3F3F3] flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <Link
             href="/parent/dashboard"
-            style={{ backgroundColor: '#F78C6B' }}
-            className="inline-flex items-center px-6 py-3 text-white rounded-md hover:opacity-90 transition-all font-medium shadow-md"
+            className="inline-flex items-center px-6 py-3 bg-[#FF6A00] text-white rounded-[10px] hover:bg-[#E55F00] transition-colors font-medium"
           >
             대시보드로 돌아가기
           </Link>
@@ -334,401 +353,263 @@ ${assessment.concernsText ? `## 부모님의 우려 사항\n${assessment.concern
     )
   }
 
-  if (!assessment) {
-    return null
-  }
-
-  const interpretation = getOverallInterpretation()
+  if (!assessment) return null
 
   return (
-    <div className="min-h-screen bg-[#F5EFE7]">
+    <div className="min-h-screen bg-[#F3F3F3]">
       <Header />
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-12 md:py-16 px-4 sm:px-6 lg:px-8">
-        <div className="sm:px-0">
-          {/* Assessment Header */}
-          <div className="bg-white shadow-sm rounded-xl md:rounded-2xl mb-6 md:mb-8">
-            <div className="px-4 py-5 sm:p-6 md:p-8">
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 md:mb-8">
-                <div>
-                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-stone-900 mb-2">
-                    {assessment.child.name}의 발달체크 결과
-                  </h1>
-                  <p className="text-sm sm:text-base text-stone-600">
-                    평가일: {new Date(assessment.createdAt).toLocaleDateString('ko-KR')} •
-                    당시 월령: {assessment.ageInMonths}개월
+      <main className="pb-8">
+        {/* 헤더 섹션 */}
+        <div className="bg-[#F3F3F3] px-5 py-5">
+          <div className="max-w-[360px] mx-auto">
+            <h1 className="text-[22px] font-bold text-[#281E19] mb-2">
+              아이포텐 발달체크 리포트
+            </h1>
+            <p className="text-[16px] text-[#777777]">
+              우리아이의 발달 현황을 한눈에 확인하세요
+            </p>
+          </div>
+        </div>
+
+        {/* 아이 정보 카드 */}
+        <div className="px-5">
+          <div className="max-w-[360px] mx-auto">
+            <div className="bg-white rounded-[20px] p-5 mb-4">
+              <div className="flex justify-between items-start">
+                <div className="text-center">
+                  <p className="text-[12px] text-[#777777] mb-1.5">아이 이름</p>
+                  <p className="text-[16px] font-bold text-[#281E19]">{assessment.child.name}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[12px] text-[#777777] mb-1.5">검사일</p>
+                  <p className="text-[16px] font-bold text-[#281E19]">
+                    {new Date(assessment.createdAt).toLocaleDateString('ko-KR', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit'
+                    }).replace(/\. /g, '.').replace(/\.$/, '')}
                   </p>
                 </div>
-                <Link
-                  href={`/assessments/new?childId=${assessment.child.id}`}
-                  className="inline-block bg-[#FF9999] text-white px-4 sm:px-6 md:px-8 py-2 md:py-3 rounded-[10px] font-semibold text-sm sm:text-base hover:bg-[#FF8888] transition-colors shadow-lg whitespace-nowrap"
-                >
-                  새 평가 시작
-                </Link>
-              </div>
-
-              {/* Overall Result */}
-              <div className="bg-gradient-to-r from-[#FFE5E5] to-[#FF9999] rounded-xl md:rounded-2xl p-6 sm:p-8 md:p-10 text-center">
-                <div className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 ${interpretation.color}`}>
-                  {interpretation.level}
-                </div>
-                <div className="text-xs sm:text-sm text-stone-600 mb-3 md:mb-4 font-medium">종합 발달 수준</div>
-                <p className="text-sm sm:text-base md:text-lg text-stone-700 leading-relaxed">{interpretation.description}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Radar Chart */}
-          <div className="bg-white shadow-sm rounded-xl md:rounded-2xl mb-6 md:mb-8">
-            <div className="px-4 py-5 sm:p-6 md:p-8">
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900 mb-6 md:mb-8 text-center">발달 영역 종합 차트</h3>
-              <div className="flex justify-center">
-                <ResponsiveContainer width="100%" height={400}>
-                  <RadarChart data={getRadarChartData()}>
-                    <PolarGrid stroke="#e5e7eb" />
-                    <PolarAngleAxis
-                      dataKey="category"
-                      tick={{ fill: '#374151', fontSize: 14, fontWeight: 500 }}
-                    />
-                    <PolarRadiusAxis
-                      angle={90}
-                      domain={[0, 4]}
-                      tick={{ fill: '#9ca3af', fontSize: 12 }}
-                      ticks={[0, 1, 2, 3, 4]}
-                    />
-                    <Radar
-                      name="발달 점수"
-                      dataKey="score"
-                      stroke="#10b981"
-                      fill="#10b981"
-                      fillOpacity={0.6}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '0.5rem',
-                        padding: '0.75rem'
-                      }}
-                      formatter={(value: number) => {
-                        const levelText = value === 4 ? '빠른 수준' :
-                                        value === 3 ? '또래 수준' :
-                                        value === 2 ? '추적검사 요망' :
-                                        value === 1 ? '심화평가 권고' : '-'
-                        return [`${value}점 (${levelText})`, '발달 수준']
-                      }}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="mt-4 text-center">
-                <p className="text-sm text-gray-600 mb-3">각 영역의 발달 수준을 시각적으로 확인할 수 있습니다.</p>
-                <div className="flex justify-center gap-4 text-xs text-gray-500">
-                  <span>4점: 빠른 수준</span>
-                  <span>3점: 또래 수준</span>
-                  <span>2점: 추적검사 요망</span>
-                  <span>1점: 심화평가 권고</span>
+                <div className="text-center">
+                  <p className="text-[12px] text-[#777777] mb-1.5">월령</p>
+                  <p className="text-[16px] font-bold text-[#281E19]">{assessment.ageInMonths}개월</p>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Category Results */}
-          <div className="bg-white shadow-sm rounded-xl md:rounded-2xl mb-6 md:mb-8">
-            <div className="px-4 py-5 sm:p-6 md:p-8">
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900 mb-4 md:mb-6">영역별 발달 수준</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
-                {(assessment.results || []).map((result) => {
-                  const levelInfo = LEVEL_LABELS[result.level] || LEVEL_LABELS.NORMAL
+            {/* 발달 영역별 현황 */}
+            <div className="bg-white rounded-[20px] p-5 mb-4">
+              <div className="mb-4">
+                <h2 className="text-[16px] font-bold text-[#281E19] mb-2">발달 영역별 현황</h2>
+                <p className="text-[15px] text-[#777777] leading-[20px]">
+                  {getOverallSummary()}
+                </p>
+              </div>
+
+              {/* 오각형 레이더 차트 */}
+              {assessment.results && assessment.results.length >= 5 && (
+                <PentagonRadarChart results={assessment.results} />
+              )}
+
+              {/* 영역별 요약 카드 */}
+              <div className="space-y-2.5">
+                {getSortedResults().map((result) => {
+                  const config = LEVEL_CONFIG[result.level] || LEVEL_CONFIG.NORMAL
                   return (
-                    <div key={result.id} className="border-2 border-gray-200 rounded-xl p-4 md:p-6 text-center hover:shadow-md transition-shadow">
-                      <h4 className="font-bold text-sm sm:text-base text-stone-900 mb-3">
-                        {CATEGORY_LABELS[result.category] || result.category}
-                      </h4>
-                      <div className="text-3xl sm:text-4xl md:text-5xl mb-3">{levelInfo.emoji}</div>
-                      <div className={`inline-flex items-center px-2 md:px-3 py-1 md:py-2 rounded-full ${levelInfo.bgColor}`}>
-                        <span className={`text-xs sm:text-sm font-semibold ${levelInfo.color}`}>
-                          {levelInfo.label}
+                    <div
+                      key={result.id}
+                      className={`${config.cardBg} rounded-[10px] px-4 py-2.5 flex items-center justify-between`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-10 h-10 bg-[#FFF7EC] rounded-full flex items-center justify-center text-lg">
+                          {CATEGORY_ICONS[result.category] || '📊'}
+                        </div>
+                        <span className="text-[14px] font-semibold text-[#281E19]">
+                          {CATEGORY_LABELS[result.category]?.replace(' 발달', '').replace(' 운동', '') || result.category}
                         </span>
                       </div>
+                      <span className={`${config.bgColor} ${config.textColor} text-[12px] font-bold px-2 py-0.5 rounded-full`}>
+                        {config.label}
+                      </span>
                     </div>
                   )
                 })}
               </div>
             </div>
           </div>
+        </div>
 
-          {/* AI Analysis Section */}
-          <div className="mt-6 md:mt-8 bg-white shadow-sm rounded-xl md:rounded-2xl">
-            <div className="px-4 py-5 sm:p-6 md:p-8">
-              <div className="flex items-center justify-between mb-4 md:mb-6">
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900">AI 종합 분석</h3>
-              </div>
+        {/* 탭 네비게이션 */}
+        <div className="bg-white pt-6">
+          <div className="max-w-[360px] mx-auto px-5">
+            <div className="bg-[#F3F3F3] rounded-[16px] p-1.5 flex">
+              <button
+                onClick={() => setActiveTab('detail')}
+                className={`flex-1 py-2.5 px-4 rounded-[12px] text-[14px] font-medium transition-all ${
+                  activeTab === 'detail'
+                    ? 'bg-white shadow-sm font-bold text-[#281E19]'
+                    : 'text-[#666666]'
+                }`}
+              >
+                발달체크 결과 상세
+              </button>
+              <button
+                onClick={() => setActiveTab('analysis')}
+                className={`flex-1 py-2.5 px-4 rounded-[12px] text-[14px] font-medium transition-all ${
+                  activeTab === 'analysis'
+                    ? 'bg-white shadow-sm font-bold text-[#281E19]'
+                    : 'text-[#666666]'
+                }`}
+              >
+                AI 종합 분석
+              </button>
+            </div>
+          </div>
 
-              {/* 프롬프트 관리 섹션 */}
-              {!assessment.aiAnalysis && (
-                <div className="mb-4 border-t border-gray-200 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowPrompt(!showPrompt)
-                      if (!showPrompt) {
-                        updatePromptPreview()
-                      }
-                    }}
-                    style={{
-                      width: '100%',
-                      backgroundColor: '#F3F4F6',
-                      color: '#374151',
-                      padding: '12px',
-                      borderRadius: '6px',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      border: '1px solid #D1D5DB',
-                    }}
-                  >
-                    <span>🔧 프롬프트 보기/수정 (고급)</span>
-                    <span>{showPrompt ? '▲' : '▼'}</span>
-                  </button>
+          {/* 탭 콘텐츠 */}
+          {activeTab === 'detail' ? (
+            // 발달체크 결과 상세
+            <div className="max-w-[360px] mx-auto">
+              {getSortedResults().map((result, index) => {
+                const config = LEVEL_CONFIG[result.level] || LEVEL_CONFIG.NORMAL
+                const feedbacks = getItemFeedbacks(result.category)
 
-                  {showPrompt && (
-                    <div className="mt-4 space-y-4">
-                      {/* 프롬프트 작성 가이드 */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg">
-                        <button
-                          type="button"
-                          onClick={() => setShowGuide(!showGuide)}
-                          className="w-full px-4 py-3 flex items-center justify-between text-left"
-                        >
-                          <span className="font-medium text-blue-900">📖 프롬프트 작성 가이드</span>
-                          <span className="text-blue-600">{showGuide ? '▲' : '▼'}</span>
-                        </button>
-
-                        {showGuide && (
-                          <div className="px-4 pb-4 text-sm text-blue-900 space-y-3">
-                            <div>
-                              <h4 className="font-semibold mb-1">✨ 효과적인 프롬프트 작성 팁</h4>
-                              <ul className="list-disc ml-5 space-y-1">
-                                <li><strong>역할 정의:</strong> AI의 역할을 명확히 지정하세요</li>
-                                <li><strong>구체적 지시:</strong> 원하는 출력 형식과 구조를 명확히 설명하세요</li>
-                                <li><strong>톤 조정:</strong> 따뜻한 톤, 전문적 톤 등 원하는 어조를 명시하세요</li>
-                                <li><strong>RAG 활용:</strong> 커스텀 프롬프트 사용 시 RAG 지식베이스가 자동으로 적용되지 않습니다</li>
-                              </ul>
-                            </div>
-
-                            <div>
-                              <h4 className="font-semibold mb-1">🎯 발달체크 분석 프롬프트 구조</h4>
-                              <ul className="list-disc ml-5 space-y-1 text-xs">
-                                <li>아이 정보 (월령)</li>
-                                <li>발달체크 결과 (영역별 점수와 수준)</li>
-                                <li>부모님의 우려 사항 (선택)</li>
-                                <li>요청사항 (전반적 요약, 영역별 분석, 육아 팁, 전문가 상담 필요성)</li>
-                              </ul>
-                            </div>
-
-                            <div>
-                              <h4 className="font-semibold mb-1">⚠️ 주의사항</h4>
-                              <ul className="list-disc ml-5 space-y-1">
-                                <li>커스텀 프롬프트 사용 시 RAG 지식베이스 참조가 비활성화됩니다</li>
-                                <li>전문 용어 사용 시 부모님이 이해하기 어려울 수 있습니다</li>
-                                <li>지나치게 긴 프롬프트는 생성 시간이 오래 걸릴 수 있습니다</li>
-                              </ul>
-                            </div>
-                          </div>
-                        )}
+                return (
+                  <div key={result.id}>
+                    <div className="p-[30px]">
+                      <div className="border-b border-[#E6E6E6] pb-4 mb-5 flex items-center justify-between">
+                        <h3 className="text-[22px] font-bold text-[#281E19]">
+                          {CATEGORY_LABELS[result.category] || result.category}
+                        </h3>
+                        <span className={`${config.bgColor} ${config.textColor} text-[14px] font-bold px-2.5 py-1 rounded-full`}>
+                          {config.label}
+                        </span>
                       </div>
 
-                      {/* 프롬프트 편집기 */}
                       <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="block text-sm font-medium text-gray-700">
-                            프롬프트 편집
-                          </label>
-                          <button
-                            type="button"
-                            onClick={resetToDefaultPrompt}
-                            style={{
-                              backgroundColor: '#EF4444',
-                              color: 'white',
-                              padding: '6px 12px',
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              fontWeight: '500',
-                              border: 'none',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            기본값으로 복원
-                          </button>
+                        <p className="text-[12px] font-bold text-[#777777] mb-2.5">발달 체크 결과</p>
+                        <div className="space-y-6">
+                          {feedbacks.length > 0 ? (
+                            feedbacks.map((feedback, i) => (
+                              <div key={i}>
+                                <div className="flex items-center gap-1.5 mb-2">
+                                  <span className={`text-sm ${feedback.icon === 'check' ? 'text-green-500' : 'text-orange-500'}`}>
+                                    {feedback.icon === 'check' ? '✓' : '△'}
+                                  </span>
+                                  <span className="text-[14px] font-bold text-[#281E19]">
+                                    {feedback.question}
+                                  </span>
+                                </div>
+                                <p className="text-[14px] text-[#454545] leading-[22px]">
+                                  {feedback.feedback}
+                                </p>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-[14px] text-[#777777]">
+                              AI 분석을 생성하면 상세 피드백을 확인할 수 있습니다.
+                            </p>
+                          )}
                         </div>
-                        <textarea
-                          value={customPrompt || createAssessmentAnalysisPrompt()}
-                          onChange={(e) => {
-                            setCustomPrompt(e.target.value)
-                            setIsPromptEdited(true)
-                          }}
-                          rows={12}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-aipoten-green font-mono text-xs"
-                          style={{ backgroundColor: '#FAFAFA' }}
-                        />
-                        <p className="mt-1 text-xs text-gray-500">
-                          {isPromptEdited ? '⚠️ 프롬프트가 수정되었습니다. RAG 참조 없이 수정된 프롬프트로만 AI가 생성합니다.' : '기본 프롬프트를 사용합니다. RAG 시스템이 자동으로 관련 지식을 참조합니다.'}
-                        </p>
                       </div>
                     </div>
-                  )}
+                    {index < getSortedResults().length - 1 && (
+                      <div className="bg-[#F3F3F3] h-4 w-full" />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            // AI 종합 분석
+            <div className="max-w-[360px] mx-auto p-[30px]">
+              {/* AI 분석이 없는 경우 */}
+              {!assessment.aiAnalysis && !isGeneratingAnalysis && (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-4">🤖</div>
+                  <h4 className="text-lg font-medium text-[#281E19] mb-2">
+                    AI 종합 분석을 생성하세요
+                  </h4>
+                  <p className="text-[14px] text-[#777777] mb-6">
+                    발달체크 결과를 바탕으로 AI가 맞춤 분석을 제공합니다.
+                  </p>
+                  <button
+                    onClick={handleGenerateAnalysis}
+                    className="w-full bg-[#FF6A00] text-white py-3 rounded-[10px] font-semibold text-[16px] hover:bg-[#E55F00] transition-colors"
+                  >
+                    AI 분석 생성하기
+                  </button>
                 </div>
               )}
 
-              {/* AI 분석 생성 버튼 */}
-              {!assessment.aiAnalysis && (
-                <button
-                  onClick={handleGenerateAnalysis}
-                  disabled={isGeneratingAnalysis}
-                  className="w-full bg-[#FF6A00] text-white px-6 md:px-8 py-3 md:py-4 rounded-[10px] font-semibold text-sm sm:text-base md:text-lg hover:bg-[#E55F00] transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mb-4 md:mb-6"
-                >
-                  {isGeneratingAnalysis ? '분석 생성 중...' : 'AI 분석 생성하기'}
-                </button>
+              {/* 분석 생성 중 */}
+              {isGeneratingAnalysis && (
+                <div className="py-8 text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6A00] mx-auto mb-4"></div>
+                  <p className="text-[#777777]">AI가 발달체크 결과를 분석하고 있습니다...</p>
+                  <p className="text-sm text-[#999999] mt-2">잠시만 기다려주세요 (약 10-20초 소요)</p>
+                </div>
               )}
 
+              {/* 분석 에러 */}
               {analysisError && (
                 <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-sm text-red-600">{analysisError}</p>
                 </div>
               )}
 
-              {isGeneratingAnalysis && (
-                <div className="py-8 text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aipoten-green mx-auto mb-4"></div>
-                  <p className="text-gray-600">AI가 발달체크 결과를 분석하고 있습니다...</p>
-                  <p className="text-sm text-gray-500 mt-2">잠시만 기다려주세요 (약 10-20초 소요)</p>
-                </div>
-              )}
-
+              {/* AI 분석 결과 */}
               {assessment.aiAnalysis && !isGeneratingAnalysis && (
-                <div className="max-w-none">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                    <p className="text-sm text-blue-800 m-0">
-                      아래 분석은 AI가 자동으로 생성한 내용입니다. 참고용으로만 활용하시고, 정확한 진단은 전문가와 상담하시기 바랍니다.
-                    </p>
+                <div>
+                  <div className="border-b border-[#FF6A00] pb-2.5 mb-6 flex items-center justify-between">
+                    <h3 className="text-[24px] font-bold text-[#281E19]">AI 종합 분석</h3>
+                    <span className="text-[24px]">🤖</span>
                   </div>
-                  <div className="max-h-[600px] overflow-y-auto bg-gray-50 rounded-lg p-6 border border-gray-200">
-                    <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-base">
-                      {assessment.aiAnalysis}
+
+                  <div className="text-[14px] text-[#281E19] leading-[22px] mb-6 whitespace-pre-wrap">
+                    {assessment.aiAnalysis}
+                  </div>
+
+                  {/* 맞춤 권장사항 */}
+                  {getRecommendations().length > 0 && (
+                    <div className="bg-[#FFF7EC] rounded-[14px] p-5 mb-6">
+                      <h4 className="text-[16px] font-bold text-[#FF6A00] mb-4">맞춤 권장사항</h4>
+                      <div className="space-y-2">
+                        {getRecommendations().map((rec, i) => (
+                          <div key={i} className="flex items-start gap-1">
+                            <span className="text-[#FF6A00] mt-1">✓</span>
+                            <p className="text-[14px] text-[#454545] leading-[22px]">{rec}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  {assessment.aiAnalyzedAt && (
-                    <p className="text-xs text-gray-500 mt-4 mb-0">
-                      분석 생성 시간: {new Date(assessment.aiAnalyzedAt).toLocaleString('ko-KR')}
-                    </p>
                   )}
-                </div>
-              )}
 
-              {!assessment.aiAnalysis && !isGeneratingAnalysis && !analysisError && (
-                <div className="py-8 text-center">
-                  <div className="text-4xl mb-4">🤖</div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">
-                    AI 분석을 생성하세요
-                  </h4>
-                  <p className="text-gray-600 mb-4">
-                    발달체크 결과와 {assessment.concernsText ? '작성하신 우려 사항을 바탕으로' : ''} AI가 맞춤 분석을 제공합니다.
+                  {/* 면책 문구 */}
+                  <p className="text-[12px] text-[#777777] leading-[20px] mb-6">
+                    *본 리포트는 AI 분석기반 참고자료이며, 의학적 진단이 아닙니다. '심화평가 권고' 시 전문 평가를 권장합니다
                   </p>
-                  <ul className="text-sm text-gray-600 text-left max-w-md mx-auto space-y-2">
-                    <li className="flex items-start">
-                      <span className="mr-2">✓</span>
-                      <span>영역별 발달 수준 상세 분석</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-2">✓</span>
-                      <span>월령에 맞는 맞춤 육아 팁 및 활동 추천</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-2">✓</span>
-                      <span>전문가 상담 필요성 판단</span>
-                    </li>
-                  </ul>
+
+                  {/* CTA 버튼 */}
+                  <div className="flex gap-3">
+                    <Link
+                      href={`/videos?childId=${assessment.child.id}&age=${assessment.ageInMonths}`}
+                      className="flex-1 bg-[#FF6D2A] text-white py-3 rounded-[10px] font-semibold text-[16px] text-center hover:bg-[#E55F00] transition-colors"
+                    >
+                      홈케어 콘텐츠 보기
+                    </Link>
+                    <Link
+                      href="/parent/therapists"
+                      className="flex-1 bg-[#FF6D2A] text-white py-3 rounded-[10px] font-semibold text-[16px] text-center hover:bg-[#E55F00] transition-colors"
+                    >
+                      전문가 예약하기
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Recommendations */}
-          <div className="mt-6 md:mt-8 bg-white shadow-sm rounded-xl md:rounded-2xl">
-            <div className="px-4 py-5 sm:p-6 md:p-8">
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-stone-900 mb-4 md:mb-6">추천 활동</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                <Link
-                  href={`/videos?childId=${assessment.child.id}&age=${assessment.ageInMonths}`}
-                  className="bg-white p-4 md:p-6 border-2 border-gray-200 rounded-xl hover:border-[#FF6A00] hover:shadow-md transition-all"
-                >
-                  <div className="flex flex-col sm:flex-row items-center text-center sm:text-left">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#FF9999] rounded-full flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 flex-shrink-0">
-                      <span className="text-2xl">📹</span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm sm:text-base text-stone-900 mb-1">추천 영상</h4>
-                      <p className="text-xs sm:text-sm text-stone-600">발달에 도움되는 영상</p>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link
-                  href={`/spirituality?childId=${assessment.child.id}`}
-                  className="bg-white p-4 md:p-6 border-2 border-gray-200 rounded-xl hover:border-[#FF6A00] hover:shadow-md transition-all"
-                >
-                  <div className="flex flex-col sm:flex-row items-center text-center sm:text-left">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#FF6A00] rounded-full flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 flex-shrink-0">
-                      <span className="text-2xl">🎮</span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm sm:text-base text-stone-900 mb-1">놀이 영성</h4>
-                      <p className="text-xs sm:text-sm text-stone-600">맞춤 놀이 활동</p>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link
-                  href="/boards"
-                  className="bg-white p-4 md:p-6 border-2 border-gray-200 rounded-xl hover:border-[#FF6A00] hover:shadow-md transition-all"
-                >
-                  <div className="flex flex-col sm:flex-row items-center text-center sm:text-left">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#FF9999] rounded-full flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 flex-shrink-0">
-                      <span className="text-2xl">💬</span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm sm:text-base text-stone-900 mb-1">커뮤니티</h4>
-                      <p className="text-xs sm:text-sm text-stone-600">다른 부모와 소통</p>
-                    </div>
-                  </div>
-                </Link>
-
-                {hasBelowLevelResults() && (
-                  <button
-                    onClick={handleTherapistRecommendation}
-                    disabled={isLoadingRecommendations}
-                    className="bg-white p-4 md:p-6 border-2 border-[#7CCF3C] rounded-xl hover:border-[#FF6A00] hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left"
-                  >
-                    <div className="flex flex-col sm:flex-row items-center text-center sm:text-left">
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#7CCF3C] rounded-full flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 flex-shrink-0">
-                        <span className="text-2xl">👨‍⚕️</span>
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-sm sm:text-base text-stone-900 mb-1">치료사 추천</h4>
-                        <p className="text-xs sm:text-sm text-stone-600">
-                          {isLoadingRecommendations ? '로딩 중...' : '맞춤 치료사 찾기'}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </main>
     </div>

@@ -72,6 +72,20 @@ export async function GET(request: NextRequest) {
       take: limit
     })
 
+    // 연령대에 맞는 영상이 없으면 전체 공개 영상에서 가져오기
+    if (recommendedVideos.length === 0) {
+      recommendedVideos = await prisma.video.findMany({
+        where: {
+          isPublished: true
+        },
+        orderBy: [
+          { priority: 'desc' },
+          { viewCount: 'desc' }
+        ],
+        take: limit
+      })
+    }
+
     // 최근 발달 체크 결과가 있는 경우 맞춤 추천
     if (child.assessments.length > 0) {
       const latestAssessment = child.assessments[0]

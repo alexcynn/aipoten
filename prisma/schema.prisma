@@ -136,9 +136,12 @@ model DevelopmentAssessment {
   createdAt    DateTime              @default(now())
 
   // AI 분석 관련
-  concernsText String?               // 부모의 서술형 우려 사항
-  aiAnalysis   String?               // LLM 종합 분석 결과 (TEXT 타입, 대용량 지원)
-  aiAnalyzedAt DateTime?             // AI 분석 시간
+  concernsText       String?               // 부모의 서술형 우려 사항
+  aiAnalysis         String?               // LLM 종합 분석 결과 (TEXT 타입, 대용량 지원)
+  aiAnalysisSummary  String?               // AI 분석 70자 요약 (대시보드용)
+  aiRecommendations  String?               // JSON 배열: 맞춤 권장사항 목록
+  aiCategoryAnalysis String?               // JSON 객체: 영역별 상세 AI 분석
+  aiAnalyzedAt       DateTime?             // AI 분석 시간
 
   // 관계
   child     Child                   @relation(fields: [childId], references: [id], onDelete: Cascade)
@@ -154,14 +157,15 @@ enum AssessmentStatus {
 }
 
 model AssessmentResult {
-  id           String                @id @default(cuid())
-  assessmentId String
-  category     DevelopmentCategory
-  score        Float
-  level        DevelopmentLevel
-  feedback     String?
+  id              String                @id @default(cuid())
+  assessmentId    String
+  category        DevelopmentCategory
+  score           Float
+  level           DevelopmentLevel
+  feedback        String?
   recommendations String?
-  createdAt    DateTime              @default(now())
+  itemFeedbacks   String?               // JSON 배열: 문항별 AI 피드백 [{question, feedback, icon}]
+  createdAt       DateTime              @default(now())
 
   // 관계
   assessment DevelopmentAssessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)

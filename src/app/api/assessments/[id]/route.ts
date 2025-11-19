@@ -241,8 +241,8 @@ export async function DELETE(
 
 // 점수에 따른 발달 수준 계산
 function calculateDevelopmentLevel(score: number): DevelopmentLevel {
-  if (score >= 80) return 'EXCELLENT'
-  if (score >= 60) return 'GOOD'
-  if (score >= 40) return 'CAUTION'
-  return 'NEEDS_OBSERVATION'
+  if (score >= 80) return 'ADVANCED'
+  if (score >= 60) return 'NORMAL'
+  if (score >= 40) return 'NEEDS_TRACKING'
+  return 'NEEDS_ASSESSMENT'
 }

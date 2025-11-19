@@ -834,12 +834,14 @@ function AssessmentContent() {
                         >
                           {isSubmitting ? '저장 중...' : '제출하고 결과 보기'}
                         </button>
+                        {/* 프롬프트 보기 버튼 - 임시 숨김
                         <button
                           onClick={handleShowPrompt}
                           className="flex-1 px-6 md:px-8 py-3 md:py-4 border-2 border-[#FF6A00] text-[#FF6A00] rounded-[10px] hover:bg-[#FFF5EB] transition-colors font-semibold text-sm sm:text-base"
                         >
                           프롬프트 보기
                         </button>
+                        */}
                       </div>
                     </div>
                   </div>

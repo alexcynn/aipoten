@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-config'
+import { generateStructuredAssessmentAnalysis } from '@/lib/services/vertexAIService'
+import { generateRAGContext } from '@/lib/services/ragService'
 
 // 발달 체크 생성 및 완료
 export async function POST(request: NextRequest) {
@@ -72,6 +74,7 @@ export async function POST(request: NextRequest) {
     const categoryScores = await calculateCategoryScores(assessment.id, responses)
 
     // AssessmentResult 저장
+    const savedResults: Array<{ category: string; score: number; level: string }> = []
     for (const [category, scoreData] of Object.entries(categoryScores)) {
       const level = determineDevelopmentLevel(category, scoreData.score)
 
@@ -83,7 +86,18 @@ export async function POST(request: NextRequest) {
           level: level,
         }
       })
+
+      savedResults.push({
+        category,
+        score: scoreData.score,
+        level,
+      })
     }
+
+    // 자동 AI 분석 생성 (백그라운드에서 실행)
+    triggerAIAnalysis(assessment.id, ageInMonths, savedResults, concernsText).catch((error) => {
+      console.error('자동 AI 분석 생성 실패:', error)
+    })
 
     return NextResponse.json({
       message: '발달 체크가 완료되었습니다.',
@@ -223,5 +237,68 @@ function determineDevelopmentLevel(category: string, score: number): 'ADVANCED' 
 
     default:
       return 'NEEDS_ASSESSMENT'
+  }
+}
+
+// 백그라운드에서 AI 분석 자동 생성
+async function triggerAIAnalysis(
+  assessmentId: string,
+  ageInMonths: number,
+  results: Array<{ category: string; score: number; level: string }>,
+  concernsText?: string
+) {
+  try {
+    // RAG 컨텍스트 생성
+    const ragContext = await generateRAGContext({
+      ageInMonths,
+      results,
+      concernsText,
+    })
+
+    // 구조화된 AI 분석 생성
+    const structuredAnalysis = await generateStructuredAssessmentAnalysis(
+      {
+        ageInMonths,
+        results,
+        concernsText,
+      },
+      ragContext
+    )
+
+    // 분석 결과 저장
+    await prisma.developmentAssessment.update({
+      where: { id: assessmentId },
+      data: {
+        aiAnalysis: structuredAnalysis.overallAnalysis,
+        aiAnalysisSummary: structuredAnalysis.summary,
+        aiRecommendations: JSON.stringify(structuredAnalysis.recommendations),
+        aiCategoryAnalysis: JSON.stringify(structuredAnalysis.categoryAnalysis),
+        aiAnalyzedAt: new Date(),
+      },
+    })
+
+    // 각 AssessmentResult에 itemFeedbacks 저장
+    if (structuredAnalysis.categoryAnalysis) {
+      const assessmentResults = await prisma.assessmentResult.findMany({
+        where: { assessmentId },
+      })
+
+      for (const result of assessmentResults) {
+        const categoryData = structuredAnalysis.categoryAnalysis[result.category]
+        if (categoryData && categoryData.itemFeedbacks) {
+          await prisma.assessmentResult.update({
+            where: { id: result.id },
+            data: {
+              itemFeedbacks: JSON.stringify(categoryData.itemFeedbacks),
+            },
+          })
+        }
+      }
+    }
+
+    console.log(`AI 분석 자동 생성 완료: ${assessmentId}`)
+  } catch (error) {
+    console.error(`AI 분석 자동 생성 실패 (${assessmentId}):`, error)
+    // 실패해도 발달체크 결과는 유지됨
   }
 }

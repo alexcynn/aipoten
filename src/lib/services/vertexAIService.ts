@@ -168,6 +168,204 @@ export async function generateAssessmentAnalysis(
 }
 
 /**
+ * 구조화된 발달체크 분석 응답 타입
+ */
+export interface StructuredAnalysisResponse {
+  summary: string;  // 70자 이내 요약 (대시보드용)
+  overallAnalysis: string;  // 전체 종합 분석
+  recommendations: string[];  // 맞춤 권장사항 목록
+  categoryAnalysis: {
+    [category: string]: {
+      level: string;
+      analysis: string;
+      itemFeedbacks: Array<{
+        question: string;
+        feedback: string;
+        icon: 'check' | 'warning';  // 잘함/주의 필요
+      }>;
+    };
+  };
+}
+
+/**
+ * 구조화된 발달체크 분석 프롬프트 생성 (JSON 응답)
+ */
+export function createStructuredAssessmentPrompt(
+  assessmentData: {
+    ageInMonths: number;
+    results: Array<{
+      category: string;
+      score: number;
+      level: string;
+    }>;
+    concernsText?: string;
+  },
+  ragContext: string
+): string {
+  const categoryNames: Record<string, string> = {
+    GROSS_MOTOR: '대근육 운동',
+    FINE_MOTOR: '소근육 운동',
+    LANGUAGE: '언어',
+    COGNITIVE: '인지',
+    SOCIAL: '사회성',
+  };
+
+  const levelNames: Record<string, string> = {
+    ADVANCED: '빠른수준',
+    NORMAL: '또래수준',
+    NEEDS_TRACKING: '추적검사요망',
+    NEEDS_ASSESSMENT: '심화평가권고',
+  };
+
+  const resultsText = assessmentData.results
+    .map((r) => {
+      const category = categoryNames[r.category] || r.category;
+      const level = levelNames[r.level] || r.level;
+      return `- ${category}: ${r.score}점 (${level})`;
+    })
+    .join('\n');
+
+  return `당신은 아동 발달 전문가입니다. 다음 발달체크 결과를 분석하여 반드시 JSON 형식으로만 응답해주세요.
+
+## 아이 정보
+- 월령: ${assessmentData.ageInMonths}개월
+
+## 발달체크 결과
+${resultsText}
+
+${assessmentData.concernsText ? `## 부모님의 우려 사항\n${assessmentData.concernsText}\n` : ''}
+
+## 참고할 전문 지식
+${ragContext}
+
+## 응답 형식
+반드시 아래 JSON 구조로만 응답하세요. 다른 텍스트는 절대 포함하지 마세요.
+
+{
+  "summary": "70자 이내의 한 줄 요약. 예: 전반적으로 건강하게 발달하고 있으나 언어 분야는 추적이 필요합니다.",
+  "overallAnalysis": "아이의 전반적인 발달 상태에 대한 종합 분석 (2-3문단). 강점, 주의점, 향후 발달 전망을 포함하세요.",
+  "recommendations": [
+    "구체적인 권장사항 1 (예: 매일 15분씩 그림책을 함께 읽으며 대화 나누기)",
+    "구체적인 권장사항 2",
+    "구체적인 권장사항 3",
+    "구체적인 권장사항 4",
+    "구체적인 권장사항 5"
+  ],
+  "categoryAnalysis": {
+    "GROSS_MOTOR": {
+      "level": "ADVANCED",
+      "analysis": "해당 영역에 대한 상세 분석",
+      "itemFeedbacks": [
+        {
+          "question": "계단 오르내리기",
+          "feedback": "훌륭해요! 난간을 잡고 안정적으로 계단을 오르내릴 수 있네요. 이제 한발씩 번갈아가며 계단을 오를 수 있도록 연습해보아요.",
+          "icon": "check"
+        },
+        {
+          "question": "공차기",
+          "feedback": "정말 잘하고 있어요! 균형감각이 뛰어나고 다리 힘이 튼튼해요.",
+          "icon": "check"
+        },
+        {
+          "question": "한발 서기",
+          "feedback": "아직은 어려워하지만 괜찮아요! 벽을 잡고 한발 들기 시작해서 천천히 연습해보세요.",
+          "icon": "warning"
+        }
+      ]
+    },
+    "FINE_MOTOR": {
+      "level": "NORMAL",
+      "analysis": "해당 영역에 대한 상세 분석",
+      "itemFeedbacks": [...]
+    },
+    "LANGUAGE": {
+      "level": "NEEDS_TRACKING",
+      "analysis": "해당 영역에 대한 상세 분석",
+      "itemFeedbacks": [...]
+    },
+    "COGNITIVE": {
+      "level": "NORMAL",
+      "analysis": "해당 영역에 대한 상세 분석",
+      "itemFeedbacks": [...]
+    },
+    "SOCIAL": {
+      "level": "NEEDS_ASSESSMENT",
+      "analysis": "해당 영역에 대한 상세 분석",
+      "itemFeedbacks": [...]
+    }
+  }
+}
+
+## 작성 지침
+1. summary는 반드시 70자 이내로 작성
+2. 각 영역별로 3개의 itemFeedbacks를 작성 (월령에 맞는 발달 과제 기반)
+3. icon은 잘하면 "check", 연습이 필요하면 "warning"
+4. recommendations는 구체적이고 실천 가능한 내용 5개
+5. 부모님이 이해하기 쉽고 따뜻한 톤으로 작성
+6. 반드시 유효한 JSON만 출력하세요 (마크다운 코드블록 없이)`;
+}
+
+/**
+ * 구조화된 발달체크 분석 생성
+ */
+export async function generateStructuredAssessmentAnalysis(
+  assessmentData: {
+    ageInMonths: number;
+    results: Array<{
+      category: string;
+      score: number;
+      level: string;
+    }>;
+    concernsText?: string;
+  },
+  ragContext: string
+): Promise<StructuredAnalysisResponse> {
+  const prompt = createStructuredAssessmentPrompt(assessmentData, ragContext);
+
+  const response = await generateText(prompt, {
+    temperature: 0.7,
+    maxOutputTokens: 10000,
+  });
+
+  // JSON 파싱 (마크다운 코드블록이 있을 수 있으므로 제거)
+  let jsonString = response.trim();
+
+  // ```json 또는 ``` 제거
+  if (jsonString.startsWith('```json')) {
+    jsonString = jsonString.slice(7);
+  } else if (jsonString.startsWith('```')) {
+    jsonString = jsonString.slice(3);
+  }
+  if (jsonString.endsWith('```')) {
+    jsonString = jsonString.slice(0, -3);
+  }
+  jsonString = jsonString.trim();
+
+  try {
+    const parsed = JSON.parse(jsonString) as StructuredAnalysisResponse;
+
+    // 기본값 설정 (파싱 실패 방지)
+    if (!parsed.summary) parsed.summary = '';
+    if (!parsed.overallAnalysis) parsed.overallAnalysis = '';
+    if (!parsed.recommendations) parsed.recommendations = [];
+    if (!parsed.categoryAnalysis) parsed.categoryAnalysis = {};
+
+    return parsed;
+  } catch (parseError) {
+    console.error('JSON 파싱 오류:', parseError);
+    console.error('원본 응답:', response);
+
+    // 파싱 실패 시 기본 구조 반환
+    return {
+      summary: '발달체크 분석이 완료되었습니다.',
+      overallAnalysis: response,  // 원본 텍스트를 전체 분석으로 사용
+      recommendations: [],
+      categoryAnalysis: {},
+    };
+  }
+}
+
+/**
  * 상담일지 생성용 프롬프트 생성
  */
 export function createSessionReportPrompt(formData: {

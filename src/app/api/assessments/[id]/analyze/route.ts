@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-config';
-import { generateAssessmentAnalysis } from '@/lib/services/vertexAIService';
+import { generateStructuredAssessmentAnalysis, StructuredAnalysisResponse } from '@/lib/services/vertexAIService';
 import { generateRAGContext } from '@/lib/services/ragService';
 
 /**
@@ -62,12 +62,16 @@ export async function POST(
 
     // 이미 분석이 완료된 경우 기존 분석 반환
     if (assessment.aiAnalysis) {
+      // 구조화된 데이터도 함께 반환
       return NextResponse.json({
         success: true,
         message: '이미 분석이 완료된 발달체크입니다.',
         data: {
           id: assessment.id,
           aiAnalysis: assessment.aiAnalysis,
+          aiAnalysisSummary: assessment.aiAnalysisSummary,
+          aiRecommendations: assessment.aiRecommendations ? JSON.parse(assessment.aiRecommendations) : [],
+          aiCategoryAnalysis: assessment.aiCategoryAnalysis ? JSON.parse(assessment.aiCategoryAnalysis) : {},
           aiAnalyzedAt: assessment.aiAnalyzedAt,
         },
       });
@@ -77,17 +81,25 @@ export async function POST(
     const body = await request.json().catch(() => ({}));
     const customPrompt = body.customPrompt;
 
-    let aiAnalysis: string;
+    let structuredAnalysis: StructuredAnalysisResponse;
 
     if (customPrompt) {
-      // 커스텀 프롬프트 사용
+      // 커스텀 프롬프트 사용 (레거시 지원)
       const { generateText } = await import('@/lib/services/vertexAIService');
-      aiAnalysis = await generateText(customPrompt, {
+      const aiAnalysis = await generateText(customPrompt, {
         temperature: 0.7,
-        maxOutputTokens: 10000, // 3000 → 10000으로 증가
+        maxOutputTokens: 10000,
       });
+
+      // 커스텀 프롬프트는 구조화되지 않은 응답이므로 기본 구조로 래핑
+      structuredAnalysis = {
+        summary: '발달체크 분석이 완료되었습니다.',
+        overallAnalysis: aiAnalysis,
+        recommendations: [],
+        categoryAnalysis: {},
+      };
     } else {
-      // 기본 프롬프트 사용
+      // 기본 프롬프트 사용 - 구조화된 분석 생성
       // 1. RAG 컨텍스트 생성
       const ragContext = await generateRAGContext({
         ageInMonths: assessment.ageInMonths,
@@ -99,8 +111,8 @@ export async function POST(
         concernsText: assessment.concernsText || undefined,
       });
 
-      // 2. LLM 분석 생성
-      aiAnalysis = await generateAssessmentAnalysis(
+      // 2. 구조화된 LLM 분석 생성
+      structuredAnalysis = await generateStructuredAssessmentAnalysis(
         {
           ageInMonths: assessment.ageInMonths,
           results: assessment.results.map((r) => ({
@@ -114,11 +126,14 @@ export async function POST(
       );
     }
 
-    // 3. 분석 결과 저장
+    // 3. 분석 결과 저장 (DevelopmentAssessment)
     const updatedAssessment = await prisma.developmentAssessment.update({
       where: { id },
       data: {
-        aiAnalysis,
+        aiAnalysis: structuredAnalysis.overallAnalysis,
+        aiAnalysisSummary: structuredAnalysis.summary,
+        aiRecommendations: JSON.stringify(structuredAnalysis.recommendations),
+        aiCategoryAnalysis: JSON.stringify(structuredAnalysis.categoryAnalysis),
         aiAnalyzedAt: new Date(),
       },
       include: {
@@ -126,12 +141,30 @@ export async function POST(
       },
     });
 
+    // 4. 각 AssessmentResult에 itemFeedbacks 저장
+    if (structuredAnalysis.categoryAnalysis) {
+      for (const result of updatedAssessment.results) {
+        const categoryData = structuredAnalysis.categoryAnalysis[result.category];
+        if (categoryData && categoryData.itemFeedbacks) {
+          await prisma.assessmentResult.update({
+            where: { id: result.id },
+            data: {
+              itemFeedbacks: JSON.stringify(categoryData.itemFeedbacks),
+            },
+          });
+        }
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: 'AI 분석이 완료되었습니다.',
       data: {
         id: updatedAssessment.id,
         aiAnalysis: updatedAssessment.aiAnalysis,
+        aiAnalysisSummary: updatedAssessment.aiAnalysisSummary,
+        aiRecommendations: structuredAnalysis.recommendations,
+        aiCategoryAnalysis: structuredAnalysis.categoryAnalysis,
         aiAnalyzedAt: updatedAssessment.aiAnalyzedAt,
       },
     });
