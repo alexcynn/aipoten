@@ -104,8 +104,12 @@ export default function Home() {
                   <p className="text-[14px] md:text-[24px] text-[#555555] leading-[20px] md:leading-[40px] tracking-[-0.28px] md:tracking-[-0.48px] text-center md:text-left max-w-[280px] md:max-w-none mx-auto md:mx-0">
                     18개월~6세 아동의 대근육·소근육·
                     <br className="md:hidden" />
-                    언어·인지·정서 발달을 분석하고
-                    <br />
+                    언어·인지·정서
+                    <br className="hidden md:block" />
+                    <span className="md:hidden"> </span>
+                    발달을 분석하고
+                    <br className="md:hidden" />
+                    <span className="hidden md:inline"> </span>
                     분석 리포트를 즉시 제공합니다.
                   </p>
                 </div>
