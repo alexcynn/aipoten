@@ -78,7 +78,7 @@ export default function SignupSelectionPage() {
                   <svg className="w-5 h-5 text-[#FF6A00] mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-sm text-stone-700 font-pretendard">6개 영역 발달 체크</span>
+                  <span className="text-sm text-stone-700 font-pretendard">5개 영역 발달 체크</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="w-5 h-5 text-[#FF6A00] mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -92,12 +92,12 @@ export default function SignupSelectionPage() {
                   </svg>
                   <span className="text-sm text-stone-700 font-pretendard">전문 치료사 매칭</span>
                 </li>
-                <li className="flex items-start">
+                {/* <li className="flex items-start">
                   <svg className="w-5 h-5 text-[#FF6A00] mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   <span className="text-sm text-stone-700 font-pretendard">발달 추이 그래프</span>
-                </li>
+                </li> */}
               </ul>
 
               <Link
@@ -144,12 +144,12 @@ export default function SignupSelectionPage() {
                   </svg>
                   <span className="text-sm text-stone-700 font-pretendard">부모 매칭 시스템</span>
                 </li>
-                <li className="flex items-start">
+                {/* <li className="flex items-start">
                   <svg className="w-5 h-5 text-[#7BC545] mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   <span className="text-sm text-stone-700 font-pretendard">상담 일정 관리</span>
-                </li>
+                </li> */}
               </ul>
 
               <Link

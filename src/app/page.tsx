@@ -13,7 +13,7 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative h-[400px] md:h-[500px] lg:h-[600px] flex items-center justify-center">
+      <section className="relative h-[500px] md:h-[700px] lg:h-[900px] xl:h-[1000px] flex items-center justify-center">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -29,14 +29,21 @@ export default function Home() {
 
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-stone-900 leading-tight">
-            아이포텐이 우리 아이를 위한
-            <br />
-            최적의 전문가를 찾아드립니다
-          </h1>
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-6 md:mb-8 text-stone-700">
-            체계적인 분석과 검증된 전문가로 아이의 건강한 성장을 지원합니다
-          </p>
+          <div className="flex flex-col gap-[18px] items-center mb-6 md:mb-8">
+            <div className="relative w-full max-w-[500px] md:max-w-[600px] lg:max-w-[737px]">
+              <Image
+                src="/images/main-hero-title.svg"
+                alt="아이포텐이 우리 아이를 위한 최적의 전문가를 찾아드립니다"
+                width={737}
+                height={176}
+                className="w-full h-auto"
+                priority
+              />
+            </div>
+            <p className="text-sm sm:text-base md:text-lg lg:text-[28px] text-[#3a2d20] text-center">
+              체계적인 분석과 검증된 전문가로  아이의 건강한 성장을 지원합니다
+            </p>
+          </div>
           <Link
             href="/parent/therapists"
             className="inline-block bg-[#FF6A00] text-white px-6 sm:px-8 md:px-10 py-3 md:py-4 rounded-[10px] font-semibold text-base md:text-lg hover:bg-[#E55F00] transition-colors shadow-lg"
@@ -49,12 +56,17 @@ export default function Home() {
       {/* Golden Time Section */}
       <section className="py-12 md:py-16 bg-[#F5EFE7]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-stone-900 mb-3 md:mb-4">
-            아이의 발달, 골든타임을 놓치지 마세요
-          </h2>
-          <p className="text-sm sm:text-base md:text-lg text-stone-700">
-            아이포텐은 우리아이의 발달을 빠르고 정확하게 이해하도록 돕습니다
-          </p>
+          <div className="flex justify-center">
+            <div className="relative w-full max-w-[600px] md:max-w-[800px] lg:max-w-[1000px]">
+              <Image
+                src="/images/golden-time-title.png"
+                alt="아이의 발달, 골든타임을 놓치지 마세요. 아이포텐은 우리아이의 발달을 빠르고 정확하게 이해하도록 돕습니다"
+                width={1000}
+                height={100}
+                className="w-full h-auto"
+              />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -63,30 +75,41 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Title */}
           <div className="text-center mb-10 md:mb-16">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-stone-900 mb-1 md:mb-2">
-              아이포텐과 함께하는
-            </h2>
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-stone-900">
-              3단계 발달 케어 솔루션
-            </h2>
+            <div className="flex justify-center">
+              <div className="relative w-full max-w-[300px] md:max-w-[400px] lg:max-w-[500px]">
+                <Image
+                  src="/images/3step-solution-title.png"
+                  alt="아이포텐과 함께하는 3단계 발달 케어 솔루션"
+                  width={500}
+                  height={120}
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Step 1 - 발달 체크 */}
           <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 mb-12 md:mb-24">
             <div className="flex-1 text-center md:text-left">
-              <div className="inline-block bg-[#FF6A00] text-white px-4 py-2 rounded-md text-xs sm:text-sm font-semibold mb-4 md:mb-6">
-                01. 발달 체크
+              <div className="flex flex-col gap-[10px] md:gap-[40px] items-center md:items-start">
+                <div className="inline-block bg-[#ff6c3b] text-white px-[14px] py-[10px] rounded-[10px] text-sm md:text-[24px] font-bold">
+                  01. 발달 체크
+                </div>
+                <div className="flex flex-col gap-[10px] md:gap-[20px]">
+                  <h3 className="text-[18px] md:text-[36px] font-bold text-[#1e1307] leading-[26px] md:leading-[54px] tracking-[-0.36px] md:tracking-[-0.72px] text-center md:text-left">
+                    3단계 문진으로,
+                    <br />
+                    아이의 발달 상태를 한눈에.
+                  </h3>
+                  <p className="text-[14px] md:text-[24px] text-[#555555] leading-[20px] md:leading-[40px] tracking-[-0.28px] md:tracking-[-0.48px] text-center md:text-left max-w-[280px] md:max-w-none mx-auto md:mx-0">
+                    18개월~6세 아동의 대근육·소근육·
+                    <br className="md:hidden" />
+                    언어·인지·정서 발달을 분석하고
+                    <br />
+                    분석 리포트를 즉시 제공합니다.
+                  </p>
+                </div>
               </div>
-              <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-stone-900 mb-3 md:mb-4">
-                3단계 문진으로,
-                <br />
-                아이의 발달 상태를 한눈에.
-              </h3>
-              <p className="text-sm sm:text-base md:text-lg text-stone-600">
-                12개월~6세 아이들의 대근육·소근육·언어·인지·정서
-                <br className="hidden md:block" />
-                발달을 분석하고 분석 리포트를 즉시 제공합니다.
-              </p>
             </div>
             <div className="flex-1 relative">
               <Image
@@ -102,19 +125,27 @@ export default function Home() {
           {/* Step 2 - 전문가 매칭 */}
           <div className="flex flex-col md:flex-row-reverse items-center gap-6 md:gap-12 mb-12 md:mb-24">
             <div className="flex-1 text-center md:text-left">
-              <div className="inline-block bg-[#FF6A00] text-white px-4 py-2 rounded-md text-xs sm:text-sm font-semibold mb-4 md:mb-6">
-                02. 전문가 매칭
+              <div className="flex flex-col gap-[10px] md:gap-[40px] items-center md:items-start">
+                <div className="inline-block bg-[#ff9e01] text-white px-[14px] py-[10px] rounded-[10px] text-sm md:text-[24px] font-bold">
+                  02. 전문가 매칭
+                </div>
+                <div className="flex flex-col gap-[10px] md:gap-[20px]">
+                  <h3 className="text-[18px] md:text-[36px] font-bold text-[#1e1307] leading-[26px] md:leading-[54px] tracking-[-0.36px] md:tracking-[-0.72px] text-center md:text-left">
+                    발달 평가 데이터 기반
+                    <br />
+                    맞춤 전문가 연결
+                  </h3>
+                  <p className="text-[14px] md:text-[24px] text-[#555555] leading-[20px] md:leading-[40px] tracking-[-0.28px] md:tracking-[-0.48px] text-center md:text-left max-w-[280px] md:max-w-none mx-auto md:mx-0">
+                    분석 결과를 기반으로 분야별
+                    <br className="md:hidden" />
+                    전문가를 찾아드립니다.
+                    <br />
+                    후기와 일정 비교부터 상담 예약까지
+                    <br className="md:hidden" />
+                    한 번에 진행돼요
+                  </p>
+                </div>
               </div>
-              <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-stone-900 mb-3 md:mb-4">
-                발달 평가 데이터 기반
-                <br />
-                맞춤 전문가 연결
-              </h3>
-              <p className="text-sm sm:text-base md:text-lg text-stone-600">
-                분석 결과를 기반으로 분야별 전문가를 찾아드립니다.
-                <br className="hidden md:block" />
-                주기와 일정 범위내에서 상담 예약하세요.
-              </p>
             </div>
             <div className="flex-1 relative">
               <Image
@@ -127,22 +158,28 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Step 3 - 안심서비스 */}
+          {/* Step 3 - 언어컨설팅 */}
           <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12">
             <div className="flex-1 text-center md:text-left">
-              <div className="inline-block bg-[#FF6A00] text-white px-4 py-2 rounded-md text-xs sm:text-sm font-semibold mb-4 md:mb-6">
-                03. 안심서비스
+              <div className="flex flex-col gap-[10px] md:gap-[40px] items-center md:items-start">
+                <div className="inline-block bg-[#ff8e6f] text-white px-[14px] py-[10px] rounded-[10px] text-sm md:text-[24px] font-bold">
+                  03. 언어컨설팅
+                </div>
+                <div className="flex flex-col gap-[10px] md:gap-[20px]">
+                  <h3 className="text-[18px] md:text-[36px] font-bold text-[#1e1307] leading-[26px] md:leading-[54px] tracking-[-0.36px] md:tracking-[-0.72px] text-center md:text-left">
+                    전문 언어치료사와 함께
+                    <br />
+                    60분 심층 평가 진행
+                  </h3>
+                  <p className="text-[14px] md:text-[24px] text-[#555555] leading-[20px] md:leading-[40px] tracking-[-0.28px] md:tracking-[-0.48px] text-center md:text-left max-w-[280px] md:max-w-none mx-auto md:mx-0">
+                    수용·표현 언어 능력을 전반적으로 점검하고
+                    <br />
+                    가정에서도 실천 가능한 코칭 플랜을
+                    <br className="md:hidden" />
+                    제공합니다.
+                  </p>
+                </div>
               </div>
-              <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-stone-900 mb-3 md:mb-4">
-                전문 언어치료사와 함께
-                <br />
-                60분 심층 평가 진행
-              </h3>
-              <p className="text-sm sm:text-base md:text-lg text-stone-600">
-                수준 높은 언어 능력을 전반적으로 점검하고
-                <br className="hidden md:block" />
-                가정에서도 실천 가능한 코칭 플랜을 제공합니다.
-              </p>
             </div>
             <div className="flex-1 relative">
               <Image
@@ -160,154 +197,80 @@ export default function Home() {
       {/* 무료 발달체크 Section */}
       <section className="py-12 md:py-16 lg:py-20 bg-[#FFE5E5]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Title */}
+          {/* Section Title - Image */}
           <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-stone-900 mb-3 md:mb-4">
-              지금, 무료 언어 발달체크로 시작하세요.
-            </h2>
-            <p className="text-sm sm:text-base md:text-lg text-stone-700">
-              간단한 문진만으로 우리 아이의 발달 상태를 빠르게 확인할 수 있습니다.
-            </p>
+            <div className="flex justify-center">
+              {/* Desktop Title */}
+              <div className="hidden md:block relative w-full max-w-[800px] lg:max-w-[1000px]">
+                <Image
+                  src="/images/free-check-title.png"
+                  alt="지금, 무료 언어 발달체크로 시작하세요. 간단한 문진만으로 우리 아이의 발달 상태를 빠르게 확인할 수 있습니다."
+                  width={1000}
+                  height={100}
+                  className="w-full h-auto"
+                />
+              </div>
+              {/* Mobile Title */}
+              <div className="md:hidden relative w-full max-w-[350px]">
+                <Image
+                  src="/images/free-check-title-mobile.png"
+                  alt="지금, 무료 언어 발달체크로 시작하세요. 간단한 문진만으로 우리 아이의 발달 상태를 빠르게 확인할 수 있습니다."
+                  width={350}
+                  height={80}
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Steps */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-12">
-            {/* Step 1 */}
-            <div className="bg-white border border-[#ffbda6] rounded-[20px] md:rounded-[40px] p-4 sm:p-6 md:p-8 text-center relative">
-              <div className="inline-block bg-[#ff9898] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
-                STEP 01
-              </div>
-              {/* Arrow */}
-              <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-[50%] -translate-y-1/2 z-10">
-                <Image
-                  src="/images/main-arrow.svg"
-                  alt="arrow"
-                  width={68}
-                  height={68}
-                />
-              </div>
-              <div className="mb-3 md:mb-4 flex justify-center">
-                <Image
-                  src="/images/main-step-01-icon.svg"
-                  alt="아이정보 입력"
-                  width={58}
-                  height={58}
-                  className="w-12 h-12 md:w-14 md:h-14"
-                />
-              </div>
-              <h3 className="text-sm sm:text-base md:text-lg lg:text-[30px] font-bold text-[#1e1307] mb-2 md:mb-3">
-                아이정보 입력
-              </h3>
-              <div className="inline-flex items-center gap-1 bg-[#e4edff] px-3 py-1 rounded-full">
-                <Image
-                  src="/images/main-ic-time.svg"
-                  alt="time"
-                  width={13}
-                  height={13}
-                />
-                <p className="text-xs md:text-sm text-[#001b72]">30초 소요</p>
-              </div>
+          {/* Steps - Image */}
+          <div className="flex justify-center mb-8 md:mb-12">
+            {/* Desktop Steps */}
+            <div className="hidden md:block relative w-full max-w-[1000px] lg:max-w-[1280px]">
+              <Image
+                src="/images/free-check-steps.png"
+                alt="STEP 01 아이정보 입력, STEP 02 3단계 문진 체크, STEP 03 AI 분석 리포트, STEP 04 맞춤 솔루션 추천"
+                width={1280}
+                height={200}
+                className="w-full h-auto"
+              />
             </div>
-
-            {/* Step 2 */}
-            <div className="bg-white border border-[#ffbda6] rounded-[20px] md:rounded-[40px] p-4 sm:p-6 md:p-8 text-center relative">
-              <div className="inline-block bg-[#ff9898] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
-                STEP 02
-              </div>
-              {/* Arrow */}
-              <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-[50%] -translate-y-1/2 z-10">
+            {/* Mobile Steps */}
+            <div className="md:hidden relative w-full max-w-[350px]">
+              <Image
+                src="/images/free-check-steps-mobile.png"
+                alt="STEP 01 아이정보 입력, STEP 02 3단계 문진 체크, STEP 03 AI 분석 리포트, STEP 04 맞춤 솔루션 추천"
+                width={350}
+                height={400}
+                className="w-full h-auto"
+              />
+              {/* Mobile Arrows */}
+              <div className="absolute left-1/2 transform -translate-x-1/2 top-[22%]">
                 <Image
-                  src="/images/main-arrow.svg"
+                  src="/images/mobile-step-arrow.svg"
                   alt="arrow"
-                  width={68}
-                  height={68}
+                  width={40}
+                  height={40}
+                  className="rotate-90"
                 />
               </div>
-              <div className="mb-3 md:mb-4 flex justify-center">
+              <div className="absolute left-1/2 transform -translate-x-1/2 top-[47%]">
                 <Image
-                  src="/images/main-step-02-icon.svg"
-                  alt="3단계 문진 체크"
-                  width={58}
-                  height={58}
-                  className="w-12 h-12 md:w-14 md:h-14"
-                />
-              </div>
-              <h3 className="text-sm sm:text-base md:text-lg lg:text-[30px] font-bold text-[#1e1307] mb-2 md:mb-3">
-                3단계 문진 체크
-              </h3>
-              <div className="inline-flex items-center gap-1 bg-[#e4edff] px-3 py-1 rounded-full">
-                <Image
-                  src="/images/main-ic-time-alt.svg"
-                  alt="time"
-                  width={13}
-                  height={13}
-                />
-                <p className="text-xs md:text-sm text-[#001b72]">2-3분 소요</p>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="bg-white border border-[#ffbda6] rounded-[20px] md:rounded-[40px] p-4 sm:p-6 md:p-8 text-center relative">
-              <div className="inline-block bg-[#ff9898] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
-                STEP 03
-              </div>
-              {/* Arrow */}
-              <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-[50%] -translate-y-1/2 z-10">
-                <Image
-                  src="/images/main-arrow.svg"
+                  src="/images/mobile-step-arrow.svg"
                   alt="arrow"
-                  width={68}
-                  height={68}
+                  width={40}
+                  height={40}
+                  className="rotate-90"
                 />
               </div>
-              <div className="mb-3 md:mb-4 flex justify-center">
+              <div className="absolute left-1/2 transform -translate-x-1/2 top-[72%]">
                 <Image
-                  src="/images/main-step-03-icon.svg"
-                  alt="AI 분석 리포트"
-                  width={58}
-                  height={58}
-                  className="w-12 h-12 md:w-14 md:h-14"
+                  src="/images/mobile-step-arrow.svg"
+                  alt="arrow"
+                  width={40}
+                  height={40}
+                  className="rotate-90"
                 />
-              </div>
-              <h3 className="text-sm sm:text-base md:text-lg lg:text-[30px] font-bold text-[#1e1307] mb-2 md:mb-3">
-                AI 분석 리포트
-              </h3>
-              <div className="inline-flex items-center gap-1 bg-[#e4edff] px-3 py-1 rounded-full">
-                <Image
-                  src="/images/main-ic-light.svg"
-                  alt="light"
-                  width={13}
-                  height={13}
-                />
-                <p className="text-xs md:text-sm text-[#001b72]">즉시 결과 확인</p>
-              </div>
-            </div>
-
-            {/* Step 4 */}
-            <div className="bg-white border border-[#ffbda6] rounded-[20px] md:rounded-[40px] p-4 sm:p-6 md:p-8 text-center">
-              <div className="inline-block bg-[#ff9898] text-white px-3 md:px-4 py-1 rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
-                STEP 04
-              </div>
-              <div className="mb-3 md:mb-4 flex justify-center">
-                <Image
-                  src="/images/main-step-04-icon.svg"
-                  alt="맞춤 솔루션 추천"
-                  width={58}
-                  height={58}
-                  className="w-12 h-12 md:w-14 md:h-14"
-                />
-              </div>
-              <h3 className="text-sm sm:text-base md:text-lg lg:text-[30px] font-bold text-[#1e1307] mb-2 md:mb-3">
-                맞춤 솔루션 추천
-              </h3>
-              <div className="inline-flex items-center gap-1 bg-[#e4edff] px-3 py-1 rounded-full">
-                <Image
-                  src="/images/main-ic-connect.svg"
-                  alt="connect"
-                  width={13}
-                  height={13}
-                />
-                <p className="text-xs md:text-sm text-[#001b72]">전문가 자동 연결</p>
               </div>
             </div>
           </div>

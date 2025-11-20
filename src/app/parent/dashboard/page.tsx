@@ -96,6 +96,70 @@ const getOverallLevel = (results?: { level: string }[]) => {
   return lowestLevel
 }
 
+// 카테고리별 아이콘 컴포넌트
+const CategoryIcon = ({ category }: { category: string }) => {
+  const bgCircle = '/images/icon-bg-circle.svg'
+
+  const renderIcon = () => {
+    switch (category) {
+      case 'GROSS_MOTOR':
+        return (
+          <div className="absolute inset-1/4">
+            <img alt="" className="absolute h-[17.5px] left-0 top-0 w-[18.5px]" src="/images/icon-shoe-1.svg" />
+            <img alt="" className="absolute h-[10px] left-[12.2px] top-[2.6px] w-[6.9px]" src="/images/icon-shoe-2.svg" />
+            <img alt="" className="absolute h-[11.7px] left-[6px] top-[5.9px] w-[13.6px]" src="/images/icon-shoe-3.svg" />
+            <img alt="" className="absolute h-[4.3px] left-[0.5px] top-[15.3px] w-[8.2px]" src="/images/icon-shoe-4.svg" />
+          </div>
+        )
+      case 'FINE_MOTOR':
+        return (
+          <div className="absolute inset-1/4">
+            <img alt="" className="w-full h-full" src="/images/icon-hand.svg" />
+          </div>
+        )
+      case 'LANGUAGE':
+        return (
+          <div className="absolute inset-[30%_27.5%_30.7%_22.5%]">
+            <img alt="" className="w-full h-full" src="/images/icon-korean.svg" />
+          </div>
+        )
+      case 'COGNITIVE':
+        return (
+          <div className="absolute inset-[22.5%_25.4%_27.5%_24.6%]">
+            <img alt="" className="absolute h-[10.5px] left-[5.5px] top-[3.8px] w-[9.7px]" src="/images/icon-bulb-1.svg" />
+            <img alt="" className="absolute h-[10.5px] left-[5.5px] top-[3.8px] w-[5.4px]" src="/images/icon-bulb-2.svg" />
+            <img alt="" className="absolute h-[2.2px] left-[9.9px] top-[16px] w-[1.1px]" src="/images/icon-bulb-3.svg" />
+            <img alt="" className="absolute h-[1.7px] left-[7.7px] top-[13.8px] w-[5.6px]" src="/images/icon-bulb-4.svg" />
+            <img alt="" className="absolute h-[1.7px] left-[7.7px] top-[15.4px] w-[5.6px]" src="/images/icon-bulb-5.svg" />
+            <img alt="" className="absolute h-[2px] left-[10.2px] top-[1px] w-[0.6px]" src="/images/icon-bulb-6.svg" />
+            <img alt="" className="absolute h-[1.6px] left-[4.5px] top-[3.3px] w-[1.6px]" src="/images/icon-bulb-7.svg" />
+            <img alt="" className="absolute h-[0.6px] left-[2.2px] top-[8.8px] w-[2px]" src="/images/icon-bulb-8.svg" />
+            <img alt="" className="absolute h-[0.6px] left-[16.8px] top-[8.8px] w-[2px]" src="/images/icon-bulb-9.svg" />
+            <img alt="" className="absolute h-[1.6px] left-[14.9px] top-[3.3px] w-[1.6px]" src="/images/icon-bulb-10.svg" />
+          </div>
+        )
+      case 'SOCIAL':
+        return (
+          <div className="absolute inset-1/4">
+            <img alt="" className="absolute left-0 top-0 w-[20px] h-[20px]" src="/images/icon-smile-1.svg" />
+            <img alt="" className="absolute h-[5.7px] left-[4.1px] top-[8.3px] w-[10.6px]" src="/images/icon-smile-2.svg" />
+            <img alt="" className="absolute h-[2.1px] left-[6px] top-[6.2px] w-[2px]" src="/images/icon-smile-eye.svg" />
+            <img alt="" className="absolute h-[2.1px] left-[10px] top-[6.2px] w-[2px]" src="/images/icon-smile-eye.svg" />
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="relative w-full h-full">
+      <img alt="" className="w-full h-full" src={bgCircle} />
+      {renderIcon()}
+    </div>
+  )
+}
+
 export default function ParentDashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -531,10 +595,7 @@ export default function ParentDashboardPage() {
                             >
                               <div className="flex items-center gap-2">
                                 <div className="w-[40px] h-[40px]">
-                                  {/* Category icon would go here */}
-                                  <span className="text-2xl">
-                                    {result.category === 'GROSS_MOTOR' ? '🏃' : '✋'}
-                                  </span>
+                                  <CategoryIcon category={result.category} />
                                 </div>
                                 <p className="font-semibold text-[17px] text-[#1E1307] tracking-[0.17px] leading-[20px]">
                                   {categoryLabel}
@@ -567,9 +628,7 @@ export default function ParentDashboardPage() {
                             >
                               <div className="flex items-center gap-2">
                                 <div className="w-[40px] h-[40px]">
-                                  <span className="text-2xl">
-                                    {result.category === 'LANGUAGE' ? '💬' : '💡'}
-                                  </span>
+                                  <CategoryIcon category={result.category} />
                                 </div>
                                 <p className="font-semibold text-[17px] text-[#1E1307] tracking-[0.17px] leading-[20px]">
                                   {categoryLabel}발달
@@ -597,7 +656,7 @@ export default function ParentDashboardPage() {
                           >
                             <div className="flex items-center gap-2">
                               <div className="w-[40px] h-[40px]">
-                                <span className="text-2xl">😊</span>
+                                <CategoryIcon category="SOCIAL" />
                               </div>
                               <p className="font-semibold text-[17px] text-[#1E1307] tracking-[0.17px] leading-[20px]">
                                 사회성 발달

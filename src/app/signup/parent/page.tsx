@@ -81,6 +81,20 @@ export default function SignupPage() {
       return
     }
 
+    // 전화번호 검증
+    if (!formData.phone) {
+      setError('전화번호를 입력해주세요.')
+      setIsLoading(false)
+      return
+    }
+
+    const phoneRegex = /^01[0-9]{8,9}$/
+    if (!phoneRegex.test(formData.phone.replace(/-/g, ''))) {
+      setError('올바른 전화번호 형식을 입력해주세요. (예: 01012345678)')
+      setIsLoading(false)
+      return
+    }
+
     // 비밀번호 확인
     if (formData.password !== formData.confirmPassword) {
       setError('비밀번호가 일치하지 않습니다.')
@@ -232,14 +246,15 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-stone-700 mb-2 font-pretendard">
-                전화번호
+                전화번호 <span className="text-red-500">*</span>
               </label>
               <input
                 id="phone"
                 name="phone"
                 type="tel"
+                required
                 className="appearance-none block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-stone-900 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent sm:text-sm font-pretendard"
-                placeholder="전화번호 (선택사항)"
+                placeholder="01012345678"
                 value={formData.phone}
                 onChange={handleChange}
               />
