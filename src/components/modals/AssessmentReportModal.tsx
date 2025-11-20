@@ -153,11 +153,11 @@ const PentagonRadarChart = ({ results }: { results: AssessmentResult[] }) => {
   ]
 
   const labelPositions = [
-    { x: 75, y: 5, anchor: 'middle' as const },
-    { x: 149, y: 60, anchor: 'start' as const },
-    { x: 118, y: 136, anchor: 'start' as const },
-    { x: 32, y: 137, anchor: 'end' as const },
-    { x: 0, y: 60, anchor: 'start' as const },
+    { x: 75, y: 0, anchor: 'middle' as const },
+    { x: 149, y: 55, anchor: 'start' as const },
+    { x: 118, y: 131, anchor: 'start' as const },
+    { x: 32, y: 132, anchor: 'end' as const },
+    { x: 0, y: 55, anchor: 'start' as const },
   ]
 
   return (
