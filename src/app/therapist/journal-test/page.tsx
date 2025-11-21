@@ -222,13 +222,13 @@ export default function JournalTestPage() {
             <label className="block text-sm font-medium text-stone-700 mb-2">
               아동 선택
             </label>
-            <select
+            <input
+              type="text"
               value={childName}
               onChange={(e) => setChildName(e.target.value)}
+              placeholder="예: 김아이"
               className="w-full px-3 py-2 border border-gray-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
-            >
-              <option>김아이 (30개월)</option>
-            </select>
+            />
           </div>
 
           {/* 세션 유형 */}

@@ -330,9 +330,18 @@ export default function TherapistDashboardPage() {
               href="/therapist/bookings/consultations"
               className="flex-1 bg-white border border-[#d78445] rounded-[20px] p-[40px] hover:shadow-lg transition-all"
             >
-              <h3 className="text-[24px] font-semibold text-[#1e1307] mb-4">
-                <span className="font-normal">🗣 </span>언어컨설팅
-              </h3>
+              <div className="flex items-center gap-2 mb-4">
+                <Image
+                  src="/images/icon-language-consulting-24.svg"
+                  alt="언어컨설팅"
+                  width={24}
+                  height={24}
+                  className="shrink-0"
+                />
+                <h3 className="text-[24px] font-semibold text-[#1e1307]">
+                  언어컨설팅
+                </h3>
+              </div>
               <div className="flex items-center justify-between">
                 <span className="text-[20px] text-[#666666] tracking-[0.2px]">요청 대기</span>
                 <div className="text-right">
@@ -346,9 +355,18 @@ export default function TherapistDashboardPage() {
               href="/therapist/bookings/therapies"
               className="flex-1 bg-white border border-[#d78445] rounded-[20px] p-[40px] hover:shadow-lg transition-all"
             >
-              <h3 className="text-[24px] font-semibold text-[#1e1307] mb-4">
-                <span className="font-normal">🏠 </span>홈티
-              </h3>
+              <div className="flex items-center gap-2 mb-4">
+                <Image
+                  src="/images/icon-home-therapy-24.svg"
+                  alt="홈티"
+                  width={24}
+                  height={24}
+                  className="shrink-0"
+                />
+                <h3 className="text-[24px] font-semibold text-[#1e1307]">
+                  홈티
+                </h3>
+              </div>
               <div className="flex items-center justify-between">
                 <span className="text-[20px] text-[#666666] tracking-[0.2px]">요청 대기</span>
                 <div className="text-right">
@@ -362,9 +380,18 @@ export default function TherapistDashboardPage() {
               href="/therapist/earnings"
               className="w-[480px] bg-white border border-[#d78445] rounded-[20px] p-[40px] hover:shadow-lg transition-all"
             >
-              <h3 className="text-[24px] font-semibold text-[#1e1307] mb-4">
-                💰이번달 수입금
-              </h3>
+              <div className="flex items-center gap-2 mb-4">
+                <Image
+                  src="/images/icon-earnings-24.svg"
+                  alt="이번달 수입금"
+                  width={24}
+                  height={24}
+                  className="shrink-0"
+                />
+                <h3 className="text-[24px] font-semibold text-[#1e1307]">
+                  이번달 수입금
+                </h3>
+              </div>
               <div className="text-right">
                 <span className="text-[56px] font-semibold text-[#1e1307] tracking-[-1.2px]">{calculateMonthlyEarnings().toLocaleString()}</span>
                 <span className="text-[40px] font-semibold text-[#1e1307] tracking-[-0.8px]">원</span>
@@ -378,9 +405,18 @@ export default function TherapistDashboardPage() {
             className="bg-[#d78445] rounded-[20px] p-[50px] flex items-center justify-between hover:bg-[#c67535] transition-colors"
           >
             <div className="flex flex-col gap-[10px]">
-              <h2 className="text-[30px] font-semibold text-white">
-                🪄 AI 상담일지 자동생성
-              </h2>
+              <div className="flex items-center gap-2">
+                <Image
+                  src="/images/icon-ai-journal-30.svg"
+                  alt="AI 상담일지"
+                  width={30}
+                  height={30}
+                  className="shrink-0"
+                />
+                <h2 className="text-[30px] font-semibold text-white">
+                  AI 상담일지 자동생성
+                </h2>
+              </div>
               <p className="text-[20px] text-white pl-[36px]">
                 지금 바로 최신 세션 일지를 생성해보세요
               </p>
@@ -396,9 +432,18 @@ export default function TherapistDashboardPage() {
           <div className="bg-white rounded-[20px] p-[50px]">
             <div className="border-b-2 border-[#92745c] pb-[25px] mb-[50px] flex items-end justify-between">
               <div className="flex items-center gap-4">
-                <h2 className="text-[24px] font-bold text-[#1e1307]">
-                  📅 이번달 상담 세션
-                </h2>
+                <div className="flex items-center gap-2">
+                  <Image
+                    src="/images/icon-sessions-24.svg"
+                    alt="이번달 상담 세션"
+                    width={24}
+                    height={24}
+                    className="shrink-0"
+                  />
+                  <h2 className="text-[24px] font-bold text-[#1e1307]">
+                    이번달 상담 세션
+                  </h2>
+                </div>
                 <Link
                   href="/therapist/schedule"
                   className="px-4 py-2 bg-[#92745c] text-white text-[14px] rounded-lg hover:bg-[#7a6049] transition-colors"
@@ -433,11 +478,25 @@ export default function TherapistDashboardPage() {
             <div className="bg-[#f8f8f8] rounded-[20px] px-[80px] py-[30px] mt-[50px]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-[10px]">
-                  <span className="bg-[#ffdbdb] px-[13px] py-0 h-[24px] rounded-full text-[16px] text-[#1e1307] tracking-[-0.32px] flex items-center">
-                    🗣 언어컨설팅
+                  <span className="bg-[#ffdbdb] px-[13px] py-0 h-[24px] rounded-full text-[16px] text-[#1e1307] tracking-[-0.32px] flex items-center gap-1">
+                    <Image
+                      src="/images/icon-language-consulting-16.svg"
+                      alt="언어컨설팅"
+                      width={16}
+                      height={16}
+                      className="shrink-0"
+                    />
+                    언어컨설팅
                   </span>
-                  <span className="bg-[#ffe1b8] px-[13px] py-0 h-[24px] rounded-full text-[16px] text-[#1e1307] tracking-[-0.32px] flex items-center">
-                    🏠 홈티
+                  <span className="bg-[#ffe1b8] px-[13px] py-0 h-[24px] rounded-full text-[16px] text-[#1e1307] tracking-[-0.32px] flex items-center gap-1">
+                    <Image
+                      src="/images/icon-home-therapy-16.svg"
+                      alt="홈티"
+                      width={16}
+                      height={16}
+                      className="shrink-0"
+                    />
+                    홈티
                   </span>
                 </div>
                 <div className="flex items-center gap-[20px]">
