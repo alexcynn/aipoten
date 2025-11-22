@@ -127,17 +127,22 @@ export const BOOKING_STATUS_CLASSES: Record<BookingStatus, string> = {
 
 /**
  * 달력용 상태 점(dot) 색상
+ * Figma 디자인 기준:
+ * - 주황색(#ffa500): 예약대기
+ * - 초록색(#4caf50): 예약확정
+ * - 파란색(#2196f3): 완료
+ * - 회색(#9e9e9e): 취소
  */
 export const BOOKING_STATUS_DOT_COLORS: Record<BookingStatus, string> = {
-  PENDING_PAYMENT: 'bg-orange-500',
-  PENDING_CONFIRMATION: 'bg-yellow-500',
-  CONFIRMED: 'bg-blue-500',
-  PENDING_SETTLEMENT: 'bg-green-500',
-  SETTLEMENT_COMPLETED: 'bg-green-500',
-  REFUNDED: 'bg-red-500',
-  CANCELLED: 'bg-red-500',
-  REJECTED: 'bg-red-500',
-  NO_SHOW: 'bg-red-500'
+  PENDING_PAYMENT: 'bg-[#ffa500]',      // 결제대기 -> 주황색
+  PENDING_CONFIRMATION: 'bg-[#ffa500]', // 예약대기 -> 주황색
+  CONFIRMED: 'bg-[#4caf50]',            // 예약확정 -> 초록색
+  PENDING_SETTLEMENT: 'bg-[#2196f3]',   // 완료(정산대기) -> 파란색
+  SETTLEMENT_COMPLETED: 'bg-[#2196f3]', // 완료(정산완료) -> 파란색
+  REFUNDED: 'bg-[#9e9e9e]',             // 환불 -> 회색
+  CANCELLED: 'bg-[#9e9e9e]',            // 취소 -> 회색
+  REJECTED: 'bg-[#9e9e9e]',             // 거절 -> 회색
+  NO_SHOW: 'bg-[#9e9e9e]'               // 노쇼 -> 회색
 }
 
 /**

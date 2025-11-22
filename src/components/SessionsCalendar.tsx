@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getParentViewStatus, getStatusDotColor } from '@/lib/booking-status'
+import Image from 'next/image'
 
 interface Session {
   id: string
@@ -26,9 +27,10 @@ interface Session {
 interface SessionsCalendarProps {
   sessions: Session[]
   onEventClick?: (sessionId: string) => void
+  variant?: 'default' | 'parent' // 부모용 스타일 옵션
 }
 
-export default function SessionsCalendar({ sessions, onEventClick }: SessionsCalendarProps) {
+export default function SessionsCalendar({ sessions, onEventClick, variant = 'default' }: SessionsCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
 
   // 달력에 표시할 날짜들 생성
@@ -96,35 +98,35 @@ export default function SessionsCalendar({ sessions, onEventClick }: SessionsCal
   return (
     <div className="w-full font-pretendard">
       {/* 월 네비게이션 */}
-      <div className="flex items-center justify-between mb-4">
+      <div className={`flex items-center justify-between ${variant === 'parent' ? 'mb-6' : 'mb-4'}`}>
         <button
           onClick={previousMonth}
-          className="p-2 hover:bg-[#FFE5E5] rounded-[10px] transition-colors"
+          className={`${variant === 'parent' ? 'w-[50px] h-[50px]' : 'p-2'} hover:bg-[#FFE5E5] rounded-[10px] transition-colors flex items-center justify-center`}
           type="button"
         >
-          <ChevronLeft className="w-5 h-5 text-stone-600 hover:text-[#FF6A00]" />
+          <ChevronLeft className={`${variant === 'parent' ? 'w-6 h-6' : 'w-5 h-5'} text-stone-600 hover:text-[#FF6A00]`} />
         </button>
 
-        <h3 className="text-base sm:text-lg md:text-xl font-bold text-stone-900">
+        <h3 className={`${variant === 'parent' ? 'text-[24px]' : 'text-base sm:text-lg md:text-xl'} font-semibold text-[#1e1307]`}>
           {currentMonth.getFullYear()}년 {currentMonth.getMonth() + 1}월
         </h3>
 
         <button
           onClick={nextMonth}
-          className="p-2 hover:bg-[#FFE5E5] rounded-[10px] transition-colors"
+          className={`${variant === 'parent' ? 'w-[50px] h-[50px]' : 'p-2'} hover:bg-[#FFE5E5] rounded-[10px] transition-colors flex items-center justify-center`}
           type="button"
         >
-          <ChevronRight className="w-5 h-5 text-stone-600 hover:text-[#FF6A00]" />
+          <ChevronRight className={`${variant === 'parent' ? 'w-6 h-6' : 'w-5 h-5'} text-stone-600 hover:text-[#FF6A00]`} />
         </button>
       </div>
 
       {/* 요일 헤더 */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      <div className={`grid grid-cols-7 ${variant === 'parent' ? 'gap-0' : 'gap-1'} mb-2`}>
         {weekDays.map((day, index) => (
           <div
             key={day}
-            className={`text-center text-xs sm:text-sm font-bold py-2 ${
-              index === 0 ? 'text-red-600' : index === 6 ? 'text-blue-600' : 'text-stone-700'
+            className={`text-center ${variant === 'parent' ? 'text-[24px] py-4 w-[80px]' : 'text-xs sm:text-sm py-2'} font-normal ${
+              index === 0 ? 'text-[#eb2e2e]' : 'text-[#1e1307]'
             }`}
           >
             {day}
@@ -133,7 +135,7 @@ export default function SessionsCalendar({ sessions, onEventClick }: SessionsCal
       </div>
 
       {/* 날짜 그리드 */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className={`grid grid-cols-7 ${variant === 'parent' ? 'gap-0' : 'gap-1'}`}>
         {days.map((date, index) => {
           const isCurrentMonth = date.getMonth() === currentMonth.getMonth()
           const dateObj = new Date(date)
@@ -148,52 +150,100 @@ export default function SessionsCalendar({ sessions, onEventClick }: SessionsCal
             <div
               key={index}
               className={`
-                relative min-h-[80px] p-1 text-sm border border-gray-200 rounded-md transition-all
-                ${!isCurrentMonth ? 'bg-gray-50' : 'bg-white'}
-                ${isToday ? 'border-2 border-[#FF6A00] bg-[#FFE5E5]/30' : ''}
+                relative ${variant === 'parent' ? 'min-h-[140px] w-[80px] p-2' : 'min-h-[80px] p-1'} text-sm ${variant === 'parent' ? '' : 'border border-gray-200 rounded-md'} transition-all
+                ${!isCurrentMonth ? (variant === 'parent' ? 'opacity-20' : 'bg-gray-50') : (variant === 'parent' ? '' : 'bg-white')}
+                ${isToday && variant !== 'parent' ? 'border-2 border-[#FF6A00] bg-[#FFE5E5]/30' : ''}
               `}
             >
               {/* 날짜 */}
-              <div
-                className={`text-xs font-bold mb-1 ${
-                  !isCurrentMonth ? 'text-gray-300' :
-                  isToday ? 'text-[#FF6A00]' :
-                  isSunday ? 'text-red-600' :
-                  isSaturday ? 'text-blue-600' :
-                  'text-stone-900'
-                }`}
-              >
-                {date.getDate()}
-              </div>
+              {isToday && variant === 'parent' ? (
+                <div className="flex items-center justify-center mb-2">
+                  <div className="bg-[#FF6A00] rounded-full w-[40px] h-[40px] flex items-center justify-center">
+                    <span className="text-[24px] font-bold text-white">{date.getDate()}</span>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className={`${variant === 'parent' ? 'text-[24px] text-center mb-2' : 'text-xs mb-1'} font-normal ${
+                    !isCurrentMonth ? (variant === 'parent' ? 'text-[#1e1307]' : 'text-gray-300') :
+                    isToday && variant !== 'parent' ? 'text-[#FF6A00]' :
+                    isSunday ? 'text-[#eb2e2e]' :
+                    'text-[#1e1307]'
+                  }`}
+                >
+                  {date.getDate()}
+                </div>
+              )}
 
               {/* 세션 목록 */}
               {hasSession && (
-                <div className="space-y-0.5">
-                  {daySessions.slice(0, 3).map((session) => {
-                    const sessionTypeColor = session.sessionType === 'CONSULTATION'
-                      ? 'bg-blue-100 text-blue-800 border-blue-300'
-                      : 'bg-green-100 text-green-800 border-green-300'
+                <div className={`${variant === 'parent' ? 'space-y-1' : 'space-y-0.5'} flex flex-col items-center`}>
+                  {daySessions.slice(0, variant === 'parent' ? 3 : 2).map((session) => {
+                    const sessionTypeBg = session.sessionType === 'CONSULTATION'
+                      ? 'bg-[#ffdbdb]'
+                      : 'bg-[#ffeacd]'
+
+                    const sessionIcon = session.sessionType === 'CONSULTATION'
+                      ? '/images/icon-language-consulting-16.svg'
+                      : '/images/icon-home-therapy-16.svg'
 
                     const statusInfo = getParentViewStatus(session.status, session.payment?.status)
                     const dotColor = getStatusDotColor(session.payment?.status === 'PENDING_PAYMENT' ? 'PENDING_PAYMENT' : session.status)
 
+                    // 시간 추출
+                    const sessionTime = new Date(session.scheduledAt).toLocaleTimeString('ko-KR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false
+                    })
+
+                    if (variant === 'parent') {
+                      return (
+                        <div
+                          key={session.id}
+                          className={`text-[14px] px-[7px] h-[24px] rounded-[10px] ${sessionTypeBg} text-[#1e1307] tracking-[-0.28px] flex items-center gap-1 ${
+                            onEventClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+                          }`}
+                          title={`${session.child.name} - ${session.therapist?.user.name || '치료사'} (${session.sessionType === 'CONSULTATION' ? '언어컨설팅' : '홈티'}) [${statusInfo.label}]`}
+                          onClick={() => onEventClick?.(session.id)}
+                        >
+                          <span className={`w-[9px] h-[9px] rounded-full flex-shrink-0 ${dotColor}`}></span>
+                          <Image
+                            src={sessionIcon}
+                            alt=""
+                            width={14}
+                            height={14}
+                            className="flex-shrink-0"
+                          />
+                          <span className="whitespace-nowrap">{sessionTime}</span>
+                        </div>
+                      )
+                    }
+
                     return (
                       <div
                         key={session.id}
-                        className={`text-xs px-1 py-0.5 rounded border ${sessionTypeColor} truncate flex items-center gap-1 ${
+                        className={`text-[11px] px-2 py-0.5 rounded-full ${sessionTypeBg} text-[#1e1307] truncate flex items-center gap-0.5 ${
                           onEventClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
                         }`}
                         title={`${session.child.name} - ${session.therapist?.user.name || '치료사'} (${session.sessionType === 'CONSULTATION' ? '언어컨설팅' : '홈티'}) [${statusInfo.label}]`}
                         onClick={() => onEventClick?.(session.id)}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dotColor}`}></span>
-                        <span className="truncate">{session.child.name}</span>
+                        <span className={`w-[6.75px] h-[6.75px] rounded-full flex-shrink-0 ${dotColor}`}></span>
+                        <Image
+                          src={sessionIcon}
+                          alt=""
+                          width={12}
+                          height={12}
+                          className="flex-shrink-0"
+                        />
+                        <span className="truncate">{sessionTime} | {session.child.name}</span>
                       </div>
                     )
                   })}
-                  {daySessions.length > 3 && (
-                    <div className="text-xs text-gray-500 px-1">
-                      +{daySessions.length - 3}개 더
+                  {daySessions.length > (variant === 'parent' ? 3 : 2) && (
+                    <div className={`${variant === 'parent' ? 'text-[15px] tracking-[-0.3px] px-[10px] h-[24px] rounded-[10px]' : 'text-[11px] px-2 py-0.5 rounded-full'} text-[#1e1307] bg-[#f3f3f3] text-center flex items-center justify-center`}>
+                      +{daySessions.length - (variant === 'parent' ? 3 : 2)}
                     </div>
                   )}
                 </div>
@@ -201,46 +251,6 @@ export default function SessionsCalendar({ sessions, onEventClick }: SessionsCal
             </div>
           )
         })}
-      </div>
-
-      {/* 범례 */}
-      <div className="mt-4 space-y-2">
-        <div className="flex items-center justify-center gap-4 text-xs text-stone-600">
-          <div className="flex items-center gap-1">
-            <span className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></span>
-            <span>언어컨설팅</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-4 h-4 bg-green-100 border border-green-300 rounded"></span>
-            <span>홈티</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-4 h-4 border-2 border-[#FF6A00] bg-[#FFE5E5]/30 rounded"></span>
-            <span>오늘</span>
-          </div>
-        </div>
-        <div className="flex items-center justify-center gap-3 text-xs text-stone-600 flex-wrap">
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-            <span>결제대기</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-            <span>예약대기</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-            <span>예약확정</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-            <span>완료</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-            <span>환불/취소</span>
-          </div>
-        </div>
       </div>
     </div>
   )

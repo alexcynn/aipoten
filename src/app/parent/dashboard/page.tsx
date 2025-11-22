@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import Header from '@/components/layout/Header'
 import ChildSelector from '@/components/ChildSelector'
 import ChildEditModal from '@/components/ChildEditModal'
@@ -816,6 +817,7 @@ export default function ParentDashboardPage() {
 
                   {/* Sessions Calendar */}
                   <SessionsCalendar
+                    variant="parent"
                     sessions={myBookings
                       .filter((booking: any) => booking.scheduledAt)
                       .map((booking: any) => ({
@@ -833,19 +835,63 @@ export default function ParentDashboardPage() {
                     }}
                   />
 
+                  {/* Legend */}
+                  <div className="bg-[#f9f9f9] rounded-[20px] px-[40px] py-[30px] mt-[50px]">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-[10px]">
+                        <span className="bg-[#ffdbdb] px-[10px] h-[24px] rounded-[10px] text-[14px] text-[#1e1307] tracking-[-0.28px] flex items-center gap-1">
+                          <Image
+                            src="/images/icon-language-consulting-16.svg"
+                            alt="언어컨설팅"
+                            width={16}
+                            height={16}
+                            className="shrink-0"
+                          />
+                          언어컨설팅
+                        </span>
+                        <span className="bg-[#ffe1b8] px-[10px] h-[24px] rounded-[10px] text-[14px] text-[#1e1307] tracking-[-0.28px] flex items-center gap-1">
+                          <Image
+                            src="/images/icon-home-therapy-16.svg"
+                            alt="홈티"
+                            width={16}
+                            height={16}
+                            className="shrink-0"
+                          />
+                          홈티
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-[20px]">
+                        <div className="flex items-center gap-[6px]">
+                          <div className="w-[12px] h-[12px] rounded-full bg-[#ffa500]" />
+                          <span className="text-[15px] text-[#1e1307] tracking-[-0.3px]">대기 ∙ 취소</span>
+                        </div>
+                        <div className="flex items-center gap-[6px]">
+                          <div className="w-[12px] h-[12px] rounded-full bg-[#4caf50]" />
+                          <span className="text-[15px] text-[#1e1307] tracking-[-0.3px]">확정 ∙ 완료</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Booking Buttons */}
-                  <div className="flex gap-3 mt-6">
-                    <Link
-                      href="/parent/consultations"
-                      className="flex-1 px-4 py-3 rounded-lg border-2 border-[#FF6A00] text-[#FF6A00] font-semibold text-center hover:bg-[#FFF5EB] transition-colors"
-                    >
-                      언어 컨설팅 예약하기 &gt;
-                    </Link>
+                  <div className="flex gap-[10px] mt-[40px]">
                     <Link
                       href="/parent/therapies"
-                      className="flex-1 px-4 py-3 rounded-lg bg-[#FF6A00] text-white font-semibold text-center hover:bg-[#E55F00] transition-colors"
+                      className="flex-1 px-[10px] py-[15px] h-[70px] rounded-[14px] border-[1.5px] border-[#FF6A00] text-[#FF6A00] font-bold text-[18px] tracking-[-0.36px] text-center hover:bg-[#FFF5EB] transition-colors flex items-center justify-center gap-[10px]"
                     >
-                      홈티 예약하기 &gt;
+                      홈티 예약하기
+                      <svg width="8" height="20" viewBox="0 0 8 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 20L8 10L0 0V20Z" fill="#FF6A00"/>
+                      </svg>
+                    </Link>
+                    <Link
+                      href="/parent/consultations"
+                      className="flex-1 px-[10px] py-[15px] h-[70px] rounded-[14px] bg-[#FF6A00] text-white font-bold text-[18px] tracking-[-0.36px] text-center hover:bg-[#E55F00] transition-colors flex items-center justify-center gap-[10px]"
+                    >
+                      언어컨설팅 예약하기
+                      <svg width="8" height="20" viewBox="0 0 8 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 20L8 10L0 0V20Z" fill="white"/>
+                      </svg>
                     </Link>
                   </div>
                 </div>
