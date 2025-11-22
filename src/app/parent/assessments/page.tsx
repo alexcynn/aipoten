@@ -5,7 +5,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
-import AssessmentReportModal from '@/components/modals/AssessmentReportModal'
 
 interface AssessmentResult {
   id: string
@@ -76,13 +75,6 @@ export default function AssessmentsPage() {
   const [children, setChildren] = useState<Child[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedChildId, setSelectedChildId] = useState<string>('')
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
-  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>('')
-
-  const handleOpenReport = (assessmentId: string) => {
-    setSelectedAssessmentId(assessmentId)
-    setIsReportModalOpen(true)
-  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -233,9 +225,9 @@ export default function AssessmentsPage() {
                     const levelInfo = LEVEL_LABELS[overallLevel] || LEVEL_LABELS['NEEDS_ASSESSMENT']
 
                     return (
-                      <div
+                      <Link
                         key={assessment.id}
-                        onClick={() => handleOpenReport(assessment.id)}
+                        href={`/parent/assessments/${assessment.id}`}
                         className="block cursor-pointer"
                       >
                         <div className="bg-white border-2 border-gray-200 rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 hover:shadow-lg hover:border-[#FF6A00] transition-all">
@@ -299,7 +291,7 @@ export default function AssessmentsPage() {
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     )
                   })}
                 </div>
@@ -308,13 +300,6 @@ export default function AssessmentsPage() {
           </div>
         </div>
       </main>
-
-      {/* 발달체크 리포트 모달 */}
-      <AssessmentReportModal
-        assessmentId={selectedAssessmentId}
-        isOpen={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
-      />
     </div>
   )
 }
