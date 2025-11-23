@@ -276,12 +276,12 @@ export default function TherapistDashboardPage() {
                     <div className="w-[2px] h-[18px] bg-white/40" />
                     <span>경력 {getExperienceYears()}년</span>
                     <div className="w-[2px] h-[18px] bg-white/40" />
-                    <div className="flex items-center gap-[5px]">
+                    <Link href="/therapist/reviews" className="flex items-center gap-[5px] hover:opacity-80 transition-opacity cursor-pointer">
                       <svg width="20" height="19" viewBox="0 0 20 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10 0L12.2451 6.90983H19.5106L13.6327 11.1803L15.8779 18.0902L10 13.8197L4.12215 18.0902L6.36729 11.1803L0.489435 6.90983H7.75486L10 0Z" fill="#FFD700"/>
                       </svg>
                       <span>평점 {calculateAverageRating() === '0' ? '0.0' : calculateAverageRating()}점</span>
-                    </div>
+                    </Link>
                   </div>
                   <div className="bg-white/20 rounded-[4px] px-[10px] py-[9px] inline-flex items-center gap-[10px] w-fit">
                     <div className="flex items-center gap-[6px]">

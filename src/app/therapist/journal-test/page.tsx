@@ -360,6 +360,8 @@ export default function JournalTestPage() {
 
           {/* 프롬프트 관리 섹션 */}
           <div className="mb-4 border-t border-gray-200 pt-6">
+            {/* 프롬프트 보기/수정 버튼 - 숨김 처리 */}
+            {false && (
             <button
               type="button"
               onClick={() => {
@@ -385,8 +387,9 @@ export default function JournalTestPage() {
               <span>🔧 프롬프트 보기/수정</span>
               <span>{showPrompt ? '▲' : '▼'}</span>
             </button>
+            )}
 
-            {showPrompt && (
+            {false && showPrompt && (
               <div className="mt-4 space-y-4">
                 {/* 프롬프트 작성 가이드 */}
                 <div className="bg-blue-50 border border-blue-200 rounded-xl">

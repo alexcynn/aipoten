@@ -440,7 +440,28 @@ export async function GET(request: NextRequest) {
     }
 
     if (status) {
-      where.status = status
+      const statusList = status.includes(',') ? status.split(',') : [status]
+
+      // BookingStatus와 PaymentStatus 분리
+      const bookingStatuses = statusList.filter((s: string) =>
+        ['PENDING_CONFIRMATION', 'CONFIRMED', 'SCHEDULED', 'PENDING_SETTLEMENT', 'SETTLEMENT_COMPLETED', 'COMPLETED', 'CANCELLED', 'REJECTED', 'NO_SHOW'].includes(s)
+      )
+      const paymentStatuses = statusList.filter((s: string) =>
+        ['PENDING_PAYMENT', 'PAID', 'REFUNDED', 'PARTIALLY_REFUNDED', 'FAILED'].includes(s)
+      )
+
+      // OR 조건으로 결합
+      if (bookingStatuses.length > 0 && paymentStatuses.length > 0) {
+        where.OR = [
+          { status: bookingStatuses.length === 1 ? bookingStatuses[0] : { in: bookingStatuses } },
+          { payment: { status: paymentStatuses.length === 1 ? paymentStatuses[0] : { in: paymentStatuses } } }
+        ]
+      } else if (bookingStatuses.length > 0) {
+        where.status = bookingStatuses.length === 1 ? bookingStatuses[0] : { in: bookingStatuses }
+      } else if (paymentStatuses.length > 0) {
+        where.payment = where.payment || {}
+        where.payment.status = paymentStatuses.length === 1 ? paymentStatuses[0] : { in: paymentStatuses }
+      }
     }
 
     if (childId) {
@@ -448,9 +469,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (sessionType) {
-      where.payment = {
-        sessionType: sessionType
-      }
+      where.payment = where.payment || {}
+      where.payment.sessionType = sessionType
     }
 
     const bookings = await prisma.booking.findMany({

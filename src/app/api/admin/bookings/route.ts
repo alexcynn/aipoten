@@ -24,11 +24,45 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
+    const status = searchParams.get('status')
+    const sessionType = searchParams.get('sessionType')
 
-    console.log('📥 [관리자 API] 예약 목록 조회 요청, 날짜:', startDate, '~', endDate)
+    console.log('📥 [관리자 API] 예약 목록 조회 요청, 날짜:', startDate, '~', endDate, ', 상태:', status, ', 타입:', sessionType)
 
     // 날짜 필터 조건 구성
     const where: any = {}
+
+    // 상태 필터 (다중 상태 지원, BookingStatus와 PaymentStatus 분리)
+    if (status && status !== 'ALL') {
+      const statusList = status.split(',')
+
+      // BookingStatus와 PaymentStatus 분리
+      const bookingStatuses = statusList.filter((s: string) =>
+        ['PENDING_CONFIRMATION', 'CONFIRMED', 'SCHEDULED', 'PENDING_SETTLEMENT', 'SETTLEMENT_COMPLETED', 'COMPLETED', 'CANCELLED', 'REJECTED', 'NO_SHOW'].includes(s)
+      )
+      const paymentStatuses = statusList.filter((s: string) =>
+        ['PENDING_PAYMENT', 'PAID', 'REFUNDED', 'PARTIALLY_REFUNDED', 'FAILED'].includes(s)
+      )
+
+      // OR 조건으로 결합
+      if (bookingStatuses.length > 0 && paymentStatuses.length > 0) {
+        where.OR = [
+          { status: bookingStatuses.length === 1 ? bookingStatuses[0] : { in: bookingStatuses } },
+          { payment: { status: paymentStatuses.length === 1 ? paymentStatuses[0] : { in: paymentStatuses } } }
+        ]
+      } else if (bookingStatuses.length > 0) {
+        where.status = bookingStatuses.length === 1 ? bookingStatuses[0] : { in: bookingStatuses }
+      } else if (paymentStatuses.length > 0) {
+        where.payment = where.payment || {}
+        where.payment.status = paymentStatuses.length === 1 ? paymentStatuses[0] : { in: paymentStatuses }
+      }
+    }
+
+    // sessionType 필터 추가
+    if (sessionType) {
+      where.payment = where.payment || {}
+      where.payment.sessionType = sessionType
+    }
 
     if (startDate || endDate) {
       where.scheduledAt = {}
@@ -41,14 +75,6 @@ export async function GET(request: NextRequest) {
       if (endDate) {
         const [year, month, day] = endDate.split('-').map(Number)
         where.scheduledAt.lte = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999))
-      }
-    }
-
-    // sessionType 필터 추가
-    const sessionType = searchParams.get('sessionType')
-    if (sessionType) {
-      where.payment = {
-        sessionType: sessionType
       }
     }
 

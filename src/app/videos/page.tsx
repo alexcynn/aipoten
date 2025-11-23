@@ -65,16 +65,42 @@ function VideosContent() {
   const [selectedChildId, setSelectedChildId] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [total, setTotal] = useState(0)
   const videosPerPage = 12
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const videosRes = await fetch('/api/videos')
+        // 서버 페이지네이션 사용
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          limit: videosPerPage.toString()
+        })
+
+        if (searchQuery) {
+          params.append('search', searchQuery)
+        }
+
+        if (selectedChildId) {
+          const child = children.find(c => c.id === selectedChildId)
+          if (child) {
+            const ageInMonths = calculateAge(child.birthDate)
+            params.append('ageInMonths', ageInMonths.toString())
+          }
+        }
+
+        const videosRes = await fetch(`/api/videos?${params.toString()}`)
         if (videosRes.ok) {
           const videosData = await videosRes.json()
           const videosArray = Array.isArray(videosData) ? videosData : (videosData.videos || [])
           setVideos(videosArray)
+
+          // 페이지네이션 정보 저장
+          if (videosData.pagination) {
+            setTotalPages(videosData.pagination.totalPages)
+            setTotal(videosData.pagination.total)
+          }
         }
 
         // 로그인한 경우만 children 정보 가져오기
@@ -100,7 +126,7 @@ function VideosContent() {
     }
 
     fetchData()
-  }, [session, searchParams])
+  }, [session, searchParams, currentPage, searchQuery, selectedChildId, children])
 
   const calculateAge = (birthDate: string) => {
     const birth = new Date(birthDate)
@@ -120,38 +146,11 @@ function VideosContent() {
     }
   }
 
-  const filteredVideos = videos.filter(video => {
-    // 검색어 필터
-    if (searchQuery && !video.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !video.description.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false
-    }
-
-    // 아이 나이 필터
-    if (selectedChildId) {
-      const child = children.find(c => c.id === selectedChildId)
-      if (child) {
-        const ageInMonths = calculateAge(child.birthDate)
-        if (ageInMonths < video.targetAgeMin || ageInMonths > video.targetAgeMax) {
-          return false
-        }
-      }
-    }
-
-    return true
-  })
-
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
   }
-
-  // 페이지네이션 계산
-  const totalPages = Math.ceil(filteredVideos.length / videosPerPage)
-  const indexOfLastVideo = currentPage * videosPerPage
-  const indexOfFirstVideo = indexOfLastVideo - videosPerPage
-  const currentVideos = filteredVideos.slice(indexOfFirstVideo, indexOfLastVideo)
 
   // 페이지 변경 시 맨 위로 스크롤
   const handlePageChange = (pageNumber: number) => {
@@ -242,7 +241,7 @@ function VideosContent() {
           </div>
 
           {/* Videos Grid */}
-          {filteredVideos.length === 0 ? (
+          {videos.length === 0 ? (
             <div className="bg-white shadow-sm rounded-xl md:rounded-2xl">
               <div className="px-4 py-12 text-center">
                 <div className="w-24 h-24 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -268,7 +267,7 @@ function VideosContent() {
           ) : (
             <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {currentVideos.map((video) => {
+              {videos.map((video) => {
                 const thumbnail = getVideoThumbnail(video)
                 // 디버깅용 - 콘솔에서 확인
                 if (typeof window !== 'undefined') {
@@ -424,11 +423,11 @@ function VideosContent() {
           )}
 
           {/* Stats */}
-          {filteredVideos.length > 0 && (
+          {videos.length > 0 && (
             <div className="mt-8 bg-white shadow-sm rounded-xl md:rounded-2xl p-6">
               <div className="text-center">
                 <p className="text-stone-600">
-                  총 <span className="font-semibold text-[#FF6A00]">{filteredVideos.length}</span>개의 영상이 있습니다
+                  총 <span className="font-semibold text-[#FF6A00]">{total}</span>개의 영상이 있습니다
                   {selectedChildId && (
                     <>
                       {' '}• {children.find(c => c.id === selectedChildId)?.name}님의 연령에 맞는 영상입니다
