@@ -228,12 +228,12 @@ export default function LanguageConsultingPage() {
       </section>
 
       {/* 이런분들에게 권해드립니다 Section */}
-      <section className="bg-[#ffe6c8] pt-[60px] lg:pt-[80px] pb-[60px] lg:pb-[100px] px-[40px] lg:px-[320px] flex flex-col gap-[10px] items-center justify-center">
-        <div className="flex flex-col lg:flex-row items-center justify-between w-full max-w-[1280px] gap-[40px] lg:gap-0">
+      <section className="bg-[#ffe6c8] pt-[60px] lg:pt-[80px] pb-[60px] lg:pb-[100px] px-[40px] lg:px-[320px]">
+        <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between w-full max-w-[1280px] mx-auto gap-[40px] lg:gap-0">
           {/* Title - Mobile */}
-          <div className="lg:hidden relative w-[157px] h-[76px]">
+          <div className="lg:hidden relative w-[134px] h-[68px]">
             <img
-              src="/images/lang-mo-recommend-title.svg"
+              src="/images/lang-recommend-title-mobile.svg"
               alt="이런분들에게 권해드립니다."
               className="block w-full h-full"
             />
@@ -251,19 +251,24 @@ export default function LanguageConsultingPage() {
           </div>
 
           {/* Cards */}
-          <div className="flex flex-col gap-[20px] lg:gap-[30px] w-full lg:w-[679px]">
-            <div className="bg-white h-[80px] lg:h-[100px] w-full lg:w-[670px] rounded-[40px] lg:rounded-[80px] shadow-[0px_2px_20px_0px_rgba(0,0,0,0.05)] flex items-center px-[30px] lg:px-[50px] py-[15px] lg:py-[20px]">
-              <p className="font-semibold text-[18px] lg:text-[30px] text-[#1e1307] leading-normal lg:whitespace-nowrap">
+          <div className="flex flex-col gap-[14px] lg:gap-[30px] w-full lg:w-[679px]">
+            {/* Card 1 */}
+            <div className="bg-white rounded-[80px] shadow-[0px_2px_20px_0px_rgba(0,0,0,0.05)] flex items-center justify-center px-[20px] py-[15px] lg:px-[50px] lg:py-[20px]">
+              <p className="font-semibold text-[14px] lg:text-[30px] text-[#1e1307] leading-normal whitespace-nowrap">
                 🧒 또래보다 말이 느려 걱정되는 부모님
               </p>
             </div>
-            <div className="bg-white h-[80px] lg:h-[100px] w-full lg:w-[670px] rounded-[40px] lg:rounded-[80px] shadow-[0px_2px_20px_0px_rgba(0,0,0,0.05)] flex items-center px-[30px] lg:px-[50px] py-[15px] lg:py-[20px]">
-              <p className="font-semibold text-[18px] lg:text-[30px] text-[#1e1307] leading-normal lg:whitespace-nowrap">
+
+            {/* Card 2 */}
+            <div className="bg-white rounded-[80px] shadow-[0px_2px_20px_0px_rgba(0,0,0,0.05)] flex items-center justify-center px-[20px] py-[15px] lg:px-[50px] lg:py-[20px]">
+              <p className="font-semibold text-[14px] lg:text-[30px] text-[#1e1307] leading-normal whitespace-nowrap">
                 💬 현재 발달 수준을 정확히 알고 싶은 부모님
               </p>
             </div>
-            <div className="bg-white h-[80px] lg:h-[100px] w-full lg:w-[670px] rounded-[40px] lg:rounded-[80px] shadow-[0px_2px_20px_0px_rgba(0,0,0,0.05)] flex items-center px-[30px] lg:px-[50px] py-[15px] lg:py-[20px]">
-              <p className="font-semibold text-[18px] lg:text-[30px] text-[#1e1307] leading-normal lg:whitespace-nowrap">
+
+            {/* Card 3 */}
+            <div className="bg-white rounded-[80px] shadow-[0px_2px_20px_0px_rgba(0,0,0,0.05)] flex items-center justify-center px-[20px] py-[15px] lg:px-[50px] lg:py-[20px]">
+              <p className="font-semibold text-[14px] lg:text-[30px] text-[#1e1307] leading-normal whitespace-nowrap">
                 🏠 가정에서도 실천 가능한 조언이 필요한 부모님
               </p>
             </div>
@@ -275,12 +280,14 @@ export default function LanguageConsultingPage() {
       <section className="bg-[#fffbf6] py-[60px] lg:py-[120px]">
         <div className="flex flex-col gap-[40px] lg:gap-[80px] items-center px-[40px] lg:px-0">
           {/* Title - Mobile */}
-          <div className="lg:hidden relative w-[246px] h-[29px]">
-            <img
-              src="/images/lang-mo-process-title.svg"
-              alt="언어컨설팅 이렇게 진행됩니다."
-              className="block w-full h-full"
-            />
+          <div className="lg:hidden relative w-[181px] h-[68px]">
+            <div className="absolute left-[1.48px] top-[6.43px] h-[54.667px] w-[178.424px]">
+              <img
+                src="/images/lang-process-title-mobile.svg"
+                alt="언어컨설팅 이렇게 진행됩니다."
+                className="block w-full h-full"
+              />
+            </div>
           </div>
 
           {/* Title - Desktop */}
@@ -516,210 +523,205 @@ export default function LanguageConsultingPage() {
           </div>
 
           {/* Mobile Vertical Timeline */}
-          <div className="lg:hidden flex flex-col gap-[20px] w-full max-w-[280px]">
+          <div className="lg:hidden flex flex-col gap-[12px] items-end w-full max-w-[280px] relative">
+            {/* Vertical dotted line - background */}
+            <div className="absolute h-[324px] left-[5px] top-[15px] w-0">
+              <div className="absolute bottom-0 left-[-0.5px] right-[-0.5px] top-0">
+                <img
+                  src="/images/lang-timeline-dotline.svg"
+                  alt=""
+                  className="block w-full h-full"
+                />
+              </div>
+            </div>
+
             {/* Step 01 */}
-            <div className="flex flex-col items-center gap-[20px]">
-              <div className="flex flex-col gap-[10px] items-center">
-                <p className="font-bold text-[16px] leading-normal text-[#ff6a00]">
-                  Step 01
-                </p>
-                <div className="relative w-[15px] h-[15px]">
-                  <img
-                    src="/images/lang-step-dot.svg"
-                    alt=""
-                    className="block w-full h-full"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-[20px] items-center">
-                {/* Icon */}
-                <div className="relative w-[100px] h-[100px]">
-                  <img
-                    src="/images/lang-step-01-bg.svg"
-                    alt=""
-                    className="absolute inset-0 w-full h-full"
-                  />
-                  <div className="absolute left-[10.67px] top-[13.33px] w-[77.33px] h-[60px]">
-                    <div className="absolute inset-0 bg-[#6a6a6a] rounded-[7.33px]" />
-                    <div className="absolute left-[2.67px] top-[2.67px] w-[72px] h-[54.67px] bg-white rounded-[4.67px]" />
-                    <div className="absolute left-[26px] top-[16.67px] w-[26.67px] h-[26.67px] bg-[#ff793a] rounded-[6px]" />
-                    <div className="absolute left-[31.33px] top-[21.33px] w-[16.67px] h-[16.67px]">
-                      <img
-                        src="/images/lang-step-01-icon.svg"
-                        alt=""
-                        className="block w-full h-full"
-                      />
-                    </div>
-                    <div className="absolute left-[35.33px] top-[30px] w-[37.33px] h-[42.67px]">
-                      <img
-                        src="/images/lang-step-01-hand.svg"
-                        alt=""
-                        className="block w-full h-full rotate-[5deg]"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Text */}
-                <div className="flex flex-col gap-[5px] items-center text-center">
-                  <p className="font-bold text-[16px] leading-normal text-[#ff5d12]">
-                    회원가입
-                  </p>
-                  <div className="text-[13px] leading-[20px] text-[#1e1307]">
-                    <p>아이포텐 웹사이트에서</p>
-                    <p className="font-bold">간편하게 가입</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Arrow down */}
-              <div className="w-[15px] h-[15px]">
-                <div className="w-full h-full">
-                  <img
-                    src="/images/lang-arrow.svg"
-                    alt=""
-                    className="block w-full h-full rotate-180"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Step 02 */}
-            <div className="flex flex-col items-center gap-[20px]">
-              <div className="flex flex-col gap-[10px] items-center">
-                <p className="font-bold text-[16px] leading-normal text-[#ff6a00]">
-                  Step 02
-                </p>
-                <div className="relative w-[15px] h-[15px]">
-                  <img
-                    src="/images/lang-step-dot.svg"
-                    alt=""
-                    className="block w-full h-full"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-[20px] items-center">
-                {/* Icon */}
-                <div className="relative w-[100px] h-[101.33px]">
-                  <img
-                    src="/images/lang-step-02-icon.svg"
-                    alt=""
-                    className="block w-full h-full"
-                  />
-                </div>
-
-                {/* Text */}
-                <div className="flex flex-col gap-[5px] items-center text-center">
-                  <p className="font-bold text-[16px] leading-normal text-[#ff6a00]">
-                    상담신청
-                  </p>
-                  <div className="text-[13px] leading-[20px] text-[#1e1307]">
-                    <p><span className="font-bold">내 아이 정보를 등록</span>하고</p>
-                    <p>언어컨설팅 메뉴 선택</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Arrow down */}
-              <div className="w-[15px] h-[15px]">
-                <div className="w-full h-full">
-                  <img
-                    src="/images/lang-arrow.svg"
-                    alt=""
-                    className="block w-full h-full rotate-180"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Step 03 */}
-            <div className="flex flex-col items-center gap-[20px]">
-              <div className="flex flex-col gap-[10px] items-center">
-                <p className="font-bold text-[16px] leading-normal text-[#ff6a00]">
-                  Step 03
-                </p>
-                <div className="relative w-[15px] h-[15px]">
-                  <img
-                    src="/images/lang-step-dot.svg"
-                    alt=""
-                    className="block w-full h-full"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-[20px] items-center">
-                {/* Icon */}
-                <div className="bg-[#fff2e1] w-[100px] h-[100px] rounded-[50px] flex items-center justify-center px-[22.67px] py-[21.33px]">
-                  <div className="relative w-[54.67px] h-[57.28px]">
+            <div className="flex items-center justify-between w-full relative">
+              <div className="flex gap-[20px] items-start">
+                <div className="flex gap-[10px] items-center">
+                  <div className="relative w-[10px] h-[10px] z-10">
                     <img
-                      src="/images/lang-step-03-icon.svg"
+                      src="/images/lang-step-dot-mobile.svg"
                       alt=""
                       className="block w-full h-full"
                     />
                   </div>
-                </div>
-
-                {/* Text */}
-                <div className="flex flex-col gap-[5px] items-center text-center">
-                  <p className="font-bold text-[16px] leading-normal text-[#ff6a00]">
-                    날짜/시간 선택
+                  <p className="font-bold text-[12px] leading-[15px] text-[#ff6a00] whitespace-nowrap">
+                    Step 01
                   </p>
-                  <div className="text-[13px] leading-[20px] text-[#1e1307]">
-                    <p>원하는 시간에</p>
-                    <p className="font-bold">간편하게 예약</p>
+                </div>
+                <div className="flex flex-col gap-[5px] pt-[2px]">
+                  <p className="font-bold text-[12px] leading-normal text-[#ff5d12] whitespace-nowrap">
+                    회원가입
+                  </p>
+                  <div className="text-[10px] leading-[16px] text-[#1e1307]">
+                    <p className="mb-0 whitespace-nowrap">아이포텐 웹사이트에서</p>
+                    <p className="font-bold whitespace-nowrap">간편하게 가입</p>
                   </div>
                 </div>
               </div>
+              {/* Icon */}
+              <div className="relative w-[75px] h-[75px] flex-shrink-0">
+                <img
+                  src="/images/lang-mo-step01-bg.svg"
+                  alt=""
+                  className="absolute inset-0 w-full h-full"
+                />
+                <div className="absolute left-[8px] top-[10px] w-[58px] h-[45px]">
+                  <div className="absolute inset-0 bg-[#6a6a6a] rounded-[5.5px]" />
+                  <div className="absolute left-[2px] top-[2px] w-[54px] h-[41px] bg-white rounded-[3.5px]" />
+                  <div className="absolute left-[19.5px] top-[12.5px] w-[20px] h-[20px] bg-[#ff793a] rounded-[4.5px]" />
+                  <div className="absolute left-[23.5px] top-[16px] w-[12.5px] h-[12.5px]">
+                    <img
+                      src="/images/lang-mo-step01-icon.svg"
+                      alt=""
+                      className="block w-full h-full"
+                    />
+                  </div>
+                  <div className="absolute left-[26.5px] top-[22.5px] w-[28.086px] h-[32.165px] flex items-center justify-center">
+                    <div className="w-[25.5px] h-[30px] rotate-[5.143deg]">
+                      <img
+                        src="/images/lang-mo-step01-hand.svg"
+                        alt=""
+                        className="block w-full h-full"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-              {/* Arrow down */}
-              <div className="w-[15px] h-[15px]">
-                <div className="w-full h-full">
+            {/* Arrow down */}
+            <div className="w-[75px] h-[10px] self-end">
+              <img
+                src="/images/lang-mo-arrow-down.svg"
+                alt=""
+                className="block w-full h-full"
+              />
+            </div>
+
+            {/* Step 02 */}
+            <div className="flex items-center justify-between w-full relative">
+              <div className="flex gap-[20px] items-start">
+                <div className="flex gap-[10px] items-center">
+                  <div className="relative w-[10px] h-[10px] z-10">
+                    <img
+                      src="/images/lang-step-dot-mobile.svg"
+                      alt=""
+                      className="block w-full h-full"
+                    />
+                  </div>
+                  <p className="font-bold text-[12px] leading-[15px] text-[#ff6a00] whitespace-nowrap">
+                    Step 02
+                  </p>
+                </div>
+                <div className="flex flex-col gap-[5px] pt-[2px]">
+                  <p className="font-bold text-[12px] leading-normal text-[#ff5d12] whitespace-nowrap">
+                    상담신청
+                  </p>
+                  <div className="text-[10px] leading-[16px] text-[#1e1307]">
+                    <p className="mb-0 whitespace-nowrap"><span className="font-bold">내 아이 정보를 등록</span>하고</p>
+                    <p className="whitespace-nowrap">언어컨설팅 메뉴 선택</p>
+                  </div>
+                </div>
+              </div>
+              {/* Icon */}
+              <div className="relative w-[75px] h-[76px] flex-shrink-0">
+                <img
+                  src="/images/lang-mo-step02-img.svg"
+                  alt=""
+                  className="block w-full h-full"
+                />
+              </div>
+            </div>
+
+            {/* Arrow down */}
+            <div className="w-[75px] h-[10px] self-end">
+              <img
+                src="/images/lang-mo-arrow-down.svg"
+                alt=""
+                className="block w-full h-full"
+              />
+            </div>
+
+            {/* Step 03 */}
+            <div className="flex items-center justify-between w-full relative">
+              <div className="flex gap-[20px] items-start">
+                <div className="flex gap-[10px] items-center">
+                  <div className="relative w-[10px] h-[10px] z-10">
+                    <img
+                      src="/images/lang-step-dot-mobile.svg"
+                      alt=""
+                      className="block w-full h-full"
+                    />
+                  </div>
+                  <p className="font-bold text-[12px] leading-[15px] text-[#ff6a00] whitespace-nowrap">
+                    Step 03
+                  </p>
+                </div>
+                <div className="flex flex-col gap-[5px] pt-[2px]">
+                  <p className="font-bold text-[12px] leading-normal text-[#ff6a00] whitespace-nowrap">
+                    날짜/시간 선택
+                  </p>
+                  <div className="text-[10px] leading-[16px] text-[#1e1307]">
+                    <p className="mb-0 whitespace-nowrap">원하는 시간에</p>
+                    <p className="font-bold whitespace-nowrap">간편하게 예약</p>
+                  </div>
+                </div>
+              </div>
+              {/* Icon */}
+              <div className="bg-[#fff2e1] w-[75px] h-[75px] rounded-[37.5px] flex items-center justify-center px-[17px] py-[16px] flex-shrink-0">
+                <div className="relative w-[41px] h-[42.96px]">
                   <img
-                    src="/images/lang-arrow.svg"
+                    src="/images/lang-mo-step03-icon.svg"
                     alt=""
-                    className="block w-full h-full rotate-180"
+                    className="block w-full h-full"
                   />
                 </div>
               </div>
             </div>
 
+            {/* Arrow down */}
+            <div className="w-[75px] h-[10px] self-end">
+              <img
+                src="/images/lang-mo-arrow-down.svg"
+                alt=""
+                className="block w-full h-full"
+              />
+            </div>
+
             {/* Step 04 */}
-            <div className="flex flex-col items-center gap-[20px]">
-              <div className="flex flex-col gap-[10px] items-center">
-                <p className="font-bold text-[16px] leading-normal text-[#ff6a00]">
-                  Step 04
-                </p>
-                <div className="relative w-[15px] h-[15px]">
-                  <img
-                    src="/images/lang-step-04-dot.svg"
-                    alt=""
-                    className="block w-full h-full"
-                  />
+            <div className="flex items-center justify-between w-full">
+              <div className="flex gap-[20px] items-start">
+                <div className="flex gap-[10px] items-center relative">
+                  <div className="relative w-[10px] h-[10px] z-10">
+                    <img
+                      src="/images/lang-step-dot-mobile.svg"
+                      alt=""
+                      className="block w-full h-full"
+                    />
+                  </div>
+                  <p className="font-bold text-[12px] leading-[15px] text-[#ff6a00] whitespace-nowrap">
+                    Step 04
+                  </p>
                 </div>
-              </div>
-
-              <div className="flex flex-col gap-[20px] items-center">
-                {/* Icon */}
-                <div className="relative w-[100px] h-[100px]">
-                  <img
-                    src="/images/lang-step-04-icon.svg"
-                    alt=""
-                    className="block w-full h-full"
-                  />
-                </div>
-
-                {/* Text */}
-                <div className="flex flex-col gap-[5px] items-center text-center">
-                  <p className="font-bold text-[16px] leading-normal text-[#ff6d2a]">
+                <div className="flex flex-col gap-[5px]">
+                  <p className="font-bold text-[12px] leading-normal text-[#ff6d2a] whitespace-nowrap">
                     컨설팅 진행
                   </p>
-                  <div className="text-[13px] leading-[20px] text-[#1e1307]">
-                    <p>전문가와 <span className="font-bold">1:1</span></p>
-                    <p><span className="font-bold">맞춤 언어 컨설팅</span> 시작</p>
+                  <div className="text-[10px] leading-[16px] text-[#1e1307]">
+                    <p className="mb-0 whitespace-nowrap">전문가와 <span className="font-bold">1:1</span></p>
+                    <p className="whitespace-nowrap"><span className="font-bold">맞춤 언어 컨설팅</span> 시작</p>
                   </div>
                 </div>
+              </div>
+              {/* Icon */}
+              <div className="relative w-[75px] h-[75px] flex-shrink-0">
+                <img
+                  src="/images/lang-mo-step04-img.svg"
+                  alt=""
+                  className="block w-full h-full"
+                />
               </div>
             </div>
           </div>
@@ -771,20 +773,28 @@ export default function LanguageConsultingPage() {
         {/* Content */}
         <div className="relative h-full flex flex-col items-center justify-center gap-[30px] lg:gap-[50px] z-10">
           {/* Mobile Content */}
-          <div className="lg:hidden flex flex-col items-center gap-[10px] w-full">
-            {/* Title Image */}
-            <img
-              src="/images/lang-mo-cta-title.svg"
-              alt="전문가 1:1 상담, 바로 시작해보세요"
-              className="w-[277px] h-[24px]"
-            />
-            {/* Price */}
-            <p className="font-bold text-[30px] leading-normal text-white">
-              ₩150,000
-            </p>
-            <p className="text-[14px] leading-normal text-white/80">
-              언어컨설팅 이용 가격
-            </p>
+          <div className="lg:hidden flex flex-col items-center gap-[30px] w-full">
+            <div className="flex flex-col items-center gap-[10px] w-full">
+              {/* Title Image */}
+              <div className="relative w-[277px] h-[24px]">
+                <div className="absolute left-[1.37px] top-[3.62px] h-[19.755px] w-[274.568px]">
+                  <img
+                    src="/images/lang-mo-cta-title.svg"
+                    alt="전문가 1:1 상담, 바로 시작해보세요"
+                    className="block w-full h-full"
+                  />
+                </div>
+              </div>
+              {/* Price */}
+              <div className="flex flex-col items-center gap-[5px] text-center">
+                <p className="font-bold text-[30px] leading-normal text-white whitespace-nowrap">
+                  ₩150,000
+                </p>
+                <p className="text-[14px] leading-normal text-white/80 whitespace-nowrap">
+                  언어컨설팅 이용 가격
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Desktop Content */}
@@ -819,7 +829,7 @@ export default function LanguageConsultingPage() {
               href="/login"
               className="bg-white rounded-[100px] h-[50px] lg:h-[80px] w-full max-w-[257px] lg:max-w-[400px] flex items-center justify-center px-[40px] py-[15px] lg:py-[30px] hover:bg-stone-100 transition-colors"
             >
-              <p className="font-bold text-[16px] lg:text-[24px] leading-normal text-[#ff6a00] text-center lg:whitespace-nowrap">
+              <p className="font-bold text-[16px] lg:text-[24px] leading-normal text-[#ff6a00] whitespace-nowrap">
                 로그인 하고 컨설팅 시작하기
               </p>
             </Link>
